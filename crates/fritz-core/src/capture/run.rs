@@ -9,8 +9,8 @@ use std::time::Duration;
 use serde_json::{Map, Value, json};
 use tr064::{Action, Client, Error, Service};
 
-use super::names::{Sensitivity, sensitivity};
 use super::{Decision, Plan, shape, short_id};
+use crate::redact;
 
 /// The device locked the account after too many failed attempts.
 const LOCKED: u16 = 867;
@@ -153,7 +153,14 @@ impl<P: FnMut(&Response)> Caller<'_, P> {
             .map(|((name, _), value)| (*name, value.as_str()))
             .collect();
         let outcome = match self.client.call(service, &action.name, &arguments).await {
-            Ok(out) => Outcome::Ok(out.into_iter().map(|(n, v)| mask(n, &v)).collect()),
+            Ok(out) => Outcome::Ok(
+                out.into_iter()
+                    .map(|(n, v)| {
+                        let v = redact::value(&n, &v);
+                        (n, v)
+                    })
+                    .collect(),
+            ),
             Err(error) if stops(&error) => return Err(error),
             Err(Error::Upnp { code, description }) => Outcome::Fault { code, description },
             Err(error) => Outcome::Failed(error.to_string()),
@@ -182,28 +189,6 @@ fn stops(error: &Error) -> bool {
             | Error::CertificateMismatch { .. }
             | Error::Upnp { code: LOCKED, .. }
     )
-}
-
-/// Masks the value of an argument whose name points to a secret or a login
-/// name, and session IDs in URLs like `/hostlist.lua?sid=…`.
-fn mask(name: String, value: &str) -> (String, String) {
-    if sensitivity(&name) != Sensitivity::Plain {
-        return (name, "***".to_owned());
-    }
-    let mut masked = String::with_capacity(value.len());
-    let mut rest = value;
-    while let Some(position) = rest.find("sid=") {
-        let start = position + "sid=".len();
-        let parameter = rest[..position].ends_with(['?', '&']);
-        masked.push_str(&rest[..start]);
-        rest = &rest[start..];
-        if parameter {
-            masked.push_str("***");
-            rest = &rest[rest.find(['&', '#']).unwrap_or(rest.len())..];
-        }
-    }
-    masked.push_str(rest);
-    (name, masked)
 }
 
 impl Capture {
@@ -316,31 +301,6 @@ pub fn write(plan: &Plan, capture: &Capture, dir: &Path) -> io::Result<()> {
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    fn masked(name: &str, value: &str) -> String {
-        mask(name.to_owned(), value).1
-    }
-
-    #[test]
-    fn masks_secrets_and_session_ids() {
-        assert_eq!(masked("NewX_AVM-DE_WPSClientPIN", "1234"), "***");
-        assert_eq!(masked("NewSSID", "home"), "home");
-        assert_eq!(masked("NewUserName", "provider-login@isp"), "***");
-        assert_eq!(masked("NewParameterKey", "abc"), "***");
-        assert_eq!(masked("NewMinCharsPSK", "8"), "8");
-        assert_eq!(
-            masked("NewX_AVM-DE_HostListPath", "/hostlist.lua?sid=0123abcd"),
-            "/hostlist.lua?sid=***"
-        );
-        assert_eq!(
-            masked(
-                "NewCallListURL",
-                "http://box/calllist.lua?a=1&sid=ab&max=9#x"
-            ),
-            "http://box/calllist.lua?a=1&sid=***&max=9#x"
-        );
-        assert_eq!(masked("NewName", "outsid=1, sid=2"), "outsid=1, sid=2");
-    }
 
     #[test]
     fn stops_only_at_errors_that_recur() {

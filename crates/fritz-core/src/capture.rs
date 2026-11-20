@@ -9,24 +9,11 @@ use std::fmt;
 
 use tr064::{Action, Client, DeviceDescription, Direction, Scpd, Service};
 
-mod names;
+use crate::policy::{self, Class};
+
 mod run;
 
-use names::{Sensitivity, sensitivity};
-
 pub use run::{Capture, Options, Outcome, Response, run, write};
-
-/// Actions that are never called although they look harmless by name.
-const DENIED_ACTIONS: &[(&str, &str)] = &[
-    (
-        "X_AVM-DE_GetConfigFile",
-        "exports the whole configuration including passwords",
-    ),
-    (
-        "GetPersistentData",
-        "returns opaque data that can hold credentials",
-    ),
-];
 
 /// What the capture does with one action.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -46,19 +33,15 @@ pub enum Decision {
     NotGetter,
 }
 
-/// Decides what the capture does with an action of a service.
+/// Decides what the capture does with an action of a service, following
+/// its [class](policy::classify).
 pub fn decide(service: &Service, action: &Action) -> Decision {
-    let name = action.name.as_str();
-    if !(name.starts_with("Get") || name.starts_with("X_AVM-DE_Get")) {
-        return Decision::NotGetter;
+    match policy::classify(service, action) {
+        Class::Read => shape(action),
+        Class::Personal => Decision::Personal,
+        Class::Secret { reason } => Decision::Denied { reason },
+        Class::Write | Class::Critical { .. } => Decision::NotGetter,
     }
-    if let Some(reason) = denial(service, action) {
-        return Decision::Denied { reason };
-    }
-    if is_personal(service, name) {
-        return Decision::Personal;
-    }
-    shape(action)
 }
 
 /// How a getter is called, depending on its inputs: [`Decision::Call`],
@@ -76,36 +59,6 @@ fn shape(action: &Action) -> Decision {
             index: index.clone(),
         },
         _ => Decision::NeedsInput { inputs },
-    }
-}
-
-/// Why a getter must never be called, if it must not.
-fn denial(service: &Service, action: &Action) -> Option<String> {
-    let name = action.name.as_str();
-    if let Some((_, reason)) = DENIED_ACTIONS.iter().find(|(n, _)| *n == name) {
-        return Some((*reason).to_owned());
-    }
-    if service.name() == "X_VoIP" && name.starts_with("X_AVM-DE_GetClient") {
-        return Some("returns the credentials of telephony clients".to_owned());
-    }
-    if sensitivity(name) == Sensitivity::Secret {
-        return Some("the name points to a secret".to_owned());
-    }
-    action
-        .arguments
-        .iter()
-        .find(|a| a.direction == Direction::Out && sensitivity(&a.name) == Sensitivity::Secret)
-        .map(|a| format!("returns {}, which points to a secret", a.name))
-}
-
-/// Whether a getter returns personal data: calls, contacts, voice messages
-/// and the event log, which names devices and numbers in free text.
-fn is_personal(service: &Service, action: &str) -> bool {
-    match service.name() {
-        "X_AVM-DE_OnTel" => action == "GetCallList" || action.starts_with("GetPhonebook"),
-        "X_AVM-DE_TAM" => action == "GetMessageList",
-        "DeviceInfo" => action == "GetDeviceLog",
-        _ => false,
     }
 }
 

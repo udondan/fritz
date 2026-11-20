@@ -7,6 +7,7 @@ mod context;
 mod settings;
 mod system;
 mod tls;
+mod tr64;
 
 use std::io;
 use std::path::{Path, PathBuf};
@@ -69,6 +70,9 @@ enum Command {
     /// Manage the password in the keychain.
     #[command(subcommand)]
     Auth(AuthCommand),
+    /// The services and actions of the device. Calls only actions that read.
+    #[command(subcommand)]
+    Tr64(Tr64Command),
     /// Record the answers of read-only actions as test fixtures.
     Capture(CaptureArgs),
     /// Turn raw captures into fixtures, and check fixtures for personal data.
@@ -105,6 +109,36 @@ enum AuthCommand {
     Logout,
     /// Tell where the password comes from.
     Status,
+}
+
+#[derive(Debug, Subcommand)]
+enum Tr64Command {
+    /// List the services. Needs no login.
+    Services,
+    /// List the actions of a service with their classes: read, personal,
+    /// secret, write or critical. Needs no login.
+    Actions {
+        /// The service, like `DeviceInfo1` or `DeviceInfo:1`.
+        service: String,
+    },
+    /// Show the class and the arguments of an action. Needs no login.
+    Describe {
+        /// The service, like `DeviceInfo1` or `DeviceInfo:1`.
+        service: String,
+        /// The action, like `GetInfo`.
+        action: String,
+    },
+    /// Call an action that reads, and print its output with secrets hidden.
+    /// Other actions are refused before anything is sent.
+    Call {
+        /// The service, like `DeviceInfo1` or `DeviceInfo:1`.
+        service: String,
+        /// The action, like `GetInfo`.
+        action: String,
+        /// The inputs, like `NewIndex=0`.
+        #[arg(value_name = "NAME=VALUE")]
+        arguments: Vec<String>,
+    },
 }
 
 #[derive(Debug, Subcommand)]
@@ -199,8 +233,28 @@ async fn main() -> anyhow::Result<()> {
         Command::Auth(AuthCommand::Login) => auth::login(&load()?, system::read_password, out),
         Command::Auth(AuthCommand::Logout) => auth::logout(&load()?, out),
         Command::Auth(AuthCommand::Status) => auth::status(&load()?, out),
+        Command::Tr64(command) => tr64(&load()?, command, out).await,
         Command::Capture(args) => capture(&load()?, args).await,
         Command::Fixture(command) => fixture(&command),
+    }
+}
+
+async fn tr64(
+    context: &Context,
+    command: Tr64Command,
+    out: &mut impl io::Write,
+) -> anyhow::Result<()> {
+    match command {
+        Tr64Command::Services => tr64::services(context, out).await,
+        Tr64Command::Actions { service } => tr64::actions(context, &service, out).await,
+        Tr64Command::Describe { service, action } => {
+            tr64::describe(context, &service, &action, out).await
+        }
+        Tr64Command::Call {
+            service,
+            action,
+            arguments,
+        } => tr64::call(context, &service, &action, &arguments, out).await,
     }
 }
 
