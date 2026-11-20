@@ -282,6 +282,13 @@ async fn reads_personal_lists_only_on_request() {
             .iter()
             .all(|r| r.action.as_deref() != Some("GetDeviceLog"))
     );
+    // GetInfo is no personal action, but returns the log as well.
+    let info = success(&client, "fritz_call_action", call("DeviceInfo1", "GetInfo")).await;
+    assert_eq!(
+        info["NewDeviceLog"], "(personal, needs `fritz mcp --personal`)",
+        "{info}"
+    );
+    assert!(info["NewModelName"].is_string(), "{info}");
     for (service, action) in [("Nothing1", "GetInfo"), ("DeviceInfo1", "Nothing")] {
         let error = failure(&client, "fritz_call_action", call(service, action)).await;
         assert!(error["error"].is_string(), "{error}");
@@ -315,6 +322,11 @@ async fn reads_personal_lists_only_on_request() {
     )
     .await;
     assert!(log["NewDeviceLog"].is_string(), "{log}");
+    let info = success(&client, "fritz_call_action", call("DeviceInfo1", "GetInfo")).await;
+    assert_eq!(
+        info["NewDeviceLog"], "(removed by fritz fixture anonymize)",
+        "{info}"
+    );
     client.cancel().await.unwrap();
 }
 

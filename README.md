@@ -47,8 +47,9 @@ claude mcp add fritz -- fritz --host 192.168.178.1 --user agent mcp
 | `fritz_call_action`     | Calls an action that only reads, with secrets hidden        |
 
 Calls, contacts and the event log are personal, so `fritz mcp` only serves
-them with `--personal` (or `FRITZ_MCP_PERSONAL=true`). That adds three tools
-and lets `fritz_call_action` call the actions behind them:
+them with `--personal` (or `FRITZ_MCP_PERSONAL=true`). Without it,
+`fritz_call_action` refuses the actions behind them and hides the event log
+that `DeviceInfo:GetInfo` returns as well. The option adds three tools:
 
 | Tool              | Returns                                                     |
 | ----------------- | ----------------------------------------------------------- |

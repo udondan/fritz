@@ -158,6 +158,12 @@ fn is_personal(service: &Service, action: &str) -> bool {
     }
 }
 
+/// Whether an output argument holds personal data even though its action
+/// does not, like the event log that `DeviceInfo:GetInfo` returns.
+pub fn is_personal_output(name: &str) -> bool {
+    name == "NewDeviceLog"
+}
+
 /// The class of an action that is not a getter.
 fn change(service: &Service, action: &Action) -> Class {
     let critical = |reason: String| Class::Critical { reason };
@@ -302,6 +308,12 @@ mod tests {
             classify(&service("X_VoIP"), &set_client).to_string(),
             "critical: sets NewX_AVM-DE_ClientPassword, which points to a secret"
         );
+    }
+
+    #[test]
+    fn finds_personal_outputs() {
+        assert!(is_personal_output("NewDeviceLog"));
+        assert!(!is_personal_output("NewDeviceLogPath"));
     }
 
     #[test]

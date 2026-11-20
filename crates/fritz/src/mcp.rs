@@ -424,8 +424,17 @@ impl Server {
                 .read(&query.service, &query.action, &arguments)
                 .await
                 .with_context(|| format!("{} failed", query.action))?;
-            let output: BTreeMap<String, String> =
-                output.0.into_iter().map(|(n, v)| (n, cut(v))).collect();
+            let output: BTreeMap<String, String> = output
+                .0
+                .into_iter()
+                .map(|(n, v)| {
+                    if !self.personal && policy::is_personal_output(&n) {
+                        (n, PERSONAL_HIDDEN.to_owned())
+                    } else {
+                        (n, cut(v))
+                    }
+                })
+                .collect();
             Ok(output)
         })
         .await
@@ -612,6 +621,10 @@ fn page(hosts: status::Hosts, query: &HostsQuery) -> HostsPage {
             .collect(),
     }
 }
+
+/// What replaces personal data in the output of an action without
+/// `--personal`.
+const PERSONAL_HIDDEN: &str = "(personal, needs `fritz mcp --personal`)";
 
 /// A value of at most [`MAX_VALUE`] characters.
 fn cut(value: String) -> String {
