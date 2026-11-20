@@ -124,6 +124,29 @@ fn refuses_to_overwrite() {
 }
 
 #[test]
+fn checks_a_directory_of_fixtures() {
+    let temp = tempfile::tempdir().unwrap();
+    let fixtures = temp.path().join("fixtures");
+    for version in ["8.25", "8.50"] {
+        let raw_dir = temp.path().join(version);
+        raw(&raw_dir);
+        let out = fixtures.join("fritzbox-7590").join(version);
+        anonymize::anonymize(&raw_dir, &out, &[]).unwrap();
+    }
+    // The service descriptions name an action `GetInfo`, which counts as a
+    // protocol word in the fixture they belong to.
+    tree(
+        &fixtures,
+        &[(
+            "fritzbox-7590/8.50/responses/WLANConfiguration1/GetSSID.json",
+            r#"{"out": {"NewSSID": "GetInfo"}}"#,
+        )],
+    );
+
+    assert_eq!(anonymize::check(&fixtures, &[]).unwrap(), []);
+}
+
+#[test]
 fn anonymizes_strings_in_json_arrays() {
     let temp = tempfile::tempdir().unwrap();
     let (raw_dir, out) = (temp.path().join("raw"), temp.path().join("out"));

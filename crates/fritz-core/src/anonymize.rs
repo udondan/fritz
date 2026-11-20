@@ -13,6 +13,7 @@
 //! fixtures for values the anonymizer would replace and for private
 //! patterns, and reports where it found them, but never the values.
 
+use std::collections::HashMap;
 use std::fmt;
 use std::fs;
 use std::io;
@@ -130,7 +131,7 @@ pub enum Error {
 /// exists. Nothing is written unless the result is clean.
 pub fn anonymize(raw: &Path, out: &Path, private: &[String]) -> Result<usize, Error> {
     let files = read_tree(raw)?;
-    let mut mapper = Mapper::new(descriptions(&files));
+    let mut mapper = Mapper::new(descriptions(&files, Path::new("")));
     let files = files
         .into_iter()
         .map(|(file, text)| {
@@ -160,7 +161,8 @@ pub fn anonymize(raw: &Path, out: &Path, private: &[String]) -> Result<usize, Er
 }
 
 /// Searches the files in `dir` for values the anonymizer would replace and
-/// for lines of `private`, and returns where it found them.
+/// for lines of `private`, and returns where it found them. `dir` can be
+/// one fixture or a directory with several, like `fixtures/<model>/<fw>/`.
 ///
 /// # Errors
 ///
@@ -169,8 +171,12 @@ pub fn check(dir: &Path, private: &[String]) -> Result<Vec<Finding>, Error> {
     let needles = leftovers::needles(&[], private);
     let mut findings = Vec::new();
     let files = read_tree(dir)?;
-    let protocol = Mapper::new(descriptions(&files));
+    let mut protocols = HashMap::new();
     for (file, text) in &files {
+        let root = fixture_root(file);
+        let protocol = protocols
+            .entry(root)
+            .or_insert_with(|| Mapper::new(descriptions(&files, root)));
         let mut mapper = protocol.fresh();
         anonymize_file(&mut mapper, file, text, dir)?;
         let mut kinds: Vec<Kind> = mapper.replaced.iter().map(|(kind, _)| *kind).collect();
@@ -200,12 +206,31 @@ pub fn read_private_patterns(path: &Path) -> io::Result<Vec<String>> {
         .collect())
 }
 
-/// The texts of the service descriptions among the files of a capture.
-fn descriptions(files: &[(PathBuf, String)]) -> impl Iterator<Item = &str> {
+/// The texts of the service descriptions of the fixture at `root`.
+fn descriptions<'a>(
+    files: &'a [(PathBuf, String)],
+    root: &'a Path,
+) -> impl Iterator<Item = &'a str> {
     files
         .iter()
-        .filter(|(file, _)| file.starts_with("scpd"))
+        .filter(move |(file, _)| is_description(file) && fixture_root(file) == root)
         .map(|(_, text)| text.as_str())
+}
+
+/// Whether a file is a service description, which lies in `scpd/`.
+fn is_description(file: &Path) -> bool {
+    file.parent().is_some_and(|dir| dir.ends_with("scpd"))
+}
+
+/// The directory of the fixture or capture a file belongs to: the one
+/// above its `scpd/` or `responses/` directory, else its own directory.
+fn fixture_root(file: &Path) -> &Path {
+    file.ancestors()
+        .skip(1)
+        .find(|dir| dir.ends_with("scpd") || dir.ends_with("responses"))
+        .unwrap_or(file)
+        .parent()
+        .unwrap_or(file)
 }
 
 /// Where the needles are in the files.
@@ -233,7 +258,7 @@ fn anonymize_file(
     text: &str,
     dir: &Path,
 ) -> Result<String, Error> {
-    if file.starts_with("scpd") {
+    if is_description(file) {
         return Ok(mapper.text(text));
     }
     match file.extension().and_then(|e| e.to_str()) {

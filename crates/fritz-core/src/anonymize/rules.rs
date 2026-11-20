@@ -19,7 +19,7 @@ pub(super) fn argument(name: &str) -> Option<Kind> {
         "serialnumber" => Kind::Serial,
         "devicelog" => Kind::Log,
         "email" => Kind::Email,
-        "dyndnsname" | "myfritzdyndnsname" => Kind::Server,
+        "dyndnsname" | "myfritzdyndnsname" | "ntpserver1" | "ntpserver2" => Kind::Server,
         "url" | "connectionrequesturl" | "hosturl" => Kind::Url,
         "path" | "endpointid" => Kind::Id,
         "provider" | "pppoeacname" => Kind::Provider,
@@ -105,6 +105,8 @@ mod tests {
         assert_eq!(argument("NewX_AVM-DE_PhoneNumber"), Some(Kind::Phone));
         assert_eq!(argument("NewNumber"), Some(Kind::Phone));
         assert_eq!(argument("NewDynDNSName"), Some(Kind::Server));
+        assert_eq!(argument("NewNTPServer1"), Some(Kind::Server));
+        assert_eq!(argument("NewNTPServer2"), Some(Kind::Server));
         assert_eq!(
             argument("NewX_AVM-DE_MyFritzDynDNSName"),
             Some(Kind::Server)
