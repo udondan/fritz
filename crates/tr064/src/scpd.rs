@@ -9,21 +9,27 @@ use crate::{Error, xml};
 /// A parsed SCPD document.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Scpd {
+    /// The actions of the service.
     pub actions: Vec<Action>,
+    /// The state variables that give the arguments their types.
     pub state_variables: Vec<StateVariable>,
 }
 
 /// An action of a service.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Action {
+    /// The name, for example `GetInfo`.
     pub name: String,
+    /// The input and output arguments, in the order of the SCPD.
     pub arguments: Vec<Argument>,
 }
 
 /// An argument of an [`Action`].
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Argument {
+    /// The name, for example `NewSerialNumber`.
     pub name: String,
+    /// Whether the argument is an input or an output.
     pub direction: Direction,
     /// The name of the [`StateVariable`] that gives the argument its type.
     pub related_state_variable: String,
@@ -32,28 +38,37 @@ pub struct Argument {
 /// Whether an [`Argument`] is sent to the device or returned by it.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Direction {
+    /// Sent to the device.
     In,
+    /// Returned by the device.
     Out,
 }
 
 /// A state variable of a service.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct StateVariable {
+    /// The name, for example `SerialNumber`.
     pub name: String,
     /// The UPnP data type, for example `string`, `ui4` or `boolean`.
     pub data_type: String,
+    /// The value the variable has unless set otherwise.
     pub default_value: Option<String>,
     /// The allowed values; empty if any value of the data type is allowed.
     pub allowed_values: Vec<String>,
+    /// The allowed range of a numeric variable.
     pub allowed_range: Option<AllowedRange>,
+    /// Whether the device sends events when the variable changes.
     pub send_events: bool,
 }
 
 /// The allowed range of a numeric [`StateVariable`], as given in the SCPD.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct AllowedRange {
+    /// The lowest allowed value.
     pub minimum: Option<String>,
+    /// The highest allowed value.
     pub maximum: Option<String>,
+    /// The step between allowed values.
     pub step: Option<String>,
 }
 

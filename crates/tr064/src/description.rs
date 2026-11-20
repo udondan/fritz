@@ -15,15 +15,25 @@ pub struct DeviceDescription {
 /// A device of a [`DeviceDescription`].
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Device {
+    /// The device type, for example `urn:dslforum-org:device:InternetGatewayDevice:1`.
     pub device_type: String,
+    /// A name for people.
     pub friendly_name: Option<String>,
+    /// The manufacturer.
     pub manufacturer: Option<String>,
+    /// The model name.
     pub model_name: Option<String>,
+    /// The model number.
     pub model_number: Option<String>,
+    /// A description of the model.
     pub model_description: Option<String>,
+    /// The serial number.
     pub serial_number: Option<String>,
+    /// The unique device name, usually `uuid:` followed by a UUID.
     pub udn: Option<String>,
+    /// The URL of the device's web interface.
     pub presentation_url: Option<String>,
+    /// The services of this device, without those of embedded devices.
     pub services: Vec<Service>,
     /// Embedded devices.
     pub devices: Vec<Device>,
@@ -37,8 +47,11 @@ pub struct Service {
     pub service_type: String,
     /// For example `urn:DeviceInfo-com:serviceId:DeviceInfo1`.
     pub service_id: String,
+    /// The URL action calls go to.
     pub control_url: String,
+    /// The URL for event subscriptions.
     pub event_sub_url: Option<String>,
+    /// The URL of the service's [`Scpd`](crate::Scpd).
     pub scpd_url: String,
 }
 

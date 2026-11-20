@@ -48,11 +48,6 @@ impl ClientBuilder {
         self
     }
 
-    /// Builds the client.
-    ///
-    /// # Errors
-    ///
-    /// [`Error::Http`] if the HTTP client cannot be set up.
     /// The fingerprint of the device's certificate. Required for `https`, and
     /// the only certificate the client accepts. See [`fetch_fingerprint`] to
     /// get it on first use.
