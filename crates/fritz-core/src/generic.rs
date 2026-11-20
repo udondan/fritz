@@ -90,6 +90,16 @@ pub fn check(
             class,
         });
     }
+    check_arguments(action, arguments)
+}
+
+/// Checks that the arguments are exactly the inputs of an action.
+///
+/// # Errors
+///
+/// [`Error::UnknownArgument`] or [`Error::MissingArgument`] if they are
+/// not.
+pub fn check_arguments(action: &Action, arguments: &[(String, String)]) -> Result<(), Error> {
     if let Some((name, _)) = arguments
         .iter()
         .find(|(name, _)| !action.inputs().any(|a| &a.name == name))

@@ -10,6 +10,11 @@ license.workspace = true
 repository.workspace = true
 authors.workspace = true
 
+[features]
+# `fritz change`: plans and applies changes. Off by default, so that builds
+# without it can only read.
+write = ["fritz-core/write"]
+
 [dependencies]
 anyhow = "=1.0.104"
 clap = { version = "=4.6.9", features = ["derive", "env"] }

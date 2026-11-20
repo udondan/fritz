@@ -6,10 +6,13 @@
 pub mod anonymize;
 pub mod capabilities;
 pub mod capture;
+#[cfg(feature = "write")]
+pub mod change;
 pub mod config;
 pub mod connection;
 pub mod fault;
 pub mod generic;
+pub mod identity;
 pub mod lists;
 mod names;
 pub mod personal;

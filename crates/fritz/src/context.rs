@@ -66,6 +66,12 @@ impl Context {
         &self.path
     }
 
+    /// The devices that may and may never be changed.
+    #[cfg(feature = "write")]
+    pub(crate) fn write_targets(&self) -> &fritz_core::identity::Targets {
+        &self.config.write
+    }
+
     /// The settings of the command line and the environment.
     pub(crate) fn overrides(&self) -> &Overrides {
         &self.overrides

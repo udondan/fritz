@@ -12,8 +12,8 @@ not in a public issue.
 default:
 
 - **Read-only by default.** Release builds can't send any action that changes
-  the device. Write support will be a separate compile-time feature, and will
-  also need a runtime opt-in plus an allowlist of target devices.
+  the device. Changes need a build with the feature `write`, and then pass
+  every check below before anything is sent.
 - **Every action has a class**, taken from its name and arguments in the
   service description before anything is sent: `read`, `personal` (call
   lists, phone books, voice messages, the event log), `secret` (getters that
@@ -33,3 +33,24 @@ default:
   bypassed.
 - **Data from the device** (host names, network names, phone book entries) is
   treated as untrusted input when it is handed to an AI agent.
+
+### Changes
+
+In builds with the feature `write`, `fritz change` plans and applies changes.
+A change is only sent if all of these hold:
+
+1. The action is `write` and `FRITZ_ALLOW_WRITE=1` is set, or it is `critical`
+   and `FRITZ_ALLOW_CRITICAL=1` is set as well. Getters are never changes.
+2. The arguments are exactly the inputs of the action.
+3. The identity of the device, a SHA-256 hash of its unique device name and
+   serial number, is in `allow` of the section `[write]` of the configuration,
+   and not in `deny`. `deny` always wins, so a device can be locked against
+   changes for good. `fritz change identity` prints the identity.
+4. The change was planned less than five minutes before, for the same device,
+   action and arguments, and its token was not used yet. A plan reads the
+   current values and shows what would change, without changing anything.
+
+After a change, the values are read back and compared to the ones that were
+sent. Every plan, change and refusal is appended to `audit.jsonl` in the state
+directory, with secrets hidden; a change that cannot be logged is not sent.
+The token file holds only hashes of the tokens and of the changes.

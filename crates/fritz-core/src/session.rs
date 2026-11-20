@@ -236,7 +236,8 @@ fn from_hex(text: &str) -> Option<Vec<u8>> {
         .collect()
 }
 
-fn to_hex(bytes: &[u8]) -> String {
+/// Bytes as lowercase hex digits.
+pub(crate) fn to_hex(bytes: &[u8]) -> String {
     bytes.iter().fold(String::new(), |mut text, byte| {
         let _ = write!(text, "{byte:02x}");
         text
