@@ -2,3 +2,5 @@
 //! session login, access policy, redaction and fixture anonymization.
 //!
 //! Unofficial, not affiliated with FRITZ! GmbH.
+
+pub mod capture;
