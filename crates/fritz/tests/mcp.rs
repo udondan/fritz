@@ -36,6 +36,11 @@ async fn connect(sim: &Sim) -> Client {
 
 /// Like [`connect`], with more arguments for `fritz mcp`.
 async fn connect_with(sim: &Sim, extra: &[&str]) -> Client {
+    connect_env(sim, extra, &[]).await
+}
+
+/// Like [`connect_with`], with more variables, which win over the others.
+async fn connect_env(sim: &Sim, extra: &[&str], vars: &[(&str, &str)]) -> Client {
     let missing = Path::new(env!("CARGO_TARGET_TMPDIR")).join("missing/config.toml");
     let url = sim.url().to_string();
     let command = tokio::process::Command::new(env!("CARGO_BIN_EXE_fritz")).configure(|cmd| {
@@ -46,7 +51,8 @@ async fn connect_with(sim: &Sim, extra: &[&str]) -> Client {
             .args(extra)
             .env("FRITZ_NO_KEYCHAIN", "1")
             .env("FRITZ_CONFIG", &missing)
-            .env("FRITZ_PASSWORD", fritz_sim::PASSWORD);
+            .env("FRITZ_PASSWORD", fritz_sim::PASSWORD)
+            .envs(vars.iter().copied());
     });
     ().serve(TokioChildProcess::new(command).unwrap())
         .await
@@ -388,4 +394,167 @@ async fn reports_faults_with_a_status() {
     assert_eq!(error["status"], "confirmation_required", "{error}");
     assert!(error.get("retry_after").is_none(), "{error}");
     client.cancel().await.unwrap();
+}
+
+/// The tools that change the device, in builds with the feature `write`.
+#[cfg(feature = "write")]
+mod change {
+    use fritz_core::identity::Identity;
+
+    use super::*;
+
+    /// The identity of the device of the fixture.
+    fn identity() -> String {
+        Identity::of("uuid:00000000-0000-4000-8000-000000000001", "AABBCC000001").to_string()
+    }
+
+    struct Setup {
+        sim: Sim,
+        dir: tempfile::TempDir,
+    }
+
+    impl Setup {
+        /// A simulator, and a configuration with the section `[write]`.
+        async fn new(write: &str) -> Self {
+            let setup = Self {
+                sim: sim().await,
+                dir: tempfile::tempdir().unwrap(),
+            };
+            let config = format!("[write]\n{write} = [\"{}\"]\n", identity());
+            std::fs::write(setup.dir.path().join("config.toml"), config).unwrap();
+            setup
+        }
+
+        /// Starts `fritz mcp` with the configuration, a state directory and
+        /// the variables.
+        async fn connect(&self, vars: &[(&str, &str)]) -> Client {
+            let config = self.dir.path().join("config.toml");
+            let state = self.dir.path().join("state");
+            let mut all = vec![
+                ("FRITZ_CONFIG", config.to_str().unwrap()),
+                ("FRITZ_STATE_DIR", state.to_str().unwrap()),
+            ];
+            all.extend_from_slice(vars);
+            connect_env(&self.sim, &[], &all).await
+        }
+
+        fn enabled(&self) -> Option<String> {
+            self.sim.state("WLANConfiguration1", "Enable")
+        }
+
+        fn audit(&self) -> String {
+            std::fs::read_to_string(self.dir.path().join("state/audit.jsonl")).unwrap_or_default()
+        }
+    }
+
+    fn enable(value: &str) -> Value {
+        json!({
+            "service": "WLANConfiguration1",
+            "action": "SetEnable",
+            "arguments": {"NewEnable": value},
+        })
+    }
+
+    fn with_token(mut change: Value, token: &Value) -> Value {
+        change["token"] = token.clone();
+        change
+    }
+
+    const WRITE: (&str, &str) = ("FRITZ_ALLOW_WRITE", "1");
+
+    #[tokio::test(flavor = "multi_thread")]
+    async fn offers_the_tools_only_with_the_permit() {
+        let setup = Setup::new("allow").await;
+        let client = setup.connect(&[]).await;
+        let names: Vec<_> = client
+            .list_all_tools()
+            .await
+            .unwrap()
+            .into_iter()
+            .map(|t| t.name)
+            .collect();
+        assert!(!names.iter().any(|n| n.contains("change")), "{names:?}");
+        client.cancel().await.unwrap();
+
+        let client = setup.connect(&[WRITE]).await;
+        let info = client.peer_info().unwrap();
+        let instructions = info.instructions.as_deref().unwrap();
+        assert!(instructions.contains("fritz_plan_change"), "{instructions}");
+        let tools = client.list_all_tools().await.unwrap();
+        let plan = tools
+            .iter()
+            .find(|t| t.name == "fritz_plan_change")
+            .unwrap();
+        let annotations = plan.annotations.as_ref().unwrap();
+        assert_eq!(annotations.read_only_hint, Some(true));
+        let apply = tools
+            .iter()
+            .find(|t| t.name == "fritz_apply_change")
+            .unwrap();
+        let annotations = apply.annotations.as_ref().unwrap();
+        assert_eq!(annotations.read_only_hint, Some(false));
+        assert_eq!(annotations.destructive_hint, Some(true));
+        client.cancel().await.unwrap();
+    }
+
+    #[tokio::test(flavor = "multi_thread")]
+    async fn plans_and_applies_changes() {
+        let setup = Setup::new("allow").await;
+        let client = setup.connect(&[WRITE]).await;
+        let plan = success(&client, "fritz_plan_change", enable("0")).await;
+        assert_eq!(plan["device"], identity());
+        assert_eq!(plan["class"], "write");
+        assert_eq!(
+            plan["changes"],
+            json!([{"argument": "NewEnable", "before": "1", "after": "0"}])
+        );
+        assert_eq!(setup.enabled().as_deref(), Some("1"));
+
+        let change = with_token(enable("0"), &plan["token"]);
+        let outcome = success(&client, "fritz_apply_change", change.clone()).await;
+        assert_eq!(outcome["verified"], true, "{outcome}");
+        assert_eq!(setup.enabled().as_deref(), Some("0"));
+
+        let error = failure(&client, "fritz_apply_change", change).await;
+        let message = error["error"].as_str().unwrap();
+        assert!(message.contains("the token is unknown, used"), "{message}");
+        let audit = setup.audit();
+        assert_eq!(audit.lines().count(), 4, "{audit}");
+        assert!(
+            audit.lines().all(|l| l.contains("\"source\":\"mcp\"")),
+            "{audit}"
+        );
+        client.cancel().await.unwrap();
+    }
+
+    #[tokio::test(flavor = "multi_thread")]
+    async fn refuses_changes_to_denied_devices() {
+        let setup = Setup::new("deny").await;
+        let client = setup.connect(&[WRITE]).await;
+        let error = failure(&client, "fritz_plan_change", enable("0")).await;
+        let message = error["error"].as_str().unwrap();
+        assert!(message.contains(&identity()), "{message}");
+        let change = with_token(enable("0"), &json!("0123"));
+        failure(&client, "fritz_apply_change", change).await;
+        assert_eq!(setup.enabled().as_deref(), Some("1"));
+        assert!(
+            !setup
+                .sim
+                .requests()
+                .iter()
+                .any(|r| r.action.as_deref() == Some("SetEnable"))
+        );
+        client.cancel().await.unwrap();
+    }
+
+    #[tokio::test(flavor = "multi_thread")]
+    async fn needs_the_critical_permit_for_critical_changes() {
+        let setup = Setup::new("allow").await;
+        let client = setup.connect(&[WRITE]).await;
+        let reboot = json!({"service": "DeviceConfig1", "action": "Reboot"});
+        let error = failure(&client, "fritz_plan_change", reboot).await;
+        let message = error["error"].as_str().unwrap();
+        assert!(message.contains("FRITZ_ALLOW_CRITICAL=1"), "{message}");
+        client.cancel().await.unwrap();
+    }
 }

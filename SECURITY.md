@@ -36,12 +36,14 @@ default:
 
 ### Changes
 
-In builds with the feature `write`, `fritz change` plans and applies changes.
-A change is only sent if all of these hold:
+In builds with the feature `write`, `fritz change` plans and applies changes,
+and so do the MCP tools `fritz_plan_change` and `fritz_apply_change`. `fritz
+mcp` only offers these tools with `FRITZ_ALLOW_WRITE=1`. A change is only sent
+if all of these hold:
 
 1. The action is `write` and `FRITZ_ALLOW_WRITE=1` is set, or it is `critical`
    and `FRITZ_ALLOW_CRITICAL=1` is set as well. Getters are never changes.
-2. The arguments are exactly the inputs of the action.
+2. The arguments are exactly the inputs of the action, each once.
 3. The identity of the device, a SHA-256 hash of its unique device name and
    serial number, is in `allow` of the section `[write]` of the configuration,
    and not in `deny`. `deny` always wins, so a device can be locked against
@@ -53,4 +55,5 @@ A change is only sent if all of these hold:
 After a change, the values are read back and compared to the ones that were
 sent. Every plan, change and refusal is appended to `audit.jsonl` in the state
 directory, with secrets hidden; a change that cannot be logged is not sent.
-The token file holds only hashes of the tokens and of the changes.
+The token file holds only hashes of the tokens and of the changes, and is
+locked while it changes, so processes that share it cannot use a token twice.
