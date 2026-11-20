@@ -79,8 +79,7 @@ fn summary(connection: &Connection) -> String {
     let part = |value: &Option<String>, prefix: &str, suffix: &str| {
         value
             .as_ref()
-            .map(|v| format!("{prefix}{v}{suffix}"))
-            .unwrap_or_default()
+            .map_or_else(String::new, |v| format!("{prefix}{v}{suffix}"))
     };
     let over = part(&connection.access_type, " over ", "");
     let link = part(&connection.link, " (link ", ")");
