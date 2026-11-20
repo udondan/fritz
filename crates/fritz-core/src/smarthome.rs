@@ -187,8 +187,7 @@ impl RawUnit {
             level: valid(i.level_control.as_ref()).and_then(|v| v.level),
             humidity: valid(i.humidity.as_ref()).and_then(|v| v.relative_humidity),
             alerts: valid(i.alert.as_ref())
-                .map(|v| v.alerts.iter().filter(|a| *a != "none").cloned().collect())
-                .unwrap_or_default(),
+                .map_or_default(|v| v.alerts.iter().filter(|a| *a != "none").cloned().collect()),
         }
     }
 }
