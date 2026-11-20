@@ -6,6 +6,7 @@ use std::path::{Path, PathBuf};
 
 use anyhow::{Context as _, bail};
 use clap::{Args, Parser, Subcommand};
+use fritz_core::anonymize;
 use fritz_core::capture::{self, Options, Plan};
 use tr064::{Client, Fingerprint, SecretString, Url};
 
@@ -21,6 +22,53 @@ struct Cli {
 enum Command {
     /// Record the answers of read-only actions as test fixtures.
     Capture(CaptureArgs),
+    /// Turn raw captures into fixtures, and check fixtures for personal data.
+    #[command(subcommand)]
+    Fixture(FixtureCommand),
+}
+
+#[derive(Debug, Subcommand)]
+enum FixtureCommand {
+    /// Replace the personal values of a raw capture with placeholders.
+    Anonymize {
+        /// The directory of the raw capture.
+        raw: PathBuf,
+        /// A new directory for the fixture, like `fixtures/<model>/<version>`.
+        #[arg(long)]
+        out: PathBuf,
+        #[command(flatten)]
+        private: PrivateArgs,
+    },
+    /// Look for personal values in fixtures. Reports the files and the kinds
+    /// of values, never the values.
+    Check {
+        /// The directory to check.
+        #[arg(default_value = "fixtures")]
+        dir: PathBuf,
+        #[command(flatten)]
+        private: PrivateArgs,
+    },
+}
+
+#[derive(Debug, Args)]
+struct PrivateArgs {
+    /// A file with texts that must not be in a fixture, one per line, like
+    /// one's own name or street. Defaults to `.private-patterns` if it exists.
+    #[arg(long)]
+    private_patterns: Option<PathBuf>,
+}
+
+impl PrivateArgs {
+    fn load(&self) -> anyhow::Result<Vec<String>> {
+        let default = Path::new(".private-patterns");
+        let path = match &self.private_patterns {
+            Some(path) => path,
+            None if default.exists() => default,
+            None => return Ok(Vec::new()),
+        };
+        anonymize::read_private_patterns(path)
+            .with_context(|| format!("cannot read {}", path.display()))
+    }
 }
 
 #[derive(Debug, Args)]
@@ -56,6 +104,44 @@ struct CaptureArgs {
 async fn main() -> anyhow::Result<()> {
     match Cli::parse().command {
         Command::Capture(args) => capture(args).await,
+        Command::Fixture(command) => fixture(&command),
+    }
+}
+
+fn fixture(command: &FixtureCommand) -> anyhow::Result<()> {
+    match command {
+        FixtureCommand::Anonymize { raw, out, private } => {
+            match anonymize::anonymize(raw, out, &private.load()?) {
+                Ok(count) => {
+                    println!("anonymized {count} files into {}", out.display());
+                    Ok(())
+                }
+                Err(anonymize::Error::Leftovers(findings)) => {
+                    report(&findings);
+                    bail!("personal values remain, nothing was written")
+                }
+                Err(error) => Err(error.into()),
+            }
+        }
+        FixtureCommand::Check { dir, private } => {
+            let findings = anonymize::check(dir, &private.load()?)?;
+            report(&findings);
+            if !findings.is_empty() {
+                bail!(
+                    "{} personal values found in {}",
+                    findings.len(),
+                    dir.display()
+                );
+            }
+            println!("no personal values found in {}", dir.display());
+            Ok(())
+        }
+    }
+}
+
+fn report(findings: &[anonymize::Finding]) {
+    for finding in findings {
+        eprintln!("{finding}");
     }
 }
 

@@ -23,5 +23,47 @@ Pull requests are squash-merged, and the title becomes the commit message.
 ## Fixtures from other models
 
 Fixtures recorded from other FRITZ!Box models and FRITZ!OS versions are
-welcome. `fritz capture` will record them read-only and anonymized; the steps
-will be described here once the command exists.
+welcome. Recording one only reads from the device, and nothing personal ends
+up in the repository:
+
+1. Set up a user on the device as described in [docs/box-setup.md](docs/box-setup.md).
+2. Look at what a capture would read. This loads only the service
+   descriptions, which need no login:
+
+   ```sh
+   fritz capture --plan
+   ```
+
+3. Record the raw capture. It contains personal data and is written outside
+   the repository, to `~/.local/share/fritz/captures/<time>/`:
+
+   ```sh
+   FRITZ_PASSWORD=… fritz capture --user <user>
+   ```
+
+4. List what is personal to you and must not appear anywhere, one text per
+   line, in `.private-patterns` at the root of the repository: your name,
+   street, real WLAN names and so on. The file is ignored by git, and lines
+   starting with `#` are comments.
+5. Anonymize the capture into the fixtures, named by model and FRITZ!OS
+   version:
+
+   ```sh
+   fritz fixture anonymize ~/.local/share/fritz/captures/<time> \
+     --out fixtures/<model>/<fritzos>
+   ```
+
+   Addresses, UUIDs, serial numbers, host and WLAN names, user names, phone
+   numbers and similar values become placeholders like `AA:BB:CC:00:00:01`,
+   `192.0.2.1` or `device-1`; the same value always gets the same
+   placeholder. If any replaced value or private pattern is still found
+   afterwards, nothing is written and the affected files are listed.
+6. Check all fixtures and read through the new one before opening a pull
+   request:
+
+   ```sh
+   fritz fixture check
+   ```
+
+   It names the files and kinds of the personal values it finds, never the
+   values. Delete the raw capture when you no longer need it.

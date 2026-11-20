@@ -3,4 +3,5 @@
 //!
 //! Unofficial, not affiliated with FRITZ! GmbH.
 
+pub mod anonymize;
 pub mod capture;
