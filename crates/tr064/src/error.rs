@@ -1,3 +1,5 @@
+use crate::Fingerprint;
+
 /// Errors of this crate.
 #[derive(Debug, thiserror::Error)]
 #[non_exhaustive]
@@ -78,4 +80,16 @@ pub enum Error {
     /// than the device.
     #[error("invalid URL: {0}")]
     InvalidUrl(String),
+
+    /// A certificate fingerprint is not 64 hex digits.
+    #[error("invalid certificate fingerprint {0:?}")]
+    InvalidFingerprint(String),
+
+    /// The device presented another certificate than the pinned one. Either
+    /// the device got a new certificate, or someone else is answering.
+    #[error("the device presented the certificate {found}, expected {expected}")]
+    CertificateMismatch {
+        expected: Fingerprint,
+        found: Fingerprint,
+    },
 }
