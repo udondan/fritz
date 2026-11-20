@@ -10,7 +10,7 @@ RUN cargo build --release --locked -p fritz \
     && cp target/release/fritz /usr/local/bin/fritz
 
 
-FROM alpine:3.22
+FROM alpine:3.24
 
 LABEL com.docker.desktop.mcp="true"
 LABEL com.docker.desktop.mcp.name="fritz"
