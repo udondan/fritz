@@ -19,7 +19,16 @@ const SECRET_WORDS: &[&str] = &[
 /// Words that turn a name into a limit, counter or flag about a secret rather
 /// than the secret itself, like `NewMinCharsPSK` or `NewPINFailureCount`.
 const QUALIFIER_WORDS: &[&str] = &[
-    "allowed", "chars", "count", "enabled", "index", "max", "min", "required",
+    "allowed",
+    "chars",
+    "count",
+    "enabled",
+    "index",
+    "is",
+    "max",
+    "min",
+    "required",
+    "selectable",
 ];
 
 /// Word sequences of values that are not secrets but identify the owner or
@@ -122,6 +131,8 @@ mod tests {
         for (name, expected) in [
             ("NewSSID", Sensitivity::Plain),
             ("NewX_AVM-DE_PINEnabled", Sensitivity::Plain),
+            ("NewX_AVM-DE_IsDefaultPasswordActive", Sensitivity::Plain),
+            ("NewPasswordUserSelectable", Sensitivity::Plain),
             ("NewUserName", Sensitivity::Masked),
             ("NewX_AVM-DE_CurrentUsername", Sensitivity::Masked),
             ("NewParameterKey", Sensitivity::Masked),
