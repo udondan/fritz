@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+<timestamp>1795197942</timestamp>
+<Call><Id>3</Id><Type>2</Type><Caller>phone-3</Caller><Called>SIP: phone-1</Called><CalledNumber>phone-1</CalledNumber><Name></Name><Numbertype>sip</Numbertype><Device></Device><Port>-1</Port><Date>20.11.26 17:40</Date><Duration>0:00</Duration><Count></Count><Path /></Call>
+<Call><Id>2</Id><Type>3</Type><Caller>SIP: phone-1</Caller><Called>phone-2</Called><CallerNumber>phone-1</CallerNumber><Name>name-6</Name><Numbertype>sip</Numbertype><Device>name-7</Device><Port>10</Port><Date>20.11.26 09:15</Date><Duration>0:12</Duration><Count></Count><Path /></Call>
+<Call><Id>1</Id><Type>1</Type><Caller>phone-2</Caller><Called>SIP: phone-1</Called><CalledNumber>phone-1</CalledNumber><Name>name-6</Name><Numbertype>sip</Numbertype><Device>name-7</Device><Port>10</Port><Date>19.11.26 20:01</Date><Duration>1:05</Duration><Count></Count><Path /></Call>
+</root>

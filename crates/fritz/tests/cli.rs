@@ -888,6 +888,47 @@ async fn prints_the_settings() {
 }
 
 #[tokio::test(flavor = "multi_thread")]
+async fn prints_the_personal_lists() {
+    let log = fritz_sim::Answer::Ok(
+        [(
+            "NewDeviceLog".to_owned(),
+            "20.11.26 18:05:42 DSL is ready.".to_owned(),
+        )]
+        .into(),
+    );
+    let fixture = fritz_sim::Fixture::load(FIXTURE).unwrap().with_answer(
+        "DeviceInfo1",
+        "GetDeviceLog",
+        None,
+        log,
+    );
+    let sim = fritz_sim::Sim::start(fixture).await.unwrap();
+    let password = Some(fritz_sim::PASSWORD);
+    let output = run(&sim, &["calls", "--limit", "2"], password).await;
+    let calls: serde_json::Value = serde_json::from_str(&success(&output)).unwrap();
+    assert_eq!(calls[0]["kind"], "missed", "{calls}");
+    assert_eq!(calls.as_array().unwrap().len(), 2);
+    let output = run(&sim, &["--output", "text", "calls"], password).await;
+    assert!(stdout(&output).contains("2026-11-19 20:01  incoming"));
+
+    let output = run(&sim, &["phonebook", "phone-4"], password).await;
+    let books: serde_json::Value = serde_json::from_str(&success(&output)).unwrap();
+    assert_eq!(books[0]["contacts"][0]["name"], "name-6", "{books}");
+    assert_eq!(books[0]["contacts"].as_array().unwrap().len(), 1);
+    let output = run(&sim, &["--output", "text", "phonebook"], password).await;
+    assert!(stdout(&output).contains("name-5     name-8  phone-5  intern"));
+
+    let output = run(&sim, &["--output", "text", "log"], password).await;
+    assert_eq!(
+        success(&output),
+        "TIME                 MESSAGE\n2026-11-20 18:05:42  DSL is ready.\n"
+    );
+    let output = run(&sim, &["log", "--limit", "1"], password).await;
+    let log: serde_json::Value = serde_json::from_str(&success(&output)).unwrap();
+    assert_eq!(log[0]["message"], "DSL is ready.", "{log}");
+}
+
+#[tokio::test(flavor = "multi_thread")]
 async fn prints_the_state_as_text() {
     let fixture = fritz_sim::Fixture::load(FIXTURE).unwrap();
     let sim = fritz_sim::Sim::start(fixture).await.unwrap();

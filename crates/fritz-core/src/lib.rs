@@ -12,6 +12,7 @@ pub mod fault;
 pub mod generic;
 pub mod lists;
 mod names;
+pub mod personal;
 pub mod policy;
 pub mod ports;
 pub mod read;

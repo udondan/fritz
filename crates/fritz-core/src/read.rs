@@ -4,7 +4,7 @@
 use std::collections::HashMap;
 use std::str::FromStr;
 
-use tr064::{Client, DeviceDescription, Scpd, Service};
+use tr064::{Client, DeviceDescription, Scpd, Service, Url};
 
 use crate::generic::{self, Error};
 use crate::redact;
@@ -74,15 +74,35 @@ impl Reader {
         name: &str,
         output: &str,
     ) -> Result<Option<String>, Error> {
-        let values = match self.output(reference, name, &[]).await {
+        self.document_with(reference, (name, &[]), output, "").await
+    }
+
+    /// Like [`document`](Self::document), for an action with inputs, like
+    /// `GetPhonebook` with `NewPhonebookID`, and with `query` added to the
+    /// query of the path, like `max=10`. An action can return a full URL,
+    /// like the call list on the address of the device; only its path and
+    /// query are fetched, from the device of this reader.
+    ///
+    /// # Errors
+    ///
+    /// The errors of [`document`](Self::document).
+    pub async fn document_with(
+        &mut self,
+        reference: &str,
+        (name, arguments): (&str, &[(&str, &str)]),
+        output: &str,
+        query: &str,
+    ) -> Result<Option<String>, Error> {
+        let values = match self.output(reference, name, arguments).await {
             Ok(values) => values,
             Err(error) if is_missing(&error) => return Ok(None),
             Err(error) => return Err(error),
         };
-        let Some((_, path)) = values.iter().find(|(n, v)| n == output && !v.is_empty()) else {
+        let Some((_, location)) = values.iter().find(|(n, v)| n == output && !v.is_empty()) else {
             return Ok(None);
         };
-        Ok(Some(self.client.get(path).await.map_err(redact::error)?))
+        let path = local(location, query);
+        Ok(Some(self.client.get(&path).await.map_err(redact::error)?))
     }
 
     /// Calls an action that only reads, and returns its output as it is.
@@ -186,6 +206,23 @@ impl Reader {
     }
 }
 
+/// The path and query of `location`, a path or a full URL, with `query`
+/// added.
+fn local(location: &str, query: &str) -> String {
+    let path = match Url::parse(location) {
+        Ok(url) => match url.query() {
+            Some(q) => format!("{}?{q}", url.path()),
+            None => url.path().to_owned(),
+        },
+        Err(_) => location.to_owned(),
+    };
+    match (query.is_empty(), path.contains('?')) {
+        (true, _) => path,
+        (false, true) => format!("{path}&{query}"),
+        (false, false) => format!("{path}?{query}"),
+    }
+}
+
 /// Whether the error says that the device lacks something, or keeps it from
 /// this user, rather than that it could not be asked. Blocked and busy
 /// confirmations are failures: the device holds back the next calls too.
@@ -256,6 +293,21 @@ mod tests {
         assert_eq!(values.flag("NewOff"), Some(false));
         assert_eq!(values.flag("NewName"), None);
         assert_eq!(values.flag("NewOther"), None);
+    }
+
+    #[test]
+    fn keeps_the_path_of_a_location() {
+        assert_eq!(local("/list.lua?sid=1", ""), "/list.lua?sid=1");
+        assert_eq!(local("/list.lua?sid=1", "max=5"), "/list.lua?sid=1&max=5");
+        assert_eq!(local("/list.lua", "max=5"), "/list.lua?max=5");
+        assert_eq!(
+            local("https://192.0.2.1:49443/calllist.lua?sid=1", ""),
+            "/calllist.lua?sid=1"
+        );
+        assert_eq!(
+            local("http://192.0.2.1/phonebook.lua", ""),
+            "/phonebook.lua"
+        );
     }
 
     #[test]

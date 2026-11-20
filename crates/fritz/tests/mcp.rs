@@ -31,6 +31,11 @@ async fn sim() -> Sim {
 /// Starts `fritz mcp` for `sim`, without the `FRITZ_*` variables of the
 /// caller.
 async fn connect(sim: &Sim) -> Client {
+    connect_with(sim, &[]).await
+}
+
+/// Like [`connect`], with more arguments for `fritz mcp`.
+async fn connect_with(sim: &Sim, extra: &[&str]) -> Client {
     let missing = Path::new(env!("CARGO_TARGET_TMPDIR")).join("missing/config.toml");
     let url = sim.url().to_string();
     let command = tokio::process::Command::new(env!("CARGO_BIN_EXE_fritz")).configure(|cmd| {
@@ -38,6 +43,7 @@ async fn connect(sim: &Sim) -> Client {
             cmd.env_remove(name);
         }
         cmd.args(["--host", &url, "--user", fritz_sim::USERNAME, "mcp"])
+            .args(extra)
             .env("FRITZ_NO_KEYCHAIN", "1")
             .env("FRITZ_CONFIG", &missing)
             .env("FRITZ_PASSWORD", fritz_sim::PASSWORD);
@@ -74,7 +80,8 @@ async fn failure(client: &Client, tool: &'static str, arguments: Value) -> Value
 #[tokio::test(flavor = "multi_thread")]
 async fn lists_tools_within_the_budget() {
     let sim = sim().await;
-    let client = connect(&sim).await;
+    // All tools, the personal ones included.
+    let client = connect_with(&sim, &["--personal"]).await;
     let info = client.peer_info().unwrap();
     assert!(
         info.instructions
@@ -248,6 +255,66 @@ async fn lists_describes_and_calls_actions() {
         error["error"].as_str().unwrap().contains("Nothing"),
         "{error}"
     );
+    client.cancel().await.unwrap();
+}
+
+#[tokio::test(flavor = "multi_thread")]
+async fn reads_personal_lists_only_on_request() {
+    let sim = sim().await;
+    let client = connect(&sim).await;
+    let tools = client.list_all_tools().await.unwrap();
+    for personal in ["fritz_calls", "fritz_phonebook", "fritz_log"] {
+        assert!(tools.iter().all(|t| t.name != personal), "{personal}");
+    }
+    let call = |service: &str, action: &str| json!({"service": service, "action": action});
+    let error = failure(
+        &client,
+        "fritz_call_action",
+        call("DeviceInfo1", "GetDeviceLog"),
+    )
+    .await;
+    assert!(
+        error["error"].as_str().unwrap().contains("--personal"),
+        "{error}"
+    );
+    assert!(
+        sim.requests()
+            .iter()
+            .all(|r| r.action.as_deref() != Some("GetDeviceLog"))
+    );
+    for (service, action) in [("Nothing1", "GetInfo"), ("DeviceInfo1", "Nothing")] {
+        let error = failure(&client, "fritz_call_action", call(service, action)).await;
+        assert!(error["error"].is_string(), "{error}");
+    }
+    client.cancel().await.unwrap();
+
+    let client = connect_with(&sim, &["--personal"]).await;
+    let calls = success(&client, "fritz_calls", json!({})).await;
+    assert_eq!(calls.as_array().unwrap().len(), 3, "{calls}");
+    let missed = success(&client, "fritz_calls", json!({"kind": "missed"})).await;
+    assert_eq!(missed.as_array().unwrap().len(), 1, "{missed}");
+    let latest = success(&client, "fritz_calls", json!({"limit": 1})).await;
+    assert_eq!(latest[0]["kind"], "missed", "{latest}");
+
+    let found = success(&client, "fritz_phonebook", json!({"search": "name-8"})).await;
+    assert_eq!(found["total"], 1, "{found}");
+    assert_eq!(found["contacts"][0]["phonebook"], "name-5", "{found}");
+    assert_eq!(found["contacts"][0]["numbers"][0]["number"], "phone-5");
+    let page = success(&client, "fritz_phonebook", json!({"offset": 1, "limit": 1})).await;
+    assert_eq!(page["total"], 2, "{page}");
+    assert_eq!(page["contacts"][0]["name"], "name-8", "{page}");
+
+    let log = success(&client, "fritz_log", json!({})).await;
+    assert_eq!(log.as_array().unwrap().len(), 1, "{log}");
+    let none = success(&client, "fritz_log", json!({"search": "nothing"})).await;
+    assert_eq!(none, json!([]));
+    let log = success(
+        &client,
+        "fritz_call_action",
+        call("DeviceInfo1", "GetDeviceLog"),
+    )
+    .await;
+    assert!(log["NewDeviceLog"].is_string(), "{log}");
     client.cancel().await.unwrap();
 }
 
