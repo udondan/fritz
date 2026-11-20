@@ -22,7 +22,7 @@ use fritz_core::anonymize;
 use fritz_core::capture::{self, Options, Plan};
 use fritz_core::connection::Overrides;
 use fritz_core::secrets::ENV_PASSWORD;
-use tr064::{Client, Fingerprint, SecretString, Url};
+use tr064::{Client, SecretString, Url};
 
 use crate::context::Context;
 use crate::status::Format;
@@ -61,7 +61,7 @@ struct Global {
     /// The SHA-256 fingerprint of the certificate to trust, instead of the
     /// one of the profile.
     #[arg(long, global = true, env = "FRITZ_TLS_FINGERPRINT")]
-    fingerprint: Option<Fingerprint>,
+    fingerprint: Option<String>,
     /// How to print results: text, or JSON, which is the default when the
     /// output is not a terminal.
     #[arg(long, global = true, value_enum)]

@@ -29,6 +29,9 @@ pub enum Error {
     /// The address is `https`, but no certificate is trusted for it.
     #[error("no certificate is trusted for {0}, run `fritz tls trust`")]
     NotTrusted(Url),
+    /// The fingerprint given as an override is not one.
+    #[error("{0} is not a SHA-256 fingerprint of 64 hex digits")]
+    InvalidFingerprint(String),
     /// No user is set.
     #[error("no user is set for {0}, pass --user or run `fritz config init --user <name>`")]
     NoUsername(Url),
@@ -73,8 +76,22 @@ pub struct Overrides {
     pub host: Option<String>,
     /// The user on the device.
     pub username: Option<String>,
-    /// The fingerprint of the certificate to trust.
-    pub fingerprint: Option<Fingerprint>,
+    /// The fingerprint of the certificate to trust, as given. It is only
+    /// checked when it is used, so that a server can start without one.
+    pub fingerprint: Option<String>,
+}
+
+impl Overrides {
+    /// The fingerprint of the certificate to trust, if one is given.
+    pub fn fingerprint(&self) -> Result<Option<Fingerprint>, Error> {
+        self.fingerprint
+            .as_deref()
+            .map(|f| {
+                f.parse()
+                    .map_err(|_| Error::InvalidFingerprint(f.to_owned()))
+            })
+            .transpose()
+    }
 }
 
 /// The device to connect to, with everything but the password.
@@ -109,7 +126,7 @@ impl Target {
                 .username
                 .clone()
                 .or_else(|| profile.and_then(|p| p.username.clone())),
-            fingerprint: overrides.fingerprint.or(trusted),
+            fingerprint: overrides.fingerprint()?.or(trusted),
             url,
         })
     }
@@ -258,18 +275,30 @@ mod tests {
         assert_eq!(target.fingerprint, None);
 
         let overrides = Overrides {
-            fingerprint: Some(fingerprint(2)),
+            fingerprint: Some(fingerprint(2).to_string()),
             ..overrides
         };
         let target = Target::resolve(Some(&profile), &overrides).unwrap();
         assert_eq!(target.fingerprint, Some(fingerprint(2)));
+
+        // An invalid fingerprint fails only when it is used.
+        let overrides = Overrides {
+            fingerprint: Some("se://docker/mcp/fritz.fingerprint".to_owned()),
+            ..overrides
+        };
+        assert_eq!(
+            Target::resolve(Some(&profile), &overrides)
+                .unwrap_err()
+                .to_string(),
+            "se://docker/mcp/fritz.fingerprint is not a SHA-256 fingerprint of 64 hex digits"
+        );
     }
 
     #[test]
     fn ignores_the_certificate_for_http() {
         let overrides = Overrides {
             host: Some("http://127.0.0.1:49000".to_owned()),
-            fingerprint: Some(fingerprint(1)),
+            fingerprint: Some(fingerprint(1).to_string()),
             ..Overrides::default()
         };
         let target = Target::resolve(None, &overrides).unwrap();
@@ -288,7 +317,7 @@ mod tests {
             let overrides = Overrides {
                 host: Some(host.to_owned()),
                 username: Some("agent".to_owned()),
-                fingerprint: Some(fingerprint(1)),
+                fingerprint: Some(fingerprint(1).to_string()),
             };
             let target = Target::resolve(None, &overrides).unwrap();
             let expected = Target {
