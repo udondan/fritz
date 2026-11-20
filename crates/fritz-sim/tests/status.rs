@@ -64,6 +64,8 @@ async fn leaves_out_what_cannot_be_read() {
         ("WANCommonInterfaceConfig1", "GetCommonLinkProperties"),
         ("WANPPPConnection1", "GetInfo"),
         ("Hosts1", "GetHostNumberOfEntries"),
+        ("Hosts1", "X_AVM-DE_GetHostListPath"),
+        ("Hosts1", "X_AVM-DE_GetMeshListPath"),
         ("WLANConfiguration1", "GetInfo"),
     ] {
         sim.inject(Injection::fault(service, action, 606));
@@ -84,6 +86,7 @@ async fn leaves_out_what_cannot_be_read() {
 
     let hosts = status::hosts(&mut reader).await.unwrap();
     assert_eq!((hosts.reported, hosts.hosts.len()), (0, 0));
+    assert_eq!(status::mesh(&mut reader).await.unwrap(), None);
     let wlans = status::wlans(&mut reader).await.unwrap();
     let services: Vec<&str> = wlans.iter().map(|w| w.service.as_str()).collect();
     assert_eq!(services, ["WLANConfiguration2", "WLANConfiguration3"]);
@@ -110,8 +113,35 @@ async fn reads_the_internet_connection() {
 }
 
 #[tokio::test]
-async fn reads_hosts_until_the_device_has_no_more() {
+async fn reads_the_host_list() {
     let sim = sim().await;
+    let hosts = status::hosts(&mut reader(&sim).await).await.unwrap();
+    assert_eq!(hosts.reported, 50);
+    assert_eq!(hosts.hosts.len(), 50);
+    let second = &hosts.hosts[1];
+    assert_eq!(second.name.as_deref(), Some("device-2"));
+    assert_eq!(second.ip.as_deref(), Some("192.0.2.2"));
+    assert_eq!(second.mac.as_deref(), Some("AA:BB:CC:00:00:03"));
+    assert!(second.active);
+    assert_eq!(second.interface.as_deref(), Some("802.11"));
+    assert_eq!(second.address_source, None, "not in the host list");
+    assert_eq!(second.guest, Some(false));
+    assert_eq!(second.internet_access.as_deref(), Some("granted"));
+    assert_eq!(second.speed, Some(866));
+    assert_eq!(called(&sim), ["X_AVM-DE_GetHostListPath"]);
+    let fetched: Vec<String> = sim
+        .requests()
+        .into_iter()
+        .filter(|r| r.path.contains(".lua"))
+        .map(|r| r.path)
+        .collect();
+    assert_eq!(fetched, ["/devicehostlist.lua"]);
+}
+
+#[tokio::test]
+async fn reads_hosts_one_by_one_without_a_host_list() {
+    let sim = sim().await;
+    sim.inject(Injection::fault("Hosts1", "X_AVM-DE_GetHostListPath", 606));
     let hosts = status::hosts(&mut reader(&sim).await).await.unwrap();
     // The fixture recorded 50 of the 161 entries.
     assert_eq!(hosts.reported, 161);
@@ -123,8 +153,96 @@ async fn reads_hosts_until_the_device_has_no_more() {
     assert!(!first.active);
     assert_eq!(first.interface, None);
     assert_eq!(first.address_source.as_deref(), Some("DHCP"));
+    assert_eq!(first.guest, None, "only in the host list");
     let calls = called(&sim);
-    assert_eq!(calls.len(), 52, "the count and 51 entries: {calls:?}");
+    assert_eq!(
+        calls.len(),
+        53,
+        "the list, the count and 51 entries: {calls:?}"
+    );
+}
+
+#[tokio::test]
+async fn reads_the_mesh() {
+    let sim = sim().await;
+    let mesh = status::mesh(&mut reader(&sim).await)
+        .await
+        .unwrap()
+        .unwrap();
+    let meshed: Vec<_> = mesh
+        .nodes
+        .iter()
+        .filter(|n| n.meshed)
+        .map(|n| (n.name.as_deref(), n.role.as_deref()))
+        .collect();
+    assert_eq!(
+        meshed,
+        [
+            (Some("device-50"), Some("master")),
+            (Some("device-51"), Some("slave"))
+        ]
+    );
+    assert_eq!(mesh.nodes.len(), 4);
+    let links: Vec<_> = mesh
+        .links
+        .iter()
+        .map(|l| (l.from.as_str(), l.to.as_str(), l.interface.as_deref()))
+        .collect();
+    assert_eq!(
+        links,
+        [
+            ("device-50", "device-51", Some("AP:5G:0")),
+            ("device-50", "device-2", Some("AP:5G:0")),
+            ("device-51", "device-47", Some("LAN:1")),
+        ]
+    );
+    assert_eq!(mesh.links[1].rate_tx, Some(866_700));
+}
+
+#[tokio::test]
+async fn rejects_lists_that_are_not_valid() {
+    let dir = tempfile::tempdir().unwrap();
+    copy(FIXTURE.as_ref(), dir.path());
+    std::fs::write(dir.path().join("lists/devicehostlist.xml"), "<html/>").unwrap();
+    std::fs::write(dir.path().join("lists/meshlist.json"), "[]").unwrap();
+    let sim = Sim::start(Fixture::load(dir.path()).unwrap())
+        .await
+        .unwrap();
+    let mut reader = reader(&sim).await;
+    let error = status::hosts(&mut reader).await.unwrap_err();
+    assert!(error.to_string().contains("host list"), "{error}");
+    let error = status::mesh(&mut reader).await.unwrap_err();
+    assert!(error.to_string().contains("mesh list"), "{error}");
+}
+
+#[tokio::test]
+async fn has_no_mesh_without_a_path() {
+    let dir = tempfile::tempdir().unwrap();
+    copy(FIXTURE.as_ref(), dir.path());
+    std::fs::write(
+        dir.path()
+            .join("responses/Hosts1/X_AVM-DE_GetMeshListPath.json"),
+        r#"{"out": {"NewX_AVM-DE_MeshListPath": ""}, "status": "ok"}"#,
+    )
+    .unwrap();
+    let sim = Sim::start(Fixture::load(dir.path()).unwrap())
+        .await
+        .unwrap();
+    let mesh = status::mesh(&mut reader(&sim).await).await.unwrap();
+    assert_eq!(mesh, None);
+}
+
+fn copy(from: &std::path::Path, to: &std::path::Path) {
+    for entry in std::fs::read_dir(from).unwrap() {
+        let entry = entry.unwrap();
+        let target = to.join(entry.file_name());
+        if entry.file_type().unwrap().is_dir() {
+            std::fs::create_dir(&target).unwrap();
+            copy(&entry.path(), &target);
+        } else {
+            std::fs::copy(entry.path(), target).unwrap();
+        }
+    }
 }
 
 #[tokio::test]
@@ -158,5 +276,6 @@ async fn fails_without_a_login() {
     assert!(status::overview(&mut reader).await.is_err());
     assert!(status::internet(&mut reader).await.is_err());
     assert!(status::hosts(&mut reader).await.is_err());
+    assert!(status::mesh(&mut reader).await.is_err());
     assert!(status::wlans(&mut reader).await.is_err());
 }

@@ -42,6 +42,37 @@ async fn serves_the_documents() {
 }
 
 #[tokio::test]
+async fn serves_lists_for_the_session_only() {
+    let (_sim, client, description) = start().await;
+    let hosts = description.service("Hosts1").unwrap();
+    let out = client
+        .call(hosts, "X_AVM-DE_GetHostListPath", &[])
+        .await
+        .unwrap();
+    let path = out.get("NewX_AVM-DE_HostListPath").unwrap();
+    assert!(path.starts_with("/devicehostlist.lua?sid="), "{path}");
+    assert!(!path.contains("***"), "{path}");
+    let list = client.get(path).await.unwrap();
+    assert!(list.contains("<HostName>device-1</HostName>"), "{list}");
+    for path in [
+        "/devicehostlist.lua",
+        "/devicehostlist.lua?sid=0000000000000000",
+    ] {
+        assert!(
+            matches!(
+                client.get(path).await,
+                Err(Error::Status { status: 403, .. })
+            ),
+            "{path}"
+        );
+    }
+    assert!(matches!(
+        client.get("/missinglist.lua").await,
+        Err(Error::Status { status: 404, .. })
+    ));
+}
+
+#[tokio::test]
 async fn answers_getters_as_recorded() {
     let (_sim, client, description) = start().await;
     let wlan = description.service("WLANConfiguration1").unwrap();

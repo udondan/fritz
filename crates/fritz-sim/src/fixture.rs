@@ -44,7 +44,12 @@ pub(crate) struct Recording {
 /// tr64desc.xml
 /// scpd/<file>.xml
 /// responses/<service>/<action>[@<index>].json
+/// lists/<name>.<xml|json>
 /// ```
+///
+/// A list document `lists/devicehostlist.xml` is served at the path
+/// `/devicehostlist.lua` that an action like `X_AVM-DE_GetHostListPath`
+/// returns.
 #[derive(Debug, Clone)]
 pub struct Fixture {
     pub(crate) description_xml: String,
@@ -53,6 +58,8 @@ pub struct Fixture {
     pub(crate) scpds: HashMap<String, (String, Scpd)>,
     /// The recorded answers by service, like `Hosts1`, and action.
     pub(crate) recordings: HashMap<(String, String), Recording>,
+    /// The list documents by name, like `devicehostlist`.
+    pub(crate) lists: HashMap<String, String>,
 }
 
 impl Fixture {
@@ -100,11 +107,20 @@ impl Fixture {
                 }
             }
         }
+        let mut lists = HashMap::new();
+        let dir = dir.join("lists");
+        if dir.is_dir() {
+            for (name, path) in entries(&dir)? {
+                let name = name.split_once('.').map_or(name.as_str(), |(stem, _)| stem);
+                lists.insert(name.to_owned(), read(&path)?);
+            }
+        }
         Ok(Self {
             description_xml,
             description,
             scpds,
             recordings,
+            lists,
         })
     }
 

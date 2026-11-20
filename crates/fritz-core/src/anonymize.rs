@@ -223,11 +223,16 @@ fn is_description(file: &Path) -> bool {
 }
 
 /// The directory of the fixture or capture a file belongs to: the one
-/// above its `scpd/` or `responses/` directory, else its own directory.
+/// above its `scpd/`, `responses/` or `lists/` directory, else its own
+/// directory.
 fn fixture_root(file: &Path) -> &Path {
     file.ancestors()
         .skip(1)
-        .find(|dir| dir.ends_with("scpd") || dir.ends_with("responses"))
+        .find(|dir| {
+            ["scpd", "responses", "lists"]
+                .iter()
+                .any(|d| dir.ends_with(d))
+        })
         .unwrap_or(file)
         .parent()
         .unwrap_or(file)

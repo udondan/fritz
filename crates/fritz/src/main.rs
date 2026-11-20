@@ -70,12 +70,14 @@ enum Command {
     /// The model, firmware, uptime, internet connection and the rights of
     /// the user.
     Overview,
-    /// The hosts the device knows, one call per host.
+    /// The hosts the device knows.
     Hosts {
         /// Only the hosts that are connected now.
         #[arg(long)]
         active: bool,
     },
+    /// The mesh: its nodes and the links between all devices.
+    Mesh,
     /// The wireless networks.
     Wlan,
     /// The internet connection and, for DSL, the line.
@@ -247,6 +249,7 @@ async fn main() -> anyhow::Result<()> {
     match cli.command {
         Command::Overview => status::overview(&load()?, format, out).await,
         Command::Hosts { active } => status::hosts(&load()?, active, format, out).await,
+        Command::Mesh => status::mesh(&load()?, format, out).await,
         Command::Wlan => status::wlan(&load()?, format, out).await,
         Command::Internet => status::internet(&load()?, format, out).await,
         Command::Config(ConfigCommand::Init) => settings::init(&mut load()?, out),

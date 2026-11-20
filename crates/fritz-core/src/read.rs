@@ -7,6 +7,7 @@ use std::str::FromStr;
 use tr064::{Client, DeviceDescription, Scpd};
 
 use crate::generic::{self, Error};
+use crate::redact;
 
 /// Reads a device through a client with credentials.
 #[derive(Debug)]
@@ -44,6 +45,53 @@ impl Reader {
         name: &str,
         arguments: &[(&str, &str)],
     ) -> Result<Values, Error> {
+        let output = self.output(reference, name, arguments).await?;
+        Ok(Values(
+            output
+                .into_iter()
+                .map(|(name, value)| {
+                    let value = redact::value(&name, &value);
+                    (name, value)
+                })
+                .collect(),
+        ))
+    }
+
+    /// Fetches a document whose path an action without inputs returns, like
+    /// the host list at the path `X_AVM-DE_GetHostListPath` returns in
+    /// `NewX_AVM-DE_HostListPath`. The path holds a session ID, which never
+    /// leaves this function. `None` if the device has no such action, or
+    /// answers it with a fault or without a path, like
+    /// [`try_read`](Self::try_read).
+    ///
+    /// # Errors
+    ///
+    /// The other errors of the call, and the errors of fetching the
+    /// document.
+    pub async fn document(
+        &mut self,
+        reference: &str,
+        name: &str,
+        output: &str,
+    ) -> Result<Option<String>, Error> {
+        let values = match self.output(reference, name, &[]).await {
+            Ok(values) => values,
+            Err(error) if is_missing(&error) => return Ok(None),
+            Err(error) => return Err(error),
+        };
+        let Some((_, path)) = values.iter().find(|(n, v)| n == output && !v.is_empty()) else {
+            return Ok(None);
+        };
+        Ok(Some(self.client.get(path).await.map_err(redact::error)?))
+    }
+
+    /// Calls an action that only reads, and returns its output as it is.
+    async fn output(
+        &mut self,
+        reference: &str,
+        name: &str,
+        arguments: &[(&str, &str)],
+    ) -> Result<Vec<(String, String)>, Error> {
         let service = self.description.service(reference)?.clone();
         if !self.scpds.contains_key(&service.service_id) {
             let scpd = self.client.scpd(&service).await?;
@@ -55,8 +103,7 @@ impl Reader {
             .iter()
             .map(|(n, v)| ((*n).to_owned(), (*v).to_owned()))
             .collect();
-        let output = generic::call(&self.client, &service, action, &arguments).await?;
-        Ok(Values(output))
+        generic::send(&self.client, &service, action, &arguments).await
     }
 
     /// Like [`read`](Self::read), but `None` if the device has no such

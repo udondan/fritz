@@ -1,5 +1,5 @@
-//! `fritz overview`, `hosts`, `wlan` and `internet`: the state of the
-//! device as text or JSON.
+//! `fritz overview`, `hosts`, `mesh`, `wlan` and `internet`: the state of
+//! the device as text or JSON.
 //!
 //! Values from the device are untrusted: control characters in them are
 //! replaced in text output, so a host name cannot steer the terminal.
@@ -7,6 +7,7 @@
 use std::io::Write;
 
 use anyhow::Context as _;
+use fritz_core::lists::Mesh;
 use fritz_core::read::Reader;
 use fritz_core::status::{self, Connection, Host, Hosts, Internet, Overview, Wlan};
 use serde::Serialize;
@@ -142,14 +143,16 @@ fn internet_pairs(internet: &Internet) -> Vec<(&'static str, Option<String>)> {
 
 /// Rates in kbit/s, like `↓ 100 Mbit/s ↑ 40 Mbit/s`.
 fn rates(down: Option<u64>, up: Option<u64>) -> Option<String> {
-    let rate = |kbits: u64| {
-        if kbits >= 1000 {
-            format!("{:.1} Mbit/s", kbits_to_mbits(kbits))
-        } else {
-            format!("{kbits} kbit/s")
-        }
-    };
     both(down.map(rate), up.map(rate))
+}
+
+/// A rate in kbit/s, like `100.0 Mbit/s` or `800 kbit/s`.
+fn rate(kbits: u64) -> String {
+    if kbits >= 1000 {
+        format!("{:.1} Mbit/s", kbits_to_mbits(kbits))
+    } else {
+        format!("{kbits} kbit/s")
+    }
 }
 
 #[expect(clippy::cast_precision_loss, reason = "rates are far below 2^52")]
@@ -217,6 +220,48 @@ fn host_table(hosts: &Hosts, out: &mut impl Write) -> anyhow::Result<()> {
         ]
     });
     table(&["NAME", "IP", "MAC", "ACTIVE", "INTERFACE"], rows, out)
+}
+
+/// Prints the mesh: its nodes, and the links between all nodes.
+pub(crate) async fn mesh(
+    context: &Context,
+    format: Format,
+    out: &mut impl Write,
+) -> anyhow::Result<()> {
+    let mut reader = reader(context).await?;
+    let mesh = status::mesh(&mut reader)
+        .await
+        .context("cannot read the mesh")?
+        .context("the device has no mesh list, or the user may not read it")?;
+    match format {
+        Format::Json => json(&mesh, out),
+        Format::Text => mesh_tables(&mesh, out),
+    }
+}
+
+/// The nodes of the mesh, then the links. The rates go down from `FROM` to
+/// `TO`, and up the other way.
+fn mesh_tables(mesh: &Mesh, out: &mut impl Write) -> anyhow::Result<()> {
+    let text = |value: &Option<String>| value.clone().unwrap_or_default();
+    let nodes = mesh
+        .nodes
+        .iter()
+        .filter(|n| n.meshed)
+        .map(|n| vec![text(&n.name), text(&n.role), text(&n.model), text(&n.mac)]);
+    table(&["NODE", "ROLE", "MODEL", "MAC"], nodes, out)?;
+    writeln!(out)?;
+    let links = mesh.links.iter().map(|l| {
+        vec![
+            l.from.clone(),
+            l.to.clone(),
+            text(&l.kind),
+            text(&l.interface),
+            text(&l.state),
+            rates(l.rate_tx, l.rate_rx).unwrap_or_default(),
+        ]
+    });
+    let headers = ["FROM", "TO", "TYPE", "INTERFACE", "STATE", "RATE"];
+    table(&headers, links, out)
 }
 
 /// Prints the wireless networks.
@@ -328,6 +373,7 @@ fn yes_no(yes: bool) -> String {
 
 #[cfg(test)]
 mod tests {
+    use fritz_core::lists::{Link, Node};
     use fritz_core::status::{Dsl, Right};
 
     use super::*;
@@ -468,6 +514,36 @@ mod tests {
             ..hosts
         };
         assert_eq!(shortfall(&fewer), "the device reported 3 hosts, read 2\n");
+        let mesh = Mesh {
+            nodes: vec![
+                Node {
+                    name: Some("box".to_owned()),
+                    role: Some("master".to_owned()),
+                    meshed: true,
+                    ..Node::default()
+                },
+                Node {
+                    name: Some("host".to_owned()),
+                    ..Node::default()
+                },
+            ],
+            links: vec![Link {
+                from: "box".to_owned(),
+                to: "host".to_owned(),
+                rate_rx: Some(800),
+                rate_tx: Some(2000),
+                ..Link::default()
+            }],
+        };
+        let output = text(|out| mesh_tables(&mesh, out));
+        assert_eq!(
+            output,
+            "NODE  ROLE    MODEL  MAC\n\
+             box   master\n\
+             \n\
+             FROM  TO    TYPE  INTERFACE  STATE  RATE\n\
+             box   host                          ↓ 2.0 Mbit/s  ↑ 800 kbit/s\n"
+        );
         let wlans = [Wlan {
             service: "WLANConfiguration1".to_owned(),
             channel: Some(6),

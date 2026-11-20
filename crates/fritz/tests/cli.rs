@@ -7,6 +7,7 @@ use std::process::{Command, Output, Stdio};
 use axum::Router;
 use axum::http::StatusCode;
 use axum::routing::{get, post};
+use fritz_sim::Injection;
 
 const DESCRIPTION: &str = include_str!("../../fritz-core/tests/data/tr64desc.xml");
 const DEVICE_INFO: &str = include_str!("../../fritz-core/tests/data/deviceinfoSCPD.xml");
@@ -822,12 +823,23 @@ async fn prints_the_state_as_json() {
     assert_eq!(wlan.as_array().unwrap().len(), 3);
 
     let output = run(&sim, &["hosts"], password).await;
-    assert_eq!(json(&output)["hosts"].as_array().unwrap().len(), 50);
-    assert!(stderr(&output).contains("the device reported 161 hosts, read 50"));
+    let hosts = json(&output);
+    assert_eq!(hosts["hosts"].as_array().unwrap().len(), 50);
+    assert_eq!(hosts["hosts"][1]["speed"], 866);
+    assert_eq!(stderr(&output), "");
     let active = json(&run(&sim, &["hosts", "--active"], password).await);
     let active = active["hosts"].as_array().unwrap();
     assert!(!active.is_empty() && active.len() < 50, "{active:?}");
     assert!(active.iter().all(|h| h["active"] == true));
+    let mesh = json(&run(&sim, &["mesh"], password).await);
+    assert_eq!(mesh["nodes"][0]["name"], "device-50");
+    assert_eq!(mesh["links"].as_array().unwrap().len(), 3);
+
+    // Without the host list, the hosts are read one by one.
+    sim.inject(Injection::fault("Hosts1", "X_AVM-DE_GetHostListPath", 606));
+    let output = run(&sim, &["hosts"], password).await;
+    assert_eq!(json(&output)["hosts"].as_array().unwrap().len(), 50);
+    assert!(stderr(&output).contains("the device reported 161 hosts, read 50"));
 }
 
 #[tokio::test(flavor = "multi_thread")]
@@ -865,6 +877,10 @@ async fn prints_the_state_as_text() {
     let hosts = text("hosts").await;
     assert!(hosts.starts_with("NAME "), "{hosts}");
     assert!(hosts.contains("device-1 "), "{hosts}");
+    let mesh = text("mesh").await;
+    assert!(mesh.starts_with("NODE "), "{mesh}");
+    assert!(mesh.contains("\nFROM "), "{mesh}");
+    assert!(mesh.contains("device-50  device-51"), "{mesh}");
 }
 
 #[tokio::test(flavor = "multi_thread")]
@@ -876,12 +892,16 @@ async fn reports_failed_reads() {
         ("internet", "cannot read the internet connection"),
         ("wlan", "cannot read the wireless networks"),
         ("hosts", "cannot read the hosts"),
+        ("mesh", "cannot read the mesh"),
     ] {
         let error = failure(&run(&sim, &[command], Some("wrong")).await);
         assert!(error.contains(message), "{message} in {error}");
     }
     let error = failure(&run(&sim, &["overview"], None).await);
     assert!(error.contains("no password for"), "{error}");
+    sim.inject(Injection::fault("Hosts1", "X_AVM-DE_GetMeshListPath", 606));
+    let error = failure(&run(&sim, &["mesh"], Some(fritz_sim::PASSWORD)).await);
+    assert!(error.contains("the device has no mesh list"), "{error}");
     let url = unreachable_url("http");
     let output = fritz_with(
         &["--host", &url, "--user", "agent", "overview"],

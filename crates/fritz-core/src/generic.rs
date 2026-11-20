@@ -21,6 +21,11 @@ pub enum Error {
     UnknownArgument { action: String, argument: String },
     #[error("{action} needs the input {argument}")]
     MissingArgument { action: String, argument: String },
+    #[error("the {document} of the device is not valid: {reason}")]
+    InvalidDocument {
+        document: &'static str,
+        reason: String,
+    },
 }
 
 /// Finds a service by any reference [`Service::matches`] accepts, and reads
@@ -102,17 +107,33 @@ pub async fn call(
     action: &Action,
     arguments: &[(String, String)],
 ) -> Result<Vec<(String, String)>, Error> {
-    check(service, action, arguments)?;
-    let arguments: Vec<(&str, &str)> = arguments
-        .iter()
-        .map(|(n, v)| (n.as_str(), v.as_str()))
-        .collect();
-    let out = client.call(service, &action.name, &arguments).await?;
+    let out = send(client, service, action, arguments).await?;
     Ok(out
         .into_iter()
         .map(|(name, value)| {
             let value = redact::value(&name, &value);
             (name, value)
         })
+        .collect())
+}
+
+/// Calls an action after [checking](check) it, and returns its output
+/// arguments as they are. Only for values that never leave the crate, like
+/// the session IDs in the paths of list documents.
+pub(crate) async fn send(
+    client: &Client,
+    service: &Service,
+    action: &Action,
+    arguments: &[(String, String)],
+) -> Result<Vec<(String, String)>, Error> {
+    check(service, action, arguments)?;
+    let arguments: Vec<(&str, &str)> = arguments
+        .iter()
+        .map(|(n, v)| (n.as_str(), v.as_str()))
+        .collect();
+    Ok(client
+        .call(service, &action.name, &arguments)
+        .await?
+        .into_iter()
         .collect())
 }
