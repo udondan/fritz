@@ -187,6 +187,17 @@ async fn lists_describes_and_calls_actions() {
     )
     .await;
     assert_eq!(info["NewModelName"], "FRITZ!Box 7690", "{info}");
+    let host = success(
+        &client,
+        "fritz_call_action",
+        json!({
+            "service": "Hosts1",
+            "action": "GetGenericHostEntry",
+            "arguments": {"NewIndex": "0"},
+        }),
+    )
+    .await;
+    assert!(host["NewMACAddress"].is_string(), "{host}");
 
     let error = failure(
         &client,
