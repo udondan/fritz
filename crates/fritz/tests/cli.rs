@@ -164,6 +164,18 @@ fn pins_the_certificate_for_https() {
     );
     let output = fritz(&["capture", "--plan", "--url", &url]);
     assert!(stderr(&output).contains("pin"), "{}", stderr(&output));
+
+    // A capture over https needs no warning.
+    let dir = tempfile::tempdir().unwrap();
+    let out = dir.path().join("raw");
+    let mut args = capture_args(&url, &out);
+    args.extend(["--fingerprint".to_owned(), FINGERPRINT.to_owned()]);
+    let args: Vec<&str> = args.iter().map(String::as_str).collect();
+    let output = fritz_with(&args, &[("FRITZ_PASSWORD", "secret")]);
+    let stderr = stderr(&output);
+    assert!(stderr.contains("cannot read the descriptions"), "{stderr}");
+    assert!(!stderr.contains("warning"), "{stderr}");
+    assert!(!out.exists());
 }
 
 #[test]
