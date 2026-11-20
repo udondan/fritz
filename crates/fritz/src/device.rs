@@ -131,7 +131,7 @@ fn telephony_tables(telephony: &Telephony, out: &mut impl Write) -> anyhow::Resu
                     text(&h.name),
                     text(&h.model),
                     yes_no(h.active),
-                    h.update_available.map(yes_no).unwrap_or_default(),
+                    h.update_available.map_or_else(String::new, yes_no),
                 ]
             })
             .collect(),

@@ -181,8 +181,7 @@ async fn handsets(reader: &mut Reader) -> Result<Vec<Handset>, Error> {
             MAX_HANDSETS,
         )
         .await?
-        .map(|(_, entries)| entries)
-        .unwrap_or_default();
+        .map_or_else(Vec::new, |(_, entries)| entries);
     Ok(entries
         .iter()
         .map(|entry| Handset {
