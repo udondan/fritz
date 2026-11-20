@@ -219,6 +219,43 @@ async fn lists_describes_and_calls_actions() {
 }
 
 #[tokio::test(flavor = "multi_thread")]
+async fn reads_the_descriptions_once() {
+    let sim = sim().await;
+    let client = connect(&sim).await;
+    let fetched = |name: &str| {
+        sim.requests()
+            .iter()
+            .filter(|r| r.method == "GET" && r.path.contains(name))
+            .count()
+    };
+
+    success(&client, "fritz_overview", json!({})).await;
+    let scpds = fetched("SCPD");
+    assert!(scpds > 0);
+    success(&client, "fritz_overview", json!({})).await;
+    success(&client, "fritz_list_services", json!({})).await;
+    success(
+        &client,
+        "fritz_describe_action",
+        json!({"service": "DeviceInfo1", "action": "GetInfo"}),
+    )
+    .await;
+    assert_eq!(fetched("tr64desc"), 1);
+    assert_eq!(fetched("SCPD"), scpds);
+
+    // After an error, the next tool starts over.
+    failure(
+        &client,
+        "fritz_call_action",
+        json!({"service": "DeviceConfig1", "action": "Reboot"}),
+    )
+    .await;
+    success(&client, "fritz_overview", json!({})).await;
+    assert_eq!(fetched("tr64desc"), 2);
+    client.cancel().await.unwrap();
+}
+
+#[tokio::test(flavor = "multi_thread")]
 async fn reports_faults_with_a_status() {
     let sim = sim().await;
     let client = connect(&sim).await;

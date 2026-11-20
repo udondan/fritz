@@ -4,6 +4,9 @@
 //! can be set by anyone on the network, so the instructions tell the model to
 //! treat them as data. Lists are paginated and long values cut, so a result
 //! stays small.
+//!
+//! The server reads the device description and the service descriptions
+//! once, and again only after a tool failed.
 
 use std::collections::BTreeMap;
 use std::sync::Arc;
@@ -12,6 +15,7 @@ use anyhow::Context as _;
 use fritz_core::capture::short_id;
 use fritz_core::generic;
 use fritz_core::policy;
+use fritz_core::read::Reader;
 use fritz_core::smarthome;
 use fritz_core::status::{self, Host};
 use rmcp::handler::server::router::tool::ToolRouter;
@@ -21,11 +25,11 @@ use rmcp::schemars::{self, JsonSchema};
 use rmcp::{ServerHandler, ServiceExt as _, tool, tool_handler, tool_router};
 use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
+use tokio::sync::{MappedMutexGuard, Mutex, MutexGuard};
 use tr064::Direction;
 
 use crate::context::Context;
-use crate::status::reader;
-use crate::tr64::{anonymous, kind, service};
+use crate::tr64::kind;
 
 /// The hosts in one page, unless the call asks for another number.
 const PAGE: usize = 50;
@@ -56,6 +60,8 @@ pub(crate) async fn serve(context: Context) -> anyhow::Result<()> {
 #[derive(Debug, Clone)]
 pub(crate) struct Server {
     context: Arc<Context>,
+    /// The reader of the device, once a tool needed it.
+    reader: Arc<Mutex<Option<Reader>>>,
     tool_router: ToolRouter<Self>,
 }
 
@@ -120,6 +126,7 @@ impl Server {
     pub(crate) fn new(context: Context) -> Self {
         Self {
             context: Arc::new(context),
+            reader: Arc::default(),
             tool_router: Self::tool_router(),
         }
     }
@@ -129,8 +136,8 @@ impl Server {
         annotations(read_only_hint = true, open_world_hint = false)
     )]
     async fn fritz_overview(&self) -> CallToolResult {
-        respond(async {
-            let mut reader = reader(&self.context).await?;
+        self.respond(async {
+            let mut reader = self.reader().await?;
             Ok(status::overview(&mut reader).await?)
         })
         .await
@@ -141,8 +148,8 @@ impl Server {
         annotations(read_only_hint = true, open_world_hint = false)
     )]
     async fn fritz_internet(&self) -> CallToolResult {
-        respond(async {
-            let mut reader = reader(&self.context).await?;
+        self.respond(async {
+            let mut reader = self.reader().await?;
             Ok(status::internet(&mut reader).await?)
         })
         .await
@@ -153,8 +160,8 @@ impl Server {
         annotations(read_only_hint = true, open_world_hint = false)
     )]
     async fn fritz_wlan(&self) -> CallToolResult {
-        respond(async {
-            let mut reader = reader(&self.context).await?;
+        self.respond(async {
+            let mut reader = self.reader().await?;
             Ok(status::wlans(&mut reader).await?)
         })
         .await
@@ -165,8 +172,8 @@ impl Server {
         annotations(read_only_hint = true, open_world_hint = false)
     )]
     async fn fritz_hosts(&self, Parameters(query): Parameters<HostsQuery>) -> CallToolResult {
-        respond(async {
-            let mut reader = reader(&self.context).await?;
+        self.respond(async {
+            let mut reader = self.reader().await?;
             let hosts = status::hosts(&mut reader).await?;
             Ok(page(hosts, &query))
         })
@@ -178,8 +185,8 @@ impl Server {
         annotations(read_only_hint = true, open_world_hint = false)
     )]
     async fn fritz_mesh(&self) -> CallToolResult {
-        respond(async {
-            let mut reader = reader(&self.context).await?;
+        self.respond(async {
+            let mut reader = self.reader().await?;
             Ok(status::mesh(&mut reader).await?)
         })
         .await
@@ -190,7 +197,7 @@ impl Server {
         annotations(read_only_hint = true, open_world_hint = false)
     )]
     async fn fritz_smarthome(&self) -> CallToolResult {
-        respond(async {
+        self.respond(async {
             let session = self.context.session().await?;
             let devices = smarthome::devices(&session).await;
             // Ends the session even if reading failed.
@@ -210,10 +217,10 @@ impl Server {
         &self,
         Parameters(query): Parameters<ServiceQuery>,
     ) -> CallToolResult {
-        respond(async {
-            let client = anonymous(&self.context)?;
+        self.respond(async {
+            let mut reader = self.reader().await?;
             if let Some(reference) = query.service {
-                let (service, scpd) = service(&client, &reference).await?;
+                let (service, scpd) = reader.service(&reference).await?;
                 let actions: BTreeMap<&str, &str> = scpd
                     .actions
                     .iter()
@@ -221,11 +228,8 @@ impl Server {
                     .collect();
                 return Ok(json!(actions));
             }
-            let description = client
+            let services: BTreeMap<&str, String> = reader
                 .description()
-                .await
-                .context("cannot read the device description")?;
-            let services: BTreeMap<&str, String> = description
                 .services()
                 .map(|s| (short_id(s), format!("{}:{}", s.name(), s.version())))
                 .collect();
@@ -242,10 +246,10 @@ impl Server {
         &self,
         Parameters(query): Parameters<ActionQuery>,
     ) -> CallToolResult {
-        respond(async {
-            let client = anonymous(&self.context)?;
-            let (service, scpd) = service(&client, &query.service).await?;
-            let action = generic::action(&service, &scpd, &query.action)?;
+        self.respond(async {
+            let mut reader = self.reader().await?;
+            let (service, scpd) = reader.service(&query.service).await?;
+            let action = generic::action(&service, scpd, &query.action)?;
             let mut inputs = BTreeMap::new();
             let mut outputs = BTreeMap::new();
             for argument in &action.arguments {
@@ -272,20 +276,53 @@ impl Server {
         annotations(read_only_hint = true, open_world_hint = false)
     )]
     async fn fritz_call_action(&self, Parameters(query): Parameters<CallQuery>) -> CallToolResult {
-        respond(async {
-            let arguments: Vec<(String, String)> = query.arguments.into_iter().collect();
-            let (service, scpd) = service(&anonymous(&self.context)?, &query.service).await?;
-            let action = generic::action(&service, &scpd, &query.action)?;
-            generic::check(&service, action, &arguments)?;
-            let client = self.context.client()?;
-            let output = generic::call(&client, &service, action, &arguments)
+        self.respond(async {
+            let arguments: Vec<(&str, &str)> = query
+                .arguments
+                .iter()
+                .map(|(n, v)| (n.as_str(), v.as_str()))
+                .collect();
+            let mut reader = self.reader().await?;
+            // Checks the action before anything is sent.
+            let output = reader
+                .read(&query.service, &query.action, &arguments)
                 .await
-                .with_context(|| format!("{} failed", action.name))?;
+                .with_context(|| format!("{} failed", query.action))?;
             let output: BTreeMap<String, String> =
-                output.into_iter().map(|(n, v)| (n, cut(v))).collect();
+                output.0.into_iter().map(|(n, v)| (n, cut(v))).collect();
             Ok(output)
         })
         .await
+    }
+}
+
+impl Server {
+    /// The reader of the device, read when it is first needed.
+    async fn reader(&self) -> anyhow::Result<MappedMutexGuard<'_, Reader>> {
+        let mut reader = self.reader.lock().await;
+        if reader.is_none() {
+            *reader = Some(crate::status::reader(&self.context).await?);
+        }
+        Ok(MutexGuard::map(reader, |r| r.as_mut().expect("set above")))
+    }
+
+    /// The result of a tool as JSON, or its error. After an error, the
+    /// next tool reads the descriptions again, in case the device changed
+    /// or the connection broke.
+    async fn respond<T: Serialize>(
+        &self,
+        result: impl Future<Output = anyhow::Result<T>>,
+    ) -> CallToolResult {
+        let text = result
+            .await
+            .and_then(|value| Ok(serde_json::to_string(&value)?));
+        match text {
+            Ok(text) => CallToolResult::success(vec![ContentBlock::text(text)]),
+            Err(error) => {
+                self.reader.lock().await.take();
+                failure(&error)
+            }
+        }
     }
 }
 
@@ -299,17 +336,6 @@ impl ServerHandler for Server {
         ServerConfig::new(ServerCapabilities::builder().enable_tools().build())
             .with_server_info(Implementation::new("fritz", env!("CARGO_PKG_VERSION")))
             .with_instructions(INSTRUCTIONS)
-    }
-}
-
-/// The result of a tool as JSON, or its error.
-async fn respond<T: Serialize>(result: impl Future<Output = anyhow::Result<T>>) -> CallToolResult {
-    let text = result
-        .await
-        .and_then(|value| Ok(serde_json::to_string(&value)?));
-    match text {
-        Ok(text) => CallToolResult::success(vec![ContentBlock::text(text)]),
-        Err(error) => failure(&error),
     }
 }
 
