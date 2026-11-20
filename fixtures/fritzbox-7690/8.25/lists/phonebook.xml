@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<phonebooks>
+<phonebook owner="0" name="name-5">
+<timestamp>1795197942</timestamp>
+<contact><category>0</category><person><realName>name-6</realName></person><uniqueid>1</uniqueid><telephony nid="2"><number type="home" prio="1" id="0">phone-2</number><number type="mobile" prio="0" id="1">phone-4</number></telephony></contact>
+<contact><category>0</category><person><realName>name-8</realName></person><uniqueid>2</uniqueid><telephony nid="1"><number type="intern" prio="1" id="0">phone-5</number></telephony></contact>
+</phonebook>
+</phonebooks>

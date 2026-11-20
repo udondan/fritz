@@ -5,17 +5,22 @@
 //! treat them as data. Lists are paginated and long values cut, so a result
 //! stays small.
 //!
+//! The calls, the phonebooks and the event log name people and numbers, so
+//! their tools are only offered with `--personal`, and without it
+//! `fritz_call_action` refuses the actions that read them.
+//!
 //! The server reads the device description and the service descriptions
 //! once, and again only after a tool failed.
 
 use std::collections::BTreeMap;
 use std::sync::Arc;
 
-use anyhow::Context as _;
+use anyhow::{Context as _, bail};
 use fritz_core::capabilities;
 use fritz_core::capture::short_id;
 use fritz_core::generic;
-use fritz_core::policy;
+use fritz_core::personal::{self, Contact};
+use fritz_core::policy::{self, Class};
 use fritz_core::ports;
 use fritz_core::read::Reader;
 use fritz_core::settings;
@@ -52,8 +57,8 @@ tools; use fritz_list_services, fritz_describe_action and fritz_call_action for 
 else. Errors with a status like busy or blocked carry retry_after in seconds.";
 
 /// Serves the tools on stdin and stdout until the client disconnects.
-pub(crate) async fn serve(context: Context) -> anyhow::Result<()> {
-    let server = Server::new(context)
+pub(crate) async fn serve(context: Context, personal: bool) -> anyhow::Result<()> {
+    let server = Server::new(context, personal)
         .serve(rmcp::transport::stdio())
         .await
         .context("cannot start the MCP server")?;
@@ -66,6 +71,8 @@ pub(crate) struct Server {
     context: Arc<Context>,
     /// The reader of the device, once a tool needed it.
     reader: Arc<Mutex<Option<Reader>>>,
+    /// Whether the personal lists may be read.
+    personal: bool,
     tool_router: ToolRouter<Self>,
 }
 
@@ -92,6 +99,36 @@ pub(crate) struct SettingsQuery {
     /// `landevice`, `mobiled`, `plc`, `tam`, `user`, `vpn`, `wlan`.
     #[serde(default)]
     modules: Vec<String>,
+}
+
+/// The filter and the number of `fritz_calls`.
+#[derive(Debug, Default, Deserialize, JsonSchema)]
+pub(crate) struct CallsQuery {
+    /// Only calls of this kind: `incoming`, `missed`, `outgoing`, `rejected`.
+    kind: Option<String>,
+    /// Calls to return, the latest first, at most 200. Default 50.
+    limit: Option<usize>,
+}
+
+/// The filter and the page of `fritz_phonebook`.
+#[derive(Debug, Default, Deserialize, JsonSchema)]
+pub(crate) struct PhonebookQuery {
+    /// Part of the name, or digits of the number.
+    search: Option<String>,
+    /// Contacts to skip.
+    #[serde(default)]
+    offset: usize,
+    /// Contacts to return, at most 200. Default 50.
+    limit: Option<usize>,
+}
+
+/// The filter and the number of `fritz_log`.
+#[derive(Debug, Default, Deserialize, JsonSchema)]
+pub(crate) struct LogQuery {
+    /// Part of the message, ignoring case.
+    search: Option<String>,
+    /// Entries to return, the latest first, at most 200. Default 50.
+    limit: Option<usize>,
 }
 
 /// A service, or one of its actions.
@@ -135,13 +172,35 @@ struct HostsPage {
     hosts: Vec<Host>,
 }
 
+/// A page of contacts.
+#[derive(Debug, Serialize)]
+struct ContactsPage {
+    /// The contacts that match the search.
+    total: usize,
+    offset: usize,
+    contacts: Vec<BookContact>,
+}
+
+/// A contact and its phonebook.
+#[derive(Debug, Serialize)]
+struct BookContact {
+    phonebook: Option<String>,
+    #[serde(flatten)]
+    contact: Contact,
+}
+
 #[tool_router]
 impl Server {
-    pub(crate) fn new(context: Context) -> Self {
+    pub(crate) fn new(context: Context, personal: bool) -> Self {
+        let mut tool_router = Self::tool_router();
+        if personal {
+            tool_router.merge(Self::personal_router());
+        }
         Self {
             context: Arc::new(context),
             reader: Arc::default(),
-            tool_router: Self::tool_router(),
+            personal,
+            tool_router,
         }
     }
 
@@ -350,14 +409,124 @@ impl Server {
                 .map(|(n, v)| (n.as_str(), v.as_str()))
                 .collect();
             let mut reader = self.reader().await?;
+            if !self.personal {
+                let (service, scpd) = reader.service(&query.service).await?;
+                let action = generic::action(&service, scpd, &query.action)?;
+                if policy::classify(&service, action) == Class::Personal {
+                    bail!(
+                        "{} reads personal data, which needs `fritz mcp --personal`",
+                        query.action
+                    );
+                }
+            }
             // Checks the action before anything is sent.
             let output = reader
                 .read(&query.service, &query.action, &arguments)
                 .await
                 .with_context(|| format!("{} failed", query.action))?;
-            let output: BTreeMap<String, String> =
-                output.0.into_iter().map(|(n, v)| (n, cut(v))).collect();
+            let output: BTreeMap<String, String> = output
+                .0
+                .into_iter()
+                .map(|(n, v)| {
+                    if !self.personal && policy::is_personal_output(&n) {
+                        (n, PERSONAL_HIDDEN.to_owned())
+                    } else {
+                        (n, cut(v))
+                    }
+                })
+                .collect();
             Ok(output)
+        })
+        .await
+    }
+}
+
+/// The tools that read the personal lists, offered with `--personal`.
+#[tool_router(router = personal_router)]
+impl Server {
+    #[tool(
+        description = "Latest calls: kind, date, minutes, number, name, own number, device. Personal data.",
+        annotations(read_only_hint = true, open_world_hint = false)
+    )]
+    async fn fritz_calls(&self, Parameters(query): Parameters<CallsQuery>) -> CallToolResult {
+        self.respond(async {
+            let limit = query.limit.unwrap_or(PAGE).min(MAX_PAGE);
+            // A filter needs more calls than it returns.
+            let read = if query.kind.is_some() {
+                MAX_PAGE
+            } else {
+                limit
+            };
+            let mut reader = self.reader().await?;
+            let calls = personal::calls(&mut reader, u32::try_from(read)?).await?;
+            let calls: Vec<_> = calls
+                .into_iter()
+                .filter(|c| query.kind.as_deref().is_none_or(|k| c.kind == k))
+                .take(limit)
+                .collect();
+            Ok(calls)
+        })
+        .await
+    }
+
+    #[tool(
+        description = "Contacts of the phonebooks with their numbers, by name or number. Personal data. Paginated.",
+        annotations(read_only_hint = true, open_world_hint = false)
+    )]
+    async fn fritz_phonebook(
+        &self,
+        Parameters(query): Parameters<PhonebookQuery>,
+    ) -> CallToolResult {
+        self.respond(async {
+            let mut reader = self.reader().await?;
+            let mut phonebooks = personal::phonebooks(&mut reader).await?;
+            if let Some(search) = &query.search {
+                phonebooks = personal::search(phonebooks, search);
+            }
+            let contacts: Vec<BookContact> = phonebooks
+                .into_iter()
+                .flat_map(|book| {
+                    let name = book.name;
+                    book.contacts.into_iter().map(move |contact| BookContact {
+                        phonebook: name.clone(),
+                        contact,
+                    })
+                })
+                .collect();
+            let limit = query.limit.unwrap_or(PAGE).min(MAX_PAGE);
+            Ok(ContactsPage {
+                total: contacts.len(),
+                offset: query.offset,
+                contacts: contacts
+                    .into_iter()
+                    .skip(query.offset)
+                    .take(limit)
+                    .collect(),
+            })
+        })
+        .await
+    }
+
+    #[tool(
+        description = "Latest entries of the event log: connections, logins, WLAN, telephony. Personal data.",
+        annotations(read_only_hint = true, open_world_hint = false)
+    )]
+    async fn fritz_log(&self, Parameters(query): Parameters<LogQuery>) -> CallToolResult {
+        self.respond(async {
+            let limit = query.limit.unwrap_or(PAGE).min(MAX_PAGE);
+            let search = query.search.as_deref().map(str::to_lowercase);
+            let mut reader = self.reader().await?;
+            let log = personal::log(&mut reader, usize::MAX).await?;
+            let entries: Vec<_> = log
+                .into_iter()
+                .filter(|e| {
+                    search
+                        .as_deref()
+                        .is_none_or(|s| e.message.to_lowercase().contains(s))
+                })
+                .take(limit)
+                .collect();
+            Ok(entries)
         })
         .await
     }
@@ -452,6 +621,10 @@ fn page(hosts: status::Hosts, query: &HostsQuery) -> HostsPage {
             .collect(),
     }
 }
+
+/// What replaces personal data in the output of an action without
+/// `--personal`.
+const PERSONAL_HIDDEN: &str = "(personal, needs `fritz mcp --personal`)";
 
 /// A value of at most [`MAX_VALUE`] characters.
 fn cut(value: String) -> String {

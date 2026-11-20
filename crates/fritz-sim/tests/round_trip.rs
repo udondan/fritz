@@ -9,6 +9,16 @@ use fritz_sim::{Fixture, Sim};
 
 const FIXTURES: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/../../fixtures");
 
+/// The files of personal lists, left out of a capture by default.
+const PERSONAL: [&str; 6] = [
+    "lists/calllist.xml",
+    "lists/phonebook.xml",
+    "responses/DeviceInfo1/GetDeviceLog.json",
+    "responses/X_AVM-DE_OnTel1/GetCallList.json",
+    "responses/X_AVM-DE_OnTel1/GetPhonebook@",
+    "responses/X_AVM-DE_OnTel1/GetPhonebookList.json",
+];
+
 /// The fixture directories, like `fritzbox-7690/8.25`.
 fn fixtures() -> Vec<PathBuf> {
     let mut dirs = Vec::new();
@@ -54,7 +64,11 @@ async fn capturing_the_simulator_gives_the_fixture() {
         capture::write(&plan, &capture, out.path()).unwrap();
         // The capture reads TR-064 only, not the documents of the REST API.
         let mut expected = files(&dir);
-        expected.retain(|(name, _)| !name.starts_with("api"));
+        // Nor, by default, personal lists, whose fixtures are written by hand.
+        expected.retain(|(name, _)| {
+            let name = name.to_string_lossy();
+            !name.starts_with("api") && !PERSONAL.iter().any(|p| name.starts_with(p))
+        });
         let actual = files(out.path());
         let names = |files: &[(PathBuf, String)]| -> Vec<PathBuf> {
             files.iter().map(|(name, _)| name.clone()).collect()

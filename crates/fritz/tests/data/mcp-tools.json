@@ -34,6 +34,36 @@
     }
   },
   {
+    "name": "fritz_calls",
+    "description": "Latest calls: kind, date, minutes, number, name, own number, device. Personal data.",
+    "inputSchema": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "kind": {
+          "description": "Only calls of this kind: `incoming`, `missed`, `outgoing`, `rejected`.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "limit": {
+          "description": "Calls to return, the latest first, at most 200. Default 50.",
+          "format": "uint",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        }
+      },
+      "type": "object"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "openWorldHint": false
+    }
+  },
+  {
     "name": "fritz_capabilities",
     "description": "Features the device offers, the rights of the user, two-factor confirmation.",
     "inputSchema": {
@@ -147,6 +177,36 @@
     }
   },
   {
+    "name": "fritz_log",
+    "description": "Latest entries of the event log: connections, logins, WLAN, telephony. Personal data.",
+    "inputSchema": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "limit": {
+          "description": "Entries to return, the latest first, at most 200. Default 50.",
+          "format": "uint",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "search": {
+          "description": "Part of the message, ignoring case.",
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "type": "object"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "openWorldHint": false
+    }
+  },
+  {
     "name": "fritz_mesh",
     "description": "Mesh topology: nodes and the links between them.",
     "inputSchema": {
@@ -163,6 +223,43 @@
     "description": "Model, firmware, uptime, update, internet connection, rights of the user.",
     "inputSchema": {
       "properties": {},
+      "type": "object"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "fritz_phonebook",
+    "description": "Contacts of the phonebooks with their numbers, by name or number. Personal data. Paginated.",
+    "inputSchema": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "limit": {
+          "description": "Contacts to return, at most 200. Default 50.",
+          "format": "uint",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "offset": {
+          "default": 0,
+          "description": "Contacts to skip.",
+          "format": "uint",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "search": {
+          "description": "Part of the name, or digits of the number.",
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
       "type": "object"
     },
     "annotations": {

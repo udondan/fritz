@@ -6,6 +6,7 @@ mod auth;
 mod context;
 mod device;
 mod mcp;
+mod personal;
 mod settings;
 mod status;
 mod system;
@@ -101,6 +102,25 @@ enum Command {
         /// ones.
         modules: Vec<String>,
     },
+    /// The latest calls, the latest first. Personal data.
+    Calls {
+        /// The most calls to show.
+        #[arg(long, default_value_t = 50)]
+        limit: u32,
+    },
+    /// The contacts of the phonebooks. Personal data.
+    Phonebook {
+        /// Only the contacts whose name contains this, ignoring case, or
+        /// whose number contains its digits.
+        search: Option<String>,
+    },
+    /// The latest entries of the event log, the latest first. Personal
+    /// data.
+    Log {
+        /// The most entries to show.
+        #[arg(long, default_value_t = 50)]
+        limit: usize,
+    },
     /// Manage the profiles in the configuration file.
     #[command(subcommand)]
     Config(ConfigCommand),
@@ -115,7 +135,12 @@ enum Command {
     Tr64(Tr64Command),
     /// Serve the state of the device over MCP on stdin and stdout. Only
     /// reads.
-    Mcp,
+    Mcp {
+        /// Also offer the calls, the phonebooks and the event log, which
+        /// name people and numbers.
+        #[arg(long, env = "FRITZ_MCP_PERSONAL")]
+        personal: bool,
+    },
     /// Record the answers of read-only actions as test fixtures.
     Capture(CaptureArgs),
     /// Turn raw captures into fixtures, and check fixtures for personal data.
@@ -267,13 +292,13 @@ async fn main() -> anyhow::Result<()> {
             system::keychains(),
         )
     };
-    if matches!(cli.command, Command::Mcp) {
+    if let Command::Mcp { personal } = cli.command {
         // Before stdout is locked: the transport writes to it.
-        return mcp::serve(load()?).await;
+        return mcp::serve(load()?, personal).await;
     }
     let out = &mut io::stdout().lock();
     match cli.command {
-        Command::Mcp => unreachable!("served above"),
+        Command::Mcp { .. } => unreachable!("served above"),
         Command::Overview => status::overview(&load()?, format, out).await,
         Command::Hosts { active } => status::hosts(&load()?, active, format, out).await,
         Command::Mesh => status::mesh(&load()?, format, out).await,
@@ -284,6 +309,11 @@ async fn main() -> anyhow::Result<()> {
         Command::Telephony => device::telephony(&load()?, format, out).await,
         Command::Capabilities => device::capabilities(&load()?, format, out).await,
         Command::Settings { modules } => device::settings(&load()?, &modules, format, out).await,
+        Command::Calls { limit } => personal::calls(&load()?, limit, format, out).await,
+        Command::Phonebook { search } => {
+            personal::phonebook(&load()?, search.as_deref(), format, out).await
+        }
+        Command::Log { limit } => personal::log(&load()?, limit, format, out).await,
         Command::Config(ConfigCommand::Init) => settings::init(&mut load()?, out),
         Command::Config(ConfigCommand::Show) => settings::show(&load()?, out),
         Command::Tls(TlsCommand::Fingerprint) => tls::fingerprint(&load()?, out).await,

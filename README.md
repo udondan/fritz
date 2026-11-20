@@ -46,6 +46,17 @@ claude mcp add fritz -- fritz --host 192.168.178.1 --user agent mcp
 | `fritz_describe_action` | The arguments of an action and their types                  |
 | `fritz_call_action`     | Calls an action that only reads, with secrets hidden        |
 
+Calls, contacts and the event log are personal, so `fritz mcp` only serves
+them with `--personal` (or `FRITZ_MCP_PERSONAL=true`). Without it,
+`fritz_call_action` refuses the actions behind them and hides the event log
+that `DeviceInfo:GetInfo` returns as well. The option adds three tools:
+
+| Tool              | Returns                                                     |
+| ----------------- | ----------------------------------------------------------- |
+| `fritz_calls`     | Latest calls, filtered by `kind`                            |
+| `fritz_phonebook` | Contacts of all phonebooks, filtered by `search`, paginated |
+| `fritz_log`       | Event log, filtered by `search`                             |
+
 Errors from the device come back as JSON with a `status` (`denied`,
 `confirmation_required`, `blocked` or `busy`) and, where it helps,
 `retry_after` in seconds.
