@@ -96,6 +96,9 @@ FRITZ_ALLOW_WRITE=1 fritz change plan WLANConfiguration3 SetEnable NewEnable=0
 FRITZ_ALLOW_WRITE=1 fritz change apply WLANConfiguration3 SetEnable NewEnable=0 --token <token>
 ```
 
+With `FRITZ_ALLOW_WRITE=1`, `fritz mcp` of such a build also offers
+`fritz_plan_change` and `fritz_apply_change`, which work the same way.
+
 Changes are only made to devices on the allow list, and never to those on the
 deny list. See [SECURITY.md](SECURITY.md#changes) for all checks.
 
