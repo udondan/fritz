@@ -5,3 +5,6 @@
 
 pub mod anonymize;
 pub mod capture;
+pub mod config;
+pub mod connection;
+pub mod secrets;

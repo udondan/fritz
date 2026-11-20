@@ -238,3 +238,38 @@ async fn logs_the_requests() {
     assert_eq!(last.action.as_deref(), Some("SetEnable"));
     assert_eq!(last.arguments, [("NewEnable".to_owned(), "1".to_owned())]);
 }
+
+#[tokio::test]
+async fn serves_https_with_a_pinned_certificate() {
+    let options = fritz_sim::Options {
+        https: true,
+        ..fritz_sim::Options::default()
+    };
+    let sim = Sim::start_with(Fixture::load(FIXTURE).unwrap(), options)
+        .await
+        .unwrap();
+    assert_eq!(sim.url().scheme(), "https");
+    let fingerprint = sim.fingerprint().unwrap();
+    assert_eq!(
+        tr064::fetch_fingerprint(sim.url(), Duration::from_secs(5))
+            .await
+            .unwrap(),
+        fingerprint
+    );
+
+    // A client with another pin aborts the handshake; the simulator keeps
+    // serving the next one.
+    let other = Client::builder(sim.url().clone())
+        .pin(tr064::Fingerprint::of(b"another certificate"))
+        .build()
+        .unwrap();
+    assert!(matches!(
+        other.description().await,
+        Err(Error::CertificateMismatch { .. })
+    ));
+    let client = sim.client().build().unwrap();
+    let description = client.description().await.unwrap();
+    let info = description.service("DeviceInfo1").unwrap();
+    let out = client.call(info, "GetInfo", &[]).await.unwrap();
+    assert_eq!(out.get("NewModelName"), Some("FRITZ!Box 7690"));
+}

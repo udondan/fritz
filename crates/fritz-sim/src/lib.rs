@@ -47,15 +47,17 @@ use axum::http::header::{AUTHORIZATION, CONTENT_TYPE, WWW_AUTHENTICATE};
 use axum::http::{HeaderMap, Method, StatusCode, Uri};
 use axum::response::{IntoResponse, Response};
 use tokio::task::JoinHandle;
-use tr064::{ClientBuilder, SecretString, Service, Url};
+use tr064::{ClientBuilder, Fingerprint, SecretString, Service, Url};
 
 mod auth;
 mod device;
 mod fixture;
 mod soap;
+mod tls;
 
 use device::{Device, Fault, Hooks, short_id};
 pub use fixture::{Answer, Error, Fixture};
+use tls::TlsListener;
 
 /// The user name the simulator accepts by default.
 pub const USERNAME: &str = "fritz-sim";
@@ -71,16 +73,20 @@ pub struct Options {
     pub address: SocketAddr,
     pub username: String,
     pub password: String,
+    /// Serve HTTPS with a new self-signed certificate, see
+    /// [`Sim::fingerprint`].
+    pub https: bool,
 }
 
 impl Default for Options {
-    /// A free port on the loopback interface, with [`USERNAME`] and
-    /// [`PASSWORD`].
+    /// A free port on the loopback interface, plain HTTP, with [`USERNAME`]
+    /// and [`PASSWORD`].
     fn default() -> Self {
         Self {
             address: SocketAddr::from((Ipv4Addr::LOCALHOST, 0)),
             username: USERNAME.to_owned(),
             password: PASSWORD.to_owned(),
+            https: false,
         }
     }
 }
@@ -135,6 +141,7 @@ pub struct Request {
 #[derive(Debug)]
 pub struct Sim {
     url: Url,
+    fingerprint: Option<Fingerprint>,
     shared: Arc<Shared>,
     server: JoinHandle<io::Result<()>>,
 }
@@ -157,8 +164,10 @@ impl Sim {
     /// The errors of binding the address.
     pub async fn start_with(fixture: Fixture, options: Options) -> io::Result<Self> {
         let listener = tokio::net::TcpListener::bind(options.address).await?;
-        let url =
-            Url::parse(&format!("http://{}", listener.local_addr()?)).map_err(io::Error::other)?;
+        let scheme = if options.https { "https" } else { "http" };
+        let url = Url::parse(&format!("{scheme}://{}", listener.local_addr()?))
+            .map_err(io::Error::other)?;
+        let https = options.https;
         let shared = Arc::new(Shared {
             options,
             inner: Mutex::new(Inner {
@@ -170,9 +179,16 @@ impl Sim {
         let app = Router::new()
             .fallback(handle)
             .with_state(Arc::clone(&shared));
-        let server = tokio::spawn(axum::serve(listener, app).into_future());
+        let (server, fingerprint) = if https {
+            let (listener, fingerprint) = TlsListener::new(listener);
+            let server = tokio::spawn(axum::serve(listener, app).into_future());
+            (server, Some(fingerprint))
+        } else {
+            (tokio::spawn(axum::serve(listener, app).into_future()), None)
+        };
         Ok(Self {
             url,
+            fingerprint,
             shared,
             server,
         })
@@ -183,13 +199,23 @@ impl Sim {
         &self.url
     }
 
-    /// A client builder for the simulator, with its credentials.
+    /// The fingerprint of the certificate, if the simulator serves HTTPS.
+    pub fn fingerprint(&self) -> Option<Fingerprint> {
+        self.fingerprint
+    }
+
+    /// A client builder for the simulator, with its credentials and, for
+    /// HTTPS, its certificate pinned.
     pub fn client(&self) -> ClientBuilder {
         let options = &self.shared.options;
-        tr064::Client::builder(self.url.clone()).credentials(
+        let builder = tr064::Client::builder(self.url.clone()).credentials(
             options.username.clone(),
             SecretString::from(options.password.clone()),
-        )
+        );
+        match self.fingerprint {
+            Some(fingerprint) => builder.pin(fingerprint),
+            None => builder,
+        }
     }
 
     /// Changes how the simulator behaves from the next request on.

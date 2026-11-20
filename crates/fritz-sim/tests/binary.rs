@@ -36,6 +36,33 @@ async fn serves_a_fixture_until_interrupted() {
     assert!(child.wait().unwrap().success());
 }
 
+#[tokio::test]
+async fn serves_https_and_prints_the_fingerprint() {
+    let mut child = Command::new(env!("CARGO_BIN_EXE_fritz-sim"))
+        .args(["--fixture", FIXTURE, "--https"])
+        .stdout(Stdio::piped())
+        .spawn()
+        .unwrap();
+    let mut stdout = BufReader::new(child.stdout.take().unwrap());
+    let (mut url, mut certificate) = (String::new(), String::new());
+    stdout.read_line(&mut url).unwrap();
+    stdout.read_line(&mut certificate).unwrap();
+    let url = url.trim().strip_prefix("listening on ").unwrap();
+    let fingerprint = certificate.trim().strip_prefix("certificate ").unwrap();
+
+    let client = Client::builder(Url::parse(url).unwrap())
+        .pin(fingerprint.parse().unwrap())
+        .build()
+        .unwrap();
+    assert!(client.description().await.is_ok());
+    let interrupted = Command::new("kill")
+        .args(["-INT", &child.id().to_string()])
+        .status()
+        .unwrap();
+    assert!(interrupted.success());
+    assert!(child.wait().unwrap().success());
+}
+
 #[test]
 fn fails_without_a_fixture() {
     let output = Command::new(env!("CARGO_BIN_EXE_fritz-sim"))

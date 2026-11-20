@@ -2,29 +2,109 @@
 //!
 //! Unofficial, not affiliated with FRITZ! GmbH.
 
+mod auth;
+mod context;
+mod settings;
+mod system;
+mod tls;
+
+use std::io;
 use std::path::{Path, PathBuf};
 
 use anyhow::{Context as _, bail};
 use clap::{Args, Parser, Subcommand};
 use fritz_core::anonymize;
 use fritz_core::capture::{self, Options, Plan};
+use fritz_core::connection::Overrides;
+use fritz_core::secrets::ENV_PASSWORD;
 use tr064::{Client, Fingerprint, SecretString, Url};
 
+use crate::context::Context;
+
 /// CLI and MCP server for FRITZ!Box routers (unofficial).
+///
+/// The password comes from the environment variable `FRITZ_PASSWORD`, else
+/// from the keychain (see `fritz auth login`). `FRITZ_NO_KEYCHAIN=1` turns
+/// the keychain off.
 #[derive(Debug, Parser)]
 #[command(name = "fritz", version, about)]
 struct Cli {
+    #[command(flatten)]
+    global: Global,
     #[command(subcommand)]
     command: Command,
 }
 
+/// Where and how to connect, ahead of the profile.
+#[derive(Debug, Args)]
+struct Global {
+    /// The configuration file.
+    #[arg(long, global = true, env = "FRITZ_CONFIG")]
+    config: Option<PathBuf>,
+    /// The profile in the configuration file, else the default one.
+    #[arg(long, global = true, env = "FRITZ_PROFILE")]
+    profile: Option<String>,
+    /// The device: a host name or address, optionally with a port, for HTTPS
+    /// on port 49443, or a full address like `http://192.168.178.1:49000`.
+    /// Defaults to fritz.box.
+    #[arg(long, global = true, env = "FRITZ_HOST")]
+    host: Option<String>,
+    /// The user on the device.
+    #[arg(long, global = true, env = "FRITZ_USERNAME")]
+    user: Option<String>,
+    /// The SHA-256 fingerprint of the certificate to trust, instead of the
+    /// one of the profile.
+    #[arg(long, global = true, env = "FRITZ_TLS_FINGERPRINT")]
+    fingerprint: Option<Fingerprint>,
+}
+
 #[derive(Debug, Subcommand)]
 enum Command {
+    /// Manage the profiles in the configuration file.
+    #[command(subcommand)]
+    Config(ConfigCommand),
+    /// Trust the certificate of the device.
+    #[command(subcommand)]
+    Tls(TlsCommand),
+    /// Manage the password in the keychain.
+    #[command(subcommand)]
+    Auth(AuthCommand),
     /// Record the answers of read-only actions as test fixtures.
     Capture(CaptureArgs),
     /// Turn raw captures into fixtures, and check fixtures for personal data.
     #[command(subcommand)]
     Fixture(FixtureCommand),
+}
+
+#[derive(Debug, Subcommand)]
+enum ConfigCommand {
+    /// Save --host, --user and --fingerprint to the profile, which becomes
+    /// the default if there is none.
+    Init,
+    /// Show the settings in effect, without the password.
+    Show,
+}
+
+#[derive(Debug, Subcommand)]
+enum TlsCommand {
+    /// Print the fingerprint of the certificate the device presents.
+    Fingerprint,
+    /// Trust the certificate the device presents, after confirmation, and
+    /// save it to the profile.
+    Trust,
+    /// Remove the trusted certificate from the profile.
+    Forget,
+}
+
+#[derive(Debug, Subcommand)]
+enum AuthCommand {
+    /// Store the password in the keychain. Reads it from the terminal, or a
+    /// line from the standard input.
+    Login,
+    /// Remove the password from the keychain.
+    Logout,
+    /// Tell where the password comes from.
+    Status,
 }
 
 #[derive(Debug, Subcommand)]
@@ -78,18 +158,6 @@ struct CaptureArgs {
     #[arg(long)]
     plan: bool,
 
-    /// The TR-064 address of the device.
-    #[arg(long, default_value = "http://fritz.box:49000")]
-    url: Url,
-
-    /// The SHA-256 fingerprint of the device certificate, required for https.
-    #[arg(long, env = "FRITZ_TLS_FINGERPRINT")]
-    fingerprint: Option<Fingerprint>,
-
-    /// The user on the device. The password is read from `FRITZ_PASSWORD`.
-    #[arg(long, env = "FRITZ_USERNAME", required_unless_present = "plan")]
-    user: Option<String>,
-
     /// A new directory for the raw capture. It contains personal data, so it
     /// must not be inside a git repository.
     #[arg(long, required_unless_present = "plan")]
@@ -102,8 +170,36 @@ struct CaptureArgs {
 
 #[tokio::main(flavor = "current_thread")]
 async fn main() -> anyhow::Result<()> {
-    match Cli::parse().command {
-        Command::Capture(args) => capture(args).await,
+    let cli = Cli::parse();
+    let global = cli.global;
+    let load = move || {
+        let overrides = Overrides {
+            host: global.host,
+            username: global.user,
+            fingerprint: global.fingerprint,
+        };
+        let password = std::env::var(ENV_PASSWORD).ok().map(SecretString::from);
+        Context::load(
+            global.config,
+            global.profile,
+            overrides,
+            password,
+            system::keychains(),
+        )
+    };
+    let out = &mut io::stdout().lock();
+    match cli.command {
+        Command::Config(ConfigCommand::Init) => settings::init(&mut load()?, out),
+        Command::Config(ConfigCommand::Show) => settings::show(&load()?, out),
+        Command::Tls(TlsCommand::Fingerprint) => tls::fingerprint(&load()?, out).await,
+        Command::Tls(TlsCommand::Trust) => {
+            tls::trust(&mut load()?, &mut io::stdin().lock(), out).await
+        }
+        Command::Tls(TlsCommand::Forget) => tls::forget(&mut load()?, out),
+        Command::Auth(AuthCommand::Login) => auth::login(&load()?, system::read_password, out),
+        Command::Auth(AuthCommand::Logout) => auth::logout(&load()?, out),
+        Command::Auth(AuthCommand::Status) => auth::status(&load()?, out),
+        Command::Capture(args) => capture(&load()?, args).await,
         Command::Fixture(command) => fixture(&command),
     }
 }
@@ -145,30 +241,23 @@ fn report(findings: &[anonymize::Finding]) {
     }
 }
 
-async fn capture(args: CaptureArgs) -> anyhow::Result<()> {
-    let mut builder = Client::builder(args.url.clone());
-    if let Some(fingerprint) = args.fingerprint {
-        builder = builder.pin(fingerprint);
-    }
+async fn capture(context: &Context, args: CaptureArgs) -> anyhow::Result<()> {
+    let target = context.target()?;
+    let url = &target.url;
+    let builder = target.client()?;
     if args.plan {
-        let plan = read_plan(&builder.build()?, &args.url).await?;
+        let plan = read_plan(&builder.build()?, url).await?;
         println!("{plan}");
         return Ok(());
     }
-    let user = args.user.expect("clap requires --user without --plan");
     let out = args.out.expect("clap requires --out without --plan");
     check_outside_git(&out)?;
-    let password = std::env::var("FRITZ_PASSWORD")
-        .with_context(|| format!("set FRITZ_PASSWORD to the password of {user}"))?;
-    if args.url.scheme() == "http" {
-        eprintln!(
-            "warning: the answers travel unencrypted, use the https address with --fingerprint"
-        );
+    let (password, _) = context.password(&target)?;
+    if url.scheme() == "http" {
+        eprintln!("warning: the answers travel unencrypted, use https and run `fritz tls trust`");
     }
-    let client = builder
-        .credentials(user, SecretString::from(password))
-        .build()?;
-    let plan = read_plan(&client, &args.url).await?;
+    let client = builder.credentials(target.username()?, password).build()?;
+    let plan = read_plan(&client, url).await?;
     std::fs::create_dir(&out).with_context(|| format!("cannot create {}", out.display()))?;
     let options = Options {
         include_personal: args.include_personal,

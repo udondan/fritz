@@ -13,10 +13,13 @@ anyhow = "=1.0.102"
 axum = "=0.8.9"
 clap = { version = "=4.6.9", features = ["derive"] }
 md-5 = "=0.11.0"
+rcgen = { version = "=0.14.10", default-features = false, features = ["crypto", "pem", "ring"] }
 roxmltree = "=0.21.2"
+rustls = { version = "=0.23.46", default-features = false, features = ["ring", "std", "tls12"] }
 serde_json = "=1.0.154"
 thiserror = "=2.0.21"
 tokio = { version = "=1.54.1", features = ["macros", "net", "rt-multi-thread", "signal", "time"] }
+tokio-rustls = { version = "=0.26.6", default-features = false, features = ["ring", "tls12"] }
 tr064.workspace = true
 
 [lints]
