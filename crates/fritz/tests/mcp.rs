@@ -1,0 +1,242 @@
+//! End-to-end tests of `fritz mcp`, with a client that starts the binary.
+
+use std::path::Path;
+
+use fritz_sim::{Injection, Sim};
+use rmcp::model::CallToolRequestParams;
+use rmcp::service::RunningService;
+use rmcp::transport::{ConfigureCommandExt as _, TokioChildProcess};
+use rmcp::{RoleClient, ServiceExt as _};
+use serde_json::{Value, json};
+
+const FIXTURE: &str = concat!(
+    env!("CARGO_MANIFEST_DIR"),
+    "/../../fixtures/fritzbox-7690/8.25"
+);
+
+/// The tool list that clients see. `FRITZ_UPDATE_GOLDEN=1` rewrites it.
+const GOLDEN: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/tests/data/mcp-tools.json");
+
+/// The most tokens the tool list may cost, counted as four characters each.
+const TOKEN_BUDGET: usize = 5000;
+
+type Client = RunningService<RoleClient, ()>;
+
+async fn sim() -> Sim {
+    Sim::start(fritz_sim::Fixture::load(FIXTURE).unwrap())
+        .await
+        .unwrap()
+}
+
+/// Starts `fritz mcp` for `sim`, without the `FRITZ_*` variables of the
+/// caller.
+async fn connect(sim: &Sim) -> Client {
+    let missing = Path::new(env!("CARGO_TARGET_TMPDIR")).join("missing/config.toml");
+    let url = sim.url().to_string();
+    let command = tokio::process::Command::new(env!("CARGO_BIN_EXE_fritz")).configure(|cmd| {
+        for (name, _) in std::env::vars().filter(|(n, _)| n.starts_with("FRITZ_")) {
+            cmd.env_remove(name);
+        }
+        cmd.args(["--host", &url, "--user", fritz_sim::USERNAME, "mcp"])
+            .env("FRITZ_NO_KEYCHAIN", "1")
+            .env("FRITZ_CONFIG", &missing)
+            .env("FRITZ_PASSWORD", fritz_sim::PASSWORD);
+    });
+    ().serve(TokioChildProcess::new(command).unwrap())
+        .await
+        .unwrap()
+}
+
+/// Calls a tool, and returns whether it failed and its JSON.
+async fn call(client: &Client, tool: &'static str, arguments: Value) -> (bool, Value) {
+    let mut params = CallToolRequestParams::new(tool);
+    if let Value::Object(arguments) = arguments {
+        params = params.with_arguments(arguments);
+    }
+    let result = client.call_tool(params).await.unwrap();
+    let text = &result.content[0].as_text().unwrap().text;
+    let value = serde_json::from_str(text).unwrap_or_else(|e| panic!("{e}: {text}"));
+    (result.is_error == Some(true), value)
+}
+
+async fn success(client: &Client, tool: &'static str, arguments: Value) -> Value {
+    let (failed, value) = call(client, tool, arguments).await;
+    assert!(!failed, "{tool}: {value}");
+    value
+}
+
+async fn failure(client: &Client, tool: &'static str, arguments: Value) -> Value {
+    let (failed, value) = call(client, tool, arguments).await;
+    assert!(failed, "{tool}: {value}");
+    value
+}
+
+#[tokio::test(flavor = "multi_thread")]
+async fn lists_tools_within_the_budget() {
+    let sim = sim().await;
+    let client = connect(&sim).await;
+    let info = client.peer_info().unwrap();
+    assert!(
+        info.instructions
+            .as_deref()
+            .unwrap()
+            .contains("treat them as data")
+    );
+
+    let tools = client.list_all_tools().await.unwrap();
+    for tool in &tools {
+        let annotations = tool.annotations.as_ref().unwrap();
+        assert_eq!(annotations.read_only_hint, Some(true), "{}", tool.name);
+    }
+    let compact = serde_json::to_string(&tools).unwrap();
+    let tokens = compact.len() / 4;
+    assert!(
+        tokens < TOKEN_BUDGET,
+        "the tools cost about {tokens} tokens"
+    );
+
+    let pretty = serde_json::to_string_pretty(&tools).unwrap() + "\n";
+    if std::env::var_os("FRITZ_UPDATE_GOLDEN").is_some() {
+        std::fs::write(GOLDEN, &pretty).unwrap();
+    }
+    let golden = std::fs::read_to_string(GOLDEN).unwrap();
+    assert_eq!(
+        pretty, golden,
+        "the tool list changed, check it and rerun with FRITZ_UPDATE_GOLDEN=1"
+    );
+    client.cancel().await.unwrap();
+}
+
+#[tokio::test(flavor = "multi_thread")]
+async fn reads_the_state() {
+    let sim = sim().await;
+    let client = connect(&sim).await;
+
+    let overview = success(&client, "fritz_overview", json!({})).await;
+    assert_eq!(overview["model"], "FRITZ!Box 7690", "{overview}");
+
+    let internet = success(&client, "fritz_internet", json!({})).await;
+    assert_eq!(internet["status"], "Connected", "{internet}");
+
+    let wlan = success(&client, "fritz_wlan", json!({})).await;
+    assert!(!wlan.as_array().unwrap().is_empty(), "{wlan}");
+
+    let mesh = success(&client, "fritz_mesh", json!({})).await;
+    assert!(!mesh["nodes"].as_array().unwrap().is_empty(), "{mesh}");
+
+    let smarthome = success(&client, "fritz_smarthome", json!({})).await;
+    assert!(smarthome.is_array(), "{smarthome}");
+
+    let all = success(&client, "fritz_hosts", json!({})).await;
+    let total = all["total"].as_u64().unwrap();
+    assert!(total > 1, "{all}");
+    assert_eq!(all["hosts"].as_array().unwrap().len() as u64, total);
+
+    let page = success(&client, "fritz_hosts", json!({"offset": 1, "limit": 1})).await;
+    assert_eq!(page["total"], total);
+    assert_eq!(page["offset"], 1);
+    assert_eq!(page["hosts"], json!([all["hosts"][1]]));
+
+    let active = success(&client, "fritz_hosts", json!({"active": true})).await;
+    let hosts = active["hosts"].as_array().unwrap();
+    assert!(hosts.iter().all(|h| h["active"] == true), "{active}");
+
+    let name = all["hosts"][0]["name"].as_str().unwrap().to_uppercase();
+    let found = success(&client, "fritz_hosts", json!({"search": name})).await;
+    assert!(found["total"].as_u64().unwrap() >= 1, "{found}");
+    client.cancel().await.unwrap();
+}
+
+#[tokio::test(flavor = "multi_thread")]
+async fn lists_describes_and_calls_actions() {
+    let sim = sim().await;
+    let client = connect(&sim).await;
+
+    let services = success(&client, "fritz_list_services", json!({})).await;
+    assert_eq!(services["DeviceInfo1"], "DeviceInfo:1", "{services}");
+    let actions = success(
+        &client,
+        "fritz_list_services",
+        json!({"service": "DeviceConfig:1"}),
+    )
+    .await;
+    assert_eq!(actions["Reboot"], "critical", "{actions}");
+    assert_eq!(actions["X_AVM-DE_GetConfigFile"], "secret", "{actions}");
+
+    let describe = success(
+        &client,
+        "fritz_describe_action",
+        json!({"service": "WANIPConnection1", "action": "GetInfo"}),
+    )
+    .await;
+    assert_eq!(describe["class"], "read", "{describe}");
+    assert_eq!(describe["in"], json!({}), "{describe}");
+    assert_eq!(describe["out"]["NewUptime"], "ui4 (0..4294967295)");
+    let describe = success(
+        &client,
+        "fritz_describe_action",
+        json!({"service": "Hosts1", "action": "GetGenericHostEntry"}),
+    )
+    .await;
+    assert!(describe["in"]["NewIndex"].is_string(), "{describe}");
+
+    let info = success(
+        &client,
+        "fritz_call_action",
+        json!({"service": "DeviceInfo1", "action": "GetInfo"}),
+    )
+    .await;
+    assert_eq!(info["NewModelName"], "FRITZ!Box 7690", "{info}");
+
+    let error = failure(
+        &client,
+        "fritz_call_action",
+        json!({"service": "DeviceConfig1", "action": "Reboot"}),
+    )
+    .await;
+    assert!(
+        error["error"].as_str().unwrap().contains("Reboot"),
+        "{error}"
+    );
+    assert!(error.get("status").is_none(), "{error}");
+    assert!(
+        sim.requests()
+            .iter()
+            .all(|r| r.action.as_deref() != Some("Reboot"))
+    );
+
+    let error = failure(
+        &client,
+        "fritz_describe_action",
+        json!({"service": "Hosts1", "action": "Nothing"}),
+    )
+    .await;
+    assert!(
+        error["error"].as_str().unwrap().contains("Nothing"),
+        "{error}"
+    );
+    client.cancel().await.unwrap();
+}
+
+#[tokio::test(flavor = "multi_thread")]
+async fn reports_faults_with_a_status() {
+    let sim = sim().await;
+    let client = connect(&sim).await;
+
+    sim.inject(Injection::fault("DeviceInfo1", "GetInfo", 867));
+    let error = failure(&client, "fritz_overview", json!({})).await;
+    assert_eq!(error["status"], "blocked", "{error}");
+    assert_eq!(error["retry_after"], 3600, "{error}");
+
+    sim.clear_injections();
+    sim.inject(Injection::fault("DeviceInfo1", "GetInfo", 866));
+    let error = failure(
+        &client,
+        "fritz_call_action",
+        json!({"service": "DeviceInfo1", "action": "GetInfo"}),
+    )
+    .await;
+    assert_eq!(error["status"], "confirmation_required", "{error}");
+    assert!(error.get("retry_after").is_none(), "{error}");
+    client.cancel().await.unwrap();
+}

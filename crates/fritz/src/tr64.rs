@@ -12,11 +12,11 @@ use tr064::{Client, Direction, Scpd, Service, StateVariable};
 use crate::context::Context;
 
 /// A client without credentials, for the descriptions, which need no login.
-fn anonymous(context: &Context) -> anyhow::Result<Client> {
+pub(crate) fn anonymous(context: &Context) -> anyhow::Result<Client> {
     Ok(context.target()?.client()?.build()?)
 }
 
-async fn service(client: &Client, reference: &str) -> anyhow::Result<(Service, Scpd)> {
+pub(crate) async fn service(client: &Client, reference: &str) -> anyhow::Result<(Service, Scpd)> {
     generic::service(client, reference)
         .await
         .with_context(|| format!("cannot read the service {reference}"))
@@ -87,7 +87,7 @@ pub(crate) async fn describe(
 
 /// The data type of a variable with the values it allows, like
 /// `string (Ethernet, 802.11)` or `ui2 (0..100)`.
-fn kind(variable: &StateVariable) -> String {
+pub(crate) fn kind(variable: &StateVariable) -> String {
     let data_type = &variable.data_type;
     if !variable.allowed_values.is_empty() {
         return format!("{data_type} ({})", variable.allowed_values.join(", "));

@@ -29,7 +29,7 @@ impl Format {
     }
 }
 
-async fn reader(context: &Context) -> anyhow::Result<Reader> {
+pub(crate) async fn reader(context: &Context) -> anyhow::Result<Reader> {
     let client = context.client()?;
     Reader::new(client)
         .await

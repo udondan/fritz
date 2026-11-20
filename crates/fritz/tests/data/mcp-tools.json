@@ -1,0 +1,185 @@
+[
+  {
+    "name": "fritz_call_action",
+    "description": "Calls an action that only reads. Secrets in the output are hidden.",
+    "inputSchema": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "action": {
+          "description": "Like `GetInfo`.",
+          "type": "string"
+        },
+        "arguments": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "default": {},
+          "description": "The input arguments, like {\"NewIndex\": \"0\"}.",
+          "type": "object"
+        },
+        "service": {
+          "description": "Like `DeviceInfo1`.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "service",
+        "action"
+      ],
+      "type": "object"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "fritz_describe_action",
+    "description": "The class and the arguments of an action, with their types.",
+    "inputSchema": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "action": {
+          "description": "Like `GetInfo`.",
+          "type": "string"
+        },
+        "service": {
+          "description": "Like `DeviceInfo1`.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "service",
+        "action"
+      ],
+      "type": "object"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "fritz_hosts",
+    "description": "Hosts the device knows, with IP, MAC, interface and internet access. Paginated.",
+    "inputSchema": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "active": {
+          "default": false,
+          "description": "Only hosts that are connected now.",
+          "type": "boolean"
+        },
+        "limit": {
+          "description": "Hosts to return, at most 200. Default 50.",
+          "format": "uint",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "offset": {
+          "default": 0,
+          "description": "Hosts to skip.",
+          "format": "uint",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "search": {
+          "description": "Part of the name, IP or MAC, ignoring case.",
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "type": "object"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "fritz_internet",
+    "description": "Internet connection: status, addresses, provider, DNS, rates, DSL line.",
+    "inputSchema": {
+      "properties": {},
+      "type": "object"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "fritz_list_services",
+    "description": "TR-064 services, or the actions of one service with their class. Only read actions can be called.",
+    "inputSchema": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "service": {
+          "description": "Like `DeviceInfo1` or `DeviceInfo:1`. Without it, all services.",
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "type": "object"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "fritz_mesh",
+    "description": "Mesh topology: nodes and the links between them.",
+    "inputSchema": {
+      "properties": {},
+      "type": "object"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "fritz_overview",
+    "description": "Model, firmware, uptime, update, internet connection, rights of the user.",
+    "inputSchema": {
+      "properties": {},
+      "type": "object"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "fritz_smarthome",
+    "description": "Smart Home devices and their values (FRITZ!OS 8.20 and later).",
+    "inputSchema": {
+      "properties": {},
+      "type": "object"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "fritz_wlan",
+    "description": "Wireless networks: SSID, band, channel, standard, status, clients.",
+    "inputSchema": {
+      "properties": {},
+      "type": "object"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "openWorldHint": false
+    }
+  }
+]

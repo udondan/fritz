@@ -4,6 +4,7 @@
 
 mod auth;
 mod context;
+mod mcp;
 mod settings;
 mod status;
 mod system;
@@ -97,6 +98,9 @@ enum Command {
     /// The services and actions of the device. Calls only actions that read.
     #[command(subcommand)]
     Tr64(Tr64Command),
+    /// Serve the state of the device over MCP on stdin and stdout. Only
+    /// reads.
+    Mcp,
     /// Record the answers of read-only actions as test fixtures.
     Capture(CaptureArgs),
     /// Turn raw captures into fixtures, and check fixtures for personal data.
@@ -248,8 +252,13 @@ async fn main() -> anyhow::Result<()> {
             system::keychains(),
         )
     };
+    if matches!(cli.command, Command::Mcp) {
+        // Before stdout is locked: the transport writes to it.
+        return mcp::serve(load()?).await;
+    }
     let out = &mut io::stdout().lock();
     match cli.command {
+        Command::Mcp => unreachable!("served above"),
         Command::Overview => status::overview(&load()?, format, out).await,
         Command::Hosts { active } => status::hosts(&load()?, active, format, out).await,
         Command::Mesh => status::mesh(&load()?, format, out).await,
