@@ -621,6 +621,9 @@ const FIXTURE: &str = concat!(
     "/../../fixtures/fritzbox-7690/8.25"
 );
 
+/// The session ID of the simulator.
+const SESSION: &str = "5e55104d0c0ffee5";
+
 /// Runs `fritz tr64` against `sim` as its user, with the given password.
 async fn tr64(sim: &fritz_sim::Sim, args: &[&str], password: Option<&str>) -> Output {
     let mut all = vec!["tr64"];
@@ -834,6 +837,19 @@ async fn prints_the_state_as_json() {
     let mesh = json(&run(&sim, &["mesh"], password).await);
     assert_eq!(mesh["nodes"][0]["name"], "device-50");
     assert_eq!(mesh["links"].as_array().unwrap().len(), 3);
+    let output = run(&sim, &["smarthome"], password).await;
+    let devices = json(&output);
+    assert_eq!(devices.as_array().unwrap().len(), 4);
+    assert_eq!(devices[0]["units"][0]["power"], 23.45);
+    assert_eq!(devices[1]["units"][0]["target"], 21.0);
+    // The session ID stays in memory, and the session is closed again.
+    assert!(!stdout(&output).contains(SESSION) && !stderr(&output).contains(SESSION));
+    let logouts = sim
+        .requests()
+        .iter()
+        .filter(|r| r.method == "POST" && r.path == "/login_sid.lua")
+        .count();
+    assert_eq!(logouts, 2, "a login and a logout");
 
     // Without the host list, the hosts are read one by one.
     sim.inject(Injection::fault("Hosts1", "X_AVM-DE_GetHostListPath", 606));
@@ -881,6 +897,10 @@ async fn prints_the_state_as_text() {
     assert!(mesh.starts_with("NODE "), "{mesh}");
     assert!(mesh.contains("\nFROM "), "{mesh}");
     assert!(mesh.contains("device-50  device-51"), "{mesh}");
+    let smarthome = text("smarthome").await;
+    assert!(smarthome.starts_with("NAME "), "{smarthome}");
+    assert!(smarthome.contains("23.4 W"), "{smarthome}");
+    assert!(smarthome.contains("80%"), "{smarthome}");
 }
 
 #[tokio::test(flavor = "multi_thread")]
@@ -893,12 +913,18 @@ async fn reports_failed_reads() {
         ("wlan", "cannot read the wireless networks"),
         ("hosts", "cannot read the hosts"),
         ("mesh", "cannot read the mesh"),
+        ("smarthome", "cannot log in to the web interface"),
     ] {
         let error = failure(&run(&sim, &[command], Some("wrong")).await);
         assert!(error.contains(message), "{message} in {error}");
     }
     let error = failure(&run(&sim, &["overview"], None).await);
     assert!(error.contains("no password for"), "{error}");
+    let error = failure(&run(&sim, &["smarthome"], Some("wrong")).await);
+    assert!(
+        error.contains("the device rejected the user or the password"),
+        "{error}"
+    );
     sim.inject(Injection::fault("Hosts1", "X_AVM-DE_GetMeshListPath", 606));
     let error = failure(&run(&sim, &["mesh"], Some(fritz_sim::PASSWORD)).await);
     assert!(error.contains("the device has no mesh list"), "{error}");
@@ -912,4 +938,27 @@ async fn reports_failed_reads() {
         error.contains("cannot read the device description"),
         "{error}"
     );
+}
+
+#[tokio::test(flavor = "multi_thread")]
+async fn reports_a_missing_smart_home_api() {
+    // A device without the REST API, like one before FRITZ!OS 8.20.
+    let dir = tempfile::tempdir().unwrap();
+    std::fs::copy(
+        Path::new(FIXTURE).join("tr64desc.xml"),
+        dir.path().join("tr64desc.xml"),
+    )
+    .unwrap();
+    std::fs::create_dir(dir.path().join("scpd")).unwrap();
+    std::fs::create_dir(dir.path().join("responses")).unwrap();
+    let fixture = fritz_sim::Fixture::load(dir.path()).unwrap();
+    let sim = fritz_sim::Sim::start(fixture).await.unwrap();
+    let error = failure(&run(&sim, &["smarthome"], Some(fritz_sim::PASSWORD)).await);
+    assert!(
+        error.contains("cannot read the Smart Home devices"),
+        "{error}"
+    );
+    assert!(!error.contains(SESSION), "{error}");
+    // The session is closed anyway.
+    assert_eq!(sim.requests().last().unwrap().path, "/login_sid.lua");
 }

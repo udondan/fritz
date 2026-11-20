@@ -14,4 +14,6 @@ pub mod policy;
 pub mod read;
 pub mod redact;
 pub mod secrets;
+pub mod session;
+pub mod smarthome;
 pub mod status;

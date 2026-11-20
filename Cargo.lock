@@ -741,11 +741,14 @@ dependencies = [
  "axum",
  "directories",
  "keyring-core",
+ "md-5",
+ "pbkdf2",
  "regex",
  "roxmltree",
  "secrecy",
  "serde",
  "serde_json",
+ "sha2",
  "tempfile",
  "thiserror",
  "tokio",
@@ -762,12 +765,15 @@ dependencies = [
  "anyhow",
  "axum",
  "clap",
+ "form_urlencoded",
  "fritz-core",
  "md-5",
+ "pbkdf2",
  "rcgen",
  "roxmltree",
  "rustls",
  "serde_json",
+ "sha2",
  "tempfile",
  "thiserror",
  "tokio",
@@ -1456,6 +1462,16 @@ name = "parking"
 version = "2.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f38d5652c16fde515bb1ecef450ab0f6a219d619a7274976324d5e377f7dceba"
+
+[[package]]
+name = "pbkdf2"
+version = "0.13.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "112d82ceb8c5bf524d9af484d4e4970c9fd5a0cc15ba14ad93dccd28873b0629"
+dependencies = [
+ "digest",
+ "hmac",
+]
 
 [[package]]
 name = "pem"

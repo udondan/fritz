@@ -12,6 +12,9 @@ pub const DEFAULT_HOST: &str = "fritz.box";
 /// The TR-064 port for HTTPS.
 pub const HTTPS_PORT: u16 = 49443;
 
+/// The TR-064 port for HTTP.
+pub const HTTP_PORT: u16 = 49000;
+
 /// The connection settings are incomplete or invalid.
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
@@ -125,6 +128,25 @@ impl Target {
             self.username()?,
             self.url.host_str().unwrap_or_default()
         ))
+    }
+
+    /// The web interface of the device, which serves the session login and
+    /// the REST API: the TR-064 ports 49443 and 49000 become the default
+    /// ports of `https` and `http`, other addresses stay as they are. The
+    /// device uses the same certificate for both.
+    #[must_use]
+    pub fn web(&self) -> Self {
+        let mut url = self.url.clone();
+        let port = match (url.scheme(), url.port()) {
+            ("https", Some(HTTPS_PORT)) | ("http", Some(HTTP_PORT)) => None,
+            (_, port) => port,
+        };
+        // Fails only for addresses without a host, which parse_host rules out.
+        let _ = url.set_port(port);
+        Self {
+            url,
+            ..self.clone()
+        }
     }
 
     /// A client builder for the device, with the certificate pinned for
@@ -252,6 +274,29 @@ mod tests {
         };
         let target = Target::resolve(None, &overrides).unwrap();
         assert!(target.client().unwrap().build().is_ok());
+    }
+
+    #[test]
+    fn derives_the_web_interface() {
+        for (host, web) in [
+            ("fritz.box", "https://fritz.box/"),
+            ("http://fritz.box:49000", "http://fritz.box/"),
+            ("fritz.box:8443", "https://fritz.box:8443/"),
+            ("http://127.0.0.1:49443", "http://127.0.0.1:49443/"),
+            ("https://fritz.box", "https://fritz.box/"),
+        ] {
+            let overrides = Overrides {
+                host: Some(host.to_owned()),
+                username: Some("agent".to_owned()),
+                fingerprint: Some(fingerprint(1)),
+            };
+            let target = Target::resolve(None, &overrides).unwrap();
+            let expected = Target {
+                url: Url::parse(web).unwrap(),
+                ..target.clone()
+            };
+            assert_eq!(target.web(), expected, "{host}");
+        }
     }
 
     #[test]
