@@ -5,11 +5,18 @@
 //! reads those documents and makes the calls. It knows nothing about specific
 //! vendors: vendor extensions are services and actions like any other.
 
+mod client;
 mod description;
+mod digest;
 mod error;
 mod scpd;
+mod soap;
 mod xml;
 
+pub use client::{Client, ClientBuilder};
 pub use description::{Device, DeviceDescription, Service};
 pub use error::Error;
+pub use reqwest::Url;
 pub use scpd::{Action, AllowedRange, Argument, Direction, Scpd, StateVariable};
+pub use secrecy::SecretString;
+pub use soap::Arguments;
