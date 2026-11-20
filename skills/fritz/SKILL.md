@@ -33,6 +33,13 @@ is not a terminal.
 | Which ports are forwarded, is UPnP on?      | `fritz ports`                        |
 | Numbers, deflections, answering machines    | `fritz telephony`                    |
 | What does the box offer, what may I do?     | `fritz capabilities`                 |
+| DNS, IPv6, MTU, DHCP, time, LAN ports       | `fritz settings`                     |
+| VPN, WLAN, parental controls, traffic       | `fritz settings vpn wlan user inetstat` |
+
+`fritz settings` reads modules of the web interface, which has no documented
+API: names and fields can change with FRITZ!OS. Without arguments it reads
+the common modules. Others are dect, filter_profile, inetstat, landevice,
+mobiled, plc, tam, user, vpn and wlan. Secrets are replaced by `***`.
 
 Anything else goes through TR-064:
 

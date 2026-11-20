@@ -94,6 +94,13 @@ enum Command {
     Telephony,
     /// The features the device offers and the rights of the user.
     Capabilities,
+    /// The settings of the device, like DNS and IPv6, read through the web
+    /// interface. Secrets are hidden.
+    Settings {
+        /// The modules to read, like ipv6 or dnscfg. Without, the common
+        /// ones.
+        modules: Vec<String>,
+    },
     /// Manage the profiles in the configuration file.
     #[command(subcommand)]
     Config(ConfigCommand),
@@ -276,6 +283,7 @@ async fn main() -> anyhow::Result<()> {
         Command::Ports => device::ports(&load()?, format, out).await,
         Command::Telephony => device::telephony(&load()?, format, out).await,
         Command::Capabilities => device::capabilities(&load()?, format, out).await,
+        Command::Settings { modules } => device::settings(&load()?, &modules, format, out).await,
         Command::Config(ConfigCommand::Init) => settings::init(&mut load()?, out),
         Command::Config(ConfigCommand::Show) => settings::show(&load()?, out),
         Command::Tls(TlsCommand::Fingerprint) => tls::fingerprint(&load()?, out).await,

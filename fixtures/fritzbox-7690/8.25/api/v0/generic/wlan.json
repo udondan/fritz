@@ -1,0 +1,6 @@
+{
+  "guest_pskvalue": "fixture-guest-key",
+  "pskvalue": "fixture-wlan-key",
+  "ssid": "wlan-1",
+  "wlan_enable": "1"
+}

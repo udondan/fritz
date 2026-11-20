@@ -1,0 +1,18 @@
+{
+  "connection": [
+    {
+      "UID": "connection0",
+      "enable": "1",
+      "ip4_first_dns": "198.51.100.53",
+      "ip4_mode": "pppoe",
+      "ip6_first_dns": "2001:db8::53",
+      "ip6_mode": "dhcpv6",
+      "is_active_internet_connection": "1",
+      "media_type": "dsl",
+      "name": "Internet",
+      "username": "user-1"
+    }
+  ],
+  "opmode": "opmode_pppoe",
+  "use_static_dns": "0"
+}

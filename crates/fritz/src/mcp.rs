@@ -18,6 +18,7 @@ use fritz_core::generic;
 use fritz_core::policy;
 use fritz_core::ports;
 use fritz_core::read::Reader;
+use fritz_core::settings;
 use fritz_core::smarthome;
 use fritz_core::status::{self, Host};
 use fritz_core::telephony;
@@ -81,6 +82,16 @@ pub(crate) struct HostsQuery {
     offset: usize,
     /// Hosts to return, at most 200. Default 50.
     limit: Option<usize>,
+}
+
+/// The modules of `fritz_settings`.
+#[derive(Debug, Default, Deserialize, JsonSchema)]
+pub(crate) struct SettingsQuery {
+    /// Like `ipv6`. Without, the common modules: DNS, IPv6, internet, LAN
+    /// ports, routes, time. Others: `dect`, `filter_profile`, `inetstat`,
+    /// `landevice`, `mobiled`, `plc`, `tam`, `user`, `vpn`, `wlan`.
+    #[serde(default)]
+    modules: Vec<String>,
 }
 
 /// A service, or one of its actions.
@@ -202,6 +213,23 @@ impl Server {
         self.respond(async {
             let mut reader = self.reader().await?;
             Ok(capabilities::capabilities(&mut reader).await?)
+        })
+        .await
+    }
+
+    #[tool(
+        description = "Settings like DNS, IPv6, MTU, DHCP and time, by module, from the web interface. Secrets hidden.",
+        annotations(read_only_hint = true, open_world_hint = false)
+    )]
+    async fn fritz_settings(&self, Parameters(query): Parameters<SettingsQuery>) -> CallToolResult {
+        self.respond(async {
+            let session = self.context.session().await?;
+            let settings = settings::settings(&session, &query.modules).await;
+            session
+                .logout()
+                .await
+                .context("cannot log out of the web interface")?;
+            Ok(settings)
         })
         .await
     }

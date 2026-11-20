@@ -183,6 +183,28 @@
     }
   },
   {
+    "name": "fritz_settings",
+    "description": "Settings like DNS, IPv6, MTU, DHCP and time, by module, from the web interface. Secrets hidden.",
+    "inputSchema": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "modules": {
+          "default": [],
+          "description": "Like `ipv6`. Without, the common modules: DNS, IPv6, internet, LAN\nports, routes, time. Others: `dect`, `filter_profile`, `inetstat`,\n`landevice`, `mobiled`, `plc`, `tam`, `user`, `vpn`, `wlan`.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "type": "object"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "openWorldHint": false
+    }
+  },
+  {
     "name": "fritz_smarthome",
     "description": "Smart Home devices and their values (FRITZ!OS 8.20 and later).",
     "inputSchema": {
