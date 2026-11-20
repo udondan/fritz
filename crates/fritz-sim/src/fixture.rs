@@ -45,11 +45,13 @@ pub(crate) struct Recording {
 /// scpd/<file>.xml
 /// responses/<service>/<action>[@<index>].json
 /// lists/<name>.<xml|json>
+/// api/<path>.json
 /// ```
 ///
 /// A list document `lists/devicehostlist.xml` is served at the path
 /// `/devicehostlist.lua` that an action like `X_AVM-DE_GetHostListPath`
-/// returns.
+/// returns. A document `api/v0/smarthome/overview.json` of the REST API is
+/// served at `/api/v0/smarthome/overview`.
 #[derive(Debug, Clone)]
 pub struct Fixture {
     pub(crate) description_xml: String,
@@ -60,6 +62,9 @@ pub struct Fixture {
     pub(crate) recordings: HashMap<(String, String), Recording>,
     /// The list documents by name, like `devicehostlist`.
     pub(crate) lists: HashMap<String, String>,
+    /// The documents of the REST API by path, like
+    /// `/api/v0/smarthome/overview`.
+    pub(crate) api: HashMap<String, String>,
 }
 
 impl Fixture {
@@ -108,12 +113,17 @@ impl Fixture {
             }
         }
         let mut lists = HashMap::new();
-        let dir = dir.join("lists");
-        if dir.is_dir() {
-            for (name, path) in entries(&dir)? {
+        let lists_dir = dir.join("lists");
+        if lists_dir.is_dir() {
+            for (name, path) in entries(&lists_dir)? {
                 let name = name.split_once('.').map_or(name.as_str(), |(stem, _)| stem);
                 lists.insert(name.to_owned(), read(&path)?);
             }
+        }
+        let mut api = HashMap::new();
+        let api_dir = dir.join("api");
+        if api_dir.is_dir() {
+            documents(&api_dir, "/api", &mut api)?;
         }
         Ok(Self {
             description_xml,
@@ -121,6 +131,7 @@ impl Fixture {
             scpds,
             recordings,
             lists,
+            api,
         })
     }
 
@@ -168,6 +179,19 @@ fn answer(json: &str) -> Result<Option<Answer>, String> {
         Some("failed") => Ok(None),
         _ => Err("unknown status".to_owned()),
     }
+}
+
+/// Adds the JSON documents in `dir` and its subdirectories to `found`, by
+/// their path under `prefix` without the extension.
+fn documents(dir: &Path, prefix: &str, found: &mut HashMap<String, String>) -> Result<(), Error> {
+    for (name, path) in entries(dir)? {
+        if path.is_dir() {
+            documents(&path, &format!("{prefix}/{name}"), found)?;
+        } else if let Some(stem) = name.strip_suffix(".json") {
+            found.insert(format!("{prefix}/{stem}"), read(&path)?);
+        }
+    }
+    Ok(())
 }
 
 fn read(path: &Path) -> Result<String, Error> {

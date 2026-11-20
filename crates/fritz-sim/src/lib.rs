@@ -16,6 +16,9 @@
 //!   getters that read the same variables answer with the new values.
 //! - Paths to list documents, like the one `X_AVM-DE_GetHostListPath`
 //!   returns, hold a session ID, and the documents are served for it.
+//! - The web interface has a session login, `/login_sid.lua`, with a
+//!   PBKDF2 challenge, and serves the documents of the REST API, like
+//!   `/api/v0/smarthome/overview`, for the open session.
 //! - Tests can [inject](Sim::inject) UPnP errors, delays, discarded writes
 //!   and a locked login, and read the [requests](Sim::requests) the server
 //!   got.
@@ -56,10 +59,12 @@ mod device;
 mod fixture;
 mod soap;
 mod tls;
+mod web;
 
 use device::{Device, Fault, Hooks, short_id};
 pub use fixture::{Answer, Error, Fixture};
 use tls::TlsListener;
+use web::Web;
 
 /// The user name the simulator accepts by default.
 pub const USERNAME: &str = "fritz-sim";
@@ -174,6 +179,7 @@ impl Sim {
             options,
             inner: Mutex::new(Inner {
                 device: Device::new(fixture),
+                web: Web::default(),
                 injections: Vec::new(),
                 requests: Vec::new(),
             }),
@@ -263,6 +269,7 @@ struct Shared {
 #[derive(Debug)]
 struct Inner {
     device: Device,
+    web: Web,
     injections: Vec<Injection>,
     requests: Vec<Request>,
 }
@@ -285,7 +292,8 @@ impl Shared {
         let call = (method == Method::POST)
             .then(|| soap::parse(body))
             .flatten();
-        let authorized = !inner.injections.contains(&Injection::LockLogin)
+        let locked = inner.injections.contains(&Injection::LockLogin);
+        let authorized = !locked
             && auth::verify(
                 headers.get(AUTHORIZATION).and_then(|v| v.to_str().ok()),
                 &auth::Expected {
@@ -312,6 +320,11 @@ impl Shared {
             })
             .sum();
         let response = match *method {
+            _ if path == web::LOGIN => inner.web.login(method, body, &self.options, locked),
+            _ if path.starts_with(web::API) => {
+                let Inner { web, device, .. } = &*inner;
+                web.api(&device.fixture.api, method, path, headers)
+            }
             Method::GET => inner.document(path, uri.query()),
             Method::POST if !authorized => (
                 StatusCode::UNAUTHORIZED,
@@ -450,6 +463,7 @@ mod tests {
     fn inner() -> Inner {
         Inner {
             device: Device::new(Fixture::load(FIXTURE).unwrap()),
+            web: Web::default(),
             injections: Vec::new(),
             requests: Vec::new(),
         }

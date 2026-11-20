@@ -64,6 +64,8 @@ fn skips_hidden_files_other_files_and_failed_calls() {
     let path = dir.path();
     write(path, "scpd/.DS_Store", "");
     write(path, "responses/Hosts1/README.md", "");
+    fs::create_dir(path.join("api")).unwrap();
+    write(path, "api/README.md", "");
     write(
         path,
         "responses/Hosts1/GetInfo.json",
