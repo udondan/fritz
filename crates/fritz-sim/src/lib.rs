@@ -274,8 +274,7 @@ impl Shared {
             action: call.as_ref().map(|c| c.action.clone()),
             arguments: call
                 .as_ref()
-                .map(|c| c.arguments.clone())
-                .unwrap_or_default(),
+                .map_or_default(|c| c.arguments.clone()),
             authorized,
         });
         let delay = inner
