@@ -3,6 +3,14 @@ name: Test
 
 # All tests run against recorded fixtures and the simulator. Nothing in CI talks
 # to a real device.
+#
+# The boarding-gate job queues the runs of pull requests and main, pull requests
+# first, and rebases branches that are behind main. A workflow-wide concurrency
+# group is not used for this because GitHub keeps only one pending run per group
+# and cancels the others.
+#
+# Pull requests from forks get no secrets. They skip the wait and run the jobs
+# right away.
 
 on:
   pull_request:
@@ -14,17 +22,33 @@ on:
 
 permissions: {}
 
-# A new push to a pull request makes its running checks obsolete. Runs on main
-# are never cancelled.
-concurrency:
-  group: test-${{ github.ref }}
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
-
 env:
   CARGO_TERM_COLOR: always
 
 jobs:
+  # The build waits for its turn, so the waiting runs of all open pull requests
+  # don't take the runners at once; most of them are tested again after a
+  # rebase anyway.
+  boarding-gate:
+    name: Queue
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    permissions:
+      actions: read
+      contents: write # lock refs under refs/boarding-gate/
+      pull-requests: read # labels for label-weights
+      statuses: write # queue position as commit status
+    # Queue order, the concurrency group that cancels outdated waiting runs and
+    # the rebase of branches that are behind main: see
+    # https://github.com/udondan/boarding-gate#reusable-workflow
+    # The rebase needs OVERRIDE_TOKEN: pushes with github.token don't start new runs.
+    uses: udondan/boarding-gate/.github/workflows/boarding-gate.yml@v1
+    secrets:
+      update-token: ${{ secrets.OVERRIDE_TOKEN }}
+
   build:
+    needs: boarding-gate
+    # The wait is skipped for forks.
+    if: ${{ !cancelled() && (needs.boarding-gate.result == 'success' || needs.boarding-gate.result == 'skipped') }}
     runs-on: ubuntu-latest
     timeout-minutes: 30
     permissions:
@@ -68,9 +92,10 @@ jobs:
       - name: Test
         run: cargo llvm-cov --workspace --lcov --output-path lcov.info
 
-      # Coverage of main is uploaded as well, as the base Codecov compares
-      # pull requests against.
+      # Coverage of main is uploaded by the Coverage workflow, without waiting
+      # in the queue.
       - name: Upload coverage to Codecov
+        if: github.event_name == 'pull_request'
         uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
         with:
           use_oidc: true
@@ -172,13 +197,15 @@ jobs:
   # The only required status check. Every job must have run and succeeded: a
   # skipped job must never let a PR become mergeable, least of all through
   # automerge. Only coverage may be skipped: it is skipped on main and when
-  # build didn't succeed, and build fails this job then anyway.
+  # build didn't succeed, and build fails this job then anyway. boarding-gate
+  # may be skipped only for pull requests from forks.
   required:
     if: always()
     runs-on: ubuntu-latest
     timeout-minutes: 5
     needs:
       - actions
+      - boarding-gate
       - build
       - coverage
       - qlty
@@ -186,8 +213,9 @@ jobs:
       - name: Check that all jobs succeeded
         env:
           RESULTS: ${{ toJSON(needs) }}
+          FORK: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository }}
         run: |
-          failed=$(echo "$RESULTS" | jq -r 'to_entries[] | select(.value.result != "success" and (.key != "coverage" or .value.result != "skipped")) | "\(.key): \(.value.result)"')
+          failed=$(echo "$RESULTS" | jq -r --argjson fork "$FORK" 'to_entries[] | select(.value.result != "success" and (.value.result != "skipped" or (.key != "coverage" and (.key != "boarding-gate" or ($fork | not))))) | "\(.key): \(.value.result)"')
           if [ -n "$failed" ]; then
             echo "::error::Not all jobs succeeded:"
             echo "$failed"
