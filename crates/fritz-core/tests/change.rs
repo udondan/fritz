@@ -281,6 +281,38 @@ async fn checks_the_arguments() {
         .await
         .unwrap_err();
     assert_eq!(error.to_string(), "SetEnable needs the input NewEnable");
+    let twice = [enable("0"), enable("1")].concat();
+    let error = setup
+        .allowed()
+        .plan("WLANConfiguration1", "SetEnable", &twice)
+        .await
+        .unwrap_err();
+    assert_eq!(
+        error.to_string(),
+        "SetEnable got the input NewEnable more than once"
+    );
+}
+
+#[tokio::test]
+async fn reads_values_back_only_from_the_same_entry() {
+    let setup = Setup::new().await;
+    let arguments = vec![
+        ("NewMACAddress".to_owned(), "AA:BB:CC:00:00:01".to_owned()),
+        ("NewX_AVM-DE_FriendlyName".to_owned(), "renamed".to_owned()),
+    ];
+    let plan = setup
+        .allowed()
+        .plan("Hosts1", "X_AVM-DE_SetFriendlyNameByMAC", &arguments)
+        .await
+        .unwrap();
+    // X_AVM-DE_GetFriendlyName returns the name of the device, not of the
+    // host with this address.
+    assert_eq!(plan.changes[1].before, None, "{:?}", plan.changes);
+    assert!(
+        !setup
+            .calls()
+            .contains(&"X_AVM-DE_GetFriendlyName".to_owned())
+    );
 }
 
 #[tokio::test]

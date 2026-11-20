@@ -419,8 +419,9 @@ impl Changer {
 
     /// The values of the state variables the inputs of the change refer
     /// to, as the getters of the service return them. A getter is called if
-    /// it only reads, returns one of these variables, and all its inputs,
-    /// like an index, refer to them as well.
+    /// it only reads, returns one of these variables, all its inputs refer
+    /// to them as well, and it takes every one it does not return, like an
+    /// index or an address: otherwise it may read another entry.
     async fn read_back(
         &self,
         checked: &Checked,
@@ -443,6 +444,15 @@ impl Changer {
                     .outputs()
                     .any(|o| inputs.contains_key(o.related_state_variable.as_str()))
             {
+                continue;
+            }
+            let scoped = inputs.keys().all(|variable| {
+                getter
+                    .arguments
+                    .iter()
+                    .any(|a| a.related_state_variable == *variable)
+            });
+            if !scoped {
                 continue;
             }
             let Some(getter_arguments) = getter

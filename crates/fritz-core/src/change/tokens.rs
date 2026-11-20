@@ -3,6 +3,8 @@
 //!
 //! The file holds hashes only: of the tokens, and of the changes they are
 //! for, so it reveals neither the tokens nor the values of the changes.
+//! Every change of the file holds a lock, so processes that share it cannot
+//! redeem a token twice or bring a redeemed one back.
 
 use std::collections::BTreeMap;
 use std::io;
@@ -47,15 +49,15 @@ impl Tokens {
         let mut bytes = [0; 16];
         getrandom::fill(&mut bytes).map_err(|e| self.error(io::Error::other(e.to_string())))?;
         let token = to_hex(&bytes);
-        let mut entries = self.load(now)?;
-        entries.0.insert(
-            hash(&token),
-            Entry {
-                change: change.to_owned(),
-                expires,
-            },
-        );
-        self.save(&entries)?;
+        self.transaction(now, |entries| {
+            entries.0.insert(
+                hash(&token),
+                Entry {
+                    change: change.to_owned(),
+                    expires,
+                },
+            );
+        })?;
         Ok(token)
     }
 
@@ -67,13 +69,14 @@ impl Tokens {
     /// `now` or for another change. A token for another change stays valid
     /// for its own.
     pub(crate) fn redeem(&self, token: &str, change: &str, now: u64) -> Result<(), Error> {
-        let mut entries = self.load(now)?;
         let key = hash(token);
-        let valid = entries.0.get(&key).is_some_and(|e| e.change == change);
-        if valid {
-            entries.0.remove(&key);
-        }
-        self.save(&entries)?;
+        let valid = self.transaction(now, |entries| {
+            let valid = entries.0.get(&key).is_some_and(|e| e.change == change);
+            if valid {
+                entries.0.remove(&key);
+            }
+            valid
+        })?;
         if valid {
             Ok(())
         } else {
@@ -81,25 +84,43 @@ impl Tokens {
         }
     }
 
+    /// Changes the tokens that are valid at `now`, holding the lock of the
+    /// file from reading to writing it.
+    fn transaction<T>(&self, now: u64, change: impl FnOnce(&mut Entries) -> T) -> Result<T, Error> {
+        self.locked(now, change).map_err(|e| self.error(e))
+    }
+
+    fn locked<T>(&self, now: u64, change: impl FnOnce(&mut Entries) -> T) -> io::Result<T> {
+        std::fs::create_dir_all(self.path.parent().unwrap_or(Path::new("")))?;
+        let lock = std::fs::OpenOptions::new()
+            .create(true)
+            .truncate(false)
+            .write(true)
+            .open(self.path.with_extension("lock"))?;
+        lock.lock()?;
+        let mut entries = self.load(now)?;
+        let result = change(&mut entries);
+        self.save(&entries)?;
+        // Dropping the file releases the lock.
+        Ok(result)
+    }
+
     /// The tokens that are valid at `now`.
-    fn load(&self, now: u64) -> Result<Entries, Error> {
+    fn load(&self, now: u64) -> io::Result<Entries> {
         let mut entries: Entries = match std::fs::read_to_string(&self.path) {
             Ok(text) => serde_json::from_str(&text).unwrap_or_default(),
             Err(error) if error.kind() == io::ErrorKind::NotFound => Entries::default(),
-            Err(error) => return Err(self.error(error)),
+            Err(error) => return Err(error),
         };
         entries.0.retain(|_, e| e.expires > now);
         Ok(entries)
     }
 
     /// Replaces the file at once.
-    fn save(&self, entries: &Entries) -> Result<(), Error> {
-        let text = serde_json::to_string(entries).map_err(|e| self.error(e.into()))?;
-        std::fs::create_dir_all(self.path.parent().unwrap_or(Path::new("")))
-            .map_err(|e| self.error(e))?;
+    fn save(&self, entries: &Entries) -> io::Result<()> {
         let temporary = self.path.with_extension("tmp");
-        std::fs::write(&temporary, text).map_err(|e| self.error(e))?;
-        std::fs::rename(&temporary, &self.path).map_err(|e| self.error(e))
+        std::fs::write(&temporary, serde_json::to_string(entries)?)?;
+        std::fs::rename(&temporary, &self.path)
     }
 
     fn error(&self, source: io::Error) -> Error {
@@ -164,6 +185,23 @@ mod tests {
         let text = std::fs::read_to_string(&tokens.path).unwrap();
         assert!(!text.contains(&hash(&old)), "{text}");
         tokens.redeem(&new, "a", 400).unwrap();
+    }
+
+    #[test]
+    fn redeems_a_token_once_across_threads() {
+        let (_dir, tokens) = tokens();
+        let token = tokens.issue("a", 100, 400).unwrap();
+        let redeemed = std::thread::scope(|scope| {
+            let handles: Vec<_> = (0..8)
+                .map(|_| scope.spawn(|| tokens.redeem(&token, "a", 200).is_ok()))
+                .collect();
+            handles
+                .into_iter()
+                .map(|h| h.join().unwrap())
+                .filter(|ok| *ok)
+                .count()
+        });
+        assert_eq!(redeemed, 1);
     }
 
     #[test]
