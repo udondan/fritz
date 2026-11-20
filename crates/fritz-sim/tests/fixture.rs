@@ -132,3 +132,51 @@ async fn services_without_description_have_no_actions() {
         "{error:?}"
     );
 }
+
+/// A getter with one output argument.
+fn getter(name: &str, argument: &str, variable: &str) -> String {
+    format!(
+        "<action><name>{name}</name><argumentList><argument><name>{argument}</name>\
+         <direction>out</direction><relatedStateVariable>{variable}</relatedStateVariable>\
+         </argument></argumentList></action>"
+    )
+}
+
+#[tokio::test]
+async fn unrecorded_getters_answer_from_the_state() {
+    let dir = bare();
+    let actions = [
+        getter("GetRecorded", "NewName", "Name"),
+        getter("GetName", "NewName", "Name"),
+        getter("GetMode", "NewMode", "Mode"),
+        getter("GetOther", "NewOther", "Undeclared"),
+    ]
+    .concat();
+    let scpd = format!(
+        "<scpd><actionList>{actions}</actionList><serviceStateTable>\
+         <stateVariable><name>Name</name><dataType>string</dataType></stateVariable>\
+         <stateVariable><name>Mode</name><dataType>string</dataType>\
+         <defaultValue>auto</defaultValue></stateVariable>\
+         </serviceStateTable></scpd>"
+    );
+    write(dir.path(), "scpd/hostsSCPD.xml", &scpd);
+    write(
+        dir.path(),
+        "responses/Hosts1/GetRecorded.json",
+        r#"{"status": "ok", "out": {"NewName": "box"}}"#,
+    );
+    let sim = Sim::start(Fixture::load(dir.path()).unwrap())
+        .await
+        .unwrap();
+    let client = sim.client().build().unwrap();
+    let description = client.description().await.unwrap();
+    let hosts = description.service("Hosts1").unwrap();
+    for (action, argument, value) in [
+        ("GetName", "NewName", "box"),
+        ("GetMode", "NewMode", "auto"),
+        ("GetOther", "NewOther", ""),
+    ] {
+        let out = client.call(hosts, action, &[]).await.unwrap();
+        assert_eq!(out.get(argument), Some(value), "{action}");
+    }
+}

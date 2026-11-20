@@ -95,12 +95,11 @@ impl Device {
                 let Some(Answer::Ok(out)) = recording.and_then(|r| r.once.as_ref()) else {
                     continue;
                 };
-                for argument in outputs(action) {
-                    if let Some(value) = out.get(&argument.name) {
-                        let key = (id.to_owned(), argument.related_state_variable.clone());
-                        recorded.insert(key, value.clone());
-                    }
-                }
+                recorded.extend(outputs(action).filter_map(|argument| {
+                    let value = out.get(&argument.name)?;
+                    let key = (id.to_owned(), argument.related_state_variable.clone());
+                    Some((key, value.clone()))
+                }));
             }
         }
         Self {
@@ -158,13 +157,12 @@ impl Device {
             _ => None,
         };
         if !(is_getter(&action.name) || hooks.discard_writes) {
-            for (name, value) in arguments {
-                let argument = action.arguments.iter().find(|a| &a.name == name);
-                if let Some(argument) = argument {
-                    let key = (id.to_owned(), argument.related_state_variable.clone());
-                    self.written.insert(key, value.clone());
-                }
-            }
+            let written = arguments.iter().filter_map(|(name, value)| {
+                let argument = action.arguments.iter().find(|a| &a.name == name)?;
+                let key = (id.to_owned(), argument.related_state_variable.clone());
+                Some((key, value.clone()))
+            });
+            self.written.extend(written);
         }
         Ok(outputs(action)
             .map(|argument| {
