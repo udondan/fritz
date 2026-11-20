@@ -272,9 +272,7 @@ impl Shared {
             method: method.to_string(),
             path: path.to_owned(),
             action: call.as_ref().map(|c| c.action.clone()),
-            arguments: call
-                .as_ref()
-                .map_or_default(|c| c.arguments.clone()),
+            arguments: call.as_ref().map_or_default(|c| c.arguments.clone()),
             authorized,
         });
         let delay = inner
