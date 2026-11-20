@@ -12,7 +12,7 @@ authors = ["Daniel Schroeder"]
 # their users don't run into version conflicts. The fritz binary declares its
 # own dependencies with exact versions. Cargo.lock pins every build.
 [workspace.dependencies]
-tr064 = { path = "crates/tr064", version = "0.0.0" }
+tr064 = { path = "crates/tr064", version = "0.1.0" }
 fritz-core = { path = "crates/fritz-core", version = "0.0.0" }
 fritz-sim = { path = "crates/fritz-sim" }
 
