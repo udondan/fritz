@@ -1,0 +1,11 @@
+{
+  "out": {
+    "NewDeviceRegistered": "1",
+    "NewDynDNSName": "server-3.example.net",
+    "NewEmail": "user-1@example.com",
+    "NewEnabled": "1",
+    "NewPort": "49032",
+    "NewState": "dyndns_verified"
+  },
+  "status": "ok"
+}

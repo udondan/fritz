@@ -1,0 +1,6 @@
+{
+  "out": {
+    "NewX_AVM-DE_UserList": "<List><Username last_user=\"0\">user-1</Username><Username last_user=\"0\">user-2</Username><Username\nlast_user=\"0\">user-3</Username><Username last_user=\"1\">user-4</Username></List>\n"
+  },
+  "status": "ok"
+}

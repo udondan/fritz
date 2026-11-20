@@ -1,0 +1,15 @@
+{
+  "out": {
+    "NewDomain": "",
+    "NewEnabled": "0",
+    "NewMode": "ddns_v4",
+    "NewProviderName": "Benutzerdefiniert",
+    "NewServerIPv4": "",
+    "NewServerIPv6": "",
+    "NewStatusIPv4": "undefined",
+    "NewStatusIPv6": "undefined",
+    "NewUpdateURL": "",
+    "NewUsername": "***"
+  },
+  "status": "ok"
+}

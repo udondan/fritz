@@ -1,0 +1,14 @@
+{
+  "out": {
+    "NewCapacity": "3014",
+    "NewEnable": "0",
+    "NewMode": "record_message",
+    "NewName": "name-4",
+    "NewPhoneNumbers": "",
+    "NewRingSeconds": "20",
+    "NewStatus": "32768",
+    "NewStick": "0",
+    "NewTAMRunning": "1"
+  },
+  "status": "ok"
+}

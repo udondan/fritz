@@ -1,0 +1,10 @@
+{
+  "out": {
+    "NewAllowedCharsPassword": "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz !\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~",
+    "NewAllowedCharsUsername": "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz -._",
+    "NewMaxCharsPassword": "32",
+    "NewMinCharsPassword": "0",
+    "NewX_AVM-DE_IsDefaultPasswordActive": "0"
+  },
+  "status": "ok"
+}

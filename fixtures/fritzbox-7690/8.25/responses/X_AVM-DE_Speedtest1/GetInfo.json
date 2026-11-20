@@ -1,0 +1,13 @@
+{
+  "out": {
+    "NewEnableTcp": "0",
+    "NewEnableUdp": "0",
+    "NewEnableUdpBidirect": "0",
+    "NewPortTcp": "4711",
+    "NewPortUdp": "4711",
+    "NewPortUdpBidirect": "4712",
+    "NewWANEnableTcp": "0",
+    "NewWANEnableUdp": "0"
+  },
+  "status": "ok"
+}

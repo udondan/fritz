@@ -1,0 +1,10 @@
+{
+  "out": {
+    "NewAllowedCharsAIN": "0123456789ABCDEFabcdef :-grptmp",
+    "NewMaxCharsAIN": "19",
+    "NewMaxCharsDeviceName": "79",
+    "NewMinCharsAIN": "1",
+    "NewMinCharsDeviceName": "1"
+  },
+  "status": "ok"
+}

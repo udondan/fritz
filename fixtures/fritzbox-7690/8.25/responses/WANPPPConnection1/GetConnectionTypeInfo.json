@@ -1,0 +1,7 @@
+{
+  "out": {
+    "NewConnectionType": "IP_Routed",
+    "NewPossibleConnectionTypes": "IP_Routed, IP_Bridged"
+  },
+  "status": "ok"
+}
