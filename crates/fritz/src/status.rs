@@ -183,16 +183,26 @@ pub(crate) async fn hosts(
     let mut hosts = status::hosts(&mut reader)
         .await
         .context("cannot read the hosts")?;
-    let read = hosts.hosts.len();
-    if read < usize::try_from(hosts.reported)? {
-        eprintln!("the device reported {} hosts, read {read}", hosts.reported);
-    }
+    eprint!("{}", shortfall(&hosts));
     if active {
         hosts.hosts.retain(|h| h.active);
     }
     match format {
         Format::Json => json(&hosts, out),
         Format::Text => host_table(&hosts, out),
+    }
+}
+
+/// A line that tells how many hosts were not read, or nothing.
+fn shortfall(hosts: &Hosts) -> String {
+    let read = hosts.hosts.len();
+    if read < hosts.reported as usize {
+        format!(
+            "the device reported {} hosts, read {read}\n",
+            hosts.reported
+        )
+    } else {
+        String::new()
     }
 }
 
@@ -445,6 +455,7 @@ mod tests {
                 Host::default(),
             ],
         };
+        assert_eq!(shortfall(&hosts), "");
         let output = text(|out| host_table(&hosts, out));
         assert_eq!(
             output,
@@ -452,6 +463,11 @@ mod tests {
              device-1           yes\n\
              \x20                  no\n"
         );
+        let fewer = Hosts {
+            reported: 3,
+            ..hosts
+        };
+        assert_eq!(shortfall(&fewer), "the device reported 3 hosts, read 2\n");
         let wlans = [Wlan {
             service: "WLANConfiguration1".to_owned(),
             channel: Some(6),
