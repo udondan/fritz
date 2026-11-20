@@ -13,9 +13,28 @@ use tr064::{Client, Error, Fingerprint, SecretString, Url, fetch_fingerprint};
 
 const BODY: &str = "hello over TLS";
 
+/// How the server ends its answer.
+#[derive(Clone, Copy)]
+enum Ending {
+    /// With a `Content-Length` and `close_notify`.
+    Clean,
+    /// Without a length, by closing the connection without `close_notify`.
+    Abrupt,
+    /// With a `Content-Length` larger than the body, by closing the
+    /// connection without `close_notify`.
+    Truncated,
+}
+
 /// A server that answers every request with [`BODY`], and the fingerprint of
 /// its certificate.
 async fn server(version: &'static SupportedProtocolVersion) -> (SocketAddr, Fingerprint) {
+    server_ending(version, Ending::Clean).await
+}
+
+async fn server_ending(
+    version: &'static SupportedProtocolVersion,
+    ending: Ending,
+) -> (SocketAddr, Fingerprint) {
     let certified = rcgen::generate_simple_self_signed(["localhost".to_owned()]).unwrap();
     let der: CertificateDer<'static> = certified.cert.der().clone();
     let key = PrivateKeyDer::Pkcs8(PrivatePkcs8KeyDer::from(
@@ -47,12 +66,20 @@ async fn server(version: &'static SupportedProtocolVersion) -> (SocketAddr, Fing
                     let n = tls.read(&mut buffer).await.unwrap();
                     request.extend_from_slice(&buffer[..n]);
                 }
-                let response = format!(
-                    "HTTP/1.1 200 OK\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{BODY}",
-                    BODY.len()
-                );
+                let length = match ending {
+                    Ending::Clean => format!("Content-Length: {}\r\n", BODY.len()),
+                    Ending::Abrupt => String::new(),
+                    Ending::Truncated => format!("Content-Length: {}\r\n", BODY.len() + 10),
+                };
+                let response =
+                    format!("HTTP/1.1 200 OK\r\n{length}Connection: close\r\n\r\n{BODY}");
                 tls.write_all(response.as_bytes()).await.unwrap();
-                tls.shutdown().await.unwrap();
+                tls.flush().await.unwrap();
+                match ending {
+                    Ending::Clean => tls.shutdown().await.unwrap(),
+                    // Closes the TCP connection without close_notify.
+                    Ending::Abrupt | Ending::Truncated => drop(tls.into_inner().0),
+                }
             });
         }
     });
@@ -69,6 +96,19 @@ fn pinned(addr: SocketAddr, pin: Fingerprint) -> Client {
         .pin(pin)
         .build()
         .unwrap()
+}
+
+#[tokio::test]
+async fn accepts_a_body_that_ends_with_the_connection() {
+    let (addr, fingerprint) = server_ending(&rustls::version::TLS13, Ending::Abrupt).await;
+    assert_eq!(pinned(addr, fingerprint).get("/").await.unwrap(), BODY);
+}
+
+#[tokio::test]
+async fn rejects_a_body_shorter_than_its_length() {
+    let (addr, fingerprint) = server_ending(&rustls::version::TLS13, Ending::Truncated).await;
+    let error = pinned(addr, fingerprint).get("/").await.unwrap_err();
+    assert!(matches!(error, Error::Http(_)), "{error:?}");
 }
 
 #[tokio::test]

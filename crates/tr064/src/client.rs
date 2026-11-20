@@ -123,7 +123,7 @@ impl Client {
         let response = self
             .send(self.http.get(url.clone()), &Method::GET, &url)
             .await?;
-        Ok(response.text().await?)
+        text(response).await
     }
 
     /// Fetches and parses the device description `/tr64desc.xml`.
@@ -166,7 +166,7 @@ impl Client {
             .header(CONTENT_TYPE, r#"text/xml; charset="utf-8""#)
             .body(body);
         let response = self.send(request, &Method::POST, &url).await?;
-        soap::parse_response(&response.text().await?, action)
+        soap::parse_response(&text(response).await?, action)
     }
 
     /// Resolves `path` against the base URL. Credentials must only ever go to
@@ -270,15 +270,42 @@ async fn check_status(response: Response, url: &Url) -> Result<Response, Error> 
     if status.is_success() {
         return Ok(response);
     }
-    let text = response.text().await.unwrap_or_default();
+    let body = text(response).await.unwrap_or_default();
     if status == StatusCode::INTERNAL_SERVER_ERROR
-        && let Some(fault) = soap::parse_fault(&text)
+        && let Some(fault) = soap::parse_fault(&body)
     {
         return Err(fault);
     }
     Err(Error::Status {
         status: status.as_u16(),
         url: url.to_string(),
+    })
+}
+
+/// The body of a response as text. A body without a length ends with the
+/// connection, and devices like the FRITZ!Box close a TLS connection
+/// without sending `close_notify` first. That counts as the end of such a
+/// body. A body with a length that ends early is still an error.
+async fn text(mut response: Response) -> Result<String, Error> {
+    let delimited = response.content_length().is_none();
+    let mut body = Vec::new();
+    loop {
+        match response.chunk().await {
+            Ok(Some(chunk)) => body.extend_from_slice(&chunk),
+            Ok(None) => break,
+            Err(error) if delimited && ends_early(&error) => break,
+            Err(error) => return Err(error.into()),
+        }
+    }
+    Ok(String::from_utf8_lossy(&body).into_owned())
+}
+
+/// Whether an error, or one of its causes, is an unexpected end of the
+/// connection.
+fn ends_early(error: &(dyn std::error::Error + 'static)) -> bool {
+    std::iter::successors(Some(error), |e| e.source()).any(|e| {
+        e.downcast_ref::<std::io::Error>()
+            .is_some_and(|e| e.kind() == std::io::ErrorKind::UnexpectedEof)
     })
 }
 
