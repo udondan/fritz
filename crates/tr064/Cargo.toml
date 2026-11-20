@@ -11,6 +11,8 @@ repository.workspace = true
 authors.workspace = true
 
 [dependencies]
+roxmltree = "0.21.2"
+thiserror = "2.0.21"
 
 [lints]
 workspace = true
