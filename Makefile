@@ -10,11 +10,13 @@ run:
 	@cargo run -p fritz
 
 test:
-	@cargo test --workspace
+	@cargo test --workspace --all-features
+	@cargo test -p fritz --test cli -- --exact cannot_change_without_the_feature_write
 
 lint:
 	@cargo fmt --all -- --check
 	@cargo clippy --workspace --all-targets -- -D warnings
+	@cargo clippy --workspace --all-targets --all-features -- -D warnings
 
 # Links the pre-commit hook into the repository's hooks directory, which all
 # worktrees share. The link points to the main checkout's copy of the script.

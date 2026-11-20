@@ -102,6 +102,17 @@ pub(crate) fn kind(variable: &StateVariable) -> String {
     }
 }
 
+/// Splits arguments like `NewIndex=0` into names and values.
+pub(crate) fn parse_arguments(arguments: &[String]) -> anyhow::Result<Vec<(String, String)>> {
+    arguments
+        .iter()
+        .map(|a| match a.split_once('=') {
+            Some((n, v)) => Ok((n.to_owned(), v.to_owned())),
+            None => bail!("{a} is not NAME=VALUE"),
+        })
+        .collect()
+}
+
 /// Calls an action that only reads, and prints its output with secrets
 /// hidden. The action is checked before the password is read and before
 /// anything is sent to its control URL.
@@ -112,13 +123,7 @@ pub(crate) async fn call(
     arguments: &[String],
     out: &mut impl Write,
 ) -> anyhow::Result<()> {
-    let arguments = arguments
-        .iter()
-        .map(|a| match a.split_once('=') {
-            Some((n, v)) => Ok((n.to_owned(), v.to_owned())),
-            None => bail!("{a} is not NAME=VALUE"),
-        })
-        .collect::<anyhow::Result<Vec<_>>>()?;
+    let arguments = parse_arguments(arguments)?;
     let target = context.target()?;
     let (service, scpd) = service(&target.client()?.build()?, reference).await?;
     let action = generic::action(&service, &scpd, name)?;

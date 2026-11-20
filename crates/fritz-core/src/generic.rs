@@ -26,6 +26,8 @@ pub enum Error {
     UnknownArgument { action: String, argument: String },
     #[error("{action} needs the input {argument}")]
     MissingArgument { action: String, argument: String },
+    #[error("{action} got the input {argument} more than once")]
+    DuplicateArgument { action: String, argument: String },
     #[error("the {document} of the device is not valid: {reason}")]
     InvalidDocument {
         document: &'static str,
@@ -90,6 +92,17 @@ pub fn check(
             class,
         });
     }
+    check_arguments(action, arguments)
+}
+
+/// Checks that the arguments are exactly the inputs of an action.
+///
+/// # Errors
+///
+/// [`Error::UnknownArgument`], [`Error::MissingArgument`] or
+/// [`Error::DuplicateArgument`] if they are
+/// not.
+pub fn check_arguments(action: &Action, arguments: &[(String, String)]) -> Result<(), Error> {
     if let Some((name, _)) = arguments
         .iter()
         .find(|(name, _)| !action.inputs().any(|a| &a.name == name))
@@ -106,6 +119,16 @@ pub fn check(
         return Err(Error::MissingArgument {
             action: action.name.clone(),
             argument: input.name.clone(),
+        });
+    }
+    if let Some((_, (name, _))) = arguments
+        .iter()
+        .enumerate()
+        .find(|(i, (name, _))| arguments[..*i].iter().any(|(n, _)| n == name))
+    {
+        return Err(Error::DuplicateArgument {
+            action: action.name.clone(),
+            argument: name.clone(),
         });
     }
     Ok(())

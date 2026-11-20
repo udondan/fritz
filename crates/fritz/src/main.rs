@@ -3,6 +3,8 @@
 //! Unofficial, not affiliated with FRITZ! GmbH.
 
 mod auth;
+#[cfg(feature = "write")]
+mod change;
 mod context;
 mod device;
 mod mcp;
@@ -133,6 +135,10 @@ enum Command {
     /// The services and actions of the device. Calls only actions that read.
     #[command(subcommand)]
     Tr64(Tr64Command),
+    /// Plan and apply changes. Needs `FRITZ_ALLOW_WRITE=1`, and the identity
+    /// of the device on the allow list in the configuration.
+    #[cfg(feature = "write")]
+    Change(change::ChangeArgs),
     /// Serve the state of the device over MCP on stdin and stdout. Only
     /// reads.
     Mcp {
@@ -325,6 +331,8 @@ async fn main() -> anyhow::Result<()> {
         Command::Auth(AuthCommand::Logout) => auth::logout(&load()?, out),
         Command::Auth(AuthCommand::Status) => auth::status(&load()?, out),
         Command::Tr64(command) => tr64(&load()?, command, out).await,
+        #[cfg(feature = "write")]
+        Command::Change(args) => change::run(&load()?, args, format, out).await,
         Command::Capture(args) => capture(&load()?, args).await,
         Command::Fixture(command) => fixture(&command),
     }

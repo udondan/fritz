@@ -83,6 +83,22 @@ For the Docker MCP Toolkit, `mise run docker` builds the image and adds
 `fritz.host`, `fritz.username`, `fritz.password` and `fritz.fingerprint`
 with `docker mcp secret set`. The container must be able to reach the box.
 
+## Changes
+
+Release builds only read. Builds with the feature `write` add `fritz change`,
+which plans a change, shows the current and the new values, and applies it
+with the token of the plan:
+
+```sh
+cargo build -p fritz --features write
+fritz change identity        # add it to [write] allow in the configuration
+FRITZ_ALLOW_WRITE=1 fritz change plan WLANConfiguration3 SetEnable NewEnable=0
+FRITZ_ALLOW_WRITE=1 fritz change apply WLANConfiguration3 SetEnable NewEnable=0 --token <token>
+```
+
+Changes are only made to devices on the allow list, and never to those on the
+deny list. See [SECURITY.md](SECURITY.md#changes) for all checks.
+
 ## Security
 
 `fritz` is read-only by default. See [SECURITY.md](SECURITY.md) for the security

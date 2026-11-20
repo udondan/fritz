@@ -1078,3 +1078,258 @@ async fn reports_a_missing_smart_home_api() {
     // The session is closed anyway.
     assert_eq!(sim.requests().last().unwrap().path, "/login_sid.lua");
 }
+
+/// Builds without the feature `write` have no command to change anything.
+#[cfg(not(feature = "write"))]
+#[test]
+fn cannot_change_without_the_feature_write() {
+    let error = failure(&fritz(&["change", "identity"]));
+    assert!(
+        error.contains("unrecognized subcommand 'change'"),
+        "{error}"
+    );
+}
+
+/// `fritz change`, in builds with the feature `write`.
+#[cfg(feature = "write")]
+mod change {
+    use fritz_core::identity::Identity;
+
+    use super::*;
+
+    /// The identity of the device of the fixture.
+    fn identity() -> String {
+        Identity::of("uuid:00000000-0000-4000-8000-000000000001", "AABBCC000001").to_string()
+    }
+
+    struct Setup {
+        sim: fritz_sim::Sim,
+        dir: tempfile::TempDir,
+    }
+
+    impl Setup {
+        /// A simulator, and a configuration that allows changes to it.
+        async fn new() -> Self {
+            let fixture = fritz_sim::Fixture::load(FIXTURE).unwrap();
+            let setup = Self {
+                sim: fritz_sim::Sim::start(fixture).await.unwrap(),
+                dir: tempfile::tempdir().unwrap(),
+            };
+            setup.configure(&format!("[write]\nallow = [\"{}\"]\n", identity()));
+            setup
+        }
+
+        fn configure(&self, text: &str) {
+            std::fs::write(self.dir.path().join("config.toml"), text).unwrap();
+        }
+
+        /// Runs `fritz change` against the simulator with the password,
+        /// the configuration, a state directory and the variables.
+        async fn run(&self, args: &[&str], vars: &[(&str, &str)]) -> Output {
+            let mut all = strings(&[
+                "--host",
+                self.sim.url().as_str(),
+                "--user",
+                fritz_sim::USERNAME,
+                "change",
+            ]);
+            all.extend(strings(args));
+            let dir = self.dir.path();
+            let mut env = vec![
+                ("FRITZ_PASSWORD".to_owned(), fritz_sim::PASSWORD.to_owned()),
+                (
+                    "FRITZ_CONFIG".to_owned(),
+                    dir.join("config.toml").display().to_string(),
+                ),
+                (
+                    "FRITZ_STATE_DIR".to_owned(),
+                    dir.join("state").display().to_string(),
+                ),
+            ];
+            env.extend(vars.iter().map(|(n, v)| ((*n).to_owned(), (*v).to_owned())));
+            fritz_blocking(all, env, "").await
+        }
+
+        /// Plans `SetEnable` of the first network, and returns the token.
+        async fn plan(&self, enable: &str) -> String {
+            let argument = format!("NewEnable={enable}");
+            let output = self
+                .run(
+                    &[
+                        "--output",
+                        "json",
+                        "plan",
+                        "WLANConfiguration1",
+                        "SetEnable",
+                        &argument,
+                    ],
+                    &[("FRITZ_ALLOW_WRITE", "1")],
+                )
+                .await;
+            let plan: serde_json::Value = serde_json::from_str(&success(&output)).unwrap();
+            plan["token"].as_str().unwrap().to_owned()
+        }
+
+        async fn apply(&self, enable: &str, token: &str, output: &str) -> Output {
+            let argument = format!("NewEnable={enable}");
+            self.run(
+                &[
+                    "--output",
+                    output,
+                    "apply",
+                    "WLANConfiguration1",
+                    "SetEnable",
+                    &argument,
+                    "--token",
+                    token,
+                ],
+                &[("FRITZ_ALLOW_WRITE", "1")],
+            )
+            .await
+        }
+
+        fn enabled(&self) -> Option<String> {
+            self.sim.state("WLANConfiguration1", "Enable")
+        }
+    }
+
+    #[tokio::test(flavor = "multi_thread")]
+    async fn prints_the_identity() {
+        let setup = Setup::new().await;
+        let output = success(&setup.run(&["identity"], &[]).await);
+        assert_eq!(output, format!("{}\n", identity()));
+    }
+
+    #[tokio::test(flavor = "multi_thread")]
+    async fn plans_and_applies_changes() {
+        let setup = Setup::new().await;
+        let args = [
+            "--output",
+            "text",
+            "plan",
+            "WLANConfiguration1",
+            "SetEnable",
+            "NewEnable=0",
+        ];
+        let plan = success(&setup.run(&args, &[("FRITZ_ALLOW_WRITE", "1")]).await);
+        let expected = format!(
+            "device  {}\naction  WLANConfiguration1 SetEnable (write)\nchange  NewEnable: 1 -> 0\n",
+            identity()
+        );
+        assert!(plan.starts_with(&expected), "{plan}");
+        let token = plan
+            .lines()
+            .find_map(|l| l.strip_prefix("token   "))
+            .and_then(|t| t.strip_suffix(" (valid for 300 s)"))
+            .unwrap();
+        assert_eq!(setup.enabled().as_deref(), Some("1"));
+
+        let applied = success(&setup.apply("0", token, "text").await);
+        assert_eq!(
+            applied,
+            format!(
+                "device    {}\napplied   WLANConfiguration1 SetEnable\nnow       NewEnable: 0 (sent 0)\nverified  yes\n",
+                identity()
+            )
+        );
+        assert_eq!(setup.enabled().as_deref(), Some("0"));
+
+        let error = failure(&setup.apply("0", token, "text").await);
+        assert!(error.contains("the token is unknown, used"), "{error}");
+        let audit = std::fs::read_to_string(setup.dir.path().join("state/audit.jsonl")).unwrap();
+        assert_eq!(audit.lines().count(), 4, "{audit}");
+        assert!(audit.contains("\"source\":\"cli\""), "{audit}");
+    }
+
+    #[tokio::test(flavor = "multi_thread")]
+    async fn prints_changes_as_json() {
+        let setup = Setup::new().await;
+        let token = setup.plan("0").await;
+        let output = success(&setup.apply("0", &token, "json").await);
+        let outcome: serde_json::Value = serde_json::from_str(&output).unwrap();
+        assert_eq!(outcome["verified"], true);
+        assert_eq!(outcome["checks"][0]["actual"], "0");
+    }
+
+    #[tokio::test(flavor = "multi_thread")]
+    async fn fails_when_the_device_keeps_the_old_value() {
+        let setup = Setup::new().await;
+        setup
+            .sim
+            .inject(Injection::fault("WLANConfiguration1", "GetInfo", 820));
+        let args = [
+            "--output",
+            "text",
+            "plan",
+            "WLANConfiguration1",
+            "SetEnable",
+            "NewEnable=0",
+        ];
+        let plan = success(&setup.run(&args, &[("FRITZ_ALLOW_WRITE", "1")]).await);
+        assert!(plan.contains("change  NewEnable: ? -> 0\n"), "{plan}");
+        let token = setup.plan("0").await;
+        let output = success(&setup.apply("0", &token, "text").await);
+        assert!(
+            output.contains("now       NewEnable: ? (sent 0)\n"),
+            "{output}"
+        );
+        assert!(output.ends_with("verified  unknown\n"), "{output}");
+
+        setup.sim.clear_injections();
+        let token = setup.plan("1").await;
+        setup.sim.inject(Injection::DiscardWrites);
+        let output = setup.apply("1", &token, "text").await;
+        let error = failure(&output);
+        assert!(
+            error.contains("the device does not return the values it was given"),
+            "{error}"
+        );
+        let text = stdout(&output);
+        assert!(text.contains("now       NewEnable: 0 (sent 1)\n"), "{text}");
+        assert!(text.ends_with("verified  no\n"), "{text}");
+    }
+
+    #[tokio::test(flavor = "multi_thread")]
+    async fn refuses_changes_that_are_not_allowed() {
+        let setup = Setup::new().await;
+        let plan = ["plan", "WLANConfiguration1", "SetEnable", "NewEnable=0"];
+        let error = failure(&setup.run(&plan, &[]).await);
+        assert!(
+            error.contains("SetEnable is write; it needs FRITZ_ALLOW_WRITE=1"),
+            "{error}"
+        );
+        let error = failure(
+            &setup
+                .run(&["plan", "WLANConfiguration1", "SetEnable", "x"], &[])
+                .await,
+        );
+        assert!(error.contains("x is not NAME=VALUE"), "{error}");
+        let error = failure(
+            &setup
+                .run(
+                    &[
+                        "apply",
+                        "WLANConfiguration1",
+                        "SetEnable",
+                        "x",
+                        "--token",
+                        "t",
+                    ],
+                    &[],
+                )
+                .await,
+        );
+        assert!(error.contains("x is not NAME=VALUE"), "{error}");
+
+        setup.configure(&format!("[write]\ndeny = [\"{}\"]\n", identity()));
+        let error = failure(&setup.run(&plan, &[("FRITZ_ALLOW_WRITE", "1")]).await);
+        assert!(error.contains("is on the deny list for changes"), "{error}");
+        assert!(
+            setup
+                .sim
+                .requests()
+                .iter()
+                .all(|r| r.action.as_deref() != Some("SetEnable"))
+        );
+    }
+}

@@ -9,7 +9,13 @@
 //! host = "192.168.178.1"
 //! username = "agent"
 //! fingerprint = "AB:CD:…"
+//!
+//! [write]
+//! deny = ["<identity of the device>"]
 //! ```
+//!
+//! The `write` section lists the devices that may and may never be changed,
+//! see [`identity`](crate::identity).
 
 use std::collections::BTreeMap;
 use std::io;
@@ -17,6 +23,8 @@ use std::path::{Path, PathBuf};
 
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use tr064::Fingerprint;
+
+use crate::identity::Targets;
 
 /// The configuration file could not be read or written.
 #[derive(Debug, thiserror::Error)]
@@ -64,6 +72,9 @@ pub struct Config {
         skip_serializing_if = "BTreeMap::is_empty"
     )]
     pub profiles: BTreeMap<String, Profile>,
+    /// The devices that may and may never be changed.
+    #[serde(default, skip_serializing_if = "Targets::is_empty")]
+    pub write: Targets,
 }
 
 /// How to reach one device.
@@ -169,6 +180,7 @@ impl Config {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::identity::Identity;
 
     const FINGERPRINT: &str = "00:11:22:33:44:55:66:77:88:99:AA:BB:CC:DD:EE:FF:00:11:22:33:44:55:66:77:88:99:AA:BB:CC:DD:EE:FF";
 
@@ -196,6 +208,10 @@ mod tests {
                     },
                 ),
             ]),
+            write: Targets {
+                allow: Vec::new(),
+                deny: vec![Identity::of("uuid:home", "1")],
+            },
         };
         config.save(&path).unwrap();
         let text = std::fs::read_to_string(&path).unwrap();
@@ -203,6 +219,7 @@ mod tests {
             text.contains(&format!("fingerprint = \"{FINGERPRINT}\"")),
             "{text}"
         );
+        assert!(text.contains("[write]\ndeny = [\""), "{text}");
         assert!(!dir.path().join("nested/config.toml.tmp").exists());
         assert_eq!(Config::load(&path).unwrap(), config);
     }
@@ -224,6 +241,7 @@ mod tests {
         for text in [
             "[profile.home]\nhost = \"fritz.box\"\nfingerprint = \"00\"\n",
             "unknown = 1\n",
+            "[write]\nallow = [\"00\"]\n",
         ] {
             std::fs::write(&path, text).unwrap();
             let error = Config::load(&path).unwrap_err();
@@ -251,6 +269,7 @@ mod tests {
         let mut config = Config {
             default_profile: None,
             profiles: BTreeMap::from([("home".to_owned(), home())]),
+            write: Targets::default(),
         };
         assert_eq!(config.profile(None).unwrap(), None);
         assert_eq!(

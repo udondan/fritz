@@ -84,13 +84,19 @@ jobs:
           # their own entries, which keeps the cache storage small.
           save-if: ${{ github.ref == 'refs/heads/main' }}
 
+      # Releases are built without the feature write, tests and coverage
+      # with it, so both builds are linted.
       - name: Lint
         run: |
           cargo fmt --all -- --check
           cargo clippy --workspace --all-targets -- -D warnings
+          cargo clippy --workspace --all-targets --all-features -- -D warnings
 
       - name: Test
-        run: cargo llvm-cov --workspace --lcov --output-path lcov.info
+        run: cargo llvm-cov --workspace --all-features --lcov --output-path lcov.info
+
+      - name: Test that builds without the feature write cannot change
+        run: cargo test -p fritz --test cli -- --exact cannot_change_without_the_feature_write
 
       # Coverage of main is uploaded by the Coverage workflow, without waiting
       # in the queue.

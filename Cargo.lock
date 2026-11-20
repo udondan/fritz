@@ -808,6 +808,8 @@ dependencies = [
  "apple-native-keyring-store",
  "axum",
  "directories",
+ "fritz-sim",
+ "getrandom 0.4.3",
  "keyring-core",
  "md-5",
  "pbkdf2",
