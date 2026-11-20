@@ -16,6 +16,8 @@ clap = { version = "=4.6.9", features = ["derive", "env"] }
 fritz-core.workspace = true
 rpassword = "=7.5.5"
 secrecy = "=0.10.3"
+serde = "=1.0.228"
+serde_json = "=1.0.154"
 tokio = { version = "=1.54.1", features = ["macros", "rt"] }
 tr064.workspace = true
 
@@ -26,5 +28,6 @@ workspace = true
 axum = "=0.8.9"
 fritz-sim.workspace = true
 keyring-core = "=1.0.1"
+serde_json = "=1.0.154"
 tempfile = "=3.27.0"
 tokio = { version = "=1.54.1", features = ["macros", "net", "rt-multi-thread"] }

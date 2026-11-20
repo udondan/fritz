@@ -622,8 +622,14 @@ const FIXTURE: &str = concat!(
 
 /// Runs `fritz tr64` against `sim` as its user, with the given password.
 async fn tr64(sim: &fritz_sim::Sim, args: &[&str], password: Option<&str>) -> Output {
+    let mut all = vec!["tr64"];
+    all.extend(args);
+    run(sim, &all, password).await
+}
+
+/// Runs `fritz` against `sim` as its user, with the given password.
+async fn run(sim: &fritz_sim::Sim, args: &[&str], password: Option<&str>) -> Output {
     let mut all = strings(&["--host", sim.url().as_str(), "--user", fritz_sim::USERNAME]);
-    all.push("tr64".to_owned());
     all.extend(strings(args));
     let env = password
         .map(|p| ("FRITZ_PASSWORD".to_owned(), p.to_owned()))
@@ -794,5 +800,96 @@ fn reports_an_unreachable_device_for_tr64() {
         stderr(&output).contains("cannot read the device description"),
         "{}",
         stderr(&output)
+    );
+}
+
+#[tokio::test(flavor = "multi_thread")]
+async fn prints_the_state_as_json() {
+    let fixture = fritz_sim::Fixture::load(FIXTURE).unwrap();
+    let sim = fritz_sim::Sim::start(fixture).await.unwrap();
+    let password = Some(fritz_sim::PASSWORD);
+    let json =
+        |output: &Output| -> serde_json::Value { serde_json::from_str(&success(output)).unwrap() };
+
+    // JSON is the default when the output is not a terminal.
+    let overview = json(&run(&sim, &["overview"], password).await);
+    assert_eq!(overview["model"], "FRITZ!Box 7690");
+    assert_eq!(overview["internet"]["status"], "Connected");
+    let internet = json(&run(&sim, &["--output", "json", "internet"], password).await);
+    assert_eq!(internet["provider"], "provider-1");
+    assert_eq!(internet["dsl"]["downstream_noise_margin"], 7.0);
+    let wlan = json(&run(&sim, &["wlan"], password).await);
+    assert_eq!(wlan.as_array().unwrap().len(), 3);
+
+    let output = run(&sim, &["hosts"], password).await;
+    assert_eq!(json(&output)["hosts"].as_array().unwrap().len(), 50);
+    assert!(stderr(&output).contains("the device reported 161 hosts, read 50"));
+    let active = json(&run(&sim, &["hosts", "--active"], password).await);
+    let active = active["hosts"].as_array().unwrap();
+    assert!(!active.is_empty() && active.len() < 50, "{active:?}");
+    assert!(active.iter().all(|h| h["active"] == true));
+}
+
+#[tokio::test(flavor = "multi_thread")]
+async fn prints_the_state_as_text() {
+    let fixture = fritz_sim::Fixture::load(FIXTURE).unwrap();
+    let sim = fritz_sim::Sim::start(fixture).await.unwrap();
+    let password = Some(fritz_sim::PASSWORD);
+    let text =
+        async |command: &str| success(&run(&sim, &["--output", "text", command], password).await);
+
+    let overview = text("overview").await;
+    assert!(
+        overview.starts_with("Model       FRITZ!Box 7690\n"),
+        "{overview}"
+    );
+    assert!(overview.contains("Uptime      8d 19h 13m\n"), "{overview}");
+    assert!(
+        overview.contains("Internet    Connected over DSL (link Up), 2001:db8::1, for 9h 36m\n"),
+        "{overview}"
+    );
+    let internet = text("internet").await;
+    assert!(
+        internet.contains("DSL rate       ↓ 274.8 Mbit/s  ↑ 45.9 Mbit/s\n"),
+        "{internet}"
+    );
+    let wlan = text("wlan").await;
+    assert!(
+        wlan.starts_with("SERVICE             SSID    BAND     CHANNEL"),
+        "{wlan}"
+    );
+    assert!(
+        wlan.contains("WLANConfiguration1  wlan-1  2.4 GHz  6        be        Up        4\n"),
+        "{wlan}"
+    );
+    let hosts = text("hosts").await;
+    assert!(hosts.starts_with("NAME "), "{hosts}");
+    assert!(hosts.contains("device-1 "), "{hosts}");
+}
+
+#[tokio::test(flavor = "multi_thread")]
+async fn reports_failed_reads() {
+    let fixture = fritz_sim::Fixture::load(FIXTURE).unwrap();
+    let sim = fritz_sim::Sim::start(fixture).await.unwrap();
+    for (command, message) in [
+        ("overview", "cannot read the overview"),
+        ("internet", "cannot read the internet connection"),
+        ("wlan", "cannot read the wireless networks"),
+        ("hosts", "cannot read the hosts"),
+    ] {
+        let error = failure(&run(&sim, &[command], Some("wrong")).await);
+        assert!(error.contains(message), "{message} in {error}");
+    }
+    let error = failure(&run(&sim, &["overview"], None).await);
+    assert!(error.contains("no password for"), "{error}");
+    let url = unreachable_url("http");
+    let output = fritz_with(
+        &["--host", &url, "--user", "agent", "overview"],
+        &[("FRITZ_PASSWORD", "x")],
+    );
+    let error = failure(&output);
+    assert!(
+        error.contains("cannot read the device description"),
+        "{error}"
     );
 }
