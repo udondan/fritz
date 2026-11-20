@@ -1,7 +1,8 @@
 //! End-to-end tests of the `fritz` binary.
 
+use std::io::Write as _;
 use std::path::{Path, PathBuf};
-use std::process::{Command, Output};
+use std::process::{Command, Output, Stdio};
 
 use axum::Router;
 use axum::http::StatusCode;
@@ -14,18 +15,32 @@ const ONTEL: &str = include_str!("../../fritz-core/tests/data/ontelSCPD.xml");
 
 const FINGERPRINT: &str = "00112233445566778899AABBCCDDEEFF00112233445566778899AABBCCDDEEFF";
 
-/// Runs `fritz` with the given arguments and environment, without the
-/// `FRITZ_*` variables of the caller.
-fn fritz_with(args: &[&str], env: &[(&str, &str)]) -> Output {
+/// Runs `fritz` with the given arguments, environment and input, without the
+/// `FRITZ_*` variables of the caller. The keychain is off, and the
+/// configuration file does not exist unless `FRITZ_CONFIG` is given.
+fn fritz_input(args: &[&str], env: &[(&str, &str)], input: &str) -> Output {
     let mut command = Command::new(env!("CARGO_BIN_EXE_fritz"));
     for (name, _) in std::env::vars().filter(|(n, _)| n.starts_with("FRITZ_")) {
         command.env_remove(name);
     }
-    command
+    let missing = Path::new(env!("CARGO_TARGET_TMPDIR")).join("missing/config.toml");
+    let mut child = command
         .args(args)
+        .env("FRITZ_NO_KEYCHAIN", "1")
+        .env("FRITZ_CONFIG", missing)
         .envs(env.iter().copied())
-        .output()
-        .expect("run fritz")
+        .stdin(Stdio::piped())
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped())
+        .spawn()
+        .expect("run fritz");
+    // fritz may exit without reading the input.
+    let _ = child.stdin.take().unwrap().write_all(input.as_bytes());
+    child.wait_with_output().expect("run fritz")
+}
+
+fn fritz_with(args: &[&str], env: &[(&str, &str)]) -> Output {
+    fritz_input(args, env, "")
 }
 
 fn fritz(args: &[&str]) -> Output {
@@ -33,9 +48,17 @@ fn fritz(args: &[&str]) -> Output {
 }
 
 async fn fritz_async(args: Vec<String>, env: Vec<(&'static str, &'static str)>) -> Output {
+    let env = env.into_iter().map(|(n, v)| (n.to_owned(), v.to_owned()));
+    fritz_blocking(args, env.collect(), "").await
+}
+
+/// Runs `fritz` off the runtime, so a device on the runtime can answer.
+async fn fritz_blocking(args: Vec<String>, env: Vec<(String, String)>, input: &str) -> Output {
+    let input = input.to_owned();
     tokio::task::spawn_blocking(move || {
         let args: Vec<&str> = args.iter().map(String::as_str).collect();
-        fritz_with(&args, &env)
+        let env: Vec<(&str, &str)> = env.iter().map(|(n, v)| (n.as_str(), v.as_str())).collect();
+        fritz_input(&args, &env, &input)
     })
     .await
     .unwrap()
@@ -92,7 +115,7 @@ fn unreachable_url(scheme: &str) -> String {
 }
 
 fn capture_args(url: &str, out: &Path) -> Vec<String> {
-    ["capture", "--url", url, "--user", "agent", "--out"]
+    ["capture", "--host", url, "--user", "agent", "--out"]
         .into_iter()
         .map(str::to_owned)
         .chain([out.display().to_string()])
@@ -121,7 +144,7 @@ fn prints_version() {
 async fn plans_a_capture() {
     let url = device(Control::Missing).await;
     let output = fritz_async(
-        vec!["capture".into(), "--plan".into(), "--url".into(), url],
+        vec!["capture".into(), "--plan".into(), "--host".into(), url],
         vec![],
     )
     .await;
@@ -137,7 +160,7 @@ async fn plans_a_capture() {
 #[test]
 fn reports_an_unreachable_device() {
     let url = unreachable_url("http");
-    let output = fritz(&["capture", "--plan", "--url", &url]);
+    let output = fritz(&["capture", "--plan", "--host", &url]);
     assert!(!output.status.success());
     assert!(
         stderr(&output).contains(&format!("cannot read the descriptions of {url}")),
@@ -152,7 +175,7 @@ fn pins_the_certificate_for_https() {
     let output = fritz(&[
         "capture",
         "--plan",
-        "--url",
+        "--host",
         &url,
         "--fingerprint",
         FINGERPRINT,
@@ -162,8 +185,12 @@ fn pins_the_certificate_for_https() {
         "{}",
         stderr(&output)
     );
-    let output = fritz(&["capture", "--plan", "--url", &url]);
-    assert!(stderr(&output).contains("pin"), "{}", stderr(&output));
+    let output = fritz(&["capture", "--plan", "--host", &url]);
+    assert!(
+        stderr(&output).contains("run `fritz tls trust`"),
+        "{}",
+        stderr(&output)
+    );
 
     // A capture over https needs no warning.
     let dir = tempfile::tempdir().unwrap();
@@ -182,9 +209,18 @@ fn pins_the_certificate_for_https() {
 fn needs_a_user_and_a_directory_to_capture() {
     let output = fritz(&["capture"]);
     assert!(!output.status.success());
-    let stderr = stderr(&output);
-    assert!(stderr.contains("--user"), "{stderr}");
-    assert!(stderr.contains("--out"), "{stderr}");
+    assert!(stderr(&output).contains("--out"), "{}", stderr(&output));
+
+    let dir = tempfile::tempdir().unwrap();
+    let out = dir.path().join("raw");
+    let args = ["capture", "--host", "http://127.0.0.1:9", "--out"];
+    let output = fritz(&[&args[..], &[out.to_str().unwrap()]].concat());
+    assert!(!output.status.success());
+    assert!(
+        stderr(&output).contains("no user is set for http://127.0.0.1:9/"),
+        "{}",
+        stderr(&output)
+    );
 }
 
 #[test]
@@ -196,7 +232,9 @@ fn needs_the_password_in_the_environment() {
     let output = fritz(&args);
     assert!(!output.status.success());
     assert!(
-        stderr(&output).contains("set FRITZ_PASSWORD to the password of agent"),
+        stderr(&output).contains(
+            "no password for agent@127.0.0.1, run `fritz auth login` or set FRITZ_PASSWORD"
+        ),
         "{}",
         stderr(&output)
     );
@@ -285,4 +323,277 @@ async fn reports_when_it_cannot_write() {
         "{}",
         stderr(&output)
     );
+}
+
+/// A configuration file in a temporary directory.
+struct Config {
+    _dir: tempfile::TempDir,
+    path: String,
+}
+
+impl Config {
+    fn new() -> Self {
+        let dir = tempfile::tempdir().unwrap();
+        let path = dir.path().join("fritz/config.toml").display().to_string();
+        Self { _dir: dir, path }
+    }
+
+    fn env(&self) -> Vec<(String, String)> {
+        vec![("FRITZ_CONFIG".to_owned(), self.path.clone())]
+    }
+
+    fn run(&self, args: &[&str]) -> Output {
+        fritz_with(args, &[("FRITZ_CONFIG", &self.path)])
+    }
+
+    fn text(&self) -> String {
+        std::fs::read_to_string(&self.path).unwrap()
+    }
+}
+
+fn strings(args: &[&str]) -> Vec<String> {
+    args.iter().copied().map(str::to_owned).collect()
+}
+
+#[test]
+fn creates_and_shows_profiles() {
+    let config = Config::new();
+    let output = config.run(&[
+        "config",
+        "init",
+        "--host",
+        "http://127.0.0.1:49000",
+        "--user",
+        "agent",
+    ]);
+    assert!(output.status.success(), "{}", stderr(&output));
+    assert_eq!(
+        stdout(&output),
+        format!("saved the profile default to {}\n", config.path)
+    );
+    let output = config.run(&[
+        "--profile",
+        "lab",
+        "config",
+        "init",
+        "--host",
+        "lab.example",
+    ]);
+    assert!(output.status.success(), "{}", stderr(&output));
+    assert_eq!(
+        config.text(),
+        "default_profile = \"default\"\n\n\
+         [profile.default]\nhost = \"http://127.0.0.1:49000\"\nusername = \"agent\"\n\n\
+         [profile.lab]\nhost = \"lab.example\"\n"
+    );
+
+    let output = fritz_with(
+        &["config", "show"],
+        &[("FRITZ_CONFIG", &config.path), ("FRITZ_PASSWORD", "secret")],
+    );
+    assert!(output.status.success(), "{}", stderr(&output));
+    assert_eq!(
+        stdout(&output),
+        format!(
+            "config       {}\n\
+             profile      default\n\
+             address      http://127.0.0.1:49000/\n\
+             user         agent\n\
+             certificate  none, the connection is not encrypted\n\
+             password     from the environment variable FRITZ_PASSWORD\n",
+            config.path
+        )
+    );
+
+    let output = config.run(&["--profile", "lab", "config", "show"]);
+    assert!(output.status.success(), "{}", stderr(&output));
+    let stdout = stdout(&output);
+    assert!(
+        stdout.contains("address      https://lab.example:49443/\n"),
+        "{stdout}"
+    );
+    assert!(stdout.contains("user         none\n"), "{stdout}");
+    assert!(stdout.contains("password     no user is set"), "{stdout}");
+
+    let output = config.run(&["--profile", "missing", "config", "show"]);
+    assert!(!output.status.success());
+    assert!(
+        stderr(&output).contains("there is no profile named missing"),
+        "{}",
+        stderr(&output)
+    );
+}
+
+#[test]
+fn shows_the_defaults_without_a_file() {
+    let output = fritz(&["config", "show"]);
+    assert!(output.status.success(), "{}", stderr(&output));
+    let stdout = stdout(&output);
+    assert!(stdout.contains("profile      none\n"), "{stdout}");
+    assert!(
+        stdout.contains("address      https://fritz.box:49443/\n"),
+        "{stdout}"
+    );
+    assert!(
+        stdout.contains("certificate  not trusted, run `fritz tls trust`\n"),
+        "{stdout}"
+    );
+}
+
+#[test]
+fn reports_an_invalid_configuration() {
+    let config = Config::new();
+    std::fs::create_dir_all(Path::new(&config.path).parent().unwrap()).unwrap();
+    std::fs::write(&config.path, "unknown = 1\n").unwrap();
+    let output = config.run(&["config", "show"]);
+    assert!(!output.status.success());
+    assert!(
+        stderr(&output).contains("is not a valid configuration"),
+        "{}",
+        stderr(&output)
+    );
+}
+
+#[tokio::test(flavor = "multi_thread")]
+async fn trusts_the_certificate_on_first_use() {
+    let fixture = concat!(
+        env!("CARGO_MANIFEST_DIR"),
+        "/../../fixtures/fritzbox-7690/8.25"
+    );
+    let options = fritz_sim::Options {
+        https: true,
+        ..fritz_sim::Options::default()
+    };
+    let sim = fritz_sim::Sim::start_with(fritz_sim::Fixture::load(fixture).unwrap(), options)
+        .await
+        .unwrap();
+    let host = sim.url().as_str().to_owned();
+    let found = sim.fingerprint().unwrap().to_string();
+    let config = Config::new();
+    let run = |args: &[&str], input: &'static str| {
+        let mut all = strings(&["--host", &host]);
+        all.extend(strings(args));
+        fritz_blocking(all, config.env(), input)
+    };
+
+    let output = run(&["tls", "fingerprint"], "").await;
+    assert!(output.status.success(), "{}", stderr(&output));
+    assert_eq!(stdout(&output), format!("{found}\n"));
+
+    let output = run(&["tls", "trust"], "n\n").await;
+    assert!(!output.status.success());
+    let error = stderr(&output);
+    assert!(
+        error.contains(&format!("presents the certificate\n  {found}\n")),
+        "{error}"
+    );
+    assert!(error.contains("the certificate was not trusted"), "{error}");
+    assert!(!Path::new(&config.path).exists());
+
+    let output = run(&["tls", "trust"], "y\n").await;
+    assert!(output.status.success(), "{}", stderr(&output));
+    assert_eq!(
+        stdout(&output),
+        format!("the profile default trusts the certificate {found} of {host}\n")
+    );
+    assert!(config.text().contains(&found), "{}", config.text());
+
+    let output = run(&["tls", "trust"], "").await;
+    assert!(output.status.success(), "{}", stderr(&output));
+    assert_eq!(
+        stdout(&output),
+        format!("the certificate of {host} is already trusted\n")
+    );
+
+    // The profile pins the certificate for later commands.
+    let output = fritz_blocking(strings(&["capture", "--plan"]), config.env(), "").await;
+    assert!(output.status.success(), "{}", stderr(&output));
+
+    let output = run(&["tls", "trust", "--fingerprint", FINGERPRINT], "").await;
+    assert!(!output.status.success());
+    assert!(
+        stderr(&output).contains(&format!("{host} presents the certificate {found}, not ")),
+        "{}",
+        stderr(&output)
+    );
+    let output = run(&["tls", "trust", "--fingerprint", &found], "").await;
+    assert!(output.status.success(), "{}", stderr(&output));
+
+    // Another certificate was trusted before.
+    let other = format!("{}00", "00:".repeat(31));
+    let text = config.text().replace(&found, &other);
+    std::fs::write(&config.path, text).unwrap();
+    let output = run(&["tls", "trust"], "yes\n").await;
+    assert!(output.status.success(), "{}", stderr(&output));
+    assert!(
+        stderr(&output).contains(&format!("warning: the certificate of {host} changed")),
+        "{}",
+        stderr(&output)
+    );
+    assert!(config.text().contains(&found), "{}", config.text());
+
+    let output = fritz_blocking(strings(&["tls", "forget"]), config.env(), "").await;
+    assert!(output.status.success(), "{}", stderr(&output));
+    assert_eq!(
+        stdout(&output),
+        "the profile default no longer trusts a certificate\n"
+    );
+    let output = fritz_blocking(strings(&["tls", "forget"]), config.env(), "").await;
+    assert!(!output.status.success());
+    assert!(
+        stderr(&output).contains("the profile default trusts no certificate"),
+        "{}",
+        stderr(&output)
+    );
+}
+
+#[test]
+fn has_no_certificate_without_https() {
+    let output = fritz(&["--host", "http://127.0.0.1:9", "tls", "fingerprint"]);
+    assert!(!output.status.success());
+    assert!(
+        stderr(&output).contains("http://127.0.0.1:9/ is not https, so it has no certificate"),
+        "{}",
+        stderr(&output)
+    );
+    let url = unreachable_url("https");
+    let output = fritz(&["--host", &url, "tls", "trust"]);
+    assert!(!output.status.success());
+    assert!(
+        stderr(&output).contains("cannot get the certificate of"),
+        "{}",
+        stderr(&output)
+    );
+}
+
+#[test]
+fn reports_where_the_password_comes_from() {
+    let args = ["--host", "192.168.178.1", "--user", "agent", "auth"];
+    let output = fritz_with(
+        &[&args[..], &["status"]].concat(),
+        &[("FRITZ_PASSWORD", "secret")],
+    );
+    assert!(output.status.success(), "{}", stderr(&output));
+    assert_eq!(
+        stdout(&output),
+        "the password of agent@192.168.178.1 comes from the environment variable FRITZ_PASSWORD\n"
+    );
+
+    let output = fritz(&[&args[..], &["status"]].concat());
+    assert!(!output.status.success());
+    assert!(
+        stderr(&output).contains("no password for agent@192.168.178.1"),
+        "{}",
+        stderr(&output)
+    );
+
+    for command in ["login", "logout"] {
+        let output = fritz_input(&[&args[..], &[command]].concat(), &[], "secret\n");
+        assert!(!output.status.success());
+        assert!(
+            stderr(&output).contains("the keychain is disabled by FRITZ_NO_KEYCHAIN"),
+            "{}",
+            stderr(&output)
+        );
+    }
 }

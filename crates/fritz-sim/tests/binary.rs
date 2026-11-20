@@ -55,8 +55,12 @@ async fn serves_https_and_prints_the_fingerprint() {
         .build()
         .unwrap();
     assert!(client.description().await.is_ok());
-    child.kill().unwrap();
-    child.wait().unwrap();
+    let interrupted = Command::new("kill")
+        .args(["-INT", &child.id().to_string()])
+        .status()
+        .unwrap();
+    assert!(interrupted.success());
+    assert!(child.wait().unwrap().success());
 }
 
 #[test]

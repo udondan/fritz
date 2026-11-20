@@ -5,6 +5,12 @@ codecov:
   notify:
     wait_for_ci: false
 
+ignore:
+  # The keychain of the operating system: CI has none, and tests must never
+  # touch the keychain of a developer.
+  - crates/fritz-core/src/secrets/platform.rs
+  - crates/fritz/src/system.rs
+
 coverage:
   status:
     project:

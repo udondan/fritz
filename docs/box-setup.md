@@ -55,29 +55,53 @@ some changes with a button press or a phone code. Leave this on. `fritz` never
 bypasses it: when the box asks for a confirmation, `fritz` reports that and
 stops.
 
-## 4. Note the address of your box
+## 4. Set up fritz
 
-`fritz` needs the address of your box, for example `192.168.178.1`. Use the IP
-address rather than `fritz.box`: newer FRITZ!OS versions may no longer hand
-out the name `fritz.box` in every setup.
-
-## 5. Note the fingerprint of the certificate
-
-Over plain HTTP on port 49000, the answers of the box travel unencrypted
-through your network. Over HTTPS on port 49443 they are encrypted, but the box
-uses a self-signed certificate, so `fritz` checks it against a fingerprint you
-note once:
+`fritz` keeps the address of your box, the user and the trusted certificate
+in a profile, in `~/.config/fritz/config.toml` on Linux and the usual
+configuration directory on macOS and Windows. Use the IP address rather than
+`fritz.box`: newer FRITZ!OS versions may no longer hand out the name
+`fritz.box` in every setup.
 
 ```sh
-openssl s_client -connect 192.168.178.1:49443 </dev/null 2>/dev/null \
-  | openssl x509 -noout -fingerprint -sha256
+fritz config init --host 192.168.178.1 --user agent
 ```
 
-This prints a line like `sha256 Fingerprint=AB:CD:…`. Pass the part after `=`
-with `--fingerprint` or in `FRITZ_TLS_FINGERPRINT`, together with the HTTPS
-address, for example `--url https://192.168.178.1:49443`. If the box ever
-presents another certificate, `fritz` refuses to connect. When you replace
-the certificate of the box, note the new fingerprint.
+`fritz` talks to the box over HTTPS on port 49443. The box uses a self-signed
+certificate, so `fritz` asks you once whether to trust it and then refuses
+any other certificate:
 
-Compare the fingerprint with the one shown in the web interface of the box
-if you can, to make sure nobody else answered.
+```sh
+fritz tls trust
+```
+
+Compare the fingerprint it shows with the certificate in the web interface of
+the box, to make sure nobody else answered. When you replace the certificate
+of the box, run `fritz tls trust` again.
+
+Store the password in the keychain of your system: the Keychain on macOS,
+the Credential Manager on Windows, or the Secret Service on Linux:
+
+```sh
+fritz auth login
+```
+
+`fritz config show` shows the settings in effect, and `fritz auth status`
+where the password comes from.
+
+## 5. Without a configuration file
+
+In containers and scripts, the environment can replace the profile and the
+keychain:
+
+| Variable | Option | Meaning |
+|---|---|---|
+| `FRITZ_HOST` | `--host` | `192.168.178.1` means `https://192.168.178.1:49443`. Use `http://192.168.178.1:49000` for unencrypted access. |
+| `FRITZ_USERNAME` | `--user` | The user on the box. |
+| `FRITZ_PASSWORD` | | The password. It takes precedence over the keychain. |
+| `FRITZ_TLS_FINGERPRINT` | `--fingerprint` | The SHA-256 fingerprint of the certificate, from `fritz tls fingerprint`. |
+| `FRITZ_PROFILE` | `--profile` | The profile to use instead of the default one. |
+| `FRITZ_CONFIG` | `--config` | Another configuration file. |
+| `FRITZ_NO_KEYCHAIN` | | Any value keeps `fritz` away from the keychain. |
+
+Options and variables take precedence over the profile.

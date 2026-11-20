@@ -59,3 +59,17 @@ impl axum::serve::Listener for TlsListener {
         self.tcp.local_addr()
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[tokio::test]
+    async fn reports_the_local_address() {
+        let tcp = TcpListener::bind("127.0.0.1:0").await.unwrap();
+        let address = tcp.local_addr().unwrap();
+        let (listener, _) = TlsListener::new(tcp);
+        let local = axum::serve::Listener::local_addr(&listener).unwrap();
+        assert_eq!(local, address);
+    }
+}
