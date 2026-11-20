@@ -1,0 +1,16 @@
+[package]
+name = "tr064"
+version = "0.0.0"
+description = "Vendor-neutral client for the TR-064 (UPnP/SOAP) device management protocol"
+keywords = ["tr-064", "upnp", "soap", "router"]
+categories = ["network-programming", "api-bindings"]
+readme = "README.md"
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+
+[dependencies]
+
+[lints]
+workspace = true

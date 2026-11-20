@@ -1,0 +1,15 @@
+[package]
+name = "fritz-sim"
+version = "0.0.0"
+description = "Stateful fake TR-064 server built from recorded fixtures, for tests"
+publish = false
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+
+[dependencies]
+tr064.workspace = true
+
+[lints]
+workspace = true

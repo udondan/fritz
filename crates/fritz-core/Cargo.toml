@@ -1,0 +1,16 @@
+[package]
+name = "fritz-core"
+version = "0.0.0"
+description = "FRITZ!Box specific logic for the fritz CLI and MCP server (unofficial, not affiliated with FRITZ! GmbH)"
+keywords = ["fritzbox", "tr-064", "router"]
+categories = ["network-programming"]
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+
+[dependencies]
+tr064.workspace = true
+
+[lints]
+workspace = true
