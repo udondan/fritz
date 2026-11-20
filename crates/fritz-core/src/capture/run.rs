@@ -10,10 +10,8 @@ use serde_json::{Map, Value, json};
 use tr064::{Action, Client, Error, Service};
 
 use super::{Decision, Plan, shape, short_id};
+use crate::fault::Fault;
 use crate::redact;
-
-/// The device locked the account after too many failed attempts.
-const LOCKED: u16 = 867;
 
 /// The getters that return the path of a list document: the action, the
 /// output with the path, and the file the document is stored in.
@@ -245,8 +243,7 @@ fn stops(error: &Error) -> bool {
             | Error::UnsupportedAuth(_)
             | Error::Http(_)
             | Error::CertificateMismatch { .. }
-            | Error::Upnp { code: LOCKED, .. }
-    )
+    ) || Fault::of(error) == Some(Fault::Blocked)
 }
 
 impl Capture {
@@ -391,8 +388,8 @@ mod tests {
     #[test]
     fn stops_only_at_errors_that_recur() {
         let locked = Error::Upnp {
-            code: LOCKED,
-            description: "locked".to_owned(),
+            code: 867,
+            description: "second factor authentication blocked".to_owned(),
         };
         let unauthorized = Error::Upnp {
             code: 606,

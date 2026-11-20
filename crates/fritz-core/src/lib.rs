@@ -7,6 +7,7 @@ pub mod anonymize;
 pub mod capture;
 pub mod config;
 pub mod connection;
+pub mod fault;
 pub mod generic;
 pub mod lists;
 mod names;

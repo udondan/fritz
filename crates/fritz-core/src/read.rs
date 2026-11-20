@@ -138,11 +138,13 @@ impl Reader {
     }
 }
 
-/// Whether the error says that the device lacks something, rather than that
-/// it could not be asked.
+/// Whether the error says that the device lacks something, or keeps it from
+/// this user, rather than that it could not be asked. Blocked and busy
+/// confirmations are failures: the device holds back the next calls too.
 pub(crate) fn is_missing(error: &Error) -> bool {
     match error {
         Error::UnknownAction { .. } => true,
+        Error::Fault { fault, .. } => !fault.is_temporary(),
         Error::Tr064(error) => {
             error.upnp_code().is_some() || matches!(error, tr064::Error::UnknownService(_))
         }
@@ -220,6 +222,19 @@ mod tests {
         assert!(!is_missing(&Error::Tr064(
             tr064::Error::AuthenticationFailed
         )));
+        for (code, missing) in [
+            (606, true),
+            (713, true),
+            (866, true),
+            (867, false),
+            (868, false),
+        ] {
+            let error = Error::from(tr064::Error::Upnp {
+                code,
+                description: String::new(),
+            });
+            assert_eq!(is_missing(&error), missing, "{code}");
+        }
         let refused = Error::MissingArgument {
             action: "GetGenericHostEntry".to_owned(),
             argument: "NewIndex".to_owned(),
