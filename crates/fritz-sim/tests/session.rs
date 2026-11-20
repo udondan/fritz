@@ -2,7 +2,7 @@
 //! simulated 7690.
 
 use fritz_core::session::{Error, Session};
-use fritz_core::smarthome;
+use fritz_core::{settings, smarthome};
 use fritz_sim::{Fixture, Injection, PASSWORD, Sim, USERNAME};
 use tr064::{Client, SecretString};
 
@@ -124,4 +124,42 @@ async fn rejects_a_login_while_locked() {
         .await
         .unwrap();
     assert!(answer.contains("<BlockTime>60</BlockTime>"), "{answer}");
+}
+
+#[tokio::test]
+async fn reads_the_settings() {
+    let sim = sim().await;
+    let session = login(&sim, PASSWORD).await.unwrap();
+
+    let defaults = settings::settings(&session, &[]).await;
+    let names: Vec<_> = defaults.modules.keys().map(String::as_str).collect();
+    let expected: Vec<_> = settings::MODULES
+        .iter()
+        .filter(|(_, _, default)| *default)
+        .map(|(name, _, _)| *name)
+        .collect();
+    let mut sorted = expected.clone();
+    sorted.sort_unstable();
+    assert_eq!(names, sorted);
+    assert!(
+        defaults.unavailable.is_empty(),
+        "{:?}",
+        defaults.unavailable
+    );
+    assert_eq!(defaults.modules["dnscfg"]["ipv4_firstdns"], "198.51.100.53");
+    assert_eq!(
+        defaults.modules["connections"]["connection"][0]["username"],
+        "***"
+    );
+
+    let modules = ["wlan", "missing", "../box"].map(str::to_owned);
+    let chosen = settings::settings(&session, &modules).await;
+    assert_eq!(chosen.modules["wlan"]["pskvalue"], "***");
+    assert_eq!(chosen.modules["wlan"]["guest_pskvalue"], "***");
+    assert_eq!(chosen.modules["wlan"]["ssid"], "wlan-1");
+    assert!(chosen.unavailable["missing"].contains("404"), "{chosen:?}");
+    assert!(chosen.unavailable["../box"].contains("not a module"));
+    // An invalid name is refused before anything is sent.
+    assert!(!sim.requests().iter().any(|r| r.path.contains("..")));
+    session.logout().await.unwrap();
 }

@@ -143,6 +143,12 @@ async fn reads_the_state() {
     let smarthome = success(&client, "fritz_smarthome", json!({})).await;
     assert!(smarthome.is_array(), "{smarthome}");
 
+    let settings = success(&client, "fritz_settings", json!({})).await;
+    assert_eq!(settings["modules"]["ipv6"]["mtu_override"], "1492");
+    assert!(settings.get("unavailable").is_none(), "{settings}");
+    let wlan = success(&client, "fritz_settings", json!({"modules": ["wlan"]})).await;
+    assert_eq!(wlan["modules"]["wlan"]["pskvalue"], "***", "{wlan}");
+
     let all = success(&client, "fritz_hosts", json!({})).await;
     let total = all["total"].as_u64().unwrap();
     assert!(total > 1, "{all}");

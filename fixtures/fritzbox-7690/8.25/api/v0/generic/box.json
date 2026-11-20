@@ -1,0 +1,9 @@
+{
+  "dhcpserver_guest_lease_time": "86400",
+  "dhcpserver_lease_time": "864000",
+  "hostname": "device-50",
+  "led_display": "0",
+  "night_time_control_enabled": "0",
+  "upnp_activated": "1",
+  "upnp_control_activated": "0"
+}

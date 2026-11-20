@@ -1,11 +1,12 @@
-//! `fritz ports`, `telephony` and `capabilities`: what the device offers,
-//! as text or JSON.
+//! `fritz ports`, `telephony`, `capabilities` and `settings`: what the
+//! device offers and how it is set up, as text or JSON.
 
 use std::io::Write;
 
 use anyhow::Context as _;
 use fritz_core::capabilities::{self, Capabilities};
 use fritz_core::ports::{self, Ports};
+use fritz_core::settings::{self, Settings};
 use fritz_core::telephony::{self, Telephony};
 
 use crate::context::Context;
@@ -179,6 +180,63 @@ fn capability_pairs(capabilities: &Capabilities) -> Vec<(&'static str, Option<St
     ]
 }
 
+/// Prints the settings of `modules`, or of the common ones.
+pub(crate) async fn settings(
+    context: &Context,
+    modules: &[String],
+    format: Format,
+    out: &mut impl Write,
+) -> anyhow::Result<()> {
+    let session = context
+        .session()
+        .await
+        .context("cannot log in to the web interface")?;
+    let settings = settings::settings(&session, modules).await;
+    // Ends the session even if reading failed.
+    session
+        .logout()
+        .await
+        .context("cannot log out of the web interface")?;
+    match format {
+        Format::Json => json(&settings, out),
+        Format::Text => settings_text(&settings, out),
+    }
+}
+
+/// One line per value, with its path, like `ipv6.mtu  1492`.
+fn settings_text(settings: &Settings, out: &mut impl Write) -> anyhow::Result<()> {
+    let mut lines = Vec::new();
+    for (name, value) in &settings.modules {
+        flatten(name, value, &mut lines);
+    }
+    for (name, reason) in &settings.unavailable {
+        lines.push((name.clone(), format!("unavailable: {reason}")));
+    }
+    let width = lines.iter().map(|(p, _)| p.len()).max().unwrap_or_default();
+    for (path, value) in lines {
+        writeln!(out, "{path:width$}  {value}")?;
+    }
+    Ok(())
+}
+
+fn flatten(path: &str, value: &serde_json::Value, lines: &mut Vec<(String, String)>) {
+    use serde_json::Value;
+    match value {
+        Value::Object(object) if !object.is_empty() => {
+            for (name, value) in object {
+                flatten(&format!("{path}.{name}"), value, lines);
+            }
+        }
+        Value::Array(items) if !items.is_empty() => {
+            for (i, value) in items.iter().enumerate() {
+                flatten(&format!("{path}[{i}]"), value, lines);
+            }
+        }
+        Value::String(text) => lines.push((path.to_owned(), text.clone())),
+        other => lines.push((path.to_owned(), other.to_string())),
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use fritz_core::ports::Forwarding;
@@ -266,6 +324,27 @@ mod tests {
         assert_eq!(
             text(|out| telephony_tables(&Telephony::default(), out)),
             "No telephony.\n"
+        );
+    }
+
+    #[test]
+    fn prints_settings_one_value_per_line() {
+        let mut settings = Settings::default();
+        settings.modules.insert(
+            "ipv6".to_owned(),
+            serde_json::json!({"mtu": 1492, "on": true, "dns": ["::1"], "none": [], "route": {}}),
+        );
+        settings
+            .unavailable
+            .insert("vpn".to_owned(), "HTTP status 403".to_owned());
+        assert_eq!(
+            text(|out| settings_text(&settings, out)),
+            "ipv6.dns[0]  ::1\n\
+             ipv6.mtu     1492\n\
+             ipv6.none    []\n\
+             ipv6.on      true\n\
+             ipv6.route   {}\n\
+             vpn          unavailable: HTTP status 403\n"
         );
     }
 

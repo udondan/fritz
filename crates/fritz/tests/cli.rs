@@ -865,6 +865,29 @@ async fn prints_the_state_as_json() {
 }
 
 #[tokio::test(flavor = "multi_thread")]
+async fn prints_the_settings() {
+    let fixture = fritz_sim::Fixture::load(FIXTURE).unwrap();
+    let sim = fritz_sim::Sim::start(fixture).await.unwrap();
+    let password = Some(fritz_sim::PASSWORD);
+    let output = run(&sim, &["settings"], password).await;
+    let settings: serde_json::Value = serde_json::from_str(&success(&output)).unwrap();
+    assert_eq!(settings["modules"]["ipv6"]["mtu_override"], "1492");
+    assert_eq!(stderr(&output), "");
+    let output = run(
+        &sim,
+        &["--output", "text", "settings", "wlan", "none"],
+        password,
+    )
+    .await;
+    let text = stdout(&output);
+    assert!(text.contains("wlan.pskvalue        ***\n"), "{text}");
+    assert!(
+        text.contains("none                 unavailable: "),
+        "{text}"
+    );
+}
+
+#[tokio::test(flavor = "multi_thread")]
 async fn prints_the_state_as_text() {
     let fixture = fritz_sim::Fixture::load(FIXTURE).unwrap();
     let sim = fritz_sim::Sim::start(fixture).await.unwrap();

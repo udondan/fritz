@@ -1,0 +1,7 @@
+{
+  "chrony_enabled": "1",
+  "ntp_server": "ntp.example.org",
+  "tz_dst_enabled": "1",
+  "tz_enabled": "1",
+  "tz_offset_minutes": "60"
+}

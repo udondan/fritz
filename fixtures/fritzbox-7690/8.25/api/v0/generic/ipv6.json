@@ -1,0 +1,15 @@
+{
+  "dhcpv6d_mode": "dhcpv6d_mode_stateless",
+  "dhcpv6d_preference": "0",
+  "enabled": "1",
+  "generated_ula_prefix": "2001:db8:ff::",
+  "ip_prefix": "2001:db8:1::",
+  "ip_prefixlen": "64",
+  "lan_dns6_server": "2001:db8:ff::1",
+  "mtu_override": "1492",
+  "radv_advdns": "1",
+  "radv_enabled": "1",
+  "ula": "2001:db8:ff::1",
+  "ulamode": "ulamode_dynamic",
+  "use_fixed_mtu": "0"
+}
