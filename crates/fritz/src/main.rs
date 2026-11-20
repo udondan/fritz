@@ -5,11 +5,12 @@
 mod auth;
 mod context;
 mod settings;
+mod status;
 mod system;
 mod tls;
 mod tr64;
 
-use std::io;
+use std::io::{self, IsTerminal as _};
 use std::path::{Path, PathBuf};
 
 use anyhow::{Context as _, bail};
@@ -21,6 +22,7 @@ use fritz_core::secrets::ENV_PASSWORD;
 use tr064::{Client, Fingerprint, SecretString, Url};
 
 use crate::context::Context;
+use crate::status::Format;
 
 /// CLI and MCP server for FRITZ!Box routers (unofficial).
 ///
@@ -57,10 +59,27 @@ struct Global {
     /// one of the profile.
     #[arg(long, global = true, env = "FRITZ_TLS_FINGERPRINT")]
     fingerprint: Option<Fingerprint>,
+    /// How to print results: text, or JSON, which is the default when the
+    /// output is not a terminal.
+    #[arg(long, global = true, value_enum)]
+    output: Option<Format>,
 }
 
 #[derive(Debug, Subcommand)]
 enum Command {
+    /// The model, firmware, uptime, internet connection and the rights of
+    /// the user.
+    Overview,
+    /// The hosts the device knows, one call per host.
+    Hosts {
+        /// Only the hosts that are connected now.
+        #[arg(long)]
+        active: bool,
+    },
+    /// The wireless networks.
+    Wlan,
+    /// The internet connection and, for DSL, the line.
+    Internet,
     /// Manage the profiles in the configuration file.
     #[command(subcommand)]
     Config(ConfigCommand),
@@ -206,6 +225,9 @@ struct CaptureArgs {
 async fn main() -> anyhow::Result<()> {
     let cli = Cli::parse();
     let global = cli.global;
+    let format = global
+        .output
+        .unwrap_or_else(|| Format::for_terminal(io::stdout().is_terminal()));
     let load = move || {
         let overrides = Overrides {
             host: global.host,
@@ -223,6 +245,10 @@ async fn main() -> anyhow::Result<()> {
     };
     let out = &mut io::stdout().lock();
     match cli.command {
+        Command::Overview => status::overview(&load()?, format, out).await,
+        Command::Hosts { active } => status::hosts(&load()?, active, format, out).await,
+        Command::Wlan => status::wlan(&load()?, format, out).await,
+        Command::Internet => status::internet(&load()?, format, out).await,
         Command::Config(ConfigCommand::Init) => settings::init(&mut load()?, out),
         Command::Config(ConfigCommand::Show) => settings::show(&load()?, out),
         Command::Tls(TlsCommand::Fingerprint) => tls::fingerprint(&load()?, out).await,

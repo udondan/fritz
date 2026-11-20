@@ -133,6 +133,14 @@ impl Context {
             &account,
         )?)
     }
+
+    /// A client for the target with the password, for calls of actions.
+    pub(crate) fn client(&self) -> anyhow::Result<tr064::Client> {
+        let target = self.target()?;
+        let (password, _) = self.password(&target)?;
+        let builder = target.client()?.credentials(target.username()?, password);
+        Ok(builder.build()?)
+    }
 }
 
 /// Reads one line without its line break. Empty at the end of the input.
