@@ -614,3 +614,185 @@ fn reports_where_the_password_comes_from() {
         );
     }
 }
+
+const FIXTURE: &str = concat!(
+    env!("CARGO_MANIFEST_DIR"),
+    "/../../fixtures/fritzbox-7690/8.25"
+);
+
+/// Runs `fritz tr64` against `sim` as its user, with the given password.
+async fn tr64(sim: &fritz_sim::Sim, args: &[&str], password: Option<&str>) -> Output {
+    let mut all = strings(&["--host", sim.url().as_str(), "--user", fritz_sim::USERNAME]);
+    all.push("tr64".to_owned());
+    all.extend(strings(args));
+    let env = password
+        .map(|p| ("FRITZ_PASSWORD".to_owned(), p.to_owned()))
+        .into_iter()
+        .collect();
+    fritz_blocking(all, env, "").await
+}
+
+/// The output of a successful run.
+fn success(output: &Output) -> String {
+    assert!(output.status.success(), "{}", stderr(output));
+    stdout(output)
+}
+
+/// The error of a failed run.
+fn failure(output: &Output) -> String {
+    assert!(!output.status.success(), "{}", stdout(output));
+    stderr(output)
+}
+
+#[tokio::test(flavor = "multi_thread")]
+async fn lists_and_describes_actions_without_login() {
+    let fixture = fritz_sim::Fixture::load(FIXTURE).unwrap();
+    let sim = fritz_sim::Sim::start(fixture).await.unwrap();
+
+    let services = success(&tr64(&sim, &["services"], None).await);
+    assert!(services.starts_with("DeviceInfo:1"), "{services}");
+    assert!(
+        services.contains("\nWLANConfiguration:3   ")
+            && services.contains("  WLANConfiguration3\n"),
+        "{services}"
+    );
+
+    let actions = success(&tr64(&sim, &["actions", "DeviceConfig:1"], None).await);
+    for line in [
+        "critical  Reboot\n",
+        "secret    X_AVM-DE_GetConfigFile\n",
+        "read      X_AVM-DE_GetUserAgreement\n",
+    ] {
+        assert!(actions.contains(line), "{line} in {actions}");
+    }
+
+    let describe = success(&tr64(&sim, &["describe", "WANIPConnection1", "GetInfo"], None).await);
+    assert!(describe.starts_with("GetInfo (read)\n"), "{describe}");
+    assert!(describe.contains("  out  NewUptime "), "{describe}");
+    assert!(describe.contains("ui4 (0..4294967295)\n"), "{describe}");
+    let describe =
+        success(&tr64(&sim, &["describe", "Hosts1", "X_AVM-DE_HostDoUpdate"], None).await);
+    assert!(
+        describe.starts_with("X_AVM-DE_HostDoUpdate (critical: the name says update)\n"),
+        "{describe}"
+    );
+    assert!(describe.contains("  in   NewMACAddress"), "{describe}");
+    let describe = success(
+        &tr64(
+            &sim,
+            &["describe", "Hosts1", "X_AVM-DE_GetHostListPath"],
+            None,
+        )
+        .await,
+    );
+    assert!(describe.contains("string\n"), "{describe}");
+
+    let error = failure(&tr64(&sim, &["describe", "Hosts1", "Nothing"], None).await);
+    assert!(error.contains("has no action Nothing"), "{error}");
+    let error = failure(&tr64(&sim, &["actions", "Nothing1"], None).await);
+    assert!(
+        error.contains("cannot read the service Nothing1"),
+        "{error}"
+    );
+    assert!(sim.requests().iter().all(|r| r.action.is_none()));
+}
+
+#[tokio::test(flavor = "multi_thread")]
+async fn calls_only_actions_that_read() {
+    let fixture = fritz_sim::Fixture::load(FIXTURE).unwrap();
+    let sim = fritz_sim::Sim::start(fixture).await.unwrap();
+    let password = Some(fritz_sim::PASSWORD);
+
+    let info = success(&tr64(&sim, &["call", "DeviceInfo1", "GetInfo"], password).await);
+    assert!(
+        info.contains("NewModelName         FRITZ!Box 7690\n"),
+        "{info}"
+    );
+    let path = success(
+        &tr64(
+            &sim,
+            &["call", "Hosts1", "X_AVM-DE_GetHostListPath"],
+            password,
+        )
+        .await,
+    );
+    assert_eq!(
+        path,
+        "NewX_AVM-DE_HostListPath  /devicehostlist.lua?sid=***\n"
+    );
+    let entry = tr64(
+        &sim,
+        &["call", "Hosts1", "GetGenericHostEntry", "NewIndex=0"],
+        password,
+    );
+    assert!(success(&entry.await).contains("NewActive"));
+
+    // Refused before the password is needed and before anything is sent.
+    for (args, message) in [
+        (
+            &["call", "DeviceConfig1", "Reboot"][..],
+            "Reboot is critical: changes DeviceConfig; only actions that read are called",
+        ),
+        (
+            &["call", "WLANConfiguration1", "GetSecurityKeys"],
+            "GetSecurityKeys is secret: the name points to a secret",
+        ),
+        (
+            &[
+                "call",
+                "Hosts1",
+                "X_AVM-DE_SetFriendlyName",
+                "NewX_AVM-DE_FriendlyName=x",
+            ],
+            "X_AVM-DE_SetFriendlyName is write; only actions that read are called",
+        ),
+        (
+            &["call", "Hosts1", "GetGenericHostEntry"],
+            "GetGenericHostEntry needs the input NewIndex",
+        ),
+        (
+            &[
+                "call",
+                "Hosts1",
+                "GetGenericHostEntry",
+                "NewIndex=0",
+                "Other=1",
+            ],
+            "GetGenericHostEntry has no input Other",
+        ),
+        (
+            &["call", "Hosts1", "GetGenericHostEntry", "NewIndex"],
+            "NewIndex is not NAME=VALUE",
+        ),
+    ] {
+        let error = failure(&tr64(&sim, args, None).await);
+        assert!(error.contains(message), "{message} in {error}");
+    }
+    let called: Vec<String> = sim
+        .requests()
+        .into_iter()
+        .filter(|r| r.authorized)
+        .filter_map(|r| r.action)
+        .collect();
+    assert_eq!(
+        called,
+        ["GetInfo", "X_AVM-DE_GetHostListPath", "GetGenericHostEntry"]
+    );
+
+    let error = failure(&tr64(&sim, &["call", "DeviceInfo1", "GetInfo"], Some("wrong")).await);
+    assert!(error.contains("GetInfo failed"), "{error}");
+    let error = failure(&tr64(&sim, &["call", "DeviceInfo1", "GetInfo"], None).await);
+    assert!(error.contains("no password for"), "{error}");
+}
+
+#[test]
+fn reports_an_unreachable_device_for_tr64() {
+    let url = unreachable_url("http");
+    let output = fritz(&["--host", &url, "tr64", "services"]);
+    assert!(!output.status.success());
+    assert!(
+        stderr(&output).contains("cannot read the device description"),
+        "{}",
+        stderr(&output)
+    );
+}

@@ -43,7 +43,7 @@ const MASKED_PHRASES: &[&[&str]] = &[
 
 /// How sensitive the value of a name is.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub(super) enum Sensitivity {
+pub(crate) enum Sensitivity {
     /// Recorded as it is.
     Plain,
     /// Recorded as `***`.
@@ -56,7 +56,7 @@ pub(super) enum Sensitivity {
 /// `NewMaxCharsPassword` are plain. Names with one of the [`SECRET_WORDS`]
 /// outside of [`MASKED_PHRASES`] are secret, other names with such a phrase
 /// are masked.
-pub(super) fn sensitivity(name: &str) -> Sensitivity {
+pub(crate) fn sensitivity(name: &str) -> Sensitivity {
     let words = words(name);
     if words.iter().any(|w| QUALIFIER_WORDS.contains(&w.as_str())) {
         return Sensitivity::Plain;
@@ -84,7 +84,7 @@ pub(super) fn sensitivity(name: &str) -> Sensitivity {
 
 /// The lower-case words of an identifier like `NewX_AVM-DE_WEPKey0`, without
 /// trailing digits: `new`, `x`, `avm`, `de`, `wep`, `key`.
-fn words(name: &str) -> Vec<String> {
+pub(crate) fn words(name: &str) -> Vec<String> {
     let chars: Vec<char> = name.chars().collect();
     let mut words = Vec::new();
     let mut current = String::new();

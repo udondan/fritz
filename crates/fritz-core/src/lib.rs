@@ -7,4 +7,8 @@ pub mod anonymize;
 pub mod capture;
 pub mod config;
 pub mod connection;
+pub mod generic;
+mod names;
+pub mod policy;
+pub mod redact;
 pub mod secrets;
