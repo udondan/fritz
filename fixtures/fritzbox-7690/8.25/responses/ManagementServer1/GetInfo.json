@@ -1,0 +1,15 @@
+{
+  "out": {
+    "NewConnectionRequestURL": "https://url-1.example.net/",
+    "NewConnectionRequestUsername": "***",
+    "NewParameterHash": "",
+    "NewParameterKey": "***",
+    "NewPeriodicInformEnable": "0",
+    "NewPeriodicInformInterval": "0",
+    "NewPeriodicInformTime": "1970-01-01T00:00:00",
+    "NewURL": "https://url-2.example.net/",
+    "NewUpgradesManaged": "0",
+    "NewUsername": "***"
+  },
+  "status": "ok"
+}

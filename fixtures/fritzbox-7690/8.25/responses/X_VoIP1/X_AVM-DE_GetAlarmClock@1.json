@@ -1,0 +1,10 @@
+{
+  "out": {
+    "NewX_AVM-DE_AlarmClockEnable": "0",
+    "NewX_AVM-DE_AlarmClockName": "name-8",
+    "NewX_AVM-DE_AlarmClockPhoneName": "name-7",
+    "NewX_AVM-DE_AlarmClockTime": "0000",
+    "NewX_AVM-DE_AlarmClockWeekdays": "MO,TU,WE,TH,FR,SA,SU,HO"
+  },
+  "status": "ok"
+}

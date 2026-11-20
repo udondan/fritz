@@ -1,0 +1,10 @@
+{
+  "out": {
+    "NewEnabled": "1",
+    "NewLetsEncryptEnabled": "0",
+    "NewLetsEncryptState": "not_used",
+    "NewPort": "49032",
+    "NewUsername": "***"
+  },
+  "status": "ok"
+}

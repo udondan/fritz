@@ -1,0 +1,33 @@
+{
+  "out": {
+    "NewAllowedCharsAppAVMAddress": "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-_.",
+    "NewAllowedCharsAppId": "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz",
+    "NewAllowedCharsAppPassword": "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz !\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~",
+    "NewAllowedCharsAppUsername": "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz",
+    "NewAllowedCharsCryptAlgos": "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-_.",
+    "NewAllowedCharsFilter": "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz,+:-_ ",
+    "NewAllowedCharsIPSecIdentifier": "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz",
+    "NewAllowedCharsIPSecPreSharedKey": "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz",
+    "NewAllowedCharsIPSecXauthPassword": "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz",
+    "NewAllowedCharsIPSecXauthUsername": "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz",
+    "NewMaxCharsAppDisplayName": "256",
+    "NewMaxCharsAppId": "256",
+    "NewMaxCharsAppPassword": "32",
+    "NewMaxCharsAppUsername": "32",
+    "NewMaxCharsFilter": "2048",
+    "NewMaxCharsIPSecIdentifier": "256",
+    "NewMaxCharsIPSecPreSharedKey": "64",
+    "NewMaxCharsIPSecXauthPassword": "128",
+    "NewMaxCharsIPSecXauthUsername": "256",
+    "NewMinCharsAppDisplayName": "1",
+    "NewMinCharsAppId": "1",
+    "NewMinCharsAppPassword": "8",
+    "NewMinCharsAppUsername": "1",
+    "NewMinCharsFilter": "0",
+    "NewMinCharsIPSecIdentifier": "1",
+    "NewMinCharsIPSecPreSharedKey": "1",
+    "NewMinCharsIPSecXauthPassword": "1",
+    "NewMinCharsIPSecXauthUsername": "1"
+  },
+  "status": "ok"
+}

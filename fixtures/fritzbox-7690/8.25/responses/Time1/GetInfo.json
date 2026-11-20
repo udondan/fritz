@@ -1,0 +1,13 @@
+{
+  "out": {
+    "NewCurrentLocalTime": "2026-11-20T12:25:44+01:00",
+    "NewDaylightSavingsEnd": "0001-01-01T00:00:00",
+    "NewDaylightSavingsStart": "0001-01-01T00:00:00",
+    "NewDaylightSavingsUsed": "0",
+    "NewLocalTimeZone": "",
+    "NewLocalTimeZoneName": "CET-1CEST,M3.5.0,M10.5.0/3",
+    "NewNTPServer1": "server-1.example.net",
+    "NewNTPServer2": "server-2.example.net"
+  },
+  "status": "ok"
+}

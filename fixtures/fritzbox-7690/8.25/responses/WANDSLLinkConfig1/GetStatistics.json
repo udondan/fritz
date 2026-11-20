@@ -1,0 +1,9 @@
+{
+  "out": {
+    "NewAAL5CRCErrors": "0",
+    "NewATMCRCErrors": "0",
+    "NewATMReceivedBlocks": "387754258",
+    "NewATMTransmittedBlocks": "343260881"
+  },
+  "status": "ok"
+}

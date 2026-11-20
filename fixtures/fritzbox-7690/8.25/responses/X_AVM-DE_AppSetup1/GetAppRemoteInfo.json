@@ -1,0 +1,13 @@
+{
+  "out": {
+    "NewExternalIPAddress": "198.51.100.1",
+    "NewExternalIPv6Address": "2001:db8::1",
+    "NewIPAddress": "192.0.2.34",
+    "NewMyFritzDynDNSName": "server-3.example.net",
+    "NewMyFritzEnabled": "1",
+    "NewRemoteAccessDDNSDomain": "",
+    "NewRemoteAccessDDNSEnabled": "0",
+    "NewSubnetMask": "255.255.255.0"
+  },
+  "status": "ok"
+}

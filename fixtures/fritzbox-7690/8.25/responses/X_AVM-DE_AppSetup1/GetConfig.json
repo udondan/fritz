@@ -1,0 +1,13 @@
+{
+  "out": {
+    "NewAccessFromInternet": "0",
+    "NewAppRight": "RW",
+    "NewConfigRight": "RW",
+    "NewDialRight": "RW",
+    "NewHomeautoRight": "RW",
+    "NewInternetRights": "0",
+    "NewNasRight": "RW",
+    "NewPhoneRight": "RW"
+  },
+  "status": "ok"
+}

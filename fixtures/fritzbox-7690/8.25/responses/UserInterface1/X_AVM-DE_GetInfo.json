@@ -1,0 +1,11 @@
+{
+  "out": {
+    "NewX_AVM-DE_AutoUpdateMode": "all",
+    "NewX_AVM-DE_CurrentFwVersion": "285.08.25",
+    "NewX_AVM-DE_LastFwVersion": "285.08.22,129542",
+    "NewX_AVM-DE_LastInfoUrl": "http://download.avm.de/fritzbox/fritzbox-7690/deutschland/fritz.os/info_de.txt",
+    "NewX_AVM-DE_UpdateSuccessful": "succeeded",
+    "NewX_AVM-DE_UpdateTime": "2026-08-02T03:28:11+02:00"
+  },
+  "status": "ok"
+}

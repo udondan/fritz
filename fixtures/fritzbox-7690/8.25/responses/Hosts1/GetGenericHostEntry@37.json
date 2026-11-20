@@ -1,0 +1,12 @@
+{
+  "out": {
+    "NewActive": "0",
+    "NewAddressSource": "Static",
+    "NewHostName": "device-30",
+    "NewIPAddress": "",
+    "NewInterfaceType": "",
+    "NewLeaseTimeRemaining": "0",
+    "NewMACAddress": "AA:BB:CC:00:00:21"
+  },
+  "status": "ok"
+}
