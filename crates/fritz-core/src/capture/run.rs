@@ -9,7 +9,8 @@ use std::time::Duration;
 use serde_json::{Map, Value, json};
 use tr064::{Action, Client, Error, Service};
 
-use super::{Decision, Plan, looks_secret, shape, short_id};
+use super::names::{Sensitivity, sensitivity};
+use super::{Decision, Plan, shape, short_id};
 
 /// The device locked the account after too many failed attempts.
 const LOCKED: u16 = 867;
@@ -183,10 +184,10 @@ fn stops(error: &Error) -> bool {
     )
 }
 
-/// Masks the value of an argument whose name points to a secret, and session
-/// IDs in URLs like `/hostlist.lua?sid=…`.
+/// Masks the value of an argument whose name points to a secret or a login
+/// name, and session IDs in URLs like `/hostlist.lua?sid=…`.
 fn mask(name: String, value: &str) -> (String, String) {
-    if looks_secret(&name) {
+    if sensitivity(&name) != Sensitivity::Plain {
         return (name, "***".to_owned());
     }
     let mut masked = String::with_capacity(value.len());
@@ -324,6 +325,9 @@ mod tests {
     fn masks_secrets_and_session_ids() {
         assert_eq!(masked("NewX_AVM-DE_WPSClientPIN", "1234"), "***");
         assert_eq!(masked("NewSSID", "home"), "home");
+        assert_eq!(masked("NewUserName", "provider-login@isp"), "***");
+        assert_eq!(masked("NewParameterKey", "abc"), "***");
+        assert_eq!(masked("NewMinCharsPSK", "8"), "8");
         assert_eq!(
             masked("NewX_AVM-DE_HostListPath", "/hostlist.lua?sid=0123abcd"),
             "/hostlist.lua?sid=***"
