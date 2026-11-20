@@ -415,6 +415,17 @@ fn creates_and_shows_profiles() {
     assert!(stdout.contains("user         none\n"), "{stdout}");
     assert!(stdout.contains("password     no user is set"), "{stdout}");
 
+    // Without a host, the profile names the default one.
+    let output = config.run(&["--profile", "bare", "config", "init"]);
+    assert!(output.status.success(), "{}", stderr(&output));
+    assert!(
+        config
+            .text()
+            .contains("[profile.bare]\nhost = \"fritz.box\"\n"),
+        "{}",
+        config.text()
+    );
+
     let output = config.run(&["--profile", "missing", "config", "show"]);
     assert!(!output.status.success());
     assert!(
@@ -508,6 +519,12 @@ async fn trusts_the_certificate_on_first_use() {
     // The profile pins the certificate for later commands.
     let output = fritz_blocking(strings(&["capture", "--plan"]), config.env(), "").await;
     assert!(output.status.success(), "{}", stderr(&output));
+    let output = fritz_blocking(strings(&["config", "show"]), config.env(), "").await;
+    assert!(
+        stdout(&output).contains(&format!("certificate  {found}\n")),
+        "{}",
+        stdout(&output)
+    );
 
     let output = run(&["tls", "trust", "--fingerprint", FINGERPRINT], "").await;
     assert!(!output.status.success());
@@ -523,7 +540,7 @@ async fn trusts_the_certificate_on_first_use() {
     let other = format!("{}00", "00:".repeat(31));
     let text = config.text().replace(&found, &other);
     std::fs::write(&config.path, text).unwrap();
-    let output = run(&["tls", "trust"], "yes\n").await;
+    let output = fritz_blocking(strings(&["tls", "trust"]), config.env(), "yes\n").await;
     assert!(output.status.success(), "{}", stderr(&output));
     assert!(
         stderr(&output).contains(&format!("warning: the certificate of {host} changed")),
