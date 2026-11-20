@@ -7,7 +7,14 @@
 
 use std::fmt;
 
-use tr064::{Action, Client, Direction, Service};
+use tr064::{Action, Client, DeviceDescription, Direction, Scpd, Service};
+
+mod names;
+mod run;
+
+use names::{Sensitivity, sensitivity};
+
+pub use run::{Capture, Options, Outcome, Response, run, write};
 
 /// Actions that are never called although they look harmless by name.
 const DENIED_ACTIONS: &[(&str, &str)] = &[
@@ -19,22 +26,6 @@ const DENIED_ACTIONS: &[(&str, &str)] = &[
         "GetPersistentData",
         "returns opaque data that can hold credentials",
     ),
-];
-
-/// Words in action or argument names that point to secrets.
-const SECRET_WORDS: &[&str] = &[
-    "credential",
-    "credentials",
-    "key",
-    "keys",
-    "passphrase",
-    "passwd",
-    "password",
-    "pin",
-    "psk",
-    "secret",
-    "sid",
-    "token",
 ];
 
 /// What the capture does with one action.
@@ -67,6 +58,12 @@ pub fn decide(service: &Service, action: &Action) -> Decision {
     if is_personal(service, name) {
         return Decision::Personal;
     }
+    shape(action)
+}
+
+/// How a getter is called, depending on its inputs: [`Decision::Call`],
+/// [`Decision::Iterate`] or [`Decision::NeedsInput`].
+fn shape(action: &Action) -> Decision {
     let inputs: Vec<String> = action
         .arguments
         .iter()
@@ -91,75 +88,33 @@ fn denial(service: &Service, action: &Action) -> Option<String> {
     if service.name() == "X_VoIP" && name.starts_with("X_AVM-DE_GetClient") {
         return Some("returns the credentials of telephony clients".to_owned());
     }
-    if looks_secret(name) {
+    if sensitivity(name) == Sensitivity::Secret {
         return Some("the name points to a secret".to_owned());
     }
     action
         .arguments
         .iter()
-        .find(|a| a.direction == Direction::Out && looks_secret(&a.name))
+        .find(|a| a.direction == Direction::Out && sensitivity(&a.name) == Sensitivity::Secret)
         .map(|a| format!("returns {}, which points to a secret", a.name))
 }
 
-/// Whether a getter returns personal lists: calls, contacts, voice messages.
+/// Whether a getter returns personal data: calls, contacts, voice messages
+/// and the event log, which names devices and numbers in free text.
 fn is_personal(service: &Service, action: &str) -> bool {
     match service.name() {
         "X_AVM-DE_OnTel" => action == "GetCallList" || action.starts_with("GetPhonebook"),
         "X_AVM-DE_TAM" => action == "GetMessageList",
+        "DeviceInfo" => action == "GetDeviceLog",
         _ => false,
     }
 }
 
-/// Whether a name contains one of the [`SECRET_WORDS`].
-fn looks_secret(name: &str) -> bool {
-    words(name)
-        .iter()
-        .any(|word| SECRET_WORDS.contains(&word.as_str()))
-}
-
-/// The lower-case words of an identifier like `NewX_AVM-DE_WEPKey0`, without
-/// trailing digits: `new`, `x`, `avm`, `de`, `wep`, `key`.
-fn words(name: &str) -> Vec<String> {
-    let chars: Vec<char> = name.chars().collect();
-    let mut words = Vec::new();
-    let mut current = String::new();
-    for (i, &c) in chars.iter().enumerate() {
-        let previous = i.checked_sub(1).map(|j| chars[j]);
-        let next = chars.get(i + 1).copied();
-        if !c.is_ascii_alphanumeric() || starts_word(previous, c, next) {
-            finish_word(&mut words, &mut current);
-        }
-        if c.is_ascii_alphanumeric() {
-            current.push(c.to_ascii_lowercase());
-        }
-    }
-    finish_word(&mut words, &mut current);
-    words
-}
-
-/// Whether `c` starts a new word in camel case: `Key` in `WEPKey` or
-/// `PreSharedKey`, `Index` in `Entry0Index`.
-fn starts_word(previous: Option<char>, c: char, next: Option<char>) -> bool {
-    let Some(previous) = previous else {
-        return false;
-    };
-    c.is_ascii_uppercase()
-        && (previous.is_ascii_lowercase()
-            || previous.is_ascii_digit()
-            || (previous.is_ascii_uppercase() && next.is_some_and(|n| n.is_ascii_lowercase())))
-}
-
-fn finish_word(words: &mut Vec<String>, current: &mut String) {
-    let word = current.trim_end_matches(|c: char| c.is_ascii_digit());
-    if !word.is_empty() {
-        words.push(word.to_owned());
-    }
-    current.clear();
-}
-
-/// The decisions for all actions of a device.
+/// The decisions for all actions of a device, with the documents they are
+/// based on.
 #[derive(Debug)]
 pub struct Plan {
+    /// The device description as the device sent it.
+    pub description: String,
     pub services: Vec<ServicePlan>,
 }
 
@@ -168,7 +123,15 @@ pub struct Plan {
 #[derive(Debug)]
 pub struct ServicePlan {
     pub service: Service,
-    pub actions: Result<Vec<(String, Decision)>, tr064::Error>,
+    pub scpd: Result<ServiceScpd, tr064::Error>,
+}
+
+/// The SCPD of a service and the decision for each of its actions.
+#[derive(Debug)]
+pub struct ServiceScpd {
+    /// The SCPD as the device sent it.
+    pub xml: String,
+    pub actions: Vec<(Action, Decision)>,
 }
 
 /// Reads the device description and all SCPDs and decides for each action.
@@ -177,23 +140,39 @@ pub struct ServicePlan {
 ///
 /// # Errors
 ///
-/// The errors of [`Client::description`].
+/// The errors of reading and parsing the device description.
 pub async fn plan(client: &Client) -> Result<Plan, tr064::Error> {
-    let description = client.description().await?;
+    let description = client.get("/tr64desc.xml").await?;
+    let parsed = DeviceDescription::parse(&description)?;
     let mut services = Vec::new();
-    for service in description.services() {
-        let actions = client.scpd(service).await.map(|scpd| {
-            scpd.actions
-                .iter()
-                .map(|action| (action.name.clone(), decide(service, action)))
-                .collect()
-        });
+    for service in parsed.services() {
         services.push(ServicePlan {
             service: service.clone(),
-            actions,
+            scpd: plan_service(client, service).await,
         });
     }
-    Ok(Plan { services })
+    Ok(Plan {
+        description,
+        services,
+    })
+}
+
+async fn plan_service(client: &Client, service: &Service) -> Result<ServiceScpd, tr064::Error> {
+    let xml = client.get(&service.scpd_url).await?;
+    let actions = Scpd::parse(&xml)?
+        .actions
+        .into_iter()
+        .map(|action| {
+            let decision = decide(service, &action);
+            (action, decision)
+        })
+        .collect();
+    Ok(ServiceScpd { xml, actions })
+}
+
+/// The last part of the service ID, like `Hosts1`. Unique within a device.
+pub fn short_id(service: &Service) -> &str {
+    service.service_id.rsplit(':').next().unwrap_or_default()
 }
 
 /// How many actions got each decision, and how many services failed.
@@ -227,8 +206,8 @@ impl Plan {
     pub fn summary(&self) -> Summary {
         let mut summary = Summary::default();
         for service in &self.services {
-            match &service.actions {
-                Ok(actions) => actions.iter().for_each(|(_, d)| summary.count(d)),
+            match &service.scpd {
+                Ok(scpd) => scpd.actions.iter().for_each(|(_, d)| summary.count(d)),
                 Err(_) => summary.failed_services += 1,
             }
         }
@@ -262,15 +241,15 @@ impl fmt::Display for Plan {
 
 fn write_service(f: &mut fmt::Formatter<'_>, plan: &ServicePlan) -> fmt::Result {
     let service = &plan.service;
-    let id = service.service_id.rsplit(':').next().unwrap_or_default();
+    let id = short_id(service);
     writeln!(f, "{}:{} ({id})", service.name(), service.version())?;
-    match &plan.actions {
-        Ok(actions) => {
+    match &plan.scpd {
+        Ok(scpd) => {
             let mut not_getters = 0;
-            for (name, decision) in actions {
+            for (action, decision) in &scpd.actions {
                 match decision {
                     Decision::NotGetter => not_getters += 1,
-                    _ => writeln!(f, "  {}", Line(name, decision))?,
+                    _ => writeln!(f, "  {}", Line(&action.name, decision))?,
                 }
             }
             if not_getters > 0 {
@@ -432,29 +411,64 @@ mod tests {
     }
 
     #[test]
+    fn calls_getters_that_only_describe_secrets() {
+        let cases = [
+            (
+                "WLANConfiguration",
+                action(
+                    "GetInfo",
+                    &[],
+                    &["NewMinCharsPSK", "NewMaxCharsPSK", "NewAllowedCharsPSK"],
+                ),
+            ),
+            (
+                "WLANConfiguration",
+                action("GetDefaultWEPKeyIndex", &[], &["NewDefaultWEPKeyIndex"]),
+            ),
+            (
+                "UserInterface",
+                action("GetInfo", &[], &["NewPasswordRequired"]),
+            ),
+            (
+                "X_VoIP",
+                action("GetInfoEx", &[], &["NewVoIPPasswordMinChars"]),
+            ),
+            (
+                "X_AVM-DE_WANMobileConnection",
+                action("GetInfo", &[], &["NewPINFailureCount"]),
+            ),
+            (
+                "WANPPPConnection",
+                action("GetInfo", &[], &["NewMaxCharsPassword", "NewUserName"]),
+            ),
+            (
+                "ManagementServer",
+                action("GetInfo", &[], &["NewUsername", "NewParameterKey"]),
+            ),
+        ];
+        for (service_name, a) in &cases {
+            assert_eq!(
+                decide_for(service_name, a),
+                Decision::Call,
+                "{service_name} {}",
+                a.name
+            );
+        }
+    }
+
+    #[test]
     fn marks_personal_lists() {
         for (service_name, name) in [
             ("X_AVM-DE_OnTel", "GetCallList"),
             ("X_AVM-DE_OnTel", "GetPhonebookList"),
             ("X_AVM-DE_TAM", "GetMessageList"),
+            ("DeviceInfo", "GetDeviceLog"),
         ] {
             let a = action(name, &[], &[]);
             assert_eq!(decide_for(service_name, &a), Decision::Personal, "{name}");
         }
         let deflections = action("GetDeflections", &[], &[]);
         assert_eq!(decide_for("X_AVM-DE_OnTel", &deflections), Decision::Call);
-    }
-
-    #[test]
-    fn splits_identifiers_into_words() {
-        assert_eq!(
-            words("NewX_AVM-DE_WEPKey0"),
-            ["new", "x", "avm", "de", "wep", "key"]
-        );
-        assert_eq!(words("NewPreSharedKey"), ["new", "pre", "shared", "key"]);
-        assert_eq!(words("Entry0Index"), ["entry", "index"]);
-        assert_eq!(words("NewPortMappingNumberOfEntries")[2], "mapping");
-        assert_eq!(words("__"), Vec::<String>::new());
     }
 
     #[test]
