@@ -14,6 +14,8 @@
 //! - Every argument refers to a state variable. Calls of other actions, like
 //!   `SetEnable`, write their input arguments into these variables, and the
 //!   getters that read the same variables answer with the new values.
+//! - Paths to list documents, like the one `X_AVM-DE_GetHostListPath`
+//!   returns, hold a session ID, and the documents are served for it.
 //! - Tests can [inject](Sim::inject) UPnP errors, delays, discarded writes
 //!   and a locked login, and read the [requests](Sim::requests) the server
 //!   got.
@@ -310,7 +312,7 @@ impl Shared {
             })
             .sum();
         let response = match *method {
-            Method::GET => inner.document(path),
+            Method::GET => inner.document(path, uri.query()),
             Method::POST if !authorized => (
                 StatusCode::UNAUTHORIZED,
                 [(WWW_AUTHENTICATE, auth::challenge(NONCE))],
@@ -327,11 +329,31 @@ impl Shared {
 /// like.
 const NONCE: &str = "F1A2B3C4D5E6F708";
 
+/// The session ID in the paths of list documents, in place of the `***` the
+/// fixture recorded.
+const SESSION: &str = "5e55104d0c0ffee5";
+
 impl Inner {
-    /// The device description or a service description.
-    fn document(&self, path: &str) -> Response {
+    /// The device description, a service description, or a list document
+    /// for the [session](SESSION).
+    fn document(&self, path: &str, query: Option<&str>) -> Response {
         let fixture = &self.device.fixture;
-        let xml = match path.trim_start_matches('/') {
+        let name = path.trim_start_matches('/');
+        if let Some(list) = name
+            .strip_suffix(".lua")
+            .and_then(|stem| fixture.lists.get(stem))
+        {
+            let session = query
+                .into_iter()
+                .flat_map(|q| q.split('&'))
+                .any(|p| p == format!("sid={SESSION}"));
+            return if session {
+                list.clone().into_response()
+            } else {
+                StatusCode::FORBIDDEN.into_response()
+            };
+        }
+        let xml = match name {
             "tr64desc.xml" => Some(&fixture.description_xml),
             name => fixture.scpds.get(name).map(|(xml, _)| xml),
         };
@@ -370,7 +392,10 @@ impl Inner {
             Err(Fault::new(401))
         };
         match result {
-            Ok(out) => {
+            Ok(mut out) => {
+                for (_, value) in &mut out {
+                    *value = value.replace("sid=***", &format!("sid={SESSION}"));
+                }
                 let xml = soap::response(&service.service_type, &call.action, &out);
                 ([(CONTENT_TYPE, XML)], xml).into_response()
             }

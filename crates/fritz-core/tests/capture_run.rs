@@ -10,7 +10,7 @@ use axum::extract::State;
 use axum::http::{HeaderMap, StatusCode};
 use axum::response::{IntoResponse, Response};
 use axum::routing::{get, post};
-use fritz_core::capture::{Capture, Options, Outcome, plan, run, write};
+use fritz_core::capture::{Capture, List, Options, Outcome, plan, run, write};
 use tr064::{Client, Error, Url};
 
 const DESCRIPTION: &str = include_str!("data/tr64desc.xml");
@@ -21,12 +21,15 @@ const ONTEL: &str = include_str!("data/ontelSCPD.xml");
 struct Device {
     /// Whether the device locks the account at the second call.
     locks: bool,
+    /// The status the host list is served with.
+    list: StatusCode,
     calls: AtomicUsize,
 }
 
-async fn start(locks: bool) -> (Client, Arc<Device>, Url) {
+async fn start(locks: bool, list: StatusCode) -> (Client, Arc<Device>, Url) {
     let device = Arc::new(Device {
         locks,
+        list,
         calls: AtomicUsize::new(0),
     });
     let app = Router::new()
@@ -35,6 +38,10 @@ async fn start(locks: bool) -> (Client, Arc<Device>, Url) {
         .route("/hostsSCPD.xml", get(|| async { HOSTS }))
         .route("/x_contactSCPD.xml", get(|| async { ONTEL }))
         .route("/upnp/control/{service}", post(control))
+        .route(
+            "/devicehostlist.lua",
+            get(|State(device): State<Arc<Device>>| async move { (device.list, "<List/>") }),
+        )
         .with_state(Arc::clone(&device));
     let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
     let url = Url::parse(&format!("http://{}", listener.local_addr().unwrap())).unwrap();
@@ -101,7 +108,7 @@ fn read(path: &std::path::Path) -> String {
 
 #[tokio::test]
 async fn calls_the_planned_getters_and_writes_their_answers() {
-    let (client, device, url) = start(false).await;
+    let (client, device, url) = start(false, StatusCode::OK).await;
     let plan = plan(&client).await.unwrap();
     let options = Options {
         delay: Duration::ZERO,
@@ -127,13 +134,20 @@ async fn calls_the_planned_getters_and_writes_their_answers() {
     );
     assert_eq!(device.calls.load(Ordering::SeqCst), 8);
     assert!(capture.stopped.is_none());
-    assert_eq!(capture.to_string(), "8 calls: 5 ok, 2 faults, 1 failed");
+    assert_eq!(
+        capture.to_string(),
+        "8 calls: 5 ok, 2 faults, 1 failed, 1 of 1 lists"
+    );
 
     let dir = tempfile::tempdir().unwrap();
     write(&plan, &capture, dir.path()).unwrap();
     assert_eq!(read(&dir.path().join("tr64desc.xml")), DESCRIPTION);
     assert_eq!(read(&dir.path().join("scpd/hostsSCPD.xml")), HOSTS);
     assert!(!dir.path().join("scpd/missingSCPD.xml").exists());
+    assert_eq!(
+        read(&dir.path().join("lists/devicehostlist.xml")),
+        "<List/>"
+    );
     let responses = dir.path().join("responses");
     assert_eq!(
         read(&responses.join("Hosts1/GetGenericHostEntry@1.json")),
@@ -153,7 +167,7 @@ async fn calls_the_planned_getters_and_writes_their_answers() {
 
 #[tokio::test]
 async fn calls_personal_getters_when_asked() {
-    let (client, _, _) = start(false).await;
+    let (client, _, _) = start(false, StatusCode::OK).await;
     let plan = plan(&client).await.unwrap();
     let options = Options {
         include_personal: true,
@@ -184,7 +198,7 @@ async fn calls_personal_getters_when_asked() {
 
 #[tokio::test]
 async fn stops_when_the_account_is_locked() {
-    let (client, device, _) = start(true).await;
+    let (client, device, _) = start(true, StatusCode::OK).await;
     let plan = plan(&client).await.unwrap();
     let options = Options {
         delay: Duration::ZERO,
@@ -198,6 +212,49 @@ async fn stops_when_the_account_is_locked() {
         "{:?}",
         capture.stopped
     );
+}
+
+#[tokio::test]
+async fn records_lists_it_cannot_fetch() {
+    let (client, _, url) = start(false, StatusCode::NOT_FOUND).await;
+    let plan = plan(&client).await.unwrap();
+    let options = Options {
+        delay: Duration::ZERO,
+        ..Options::default()
+    };
+    let capture = run(&client, &plan, &options, |_| {}).await;
+    assert!(capture.stopped.is_none());
+    assert_eq!(
+        capture.lists,
+        [List {
+            name: "devicehostlist.xml",
+            outcome: Err(format!(
+                "HTTP status 404 from {url}devicehostlist.lua?sid=***"
+            )),
+        }]
+    );
+    assert!(capture.to_string().ends_with(", 0 of 1 lists"));
+    let dir = tempfile::tempdir().unwrap();
+    write(&plan, &capture, dir.path()).unwrap();
+    assert!(!dir.path().join("lists").exists());
+}
+
+#[tokio::test]
+async fn stops_when_a_list_needs_credentials() {
+    let (client, _, _) = start(false, StatusCode::UNAUTHORIZED).await;
+    let plan = plan(&client).await.unwrap();
+    let options = Options {
+        delay: Duration::ZERO,
+        ..Options::default()
+    };
+    let capture = run(&client, &plan, &options, |_| {}).await;
+    assert!(
+        matches!(capture.stopped, Some(Error::CredentialsRequired)),
+        "{:?}",
+        capture.stopped
+    );
+    assert_eq!(capture.responses.len(), 7);
+    assert_eq!(capture.lists, []);
 }
 
 #[test]

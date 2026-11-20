@@ -27,13 +27,26 @@ pub(super) fn argument(name: &str) -> Option<Kind> {
     })
 }
 
+/// The kind of personal value a key of a list in JSON like the mesh list
+/// holds, if any: `device_name` or `ssid`.
+pub(super) fn field(name: &str) -> Option<Kind> {
+    Some(match key(name).as_str() {
+        "devicename" => Kind::Device,
+        "ssid" => Kind::Wlan,
+        _ => return None,
+    })
+}
+
 /// The kind of personal value an XML element or attribute holds, if any,
-/// for lists like `<List><Item><Name>…</Name></Item></List>` and for the
-/// device description. Its `friendlyName` is the model name, not a name
-/// given by the owner.
+/// for lists like `<List><Item><HostName>…</HostName></Item></List>` and
+/// for the device description. Its `friendlyName` is the model name, not a
+/// name given by the owner, unlike the `X_AVM-DE_FriendlyName` of a host.
 pub(super) fn element(name: &str) -> Option<Kind> {
     let name = name.rsplit(':').next().unwrap_or(name);
     Some(match key(name).as_str() {
+        "hostname" | "xavmdefriendlyname" => Kind::Device,
+        "clientid" => Kind::Id,
+        "xavmdeurl" | "xavmdeinfourl" => Kind::Url,
         "name" => Kind::Name,
         "username" | "voipusername" => Kind::User,
         "number" | "voipnumber" => Kind::Phone,
@@ -127,6 +140,17 @@ mod tests {
         assert_eq!(element("serialNumber"), Some(Kind::Serial));
         assert_eq!(element("VoIPSTUNServer"), Some(Kind::Server));
         assert_eq!(element("path"), None);
+        assert_eq!(element("HostName"), Some(Kind::Device));
+        assert_eq!(element("X_AVM-DE_FriendlyName"), Some(Kind::Device));
+        assert_eq!(element("ClientID"), Some(Kind::Id));
+        assert_eq!(element("X_AVM-DE_InfoURL"), Some(Kind::Url));
+    }
+
+    #[test]
+    fn finds_personal_fields() {
+        assert_eq!(field("device_name"), Some(Kind::Device));
+        assert_eq!(field("ssid"), Some(Kind::Wlan));
+        assert_eq!(field("device_model"), None);
     }
 
     #[test]

@@ -13,7 +13,7 @@ use crate::policy::{self, Class};
 
 mod run;
 
-pub use run::{Capture, Options, Outcome, Response, run, write};
+pub use run::{Capture, List, Options, Outcome, Response, run, write};
 
 /// What the capture does with one action.
 #[derive(Debug, Clone, PartialEq, Eq)]

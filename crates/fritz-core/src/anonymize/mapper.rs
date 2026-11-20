@@ -128,7 +128,7 @@ impl Mapper {
         if value.starts_with('<') {
             return self.xml(value);
         }
-        let value = match rules::argument(name) {
+        let value = match rules::argument(name).or_else(|| rules::field(name)) {
             Some(kind) => self.named(kind, value),
             None => value.to_owned(),
         };

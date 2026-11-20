@@ -1,5 +1,6 @@
 //! The state of a device, read through actions that only read: an
-//! overview, the hosts, the wireless networks and the internet connection.
+//! overview, the hosts, the mesh, the wireless networks and the internet
+//! connection.
 //!
 //! Parts the device lacks, or that the user may not read, are left out
 //! instead of failing the whole read.
@@ -7,6 +8,7 @@
 use serde::Serialize;
 
 use crate::generic::Error;
+use crate::lists::{self, Mesh};
 use crate::read::{Reader, Values};
 
 /// The most hosts read, as a guard against a device that never ends the
@@ -88,15 +90,23 @@ pub struct Host {
     pub active: bool,
     /// Like `Ethernet` or `802.11`.
     pub interface: Option<String>,
-    /// Like `DHCP` or `Static`.
+    /// Like `DHCP` or `Static`. Only in the entries, not in the host list.
     pub address_source: Option<String>,
+    /// Whether the host is in the guest network. Only in the host list.
+    pub guest: Option<bool>,
+    /// Whether the host may use the internet: `granted`, `denied` or
+    /// `error`. Only in the host list.
+    pub internet_access: Option<String>,
+    /// The speed of the connection to the host, in Mbit/s. Only in the
+    /// host list.
+    pub speed: Option<u32>,
 }
 
 /// The hosts and how many the device reported.
 #[derive(Debug, Clone, Default, PartialEq, Eq, Serialize)]
 pub struct Hosts {
-    /// The number of entries the device reported. More than the hosts if
-    /// it stopped answering before.
+    /// The number of hosts the device reported. More than the hosts if it
+    /// stopped answering before.
     pub reported: u32,
     pub hosts: Vec<Host>,
 }
@@ -261,14 +271,30 @@ fn tenths(value: i64) -> f64 {
     value as f64 / 10.0
 }
 
-/// Reads the hosts, one call per host, up to [`MAX_HOSTS`]. Stops early at
+/// Reads the hosts from the host list, in one request. Without a host list,
+/// it reads them one call per host, up to [`MAX_HOSTS`], and stops early at
 /// the first index the device has no entry for.
 ///
 /// # Errors
 ///
 /// The errors of reading other than missing parts, see
-/// [`Reader::try_read`].
+/// [`Reader::try_read`], and [`Error::InvalidDocument`] for a host list
+/// that cannot be parsed.
 pub async fn hosts(reader: &mut Reader) -> Result<Hosts, Error> {
+    if let Some(xml) = reader
+        .document(
+            "Hosts1",
+            "X_AVM-DE_GetHostListPath",
+            "NewX_AVM-DE_HostListPath",
+        )
+        .await?
+    {
+        let hosts = lists::hosts(&xml)?;
+        return Ok(Hosts {
+            reported: u32::try_from(hosts.len()).unwrap_or(u32::MAX),
+            hosts,
+        });
+    }
     let Some(count) = reader
         .try_read("Hosts1", "GetHostNumberOfEntries", &[])
         .await?
@@ -293,9 +319,29 @@ pub async fn hosts(reader: &mut Reader) -> Result<Hosts, Error> {
             active: entry.flag("NewActive").unwrap_or_default(),
             interface: entry.text("NewInterfaceType"),
             address_source: entry.text("NewAddressSource"),
+            ..Host::default()
         });
     }
     Ok(Hosts { reported, hosts })
+}
+
+/// Reads the mesh from the mesh list. `None` if the device has none.
+///
+/// # Errors
+///
+/// The errors of reading other than missing parts, see
+/// [`Reader::try_read`], and [`Error::InvalidDocument`] for a mesh list
+/// that cannot be parsed.
+pub async fn mesh(reader: &mut Reader) -> Result<Option<Mesh>, Error> {
+    reader
+        .document(
+            "Hosts1",
+            "X_AVM-DE_GetMeshListPath",
+            "NewX_AVM-DE_MeshListPath",
+        )
+        .await?
+        .map(|json| lists::mesh(&json))
+        .transpose()
 }
 
 /// Reads the wireless networks.

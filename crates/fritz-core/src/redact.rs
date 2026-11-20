@@ -29,9 +29,49 @@ pub fn value(name: &str, value: &str) -> String {
     redacted
 }
 
+/// An error as it may be shown: without the session ID of a requested URL
+/// like `/devicehostlist.lua?sid=…`.
+pub fn error(error: tr064::Error) -> tr064::Error {
+    match error {
+        tr064::Error::Http(error) => tr064::Error::Http(error.without_url()),
+        tr064::Error::Status { status, url } => tr064::Error::Status {
+            status,
+            url: value("", &url),
+        },
+        other => other,
+    }
+}
+
 #[cfg(test)]
 mod tests {
+    use tr064::{Client, Error, Url};
+
     use super::*;
+
+    #[tokio::test]
+    async fn hides_session_ids_in_errors() {
+        let status = Error::Status {
+            status: 403,
+            url: "http://box/devicehostlist.lua?sid=0123abcd".to_owned(),
+        };
+        assert_eq!(
+            error(status).to_string(),
+            "HTTP status 403 from http://box/devicehostlist.lua?sid=***"
+        );
+        let client = Client::builder(Url::parse("http://127.0.0.1:1").unwrap())
+            .build()
+            .unwrap();
+        let http = client
+            .get("/devicehostlist.lua?sid=0123abcd")
+            .await
+            .unwrap_err();
+        assert!(http.to_string().contains("0123abcd"));
+        assert!(!error(http).to_string().contains("0123abcd"));
+        assert!(matches!(
+            error(Error::AuthenticationFailed),
+            Error::AuthenticationFailed
+        ));
+    }
 
     #[test]
     fn hides_secrets_and_session_ids() {

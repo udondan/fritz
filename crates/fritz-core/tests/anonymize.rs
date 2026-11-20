@@ -166,6 +166,45 @@ fn anonymizes_strings_in_json_arrays() {
 }
 
 #[test]
+fn anonymizes_the_host_and_mesh_lists() {
+    let temp = tempfile::tempdir().unwrap();
+    let (raw_dir, out) = (temp.path().join("raw"), temp.path().join("out"));
+    tree(
+        &raw_dir,
+        &[
+            ("scpd/hostsSCPD.xml", "<scpd><name>AP:5G:0</name></scpd>\n"),
+            (
+                "lists/devicehostlist.xml",
+                "<List><Item><HostName>laptop</HostName><ClientID>01:aa</ClientID>\
+                 <X_AVM-DE_FriendlyName>laptop</X_AVM-DE_FriendlyName>\
+                 <X_AVM-DE_InfoURL>http://laptop.home/info</X_AVM-DE_InfoURL>\
+                 <InterfaceType>802.11</InterfaceType></Item></List>\n",
+            ),
+            (
+                "lists/meshlist.json",
+                r#"{"nodes": [{"device_name": "laptop", "device_model": "AX 3000",
+                    "node_interfaces": [{"name": "AP:5G:0", "ssid": "Max Home"}]}]}"#,
+            ),
+        ],
+    );
+
+    assert_eq!(anonymize::anonymize(&raw_dir, &out, &[]).unwrap(), 3);
+    assert_eq!(
+        read(&out, "lists/devicehostlist.xml"),
+        "<List><Item><HostName>device-1</HostName><ClientID>id-1</ClientID>\
+         <X_AVM-DE_FriendlyName>device-1</X_AVM-DE_FriendlyName>\
+         <X_AVM-DE_InfoURL>https://url-1.example.net/</X_AVM-DE_InfoURL>\
+         <InterfaceType>802.11</InterfaceType></Item></List>\n"
+    );
+    let mesh = read(&out, "lists/meshlist.json");
+    assert!(mesh.contains("\"device_name\": \"device-1\""), "{mesh}");
+    assert!(mesh.contains("\"ssid\": \"wlan-1\""), "{mesh}");
+    assert!(mesh.contains("\"device_model\": \"AX 3000\""), "{mesh}");
+    assert!(mesh.contains("\"name\": \"AP:5G:0\""), "{mesh}");
+    assert_eq!(anonymize::check(&out, &[]).unwrap(), []);
+}
+
+#[test]
 fn reports_an_unwritable_destination() {
     let temp = tempfile::tempdir().unwrap();
     let raw_dir = temp.path().join("raw");

@@ -15,6 +15,21 @@ use crate::redact;
 /// The device locked the account after too many failed attempts.
 const LOCKED: u16 = 867;
 
+/// The getters that return the path of a list document: the action, the
+/// output with the path, and the file the document is stored in.
+const LISTS: [(&str, &str, &str); 2] = [
+    (
+        "X_AVM-DE_GetHostListPath",
+        "NewX_AVM-DE_HostListPath",
+        "devicehostlist.xml",
+    ),
+    (
+        "X_AVM-DE_GetMeshListPath",
+        "NewX_AVM-DE_MeshListPath",
+        "meshlist.json",
+    ),
+];
+
 /// How a capture runs.
 #[derive(Debug, Clone)]
 pub struct Options {
@@ -58,10 +73,20 @@ pub enum Outcome {
     Failed(String),
 }
 
+/// A list document, fetched at the path a getter returned.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct List {
+    /// The file name, like `devicehostlist.xml`.
+    pub name: &'static str,
+    /// The document, or why it could not be fetched.
+    pub outcome: Result<String, String>,
+}
+
 /// The answers of a capture run.
 #[derive(Debug, Default)]
 pub struct Capture {
     pub responses: Vec<Response>,
+    pub lists: Vec<List>,
     /// The error that ended the run early, if any.
     pub stopped: Option<Error>,
 }
@@ -69,6 +94,7 @@ pub struct Capture {
 /// Calls the getters the plan decided to call, one after the other, and
 /// reports each answer to `progress`. An indexed getter is called with
 /// rising indexes until it fails or [`Options::max_entries`] is reached.
+/// The host and mesh lists are fetched at the paths their getters return.
 ///
 /// Errors that concern a single call are recorded. The run stops at errors
 /// that would recur on every call or put the account at risk: missing or
@@ -152,15 +178,19 @@ impl<P: FnMut(&Response)> Caller<'_, P> {
             .zip(&value)
             .map(|((name, _), value)| (*name, value.as_str()))
             .collect();
+        let mut list = None;
         let outcome = match self.client.call(service, &action.name, &arguments).await {
-            Ok(out) => Outcome::Ok(
-                out.into_iter()
-                    .map(|(n, v)| {
-                        let v = redact::value(&n, &v);
-                        (n, v)
-                    })
-                    .collect(),
-            ),
+            Ok(out) => {
+                list = list_path(&action.name, |n| out.get(n));
+                Outcome::Ok(
+                    out.into_iter()
+                        .map(|(n, v)| {
+                            let v = redact::value(&n, &v);
+                            (n, v)
+                        })
+                        .collect(),
+                )
+            }
             Err(error) if stops(&error) => return Err(error),
             Err(Error::Upnp { code, description }) => Outcome::Fault { code, description },
             Err(error) => Outcome::Failed(error.to_string()),
@@ -174,8 +204,36 @@ impl<P: FnMut(&Response)> Caller<'_, P> {
         };
         (self.progress)(&response);
         self.capture.responses.push(response);
+        if let Some((name, path)) = list {
+            self.fetch(name, &path).await?;
+        }
         Ok(ok)
     }
+
+    /// Fetches a list document and records it, or the error that ends the
+    /// run.
+    async fn fetch(&mut self, name: &'static str, path: &str) -> Result<(), Error> {
+        tokio::time::sleep(self.options.delay).await;
+        let outcome = match self.client.get(path).await.map_err(redact::error) {
+            Ok(document) => Ok(document),
+            Err(error) if stops(&error) => return Err(error),
+            Err(error) => Err(error.to_string()),
+        };
+        self.capture.lists.push(List { name, outcome });
+        Ok(())
+    }
+}
+
+/// The file name and path of the list document whose path the action
+/// returned, if it is one of the [lists](LISTS). `out` gives the value of
+/// an output.
+fn list_path<'a>(
+    action: &str,
+    out: impl Fn(&str) -> Option<&'a str>,
+) -> Option<(&'static str, String)> {
+    let (_, output, name) = LISTS.iter().find(|(a, ..)| *a == action)?;
+    let path = out(output).filter(|p| !p.is_empty())?;
+    Some((name, path.to_owned()))
 }
 
 /// Whether an error ends the run instead of only the call.
@@ -207,12 +265,18 @@ impl Capture {
 }
 
 impl fmt::Display for Capture {
-    /// A summary like `12 calls: 9 ok, 2 faults, 1 failed`.
+    /// A summary like `12 calls: 9 ok, 2 faults, 1 failed, 2 of 2 lists`,
+    /// without the lists if there were none.
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let (ok, faults, failed) = self.counts();
+        let fetched = self.lists.iter().filter(|l| l.outcome.is_ok()).count();
+        let lists = match self.lists.len() {
+            0 => String::new(),
+            n => format!(", {fetched} of {n} lists"),
+        };
         write!(
             f,
-            "{} calls: {ok} ok, {faults} faults, {failed} failed",
+            "{} calls: {ok} ok, {faults} faults, {failed} failed{lists}",
             self.responses.len()
         )
     }
@@ -268,6 +332,7 @@ impl fmt::Display for Response {
 /// scpd/<file>.xml
 /// responses/<service>/<action>.json
 /// responses/<service>/<action>@<index>.json
+/// lists/<name>
 /// ```
 ///
 /// # Errors
@@ -295,12 +360,33 @@ pub fn write(plan: &Plan, capture: &Capture, dir: &Path) -> io::Result<()> {
         json.push('\n');
         fs::write(service_dir.join(response.file_name()), json)?;
     }
+    for list in &capture.lists {
+        if let Ok(document) = &list.outcome {
+            let lists_dir = dir.join("lists");
+            fs::create_dir_all(&lists_dir)?;
+            fs::write(lists_dir.join(list.name), document)?;
+        }
+    }
     Ok(())
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn finds_the_paths_of_lists() {
+        let out = |path: &'static str| {
+            move |name: &str| (name == "NewX_AVM-DE_HostListPath").then_some(path)
+        };
+        assert_eq!(
+            list_path("X_AVM-DE_GetHostListPath", out("/devicehostlist.lua?sid=1")),
+            Some(("devicehostlist.xml", "/devicehostlist.lua?sid=1".to_owned()))
+        );
+        assert_eq!(list_path("X_AVM-DE_GetHostListPath", out("")), None);
+        assert_eq!(list_path("X_AVM-DE_GetMeshListPath", out("/x")), None);
+        assert_eq!(list_path("GetInfo", out("/x")), None);
+    }
 
     #[test]
     fn stops_only_at_errors_that_recur() {
