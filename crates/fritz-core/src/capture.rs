@@ -7,7 +7,11 @@
 
 use std::fmt;
 
-use tr064::{Action, Client, Direction, Service};
+use tr064::{Action, Client, DeviceDescription, Direction, Scpd, Service};
+
+mod run;
+
+pub use run::{Capture, Options, Outcome, Response, run, write};
 
 /// Actions that are never called although they look harmless by name.
 const DENIED_ACTIONS: &[(&str, &str)] = &[
@@ -67,6 +71,12 @@ pub fn decide(service: &Service, action: &Action) -> Decision {
     if is_personal(service, name) {
         return Decision::Personal;
     }
+    shape(action)
+}
+
+/// How a getter is called, depending on its inputs: [`Decision::Call`],
+/// [`Decision::Iterate`] or [`Decision::NeedsInput`].
+fn shape(action: &Action) -> Decision {
     let inputs: Vec<String> = action
         .arguments
         .iter()
@@ -157,9 +167,12 @@ fn finish_word(words: &mut Vec<String>, current: &mut String) {
     current.clear();
 }
 
-/// The decisions for all actions of a device.
+/// The decisions for all actions of a device, with the documents they are
+/// based on.
 #[derive(Debug)]
 pub struct Plan {
+    /// The device description as the device sent it.
+    pub description: String,
     pub services: Vec<ServicePlan>,
 }
 
@@ -168,7 +181,15 @@ pub struct Plan {
 #[derive(Debug)]
 pub struct ServicePlan {
     pub service: Service,
-    pub actions: Result<Vec<(String, Decision)>, tr064::Error>,
+    pub scpd: Result<ServiceScpd, tr064::Error>,
+}
+
+/// The SCPD of a service and the decision for each of its actions.
+#[derive(Debug)]
+pub struct ServiceScpd {
+    /// The SCPD as the device sent it.
+    pub xml: String,
+    pub actions: Vec<(Action, Decision)>,
 }
 
 /// Reads the device description and all SCPDs and decides for each action.
@@ -177,23 +198,39 @@ pub struct ServicePlan {
 ///
 /// # Errors
 ///
-/// The errors of [`Client::description`].
+/// The errors of reading and parsing the device description.
 pub async fn plan(client: &Client) -> Result<Plan, tr064::Error> {
-    let description = client.description().await?;
+    let description = client.get("/tr64desc.xml").await?;
+    let parsed = DeviceDescription::parse(&description)?;
     let mut services = Vec::new();
-    for service in description.services() {
-        let actions = client.scpd(service).await.map(|scpd| {
-            scpd.actions
-                .iter()
-                .map(|action| (action.name.clone(), decide(service, action)))
-                .collect()
-        });
+    for service in parsed.services() {
         services.push(ServicePlan {
             service: service.clone(),
-            actions,
+            scpd: plan_service(client, service).await,
         });
     }
-    Ok(Plan { services })
+    Ok(Plan {
+        description,
+        services,
+    })
+}
+
+async fn plan_service(client: &Client, service: &Service) -> Result<ServiceScpd, tr064::Error> {
+    let xml = client.get(&service.scpd_url).await?;
+    let actions = Scpd::parse(&xml)?
+        .actions
+        .into_iter()
+        .map(|action| {
+            let decision = decide(service, &action);
+            (action, decision)
+        })
+        .collect();
+    Ok(ServiceScpd { xml, actions })
+}
+
+/// The last part of the service ID, like `Hosts1`. Unique within a device.
+pub fn short_id(service: &Service) -> &str {
+    service.service_id.rsplit(':').next().unwrap_or_default()
 }
 
 /// How many actions got each decision, and how many services failed.
@@ -227,8 +264,8 @@ impl Plan {
     pub fn summary(&self) -> Summary {
         let mut summary = Summary::default();
         for service in &self.services {
-            match &service.actions {
-                Ok(actions) => actions.iter().for_each(|(_, d)| summary.count(d)),
+            match &service.scpd {
+                Ok(scpd) => scpd.actions.iter().for_each(|(_, d)| summary.count(d)),
                 Err(_) => summary.failed_services += 1,
             }
         }
@@ -262,15 +299,15 @@ impl fmt::Display for Plan {
 
 fn write_service(f: &mut fmt::Formatter<'_>, plan: &ServicePlan) -> fmt::Result {
     let service = &plan.service;
-    let id = service.service_id.rsplit(':').next().unwrap_or_default();
+    let id = short_id(service);
     writeln!(f, "{}:{} ({id})", service.name(), service.version())?;
-    match &plan.actions {
-        Ok(actions) => {
+    match &plan.scpd {
+        Ok(scpd) => {
             let mut not_getters = 0;
-            for (name, decision) in actions {
+            for (action, decision) in &scpd.actions {
                 match decision {
                     Decision::NotGetter => not_getters += 1,
-                    _ => writeln!(f, "  {}", Line(name, decision))?,
+                    _ => writeln!(f, "  {}", Line(&action.name, decision))?,
                 }
             }
             if not_getters > 0 {
