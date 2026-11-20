@@ -34,6 +34,18 @@
     }
   },
   {
+    "name": "fritz_capabilities",
+    "description": "Features the device offers, the rights of the user, two-factor confirmation.",
+    "inputSchema": {
+      "properties": {},
+      "type": "object"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "openWorldHint": false
+    }
+  },
+  {
     "name": "fritz_describe_action",
     "description": "The class and the arguments of an action, with their types.",
     "inputSchema": {
@@ -159,8 +171,32 @@
     }
   },
   {
+    "name": "fritz_ports",
+    "description": "Port forwardings and whether UPnP lets hosts open ports.",
+    "inputSchema": {
+      "properties": {},
+      "type": "object"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "openWorldHint": false
+    }
+  },
+  {
     "name": "fritz_smarthome",
     "description": "Smart Home devices and their values (FRITZ!OS 8.20 and later).",
+    "inputSchema": {
+      "properties": {},
+      "type": "object"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "fritz_telephony",
+    "description": "Telephony: numbers, accounts, call deflections, answering machines, DECT handsets.",
     "inputSchema": {
       "properties": {},
       "type": "object"

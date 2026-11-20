@@ -824,6 +824,12 @@ async fn prints_the_state_as_json() {
     assert_eq!(internet["dsl"]["downstream_noise_margin"], 7.0);
     let wlan = json(&run(&sim, &["wlan"], password).await);
     assert_eq!(wlan.as_array().unwrap().len(), 3);
+    let ports = json(&run(&sim, &["ports"], password).await);
+    assert_eq!(ports["upnp"], true);
+    let telephony = json(&run(&sim, &["telephony"], password).await);
+    assert_eq!(telephony["handsets"][0]["model"], "FRITZ!Fon C5");
+    let capabilities = json(&run(&sim, &["capabilities"], password).await);
+    assert_eq!(capabilities["services"], 37);
 
     let output = run(&sim, &["hosts"], password).await;
     let hosts = json(&output);
@@ -901,6 +907,14 @@ async fn prints_the_state_as_text() {
     assert!(smarthome.starts_with("NAME "), "{smarthome}");
     assert!(smarthome.contains("23.4 W"), "{smarthome}");
     assert!(smarthome.contains("80%"), "{smarthome}");
+    let ports = text("ports").await;
+    assert_eq!(ports, "UPnP  on\nNo port forwardings.\n");
+    let telephony = text("telephony").await;
+    assert!(telephony.starts_with("NUMBER "), "{telephony}");
+    assert!(telephony.contains("\nHANDSET "), "{telephony}");
+    let capabilities = text("capabilities").await;
+    assert!(capabilities.starts_with("Features "), "{capabilities}");
+    assert!(capabilities.contains("dect"), "{capabilities}");
 }
 
 #[tokio::test(flavor = "multi_thread")]
@@ -914,6 +928,9 @@ async fn reports_failed_reads() {
         ("hosts", "cannot read the hosts"),
         ("mesh", "cannot read the mesh"),
         ("smarthome", "cannot log in to the web interface"),
+        ("ports", "cannot read the port forwardings"),
+        ("telephony", "cannot read the telephony"),
+        ("capabilities", "cannot read the capabilities"),
     ] {
         let error = failure(&run(&sim, &[command], Some("wrong")).await);
         assert!(error.contains(message), "{message} in {error}");

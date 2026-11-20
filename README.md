@@ -38,6 +38,9 @@ claude mcp add fritz -- fritz --host 192.168.178.1 --user agent mcp
 | `fritz_hosts`           | Known hosts, filtered by `active` and `search`, paginated   |
 | `fritz_mesh`            | Mesh nodes and links                                        |
 | `fritz_smarthome`       | Smart Home devices (FRITZ!OS 8.20 and later)                |
+| `fritz_ports`           | Port forwardings and whether UPnP is on                     |
+| `fritz_telephony`       | Numbers, accounts, deflections, answering machines, DECT    |
+| `fritz_capabilities`    | Features of the device, rights of the user, two-factor      |
 | `fritz_list_services`   | TR-064 services, or the actions of one with their class     |
 | `fritz_describe_action` | The arguments of an action and their types                  |
 | `fritz_call_action`     | Calls an action that only reads, with secrets hidden        |

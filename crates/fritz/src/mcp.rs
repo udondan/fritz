@@ -12,12 +12,15 @@ use std::collections::BTreeMap;
 use std::sync::Arc;
 
 use anyhow::Context as _;
+use fritz_core::capabilities;
 use fritz_core::capture::short_id;
 use fritz_core::generic;
 use fritz_core::policy;
+use fritz_core::ports;
 use fritz_core::read::Reader;
 use fritz_core::smarthome;
 use fritz_core::status::{self, Host};
+use fritz_core::telephony;
 use rmcp::handler::server::router::tool::ToolRouter;
 use rmcp::handler::server::wrapper::Parameters;
 use rmcp::model::{CallToolResult, ContentBlock, Implementation, ServerCapabilities, ServerConfig};
@@ -163,6 +166,42 @@ impl Server {
         self.respond(async {
             let mut reader = self.reader().await?;
             Ok(status::wlans(&mut reader).await?)
+        })
+        .await
+    }
+
+    #[tool(
+        description = "Port forwardings and whether UPnP lets hosts open ports.",
+        annotations(read_only_hint = true, open_world_hint = false)
+    )]
+    async fn fritz_ports(&self) -> CallToolResult {
+        self.respond(async {
+            let mut reader = self.reader().await?;
+            Ok(ports::ports(&mut reader).await?)
+        })
+        .await
+    }
+
+    #[tool(
+        description = "Telephony: numbers, accounts, call deflections, answering machines, DECT handsets.",
+        annotations(read_only_hint = true, open_world_hint = false)
+    )]
+    async fn fritz_telephony(&self) -> CallToolResult {
+        self.respond(async {
+            let mut reader = self.reader().await?;
+            Ok(telephony::telephony(&mut reader).await?)
+        })
+        .await
+    }
+
+    #[tool(
+        description = "Features the device offers, the rights of the user, two-factor confirmation.",
+        annotations(read_only_hint = true, open_world_hint = false)
+    )]
+    async fn fritz_capabilities(&self) -> CallToolResult {
+        self.respond(async {
+            let mut reader = self.reader().await?;
+            Ok(capabilities::capabilities(&mut reader).await?)
         })
         .await
     }

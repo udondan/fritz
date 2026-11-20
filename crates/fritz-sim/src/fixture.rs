@@ -151,6 +151,30 @@ impl Fixture {
             None => recording.once.as_ref(),
         }
     }
+
+    /// Records `answer` for calls of `action` of the service `service`,
+    /// like `Hosts1`, with the given index or without one, in place of a
+    /// recorded answer. For tests of answers the fixture lacks.
+    #[must_use]
+    pub fn with_answer(
+        mut self,
+        service: &str,
+        action: &str,
+        index: Option<u32>,
+        answer: Answer,
+    ) -> Self {
+        let recording = self
+            .recordings
+            .entry((service.to_owned(), action.to_owned()))
+            .or_default();
+        match index {
+            Some(index) => {
+                recording.indexed.insert(index, answer);
+            }
+            None => recording.once = Some(answer),
+        }
+        self
+    }
 }
 
 /// Parses a recorded answer: `{"status": "ok", "out": {…}}` or

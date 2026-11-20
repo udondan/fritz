@@ -3,6 +3,7 @@
 //! JSON.
 
 use std::collections::{HashMap, HashSet};
+use std::str::FromStr;
 
 use serde::Serialize;
 use serde_json::Value;
@@ -50,51 +51,85 @@ pub struct Link {
     pub max_tx: Option<u64>,
 }
 
+/// The fields of an item of an XML list, by tag name, trimmed.
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+pub struct Item(pub HashMap<String, String>);
+
+impl Item {
+    /// The text of a field, unless it is empty.
+    pub fn text(&self, name: &str) -> Option<String> {
+        self.0.get(name).filter(|v| !v.is_empty()).cloned()
+    }
+
+    /// A field as a number, if it is one.
+    pub fn number<T: FromStr>(&self, name: &str) -> Option<T> {
+        self.0.get(name).and_then(|v| v.parse().ok())
+    }
+
+    /// Whether a field is `1`, if it is there.
+    pub fn flag(&self, name: &str) -> Option<bool> {
+        self.0.get(name).map(|v| v == "1")
+    }
+}
+
+/// Parses an XML list whose root is named `root` into its items: the
+/// children named `item`, like `<List><Item><Name>…</Name></Item></List>`.
+/// Other children of the root are skipped.
+///
+/// # Errors
+///
+/// [`Error::InvalidDocument`], naming the `document`, if it is not such a
+/// list.
+pub fn items(
+    xml: &str,
+    document: &'static str,
+    root: &str,
+    item: &str,
+) -> Result<Vec<Item>, Error> {
+    let invalid = |reason: String| Error::InvalidDocument { document, reason };
+    let parsed = roxmltree::Document::parse(xml).map_err(|e| invalid(e.to_string()))?;
+    let element = parsed.root_element();
+    if element.tag_name().name() != root {
+        return Err(invalid(format!(
+            "the root is {}, not {root}",
+            element.tag_name().name()
+        )));
+    }
+    Ok(element
+        .children()
+        .filter(|n| n.has_tag_name(item))
+        .map(|node| {
+            Item(
+                node.children()
+                    .filter(roxmltree::Node::is_element)
+                    .map(|f| {
+                        let text = f.text().unwrap_or_default().trim();
+                        (f.tag_name().name().to_owned(), text.to_owned())
+                    })
+                    .collect(),
+            )
+        })
+        .collect())
+}
+
 /// Parses the host list: `<List><Item><HostName>…</HostName>…</Item></List>`.
 ///
 /// # Errors
 ///
 /// [`Error::InvalidDocument`] if it is not such a list.
 pub fn hosts(xml: &str) -> Result<Vec<Host>, Error> {
-    let invalid = |reason: String| Error::InvalidDocument {
-        document: "host list",
-        reason,
-    };
-    let document = roxmltree::Document::parse(xml).map_err(|e| invalid(e.to_string()))?;
-    let root = document.root_element();
-    if root.tag_name().name() != "List" {
-        return Err(invalid(format!(
-            "the root is {}, not List",
-            root.tag_name().name()
-        )));
-    }
-    Ok(root
-        .children()
-        .filter(|n| n.has_tag_name("Item"))
-        .map(|item| {
-            let fields: HashMap<&str, &str> = item
-                .children()
-                .filter(roxmltree::Node::is_element)
-                .map(|f| (f.tag_name().name(), f.text().unwrap_or_default().trim()))
-                .collect();
-            let text = |name: &str| {
-                fields
-                    .get(name)
-                    .filter(|v| !v.is_empty())
-                    .map(|v| (*v).to_owned())
-            };
-            let flag = |name: &str| fields.get(name).map(|v| *v == "1");
-            Host {
-                name: text("HostName"),
-                ip: text("IPAddress"),
-                mac: text("MACAddress"),
-                active: flag("Active").unwrap_or_default(),
-                interface: text("InterfaceType"),
-                address_source: text("AddressSource"),
-                guest: flag("X_AVM-DE_Guest"),
-                internet_access: text("X_AVM-DE_WANAccess"),
-                speed: fields.get("X_AVM-DE_Speed").and_then(|v| v.parse().ok()),
-            }
+    Ok(items(xml, "host list", "List", "Item")?
+        .into_iter()
+        .map(|item| Host {
+            name: item.text("HostName"),
+            ip: item.text("IPAddress"),
+            mac: item.text("MACAddress"),
+            active: item.flag("Active").unwrap_or_default(),
+            interface: item.text("InterfaceType"),
+            address_source: item.text("AddressSource"),
+            guest: item.flag("X_AVM-DE_Guest"),
+            internet_access: item.text("X_AVM-DE_WANAccess"),
+            speed: item.number("X_AVM-DE_Speed"),
         })
         .collect())
 }

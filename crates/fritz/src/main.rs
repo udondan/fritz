@@ -4,6 +4,7 @@
 
 mod auth;
 mod context;
+mod device;
 mod mcp;
 mod settings;
 mod status;
@@ -86,6 +87,13 @@ enum Command {
     /// The Smart Home devices and their values, read through the web
     /// interface (FRITZ!OS 8.20 and later).
     Smarthome,
+    /// The port forwardings, and whether hosts may open ports through UPnP.
+    Ports,
+    /// The numbers, accounts, call deflections, answering machines and DECT
+    /// handsets.
+    Telephony,
+    /// The features the device offers and the rights of the user.
+    Capabilities,
     /// Manage the profiles in the configuration file.
     #[command(subcommand)]
     Config(ConfigCommand),
@@ -265,6 +273,9 @@ async fn main() -> anyhow::Result<()> {
         Command::Wlan => status::wlan(&load()?, format, out).await,
         Command::Internet => status::internet(&load()?, format, out).await,
         Command::Smarthome => status::smarthome(&load()?, format, out).await,
+        Command::Ports => device::ports(&load()?, format, out).await,
+        Command::Telephony => device::telephony(&load()?, format, out).await,
+        Command::Capabilities => device::capabilities(&load()?, format, out).await,
         Command::Config(ConfigCommand::Init) => settings::init(&mut load()?, out),
         Command::Config(ConfigCommand::Show) => settings::show(&load()?, out),
         Command::Tls(TlsCommand::Fingerprint) => tls::fingerprint(&load()?, out).await,

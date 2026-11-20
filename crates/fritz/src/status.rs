@@ -398,14 +398,14 @@ fn other(unit: &Unit) -> String {
     values.join(", ")
 }
 
-fn json(value: &impl Serialize, out: &mut impl Write) -> anyhow::Result<()> {
+pub(crate) fn json(value: &impl Serialize, out: &mut impl Write) -> anyhow::Result<()> {
     serde_json::to_writer_pretty(&mut *out, value)?;
     writeln!(out)?;
     Ok(())
 }
 
 /// Prints the pairs that have a value, one per line, with aligned values.
-fn pairs(pairs: &[(&str, Option<String>)], out: &mut impl Write) -> anyhow::Result<()> {
+pub(crate) fn pairs(pairs: &[(&str, Option<String>)], out: &mut impl Write) -> anyhow::Result<()> {
     let width = pairs.iter().map(|(n, _)| n.len()).max().unwrap_or_default();
     for (name, value) in pairs {
         if let Some(value) = value {
@@ -416,7 +416,7 @@ fn pairs(pairs: &[(&str, Option<String>)], out: &mut impl Write) -> anyhow::Resu
 }
 
 /// Prints a table with aligned columns.
-fn table(
+pub(crate) fn table(
     headers: &[&str],
     rows: impl Iterator<Item = Vec<String>>,
     out: &mut impl Write,
@@ -461,22 +461,22 @@ fn duration(seconds: u64) -> String {
     }
 }
 
-fn on_off(on: bool) -> String {
+pub(crate) fn on_off(on: bool) -> String {
     if on { "on" } else { "off" }.to_owned()
 }
 
-fn yes_no(yes: bool) -> String {
+pub(crate) fn yes_no(yes: bool) -> String {
     if yes { "yes" } else { "no" }.to_owned()
 }
 
 #[cfg(test)]
-mod tests {
+pub(crate) mod tests {
     use fritz_core::lists::{Link, Node};
     use fritz_core::status::{Dsl, Right};
 
     use super::*;
 
-    fn text(write: impl FnOnce(&mut Vec<u8>) -> anyhow::Result<()>) -> String {
+    pub(crate) fn text(write: impl FnOnce(&mut Vec<u8>) -> anyhow::Result<()>) -> String {
         let mut out = Vec::new();
         write(&mut out).unwrap();
         String::from_utf8(out).unwrap()
