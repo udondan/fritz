@@ -134,8 +134,7 @@ pub async fn overview(reader: &mut Reader) -> Result<Overview, Error> {
         .await?;
     let rights = user
         .and_then(|u| u.text("NewX_AVM-DE_CurrentUserRights"))
-        .map(|xml| rights(&xml))
-        .unwrap_or_default();
+        .map_or_else(Vec::new, |xml| rights(&xml));
     let info = info.unwrap_or_default();
     Ok(Overview {
         model: info.text("NewModelName"),
@@ -223,16 +222,13 @@ pub async fn internet(reader: &mut Reader) -> Result<Internet, Error> {
     let kbits = |name| details.number::<u64>(name).map(|b| b / 1000);
     Ok(Internet {
         provider: provider.and_then(|p| p.text("NewX_AVM-DE_Provider")),
-        dns_servers: details
-            .get("NewDNSServers")
-            .map(|s| {
-                s.split(',')
-                    .map(str::trim)
-                    .filter(|s| !s.is_empty())
-                    .map(str::to_owned)
-                    .collect()
-            })
-            .unwrap_or_default(),
+        dns_servers: details.get("NewDNSServers").map_or_else(Vec::new, |s| {
+            s.split(',')
+                .map(str::trim)
+                .filter(|s| !s.is_empty())
+                .map(str::to_owned)
+                .collect()
+        }),
         downstream_max: kbits("NewLayer1DownstreamMaxBitRate"),
         upstream_max: kbits("NewLayer1UpstreamMaxBitRate"),
         dsl: dsl

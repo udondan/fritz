@@ -228,7 +228,7 @@ pub(crate) async fn wlan(
 
 fn wlan_table(wlans: &[Wlan], out: &mut impl Write) -> anyhow::Result<()> {
     let text = |value: Option<String>| value.unwrap_or_default();
-    let number = |value: Option<u32>| value.map(|v| v.to_string()).unwrap_or_default();
+    let number = |value: Option<u32>| value.map_or_else(String::new, |v| v.to_string());
     let rows = wlans.iter().map(|w| {
         vec![
             w.service.clone(),
