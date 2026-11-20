@@ -1,5 +1,5 @@
-//! `fritz overview`, `hosts`, `mesh`, `wlan` and `internet`: the state of
-//! the device as text or JSON.
+//! `fritz overview`, `hosts`, `mesh`, `wlan`, `internet` and `smarthome`:
+//! the state of the device as text or JSON.
 //!
 //! Values from the device are untrusted: control characters in them are
 //! replaced in text output, so a host name cannot steer the terminal.
@@ -9,6 +9,7 @@ use std::io::Write;
 use anyhow::Context as _;
 use fritz_core::lists::Mesh;
 use fritz_core::read::Reader;
+use fritz_core::smarthome::{self, Device, Target, Unit};
 use fritz_core::status::{self, Connection, Host, Hosts, Internet, Overview, Wlan};
 use serde::Serialize;
 
@@ -300,6 +301,103 @@ fn wlan_table(wlans: &[Wlan], out: &mut impl Write) -> anyhow::Result<()> {
     table(&headers, rows, out)
 }
 
+/// Prints the Smart Home devices. Logs in to the web interface for this,
+/// and out again.
+pub(crate) async fn smarthome(
+    context: &Context,
+    format: Format,
+    out: &mut impl Write,
+) -> anyhow::Result<()> {
+    let session = context
+        .session()
+        .await
+        .context("cannot log in to the web interface")?;
+    let devices = smarthome::devices(&session).await;
+    // Ends the session even if reading failed.
+    let logout = session.logout().await;
+    let devices = devices.context("cannot read the Smart Home devices")?;
+    logout.context("cannot log out of the web interface")?;
+    match format {
+        Format::Json => json(&devices, out),
+        Format::Text => smarthome_table(&devices, out),
+    }
+}
+
+/// One line per unit, so devices with several units, like a plug with a
+/// switch and a thermometer in one unit, or a remote with buttons, get
+/// several lines.
+fn smarthome_table(devices: &[Device], out: &mut impl Write) -> anyhow::Result<()> {
+    let empty = [Unit::default()];
+    let rows = devices.iter().flat_map(|device| {
+        let units = if device.units.is_empty() {
+            &empty[..]
+        } else {
+            &device.units[..]
+        };
+        units.iter().map(move |unit| {
+            let name = if unit.name.is_empty() || unit.name == device.name {
+                device.name.clone()
+            } else {
+                format!("{} / {}", device.name, unit.name)
+            };
+            let battery = device.battery.map(|b| {
+                let low = if device.battery_low == Some(true) {
+                    " low"
+                } else {
+                    ""
+                };
+                format!("{b}%{low}")
+            });
+            vec![
+                name,
+                device.category.clone().unwrap_or_default(),
+                yes_no(device.connected),
+                unit.on.map_or_default(on_off),
+                unit.temperature.map_or_default(celsius),
+                unit.target.as_ref().map_or_default(target),
+                unit.power.map_or_default(|w| format!("{w:.1} W")),
+                unit.energy.map_or_default(|wh| format!("{wh} Wh")),
+                battery.unwrap_or_default(),
+                other(unit),
+            ]
+        })
+    });
+    let headers = [
+        "NAME",
+        "CATEGORY",
+        "CONNECTED",
+        "SWITCH",
+        "TEMPERATURE",
+        "TARGET",
+        "POWER",
+        "ENERGY",
+        "BATTERY",
+        "OTHER",
+    ];
+    table(&headers, rows, out)
+}
+
+fn celsius(value: f64) -> String {
+    format!("{value:.1} °C")
+}
+
+fn target(target: &Target) -> String {
+    match target {
+        Target::Celsius(value) => celsius(*value),
+        Target::Mode(mode) => mode.clone(),
+    }
+}
+
+/// The values without a column of their own, like `level 25%`.
+fn other(unit: &Unit) -> String {
+    let mut values = Vec::new();
+    values.extend(unit.voltage.map(|v| format!("{v:.1} V")));
+    values.extend(unit.level.map(|l| format!("level {l}%")));
+    values.extend(unit.humidity.map(|h| format!("humidity {h}%")));
+    values.extend(unit.alerts.iter().map(|a| format!("alert {a}")));
+    values.join(", ")
+}
+
 fn json(value: &impl Serialize, out: &mut impl Write) -> anyhow::Result<()> {
     serde_json::to_writer_pretty(&mut *out, value)?;
     writeln!(out)?;
@@ -423,6 +521,70 @@ mod tests {
             )
         });
         assert_eq!(output, "A  B\n\u{FFFD}\n");
+    }
+
+    #[test]
+    fn prints_smart_home_devices_as_text() {
+        let devices = [
+            Device {
+                ain: "1".to_owned(),
+                name: "Heating".to_owned(),
+                product: None,
+                category: Some("thermostat".to_owned()),
+                firmware: None,
+                connected: true,
+                battery: Some(9),
+                battery_low: Some(true),
+                units: vec![Unit {
+                    name: "Valve".to_owned(),
+                    temperature: Some(20.25),
+                    target: Some(Target::Mode("off".to_owned())),
+                    ..Unit::default()
+                }],
+            },
+            Device {
+                ain: "2".to_owned(),
+                name: "Plug".to_owned(),
+                product: None,
+                category: None,
+                firmware: None,
+                connected: false,
+                battery: Some(100),
+                battery_low: None,
+                units: vec![Unit {
+                    name: "Plug".to_owned(),
+                    on: Some(true),
+                    target: Some(Target::Celsius(21.0)),
+                    power: Some(1.25),
+                    energy: Some(12),
+                    voltage: Some(230.1),
+                    level: Some(5),
+                    humidity: Some(40),
+                    alerts: vec!["open".to_owned()],
+                    ..Unit::default()
+                }],
+            },
+            Device {
+                ain: "3".to_owned(),
+                name: "Remote".to_owned(),
+                product: None,
+                category: None,
+                firmware: None,
+                connected: true,
+                battery: None,
+                battery_low: None,
+                units: Vec::new(),
+            },
+        ];
+        let output = text(|out| smarthome_table(&devices, out));
+        assert_eq!(
+            output,
+            "NAME             CATEGORY    CONNECTED  SWITCH  TEMPERATURE  TARGET   POWER  ENERGY  BATTERY  OTHER\n\
+             Heating / Valve  thermostat  yes                20.2 °C      off                     9% low\n\
+             Plug                         no         on                   21.0 °C  1.2 W  12 Wh   100%     \
+             230.1 V, level 5%, humidity 40%, alert open\n\
+             Remote                       yes\n"
+        );
     }
 
     #[test]

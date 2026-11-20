@@ -52,7 +52,10 @@ async fn capturing_the_simulator_gives_the_fixture() {
 
         let out = tempfile::tempdir().unwrap();
         capture::write(&plan, &capture, out.path()).unwrap();
-        let (expected, actual) = (files(&dir), files(out.path()));
+        // The capture reads TR-064 only, not the documents of the REST API.
+        let mut expected = files(&dir);
+        expected.retain(|(name, _)| !name.starts_with("api"));
+        let actual = files(out.path());
         let names = |files: &[(PathBuf, String)]| -> Vec<PathBuf> {
             files.iter().map(|(name, _)| name.clone()).collect()
         };

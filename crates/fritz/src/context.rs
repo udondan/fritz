@@ -8,6 +8,7 @@ use anyhow::{Context as _, bail};
 use fritz_core::config::{Config, Profile};
 use fritz_core::connection::{DEFAULT_HOST, Overrides, Target};
 use fritz_core::secrets::{self, Keychain, Source};
+use fritz_core::session::Session;
 use tr064::SecretString;
 
 /// The environment variable that turns the keychain off, for containers and
@@ -140,6 +141,16 @@ impl Context {
         let (password, _) = self.password(&target)?;
         let builder = target.client()?.credentials(target.username()?, password);
         Ok(builder.build()?)
+    }
+
+    /// A session of the web interface of the target, logged in with the
+    /// password.
+    pub(crate) async fn session(&self) -> anyhow::Result<Session> {
+        let target = self.target()?;
+        let (password, _) = self.password(&target)?;
+        let web = target.web();
+        let client = web.client()?.build()?;
+        Ok(Session::login(client, web.username()?, &password).await?)
     }
 }
 

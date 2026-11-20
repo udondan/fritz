@@ -1,0 +1,138 @@
+{
+  "devices": [
+    {
+      "UID": "device-uid-2",
+      "ain": "09995 0000002",
+      "name": "device-2",
+      "productName": "FRITZ!Smart Thermo 302",
+      "productCategory": "thermostat",
+      "manufacturer": "FRITZ!",
+      "firmwareVersion": "05.08",
+      "isConnected": true,
+      "batteryState": "valid",
+      "batteryValue": 80,
+      "isBatteryLow": false,
+      "isUpdateAvailable": false,
+      "unitUids": ["unit-uid-2"]
+    },
+    {
+      "UID": "device-uid-1",
+      "ain": "11630 0000001",
+      "name": "device-1",
+      "productName": "FRITZ!Smart Energy 200",
+      "productCategory": "socket",
+      "manufacturer": "FRITZ!",
+      "firmwareVersion": "04.27",
+      "isConnected": true,
+      "isUpdateAvailable": false,
+      "unitUids": ["unit-uid-1"]
+    },
+    {
+      "UID": "device-uid-4",
+      "ain": "11657 0000004",
+      "name": "device-4",
+      "productName": "FRITZ!DECT 350",
+      "productCategory": "sensor",
+      "manufacturer": "FRITZ!",
+      "firmwareVersion": "05.21",
+      "isConnected": false,
+      "batteryState": "valid",
+      "batteryValue": 10,
+      "isBatteryLow": true,
+      "isUpdateAvailable": false,
+      "unitUids": ["unit-uid-4"]
+    },
+    {
+      "UID": "device-uid-3",
+      "ain": "13077 0000003",
+      "name": "device-3",
+      "productName": "FRITZ!Smart Light 500",
+      "productCategory": "lamp",
+      "manufacturer": "FRITZ!",
+      "firmwareVersion": "34.10.16.16.024",
+      "isConnected": true,
+      "isUpdateAvailable": true,
+      "unitUids": ["unit-uid-3"]
+    }
+  ],
+  "units": [
+    {
+      "UID": "unit-uid-1",
+      "ain": "11630 0000001",
+      "name": "device-1",
+      "unitType": "avmPlugSocket",
+      "isGroupUnit": false,
+      "deviceUid": "device-uid-1",
+      "isConnected": true,
+      "interfaces": {
+        "onOffInterface": { "state": "valid", "active": true },
+        "temperatureInterface": { "state": "valid", "celsius": 21.5 },
+        "multimeterInterface": {
+          "state": "valid",
+          "current": 102,
+          "power": 23450,
+          "energy": 1053,
+          "voltage": 228055
+        }
+      }
+    },
+    {
+      "UID": "unit-uid-2",
+      "ain": "09995 0000002",
+      "name": "device-2",
+      "unitType": "avmThermostat",
+      "isGroupUnit": false,
+      "deviceUid": "device-uid-2",
+      "isConnected": true,
+      "interfaces": {
+        "temperatureInterface": { "state": "valid", "celsius": 20.5 },
+        "thermostatInterface": {
+          "state": "valid",
+          "setPointTemperature": { "mode": "temperature", "celsius": 21.0 }
+        }
+      }
+    },
+    {
+      "UID": "unit-uid-3",
+      "ain": "13077 0000003",
+      "name": "device-3",
+      "unitType": "dimmableColorBulb",
+      "isGroupUnit": false,
+      "deviceUid": "device-uid-3",
+      "isConnected": true,
+      "interfaces": {
+        "onOffInterface": { "state": "valid", "active": false },
+        "levelControlInterface": { "state": "valid", "level": 25 }
+      }
+    },
+    {
+      "UID": "unit-uid-4",
+      "ain": "11657 0000004",
+      "name": "device-4",
+      "unitType": "avmTemperatureSensor",
+      "isGroupUnit": false,
+      "deviceUid": "device-uid-4",
+      "isConnected": false,
+      "interfaces": {
+        "temperatureInterface": { "state": "notConnected", "celsius": 18.0 },
+        "humidityInterface": { "state": "valid", "relativeHumidity": 55 },
+        "alertInterface": { "state": "valid", "alerts": ["open", "none"] }
+      }
+    },
+    {
+      "UID": "unit-uid-group",
+      "ain": "grp000001",
+      "name": "group-1",
+      "unitType": "avmPlugSocket",
+      "isGroupUnit": true,
+      "isConnected": true,
+      "interfaces": {
+        "onOffInterface": { "state": "valid", "active": true }
+      }
+    }
+  ],
+  "groups": [],
+  "triggers": [],
+  "templates": [],
+  "globals": {}
+}

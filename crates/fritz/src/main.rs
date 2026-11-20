@@ -82,6 +82,9 @@ enum Command {
     Wlan,
     /// The internet connection and, for DSL, the line.
     Internet,
+    /// The Smart Home devices and their values, read through the web
+    /// interface (FRITZ!OS 8.20 and later).
+    Smarthome,
     /// Manage the profiles in the configuration file.
     #[command(subcommand)]
     Config(ConfigCommand),
@@ -252,6 +255,7 @@ async fn main() -> anyhow::Result<()> {
         Command::Mesh => status::mesh(&load()?, format, out).await,
         Command::Wlan => status::wlan(&load()?, format, out).await,
         Command::Internet => status::internet(&load()?, format, out).await,
+        Command::Smarthome => status::smarthome(&load()?, format, out).await,
         Command::Config(ConfigCommand::Init) => settings::init(&mut load()?, out),
         Command::Config(ConfigCommand::Show) => settings::show(&load()?, out),
         Command::Tls(TlsCommand::Fingerprint) => tls::fingerprint(&load()?, out).await,
