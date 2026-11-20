@@ -4,7 +4,7 @@
 use std::collections::HashMap;
 use std::str::FromStr;
 
-use tr064::{Client, DeviceDescription, Scpd};
+use tr064::{Client, DeviceDescription, Scpd, Service};
 
 use crate::generic::{self, Error};
 use crate::redact;
@@ -92,11 +92,7 @@ impl Reader {
         name: &str,
         arguments: &[(&str, &str)],
     ) -> Result<Vec<(String, String)>, Error> {
-        let service = self.description.service(reference)?.clone();
-        if !self.scpds.contains_key(&service.service_id) {
-            let scpd = self.client.scpd(&service).await?;
-            self.scpds.insert(service.service_id.clone(), scpd);
-        }
+        let (service, _) = self.service(reference).await?;
         let scpd = &self.scpds[&service.service_id];
         let action = generic::action(&service, scpd, name)?;
         let arguments: Vec<(String, String)> = arguments
@@ -125,6 +121,26 @@ impl Reader {
             Err(error) if is_missing(&error) => Ok(None),
             Err(error) => Err(error),
         }
+    }
+
+    /// The device description.
+    pub fn description(&self) -> &DeviceDescription {
+        &self.description
+    }
+
+    /// A service and its description, which is read once.
+    ///
+    /// # Errors
+    ///
+    /// The errors of finding the service and of reading its description.
+    pub async fn service(&mut self, reference: &str) -> Result<(Service, &Scpd), Error> {
+        let service = self.description.service(reference)?.clone();
+        if !self.scpds.contains_key(&service.service_id) {
+            let scpd = self.client.scpd(&service).await?;
+            self.scpds.insert(service.service_id.clone(), scpd);
+        }
+        let scpd = &self.scpds[&service.service_id];
+        Ok((service, scpd))
     }
 
     /// The short ids of the services whose name is `name`, like

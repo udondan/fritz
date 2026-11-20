@@ -12,11 +12,11 @@ use tr064::{Client, Direction, Scpd, Service, StateVariable};
 use crate::context::Context;
 
 /// A client without credentials, for the descriptions, which need no login.
-pub(crate) fn anonymous(context: &Context) -> anyhow::Result<Client> {
+fn anonymous(context: &Context) -> anyhow::Result<Client> {
     Ok(context.target()?.client()?.build()?)
 }
 
-pub(crate) async fn service(client: &Client, reference: &str) -> anyhow::Result<(Service, Scpd)> {
+async fn service(client: &Client, reference: &str) -> anyhow::Result<(Service, Scpd)> {
     generic::service(client, reference)
         .await
         .with_context(|| format!("cannot read the service {reference}"))
