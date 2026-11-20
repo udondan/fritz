@@ -1,6 +1,6 @@
 //! The HTTP side: fetching documents and calling actions.
 
-use std::sync::Mutex;
+use std::sync::{Arc, Mutex};
 use std::time::Duration;
 
 use reqwest::header::{AUTHORIZATION, CONTENT_TYPE, HeaderValue, WWW_AUTHENTICATE};
@@ -8,7 +8,8 @@ use reqwest::{Method, RequestBuilder, Response, StatusCode, Url, redirect};
 use secrecy::{ExposeSecret as _, SecretString};
 
 use crate::digest::{Challenge, DigestAuth};
-use crate::{Arguments, DeviceDescription, Error, Scpd, Service, soap};
+use crate::tls::PinnedVerifier;
+use crate::{Arguments, DeviceDescription, Error, Fingerprint, Scpd, Service, soap};
 
 const DEFAULT_TIMEOUT: Duration = Duration::from_secs(10);
 
@@ -16,6 +17,7 @@ const DEFAULT_TIMEOUT: Duration = Duration::from_secs(10);
 #[derive(Debug)]
 pub struct Client {
     http: reqwest::Client,
+    verifier: Arc<PinnedVerifier>,
     base: Url,
     credentials: Option<(String, SecretString)>,
     /// The answer to the last challenge, reused until the device rejects it.
@@ -28,6 +30,7 @@ pub struct ClientBuilder {
     base: Url,
     credentials: Option<(String, SecretString)>,
     timeout: Duration,
+    pin: Option<Fingerprint>,
 }
 
 impl ClientBuilder {
@@ -50,14 +53,50 @@ impl ClientBuilder {
     /// # Errors
     ///
     /// [`Error::Http`] if the HTTP client cannot be set up.
+    /// The fingerprint of the device's certificate. Required for `https`, and
+    /// the only certificate the client accepts. See [`fetch_fingerprint`] to
+    /// get it on first use.
+    ///
+    /// [`fetch_fingerprint`]: crate::fetch_fingerprint
+    #[must_use]
+    pub fn pin(mut self, fingerprint: Fingerprint) -> Self {
+        self.pin = Some(fingerprint);
+        self
+    }
+
+    /// Builds the client.
+    ///
+    /// # Errors
+    ///
+    /// [`Error::InvalidUrl`] if the base URL is `https` without a pinned
+    /// certificate, `http` with one, or neither, and [`Error::Http`] if the
+    /// HTTP client cannot be set up.
     pub fn build(self) -> Result<Client, Error> {
+        match (self.base.scheme(), self.pin) {
+            ("https", Some(_)) | ("http", None) => {}
+            ("https", None) => {
+                return Err(Error::InvalidUrl(format!(
+                    "{} needs a pinned certificate",
+                    self.base
+                )));
+            }
+            _ => {
+                return Err(Error::InvalidUrl(format!(
+                    "{} is neither https with a pinned certificate nor http",
+                    self.base
+                )));
+            }
+        }
+        let verifier = PinnedVerifier::new(self.pin);
         let http = reqwest::Client::builder()
+            .tls_backend_preconfigured(verifier.config())
             .timeout(self.timeout)
             .redirect(redirect::Policy::none())
             .no_proxy()
             .build()?;
         Ok(Client {
             http,
+            verifier,
             base: self.base,
             credentials: self.credentials,
             auth: Mutex::new(None),
@@ -67,12 +106,14 @@ impl ClientBuilder {
 
 impl Client {
     /// Starts configuring a client for the device at `base`, for example
-    /// `http://192.168.178.1:49000`.
+    /// `https://192.168.178.1:49443` with a [pinned](ClientBuilder::pin)
+    /// certificate, or `http://192.168.178.1:49000`.
     pub fn builder(base: Url) -> ClientBuilder {
         ClientBuilder {
             base,
             credentials: None,
             timeout: DEFAULT_TIMEOUT,
+            pin: None,
         }
     }
 
@@ -166,17 +207,24 @@ impl Client {
             None => url.path().to_owned(),
         };
         let cached = self.cached_authorization(method, &uri);
-        let mut response = with_authorization(&request, cached).send().await?;
+        let mut response = self.execute(with_authorization(&request, cached)).await?;
         if response.status() == StatusCode::UNAUTHORIZED {
             *self.lock() = None;
             let (auth, header) = self.answer(&response, method, &uri)?;
-            response = with_authorization(&request, Some(header)).send().await?;
+            response = self
+                .execute(with_authorization(&request, Some(header)))
+                .await?;
             if response.status() == StatusCode::UNAUTHORIZED {
                 return Err(Error::AuthenticationFailed);
             }
             *self.lock() = Some(auth);
         }
         check_status(response, url).await
+    }
+
+    /// Sends one request, reporting a certificate mismatch as such.
+    async fn execute(&self, request: RequestBuilder) -> Result<Response, Error> {
+        request.send().await.map_err(|e| self.verifier.explain(e))
     }
 
     /// Answers the challenge of a 401 response.
