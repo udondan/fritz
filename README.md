@@ -20,6 +20,35 @@ status and settings of a FRITZ!Box router.
 | [`fritz-sim`](crates/fritz-sim)    | Stateful fake TR-064 server for tests, built from recorded fixtures    |
 | [`fritz`](crates/fritz)            | The `fritz` binary: CLI and `fritz mcp`                                |
 
+## MCP server
+
+`fritz mcp` serves the state of the device to an MCP client on stdin and
+stdout. It only reads. Store the password first with `fritz auth login`, then
+add the server to the client, for example to Claude Code:
+
+```sh
+claude mcp add fritz -- fritz --host 192.168.178.1 --user agent mcp
+```
+
+| Tool                    | Returns                                                     |
+| ----------------------- | ----------------------------------------------------------- |
+| `fritz_overview`        | Model, firmware, uptime, update, connection, rights         |
+| `fritz_internet`        | Internet connection, addresses, DNS, rates, DSL line        |
+| `fritz_wlan`            | Wireless networks                                           |
+| `fritz_hosts`           | Known hosts, filtered by `active` and `search`, paginated   |
+| `fritz_mesh`            | Mesh nodes and links                                        |
+| `fritz_smarthome`       | Smart Home devices (FRITZ!OS 8.20 and later)                |
+| `fritz_list_services`   | TR-064 services, or the actions of one with their class     |
+| `fritz_describe_action` | The arguments of an action and their types                  |
+| `fritz_call_action`     | Calls an action that only reads, with secrets hidden        |
+
+Errors from the device come back as JSON with a `status` (`denied`,
+`confirmation_required`, `blocked` or `busy`) and, where it helps,
+`retry_after` in seconds.
+
+Agents that use the CLI instead can load the skill in
+[skills/fritz/SKILL.md](skills/fritz/SKILL.md).
+
 ## Security
 
 `fritz` is read-only by default. See [SECURITY.md](SECURITY.md) for the security
