@@ -5,6 +5,7 @@
 
 use tr064::{Action, Client, Scpd, Service};
 
+use crate::fault::Fault;
 use crate::policy::{self, Class};
 use crate::redact;
 
@@ -12,7 +13,11 @@ use crate::redact;
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
     #[error(transparent)]
-    Tr064(#[from] tr064::Error),
+    Tr064(tr064::Error),
+    /// The device answered with a fault about the user, like a missing
+    /// right or a second factor.
+    #[error("{fault}")]
+    Fault { fault: Fault, description: String },
     #[error("{service} has no action {action}")]
     UnknownAction { service: String, action: String },
     #[error("{action} is {class}; only actions that read are called")]
@@ -26,6 +31,17 @@ pub enum Error {
         document: &'static str,
         reason: String,
     },
+}
+
+impl From<tr064::Error> for Error {
+    fn from(error: tr064::Error) -> Self {
+        match (Fault::of(&error), error) {
+            (Some(fault), tr064::Error::Upnp { description, .. }) => {
+                Self::Fault { fault, description }
+            }
+            (_, error) => Self::Tr064(error),
+        }
+    }
 }
 
 /// Finds a service by any reference [`Service::matches`] accepts, and reads

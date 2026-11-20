@@ -941,6 +941,41 @@ async fn reports_failed_reads() {
 }
 
 #[tokio::test(flavor = "multi_thread")]
+async fn reports_second_factor_faults() {
+    let fixture = fritz_sim::Fixture::load(FIXTURE).unwrap();
+    let sim = fritz_sim::Sim::start(fixture).await.unwrap();
+    let password = Some(fritz_sim::PASSWORD);
+
+    // A field the user may not read is left out.
+    sim.inject(Injection::fault("UserInterface1", "GetInfo", 866));
+    let overview = success(&run(&sim, &["overview"], password).await);
+    assert!(overview.contains("FRITZ!Box 7690"), "{overview}");
+
+    // A blocked or busy second factor stops the read instead.
+    sim.clear_injections();
+    sim.inject(Injection::fault("UserInterface1", "GetInfo", 867));
+    let error = failure(&run(&sim, &["overview"], password).await);
+    assert!(
+        error.contains(
+            "blocks confirmations after failed ones; try again in up to an hour (UPnP error 867)"
+        ),
+        "{error}"
+    );
+    sim.clear_injections();
+    sim.inject(Injection::fault("DeviceInfo1", "GetInfo", 868));
+    let error = failure(&run(&sim, &["overview"], password).await);
+    assert!(error.contains("(UPnP error 868)"), "{error}");
+
+    sim.clear_injections();
+    sim.inject(Injection::fault("DeviceInfo1", "GetInfo", 866));
+    let error = failure(&tr64(&sim, &["call", "DeviceInfo1", "GetInfo"], password).await);
+    assert!(
+        error.contains("confirmed with a second factor, which fritz never does (UPnP error 866)"),
+        "{error}"
+    );
+}
+
+#[tokio::test(flavor = "multi_thread")]
 async fn reports_a_missing_smart_home_api() {
     // A device without the REST API, like one before FRITZ!OS 8.20.
     let dir = tempfile::tempdir().unwrap();
