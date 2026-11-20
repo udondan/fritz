@@ -42,7 +42,7 @@ pub(crate) async fn trust(
     let target = Target::resolve(context.profile(), &stored)?;
     let url = &target.url;
     let found = fetch(url).await?;
-    match (context.overrides().fingerprint, target.fingerprint) {
+    match (context.overrides().fingerprint()?, target.fingerprint) {
         (Some(expected), _) if expected != found => {
             bail!("{url} presents the certificate {found}, not {expected}")
         }
