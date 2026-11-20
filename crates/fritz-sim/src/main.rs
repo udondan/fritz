@@ -26,6 +26,9 @@ struct Args {
     /// The password to accept.
     #[arg(long, default_value = fritz_sim::PASSWORD)]
     password: String,
+    /// Serve HTTPS with a new self-signed certificate.
+    #[arg(long)]
+    https: bool,
 }
 
 #[tokio::main]
@@ -36,9 +39,13 @@ async fn main() -> anyhow::Result<()> {
         address: SocketAddr::new(args.address, args.port),
         username: args.username,
         password: args.password,
+        https: args.https,
     };
     let sim = Sim::start_with(fixture, options).await?;
     println!("listening on {}", sim.url());
+    if let Some(fingerprint) = sim.fingerprint() {
+        println!("certificate {fingerprint}");
+    }
     tokio::signal::ctrl_c().await?;
     Ok(())
 }

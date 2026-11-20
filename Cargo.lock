@@ -438,11 +438,14 @@ dependencies = [
  "clap",
  "fritz-core",
  "md-5",
+ "rcgen",
  "roxmltree",
+ "rustls",
  "serde_json",
  "tempfile",
  "thiserror",
  "tokio",
+ "tokio-rustls",
  "tr064",
 ]
 
