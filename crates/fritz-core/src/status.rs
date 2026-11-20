@@ -159,7 +159,7 @@ pub async fn overview(reader: &mut Reader) -> Result<Overview, Error> {
 
 /// Parses rights like
 /// `<rights><path>BoxAdmin</path><access>readwrite</access></rights>`.
-fn rights(xml: &str) -> Vec<Right> {
+pub(crate) fn rights(xml: &str) -> Vec<Right> {
     let Ok(document) = roxmltree::Document::parse(xml) else {
         return Vec::new();
     };
@@ -295,24 +295,20 @@ pub async fn hosts(reader: &mut Reader) -> Result<Hosts, Error> {
             hosts,
         });
     }
-    let Some(count) = reader
-        .try_read("Hosts1", "GetHostNumberOfEntries", &[])
+    let Some((reported, entries)) = reader
+        .entries(
+            "Hosts1",
+            ("GetHostNumberOfEntries", "NewHostNumberOfEntries"),
+            ("GetGenericHostEntry", "NewIndex"),
+            MAX_HOSTS,
+        )
         .await?
     else {
         return Ok(Hosts::default());
     };
-    let reported: u32 = count.number("NewHostNumberOfEntries").unwrap_or_default();
-    let mut hosts = Vec::new();
-    for index in 0..reported.min(MAX_HOSTS) {
-        let index = index.to_string();
-        let arguments = [("NewIndex", index.as_str())];
-        let Some(entry) = reader
-            .try_read("Hosts1", "GetGenericHostEntry", &arguments)
-            .await?
-        else {
-            break;
-        };
-        hosts.push(Host {
+    let hosts = entries
+        .iter()
+        .map(|entry| Host {
             name: entry.text("NewHostName"),
             ip: entry.text("NewIPAddress"),
             mac: entry.text("NewMACAddress"),
@@ -320,8 +316,8 @@ pub async fn hosts(reader: &mut Reader) -> Result<Hosts, Error> {
             interface: entry.text("NewInterfaceType"),
             address_source: entry.text("NewAddressSource"),
             ..Host::default()
-        });
-    }
+        })
+        .collect();
     Ok(Hosts { reported, hosts })
 }
 

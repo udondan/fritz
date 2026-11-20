@@ -123,6 +123,38 @@ impl Reader {
         }
     }
 
+    /// Reads a list the device gives one entry per call: the number of
+    /// entries from the output `count` of the action `counter`, then the
+    /// entries from `getter` with each index as its input `index`, up to
+    /// `max`. Stops early at the first index the device has no entry for.
+    /// Returns the number the device reported and the entries, or `None`
+    /// like [`try_read`](Self::try_read) if it has no such list.
+    ///
+    /// # Errors
+    ///
+    /// The other errors of [`read`](Self::read).
+    pub async fn entries(
+        &mut self,
+        reference: &str,
+        (counter, count): (&str, &str),
+        (getter, index): (&str, &str),
+        max: u32,
+    ) -> Result<Option<(u32, Vec<Values>)>, Error> {
+        let Some(values) = self.try_read(reference, counter, &[]).await? else {
+            return Ok(None);
+        };
+        let reported: u32 = values.number(count).unwrap_or_default();
+        let mut entries = Vec::new();
+        for i in 0..reported.min(max) {
+            let i = i.to_string();
+            let Some(entry) = self.try_read(reference, getter, &[(index, &i)]).await? else {
+                break;
+            };
+            entries.push(entry);
+        }
+        Ok(Some((reported, entries)))
+    }
+
     /// The device description.
     pub fn description(&self) -> &DeviceDescription {
         &self.description

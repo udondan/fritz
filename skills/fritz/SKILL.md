@@ -30,6 +30,9 @@ is not a terminal.
 | Which devices are (or were) on the network? | `fritz hosts`, `fritz hosts --active`|
 | How are the mesh repeaters connected?       | `fritz mesh`                         |
 | Smart Home devices and their values         | `fritz smarthome`                    |
+| Which ports are forwarded, is UPnP on?      | `fritz ports`                        |
+| Numbers, deflections, answering machines    | `fritz telephony`                    |
+| What does the box offer, what may I do?     | `fritz capabilities`                 |
 
 Anything else goes through TR-064:
 

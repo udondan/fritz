@@ -121,6 +121,22 @@ async fn reads_the_state() {
     let wlan = success(&client, "fritz_wlan", json!({})).await;
     assert!(!wlan.as_array().unwrap().is_empty(), "{wlan}");
 
+    let ports = success(&client, "fritz_ports", json!({})).await;
+    assert_eq!(ports["upnp"], true, "{ports}");
+
+    let telephony = success(&client, "fritz_telephony", json!({})).await;
+    assert_eq!(
+        telephony["accounts"][0]["status"], "registered",
+        "{telephony}"
+    );
+
+    let capabilities = success(&client, "fritz_capabilities", json!({})).await;
+    assert_eq!(
+        capabilities["rights"].as_array().unwrap().len(),
+        6,
+        "{capabilities}"
+    );
+
     let mesh = success(&client, "fritz_mesh", json!({})).await;
     assert!(!mesh["nodes"].as_array().unwrap().is_empty(), "{mesh}");
 
