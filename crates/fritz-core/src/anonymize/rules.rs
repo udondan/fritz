@@ -101,6 +101,16 @@ mod tests {
         assert_eq!(argument("NewSSID"), Some(Kind::Wlan));
         assert_eq!(argument("NewDeviceLog"), Some(Kind::Log));
         assert_eq!(argument("NewX_AVM-DE_PPPoEACName"), Some(Kind::Provider));
+        assert_eq!(argument("NewX_AVM-DE_AlarmClockName"), Some(Kind::Name));
+        assert_eq!(argument("NewX_AVM-DE_PhoneNumber"), Some(Kind::Phone));
+        assert_eq!(argument("NewNumber"), Some(Kind::Phone));
+        assert_eq!(argument("NewDynDNSName"), Some(Kind::Server));
+        assert_eq!(
+            argument("NewX_AVM-DE_MyFritzDynDNSName"),
+            Some(Kind::Server)
+        );
+        assert_eq!(argument("NewConnectionRequestURL"), Some(Kind::Url));
+        assert_eq!(argument("NewPath"), Some(Kind::Id));
         assert_eq!(argument("NewEnable"), None);
         assert_eq!(argument("SSID"), None);
     }
