@@ -9,7 +9,7 @@ repository.workspace = true
 authors.workspace = true
 
 [dependencies]
-anyhow = "=1.0.103"
+anyhow = "=1.0.104"
 axum = "=0.8.9"
 clap = { version = "=4.6.9", features = ["derive"] }
 form_urlencoded = "=1.2.2"
