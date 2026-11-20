@@ -124,10 +124,8 @@ pub(crate) async fn call(
     let action = generic::action(&service, &scpd, name)?;
     generic::check(&service, action, &arguments)?;
     let (password, _) = context.password(&target)?;
-    let client = target
-        .client()?
-        .credentials(target.username()?, password)
-        .build()?;
+    let builder = target.client()?.credentials(target.username()?, password);
+    let client = builder.build()?;
     let output = generic::call(&client, &service, action, &arguments)
         .await
         .with_context(|| format!("{} failed", action.name))?;
