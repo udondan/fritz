@@ -34,6 +34,10 @@ your box, please open an issue.
    | **Sprachnachrichten, Faxnachrichten, FRITZ!App Fon und Anrufliste** (Voice messages, faxes, FRITZ!App Fon and call list) | Call list and phone book (optional)           |
    | **Smart Home**                                                                                            | Smart home devices (optional)                 |
 
+   According to the TR-064 documentation of FRITZ!, the settings permission
+   includes the phone permission, so with **FRITZ!Box Einstellungen** on, the
+   second row changes nothing for `fritz`.
+
    Leave everything else off: NAS contents, VPN and apps aren't needed.
 5. Click **Übernehmen** (Apply).
 
@@ -56,3 +60,24 @@ stops.
 `fritz` needs the address of your box, for example `192.168.178.1`. Use the IP
 address rather than `fritz.box`: newer FRITZ!OS versions may no longer hand
 out the name `fritz.box` in every setup.
+
+## 5. Note the fingerprint of the certificate
+
+Over plain HTTP on port 49000, the answers of the box travel unencrypted
+through your network. Over HTTPS on port 49443 they are encrypted, but the box
+uses a self-signed certificate, so `fritz` checks it against a fingerprint you
+note once:
+
+```sh
+openssl s_client -connect 192.168.178.1:49443 </dev/null 2>/dev/null \
+  | openssl x509 -noout -fingerprint -sha256
+```
+
+This prints a line like `sha256 Fingerprint=AB:CD:…`. Pass the part after `=`
+with `--fingerprint` or in `FRITZ_TLS_FINGERPRINT`, together with the HTTPS
+address, for example `--url https://192.168.178.1:49443`. If the box ever
+presents another certificate, `fritz` refuses to connect. When you replace
+the certificate of the box, note the new fingerprint.
+
+Compare the fingerprint with the one shown in the web interface of the box
+if you can, to make sure nobody else answered.
