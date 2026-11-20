@@ -1,0 +1,24 @@
+# Server definition for the Docker MCP Toolkit.
+# Add it to a profile with `mise run docker-register` (see README, section Docker).
+name: fritz
+type: server
+image: udondan/fritz:latest
+title: FRITZ!Box (unofficial)
+description: Reads the status and settings of a FRITZ!Box router over TR-064 - internet connection, wireless networks, hosts, mesh, Smart Home, telephony and settings. Never changes anything.
+secrets:
+  - name: fritz.host
+    env: FRITZ_HOST
+    example: 192.168.178.1
+    description: Address of the FRITZ!Box
+  - name: fritz.username
+    env: FRITZ_USERNAME
+    example: agent
+    description: User on the FRITZ!Box
+  - name: fritz.password
+    env: FRITZ_PASSWORD
+    example: the-password
+    description: Password of that user
+  - name: fritz.fingerprint
+    env: FRITZ_TLS_FINGERPRINT
+    example: 3f9a…(64 hex digits)
+    description: SHA-256 fingerprint of the certificate of the box, from `fritz tls fingerprint`

@@ -64,6 +64,25 @@ Errors from the device come back as JSON with a `status` (`denied`,
 Agents that use the CLI instead can load the skill in
 [skills/fritz/SKILL.md](skills/fritz/SKILL.md).
 
+### Docker
+
+The image runs `fritz`; without a command it starts the MCP server. A
+container has no keychain, so the device and the password come from the
+environment. Get the fingerprint once with `fritz tls fingerprint`.
+
+```sh
+mise run docker-build    # builds udondan/fritz
+docker run --rm -i \
+  -e FRITZ_HOST=192.168.178.1 -e FRITZ_USERNAME=agent \
+  -e FRITZ_PASSWORD -e FRITZ_TLS_FINGERPRINT \
+  udondan/fritz
+```
+
+For the Docker MCP Toolkit, `mise run docker` builds the image and adds
+[docker-mcp.yml](docker-mcp.yml) to the profile `fritz`. Set the secrets
+`fritz.host`, `fritz.username`, `fritz.password` and `fritz.fingerprint`
+with `docker mcp secret set`. The container must be able to reach the box.
+
 ## Security
 
 `fritz` is read-only by default. See [SECURITY.md](SECURITY.md) for the security
