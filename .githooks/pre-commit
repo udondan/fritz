@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+# Runs the qlty checks of CI before a commit, so findings show up locally
+# instead of on the pull request. Install with `make hooks`.
+set -euo pipefail
+
+if ! command -v qlty >/dev/null; then
+    echo "qlty is not installed, see https://docs.qlty.sh/cli/quickstart" >&2
+    exit 1
+fi
+
+qlty check --all
+
+# Like CI: only smells that are new compared to main block the commit.
+upstream=origin/main
+smells=$(qlty smells --upstream "$upstream" --json --quiet 2>/dev/null | jq length)
+if [ "$smells" -gt 0 ]; then
+    qlty smells --upstream "$upstream" --no-snippets
+    echo "qlty found $smells new code smell(s) compared to $upstream" >&2
+    exit 1
+fi
