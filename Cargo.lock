@@ -2308,6 +2308,7 @@ name = "tr064"
 version = "0.1.0"
 dependencies = [
  "axum",
+ "form_urlencoded",
  "getrandom 0.4.3",
  "md-5",
  "rcgen",

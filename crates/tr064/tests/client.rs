@@ -186,6 +186,28 @@ async fn start() -> (Url, Arc<Device>) {
             }),
         )
         .route("/no-challenge", get(|| async { StatusCode::UNAUTHORIZED }))
+        .route(
+            "/session",
+            get(|headers: HeaderMap| async move {
+                if headers.get("Authorization").and_then(|v| v.to_str().ok()) == Some("Token abc") {
+                    "session".into_response()
+                } else {
+                    StatusCode::FORBIDDEN.into_response()
+                }
+            }),
+        )
+        .route(
+            "/form",
+            post(|headers: HeaderMap, body: String| async move {
+                let kind = headers
+                    .get(CONTENT_TYPE)
+                    .unwrap()
+                    .to_str()
+                    .unwrap()
+                    .to_owned();
+                format!("{kind} {body}")
+            }),
+        )
         .with_state(Arc::clone(&device));
     let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
     let url = Url::parse(&format!("http://{}", listener.local_addr().unwrap())).unwrap();
@@ -297,6 +319,43 @@ async fn rejects_unsupported_challenges() {
         err.to_string(),
         "unsupported authentication challenge: no WWW-Authenticate header"
     );
+}
+
+#[tokio::test]
+async fn sends_additional_headers() {
+    let (url, _) = start().await;
+    let client = Client::builder(url).build().unwrap();
+    let body = client
+        .get_with_headers("/session", &[("Authorization", "Token abc")])
+        .await
+        .unwrap();
+    assert_eq!(body, "session");
+    let err = client.get("/session").await.unwrap_err();
+    assert!(matches!(err, Error::Status { status: 403, .. }), "{err:?}");
+    let err = client
+        .get_with_headers("/session", &[("in valid", "x")])
+        .await
+        .unwrap_err();
+    assert!(matches!(err, Error::Http(_)), "{err:?}");
+}
+
+#[tokio::test]
+async fn posts_forms() {
+    let (url, _) = start().await;
+    let client = Client::builder(url).build().unwrap();
+    let body = client
+        .post_form("/form", &[("username", "a b"), ("response", "x&y=z")])
+        .await
+        .unwrap();
+    assert_eq!(
+        body,
+        "application/x-www-form-urlencoded username=a+b&response=x%26y%3Dz"
+    );
+    let err = client
+        .post_form("http://192.0.2.1/form", &[])
+        .await
+        .unwrap_err();
+    assert!(matches!(err, Error::InvalidUrl(_)), "{err:?}");
 }
 
 #[tokio::test]

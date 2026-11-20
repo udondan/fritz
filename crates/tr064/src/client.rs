@@ -119,10 +119,55 @@ impl Client {
     /// [`Error::InvalidUrl`] if `path` points to another host, and the errors
     /// of a request.
     pub async fn get(&self, path: &str) -> Result<String, Error> {
+        self.get_with_headers(path, &[]).await
+    }
+
+    /// Fetches a document of the device like [`get`](Self::get), with
+    /// additional request headers, for example a session token of another
+    /// interface of the device.
+    ///
+    /// # Errors
+    ///
+    /// [`Error::InvalidUrl`] if `path` points to another host,
+    /// [`Error::Http`] if a header name or value is invalid, and the errors
+    /// of a request.
+    pub async fn get_with_headers(
+        &self,
+        path: &str,
+        headers: &[(&str, &str)],
+    ) -> Result<String, Error> {
         let url = self.url(path)?;
-        let response = self
-            .send(self.http.get(url.clone()), &Method::GET, &url)
-            .await?;
+        let request = headers
+            .iter()
+            .fold(self.http.get(url.clone()), |request, (name, value)| {
+                request.header(*name, *value)
+            });
+        // Reports an invalid header now, before the request is cloned.
+        let (http, request) = request.build_split();
+        let request = RequestBuilder::from_parts(http, request?);
+        let response = self.send(request, &Method::GET, &url).await?;
+        text(response).await
+    }
+
+    /// Posts a form, `application/x-www-form-urlencoded`, to a path of the
+    /// device and returns the body of the response. Some devices offer more
+    /// than TR-064 on the same server, like a login page.
+    ///
+    /// # Errors
+    ///
+    /// [`Error::InvalidUrl`] if `path` points to another host, and the errors
+    /// of a request.
+    pub async fn post_form(&self, path: &str, form: &[(&str, &str)]) -> Result<String, Error> {
+        let url = self.url(path)?;
+        let body = form_urlencoded::Serializer::new(String::new())
+            .extend_pairs(form)
+            .finish();
+        let request = self
+            .http
+            .post(url.clone())
+            .header(CONTENT_TYPE, "application/x-www-form-urlencoded")
+            .body(body);
+        let response = self.send(request, &Method::POST, &url).await?;
         text(response).await
     }
 
