@@ -1,5 +1,10 @@
 # fritz
 
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/banner-dark.webp">
+  <img alt="fritz – CLI + MCP for your FRITZ!Box" src="docs/banner-light.webp">
+</picture>
+
 [![CI](https://github.com/udondan/fritz/actions/workflows/test.yml/badge.svg?branch=main)](https://github.com/udondan/fritz/actions/workflows/test.yml)
 [![codecov](https://codecov.io/gh/udondan/fritz/graph/badge.svg)](https://codecov.io/gh/udondan/fritz)
 [![Maintainability](https://qlty.sh/gh/udondan/projects/fritz/maintainability.svg)](https://qlty.sh/gh/udondan/projects/fritz)
