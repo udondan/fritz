@@ -1,6 +1,9 @@
 //! `fritz`: CLI and MCP server for FRITZ!Box routers.
 //!
 //! Unofficial, not affiliated with FRITZ! GmbH.
+//!
+//! Released as binaries, a Homebrew formula and a Docker image, see the
+//! installation section of the README.
 
 mod auth;
 #[cfg(feature = "write")]

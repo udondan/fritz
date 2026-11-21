@@ -27,7 +27,26 @@ status and settings of a FRITZ!Box router.
 ## Installation
 
 ```sh
-cargo install fritz
+brew install udondan/software/fritz   # macOS and Linux
+cargo install fritz                   # from source
+docker pull udondan/fritz             # see Docker below
+```
+
+The [releases](https://github.com/udondan/fritz/releases) also have binaries
+for Linux (x86_64, aarch64, static), macOS and Windows. `SHA256SUMS.txt` lists
+their checksums and is signed with the GPG key `F111A9BDD62F384A`:
+
+```sh
+gpg --verify SHA256SUMS.txt.asc SHA256SUMS.txt
+sha256sum --check --ignore-missing SHA256SUMS.txt
+```
+
+The Docker image is signed with cosign by the release workflow:
+
+```sh
+cosign verify udondan/fritz \
+  --certificate-identity-regexp '^https://github.com/udondan/fritz/' \
+  --certificate-oidc-issuer https://token.actions.githubusercontent.com
 ```
 
 ## Crates
@@ -90,14 +109,14 @@ container has no keychain, so the device and the password come from the
 environment. Get the fingerprint once with `fritz tls fingerprint`.
 
 ```sh
-mise run docker-build    # builds udondan/fritz
 docker run --rm -i \
   -e FRITZ_HOST=192.168.178.1 -e FRITZ_USERNAME=agent \
   -e FRITZ_PASSWORD -e FRITZ_TLS_FINGERPRINT \
   udondan/fritz
 ```
 
-For the Docker MCP Toolkit, `mise run docker` builds the image and adds
+`mise run docker-build` builds the image from source. For the Docker MCP
+Toolkit, `mise run docker` builds it and adds
 [docker-mcp.yml](docker-mcp.yml) to the profile `fritz`. Set the secrets
 `fritz.host`, `fritz.username`, `fritz.password` and `fritz.fingerprint`
 with `docker mcp secret set`. The container must be able to reach the box.
