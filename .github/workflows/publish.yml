@@ -351,10 +351,12 @@ jobs:
           persist-credentials: false
           path: fritz
 
+      # Only releases push, with the personal token. Pull requests, also from
+      # forks without secrets, read the public tap with the GITHUB_TOKEN.
       - uses: actions/checkout@v7
         with: # zizmor: ignore[artipacked] pushes the formula to the tap repository
           repository: udondan/homebrew-software
-          token: ${{ secrets.OVERRIDE_TOKEN }}
+          token: ${{ github.ref_type == 'tag' && secrets.OVERRIDE_TOKEN || github.token }}
           path: tap
 
       - uses: actions/download-artifact@v8
