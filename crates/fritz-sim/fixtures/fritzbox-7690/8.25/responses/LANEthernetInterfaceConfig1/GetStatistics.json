@@ -1,0 +1,9 @@
+{
+  "out": {
+    "NewBytesReceived": "876448304265",
+    "NewBytesSent": "1137729983971",
+    "NewPacketsReceived": "709553279",
+    "NewPacketsSent": "1029439075"
+  },
+  "status": "ok"
+}

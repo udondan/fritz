@@ -1,0 +1,24 @@
+codecov:
+  # The Coverage job of the Test workflow waits for the Codecov checks, so
+  # Codecov must not wait for the other checks in turn.
+  require_ci_to_pass: false
+  notify:
+    wait_for_ci: false
+
+ignore:
+  # The keychain of the operating system: CI has none, and tests must never
+  # touch the keychain of a developer.
+  - crates/fritz-core/src/secrets/platform.rs
+  - crates/fritz/src/system.rs
+
+coverage:
+  status:
+    project:
+      default:
+        # The coverage of the whole project may drop by up to 1 % against main.
+        target: auto
+        threshold: 1%
+    patch:
+      default:
+        # Every line a pull request changes must be tested.
+        target: 100%

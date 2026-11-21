@@ -1,0 +1,92 @@
+<?xml version="1.0"?>
+<!-- Synthetic description, laid out like the one of a home router. -->
+<root xmlns="urn:dslforum-org:device-1-0">
+  <specVersion>
+    <major>1</major>
+    <minor>0</minor>
+  </specVersion>
+  <device>
+    <deviceType>urn:dslforum-org:device:InternetGatewayDevice:1</deviceType>
+    <friendlyName>Example Router</friendlyName>
+    <manufacturer>Example Corp</manufacturer>
+    <manufacturerURL>http://example.com</manufacturerURL>
+    <modelDescription>Example Router 1000</modelDescription>
+    <modelName>Example Router 1000</modelName>
+    <modelNumber>  1000  </modelNumber>
+    <serialNumber></serialNumber>
+    <UDN>uuid:00000000-0000-0000-0000-000000000001</UDN>
+    <serviceList>
+      <service>
+        <serviceType>urn:dslforum-org:service:DeviceInfo:1</serviceType>
+        <serviceId>urn:DeviceInfo-com:serviceId:DeviceInfo1</serviceId>
+        <controlURL>/upnp/control/deviceinfo</controlURL>
+        <eventSubURL>/upnp/control/deviceinfo</eventSubURL>
+        <SCPDURL>/deviceinfoSCPD.xml</SCPDURL>
+      </service>
+      <service>
+        <serviceType>urn:dslforum-org:service:X_EXAMPLE-COM_Storage:1</serviceType>
+        <serviceId>urn:X_EXAMPLE-COM_Storage-com:serviceId:X_EXAMPLE-COM_Storage1</serviceId>
+        <controlURL>/upnp/control/x_storage</controlURL>
+        <SCPDURL>/x_storageSCPD.xml</SCPDURL>
+      </service>
+    </serviceList>
+    <deviceList>
+      <device>
+        <deviceType>urn:dslforum-org:device:LANDevice:1</deviceType>
+        <friendlyName>Example Router LAN</friendlyName>
+        <serviceList>
+          <service>
+            <serviceType>urn:dslforum-org:service:WLANConfiguration:1</serviceType>
+            <serviceId>urn:WLANConfiguration-com:serviceId:WLANConfiguration1</serviceId>
+            <controlURL>/upnp/control/wlanconfig1</controlURL>
+            <SCPDURL>/wlanconfigSCPD.xml</SCPDURL>
+          </service>
+          <service>
+            <serviceType>urn:dslforum-org:service:WLANConfiguration:2</serviceType>
+            <serviceId>urn:WLANConfiguration-com:serviceId:WLANConfiguration2</serviceId>
+            <controlURL>/upnp/control/wlanconfig2</controlURL>
+            <SCPDURL>/wlanconfigSCPD.xml</SCPDURL>
+          </service>
+          <service>
+            <serviceType>urn:dslforum-org:service:WLANConfiguration:3</serviceType>
+            <serviceId>urn:WLANConfiguration-com:serviceId:WLANConfiguration3</serviceId>
+            <controlURL>/upnp/control/wlanconfig3</controlURL>
+            <SCPDURL>/wlanconfigSCPD.xml</SCPDURL>
+          </service>
+        </serviceList>
+      </device>
+      <device>
+        <deviceType>urn:dslforum-org:device:WANDevice:1</deviceType>
+        <serviceList>
+          <service>
+            <serviceType>urn:dslforum-org:service:WANCommonInterfaceConfig:1</serviceType>
+            <serviceId>urn:WANCIfConfig-com:serviceId:WANCommonInterfaceConfig1</serviceId>
+            <controlURL>/upnp/control/wancommonifconfig1</controlURL>
+            <SCPDURL>/wancommonifconfigSCPD.xml</SCPDURL>
+          </service>
+        </serviceList>
+        <deviceList>
+          <device>
+            <deviceType>urn:dslforum-org:device:WANConnectionDevice:1</deviceType>
+            <serviceList>
+              <service>
+                <serviceType>urn:dslforum-org:service:WANIPConnection:1</serviceType>
+                <serviceId>urn:WANIPConnection-com:serviceId:WANIPConnection1</serviceId>
+                <controlURL>/upnp/control/wanipconnection1</controlURL>
+                <SCPDURL>/wanipconnSCPD.xml</SCPDURL>
+              </service>
+              <!-- Same service type in a second instance, told apart by the id only. -->
+              <service>
+                <serviceType>urn:dslforum-org:service:WANIPConnection:1</serviceType>
+                <serviceId>urn:WANIPConnection-com:serviceId:WANIPConnection2</serviceId>
+                <controlURL>/upnp/control/wanipconnection2</controlURL>
+                <SCPDURL>/wanipconnSCPD.xml</SCPDURL>
+              </service>
+            </serviceList>
+          </device>
+        </deviceList>
+      </device>
+    </deviceList>
+    <presentationURL>http://192.0.2.1</presentationURL>
+  </device>
+</root>

@@ -1,0 +1,11 @@
+{
+  "out": {
+    "NewAssociatedDeviceAuthState": "1",
+    "NewAssociatedDeviceIPAddress": "192.0.2.35",
+    "NewAssociatedDeviceMACAddress": "AA:BB:CC:00:00:36",
+    "NewX_AVM-DE_ChannelWidth": "20",
+    "NewX_AVM-DE_SignalStrength": "77",
+    "NewX_AVM-DE_Speed": "130"
+  },
+  "status": "ok"
+}

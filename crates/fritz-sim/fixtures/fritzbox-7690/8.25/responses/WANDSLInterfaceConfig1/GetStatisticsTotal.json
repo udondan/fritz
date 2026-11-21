@@ -1,0 +1,20 @@
+{
+  "out": {
+    "NewATUCCRCErrors": "0",
+    "NewATUCFECErrors": "77148",
+    "NewATUCHECErrors": "0",
+    "NewCRCErrors": "203",
+    "NewCellDelin": "0",
+    "NewErroredSecs": "71",
+    "NewFECErrors": "36486673",
+    "NewHECErrors": "0",
+    "NewInitErrors": "0",
+    "NewInitTimeouts": "0",
+    "NewLinkRetrain": "1",
+    "NewLossOfFraming": "0",
+    "NewReceiveBlocks": "343061557",
+    "NewSeverelyErroredSecs": "0",
+    "NewTransmitBlocks": "98199997"
+  },
+  "status": "ok"
+}

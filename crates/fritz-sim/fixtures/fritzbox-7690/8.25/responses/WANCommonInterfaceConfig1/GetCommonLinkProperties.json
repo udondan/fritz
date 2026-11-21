@@ -1,0 +1,13 @@
+{
+  "out": {
+    "NewLayer1DownstreamMaxBitRate": "276310000",
+    "NewLayer1UpstreamMaxBitRate": "45853000",
+    "NewPhysicalLinkStatus": "Up",
+    "NewWANAccessType": "DSL",
+    "NewX_AVM-DE_DownstreamCurrentMaxSpeed": "278487",
+    "NewX_AVM-DE_DownstreamCurrentUtilization": "40712,218205,35872,32062,221945,39747,208090,20280,14493,212121,25379,27444,236889,278487,48333,231826,12593,30926,218932,7743",
+    "NewX_AVM-DE_UpstreamCurrentMaxSpeed": "646683",
+    "NewX_AVM-DE_UpstreamCurrentUtilization": "51470,646683,62951,58258,26427,22783,74021,58836,36997,84194,30185,26595,150010,195986,26898,27353,16440,14740,39970,11064"
+  },
+  "status": "ok"
+}

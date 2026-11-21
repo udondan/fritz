@@ -1,0 +1,11 @@
+{
+  "out": {
+    "NewX_AVM-DE_DeviceClassUserPossibleValues": "AirConditioner,Button,Camera,CircuitBoard,Computer,DoorBell,DoorLock,GamingDevice,Generic,IPPhone,Lamp,Monitor,NetworkSwitch,Phone,Printer,Robot,Router,Sensor,SetTopBox,Shutter,SmartWatch,Smartphone,Socket,Speaker,Storage,Tablet,Thermostat",
+    "NewX_AVM-DE_FriendlynameMaxChars": "64",
+    "NewX_AVM-DE_FriendlynameMinChars": "1",
+    "NewX_AVM-DE_HostnameAllowedChars": "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-",
+    "NewX_AVM-DE_HostnameMaxChars": "63",
+    "NewX_AVM-DE_HostnameMinChars": "0"
+  },
+  "status": "ok"
+}

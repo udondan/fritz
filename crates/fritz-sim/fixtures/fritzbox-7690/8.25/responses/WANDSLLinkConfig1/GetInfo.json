@@ -1,0 +1,14 @@
+{
+  "out": {
+    "NewATMEncapsulation": "LLC",
+    "NewATMPeakCellRate": "0",
+    "NewATMQoS": "UBR",
+    "NewATMSustainableCellRate": "0",
+    "NewAutoConfig": "0",
+    "NewDestinationAddress": "PVC: 1/32",
+    "NewEnable": "1",
+    "NewLinkStatus": "Up",
+    "NewLinkType": "PPPoE"
+  },
+  "status": "ok"
+}

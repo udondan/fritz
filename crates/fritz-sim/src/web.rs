@@ -1,0 +1,155 @@
+//! The web interface: the session login of `login_sid.lua` and the REST API
+//! under `/api/`, which wants the session in the header
+//! `Authorization: AVM-SID <sid>`.
+//!
+//! The login answers a PBKDF2 challenge. A wrong answer reports a block time,
+//! but the next login is not actually blocked; [`Injection::LockLogin`]
+//! blocks every login.
+//!
+//! [`Injection::LockLogin`]: crate::Injection::LockLogin
+
+use std::collections::HashMap;
+use std::fmt::Write as _;
+
+use axum::http::header::{AUTHORIZATION, CONTENT_TYPE};
+use axum::http::{HeaderMap, Method, StatusCode};
+use axum::response::{IntoResponse, Response};
+use sha2::Sha256;
+
+use crate::{Options, SESSION, XML};
+
+/// The login page.
+pub(crate) const LOGIN: &str = "/login_sid.lua";
+/// The prefix of the REST API.
+pub(crate) const API: &str = "/api/";
+
+/// The challenge of every login: 10 iterations with the salt `5e55104d`,
+/// then 10 with `c0ffee55`.
+const CHALLENGE: &str = "2$10$5e55104d$10$c0ffee55";
+const SALTS: ([u8; 4], [u8; 4]) = ([0x5e, 0x55, 0x10, 0x4d], [0xc0, 0xff, 0xee, 0x55]);
+const ITERATIONS: u32 = 10;
+const NO_SESSION: &str = "0000000000000000";
+/// The block time after a failed login.
+const BLOCK_TIME: u64 = 8;
+/// The block time of a [locked](crate::Injection::LockLogin) login.
+const LOCKED_TIME: u64 = 60;
+
+/// Whether the session is open.
+#[derive(Debug, Default)]
+pub(crate) struct Web {
+    open: bool,
+}
+
+impl Web {
+    /// Answers a request of the login page: the challenge, a login or a
+    /// logout.
+    pub(crate) fn login(
+        &mut self,
+        method: &Method,
+        body: &str,
+        options: &Options,
+        locked: bool,
+    ) -> Response {
+        let form: HashMap<String, String> = form_urlencoded::parse(body.as_bytes())
+            .into_owned()
+            .collect();
+        let field = |name: &str| form.get(name).map(String::as_str);
+        let blocked = if locked { LOCKED_TIME } else { 0 };
+        let info = match *method {
+            Method::GET => session_info(NO_SESSION, blocked),
+            Method::POST if form.contains_key("logout") => {
+                if field("sid") == Some(SESSION) {
+                    self.open = false;
+                }
+                session_info(NO_SESSION, 0)
+            }
+            Method::POST
+                if !locked
+                    && field("username") == Some(&options.username)
+                    && field("response") == Some(&response(&options.password)) =>
+            {
+                self.open = true;
+                session_info(SESSION, 0)
+            }
+            Method::POST => session_info(NO_SESSION, blocked.max(BLOCK_TIME)),
+            _ => return StatusCode::METHOD_NOT_ALLOWED.into_response(),
+        };
+        ([(CONTENT_TYPE, XML)], info).into_response()
+    }
+
+    /// Answers a request of the REST API with a document of the fixture, if
+    /// it carries the open session.
+    pub(crate) fn api(
+        &self,
+        documents: &HashMap<String, String>,
+        method: &Method,
+        path: &str,
+        headers: &HeaderMap,
+    ) -> Response {
+        if *method != Method::GET {
+            return StatusCode::METHOD_NOT_ALLOWED.into_response();
+        }
+        let authorization = headers.get(AUTHORIZATION).and_then(|v| v.to_str().ok());
+        if !self.open || authorization != Some(&format!("AVM-SID {SESSION}")) {
+            return StatusCode::FORBIDDEN.into_response();
+        }
+        match documents.get(path) {
+            Some(json) => ([(CONTENT_TYPE, "application/json")], json.clone()).into_response(),
+            None => StatusCode::NOT_FOUND.into_response(),
+        }
+    }
+}
+
+/// The answer of the login page. An open session comes with its rights.
+fn session_info(sid: &str, block_time: u64) -> String {
+    let rights = if sid == NO_SESSION {
+        "<Rights/>"
+    } else {
+        "<Rights><Name>HomeAuto</Name><Access>2</Access>\
+         <Name>BoxAdmin</Name><Access>2</Access></Rights>"
+    };
+    format!(
+        "<?xml version=\"1.0\" encoding=\"utf-8\"?><SessionInfo><SID>{sid}</SID>\
+         <Challenge>{CHALLENGE}</Challenge><BlockTime>{block_time}</BlockTime>{rights}\
+         <Users><User last=\"1\">fritz-sim</User></Users></SessionInfo>"
+    )
+}
+
+/// The right answer to the challenge with `password`.
+fn response(password: &str) -> String {
+    let (salt1, salt2) = SALTS;
+    let first = pbkdf2::pbkdf2_hmac_array::<Sha256, 32>(password.as_bytes(), &salt1, ITERATIONS);
+    let second = pbkdf2::pbkdf2_hmac_array::<Sha256, 32>(&first, &salt2, ITERATIONS);
+    format!("{}${}", hex(&salt2), hex(&second))
+}
+
+fn hex(bytes: &[u8]) -> String {
+    bytes.iter().fold(String::new(), |mut text, byte| {
+        let _ = write!(text, "{byte:02x}");
+        text
+    })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn answers_the_challenge() {
+        // Checked with Python's hashlib.pbkdf2_hmac.
+        assert_eq!(
+            response(crate::PASSWORD),
+            "c0ffee55$e3850e0cc988d0275516b6399262de94826857caefc0180798e5df870d725bbf"
+        );
+    }
+
+    #[test]
+    fn allows_only_get_and_post() {
+        let mut web = Web::default();
+        let options = Options::default();
+        let response = web.login(&Method::PUT, "", &options, false);
+        assert_eq!(response.status(), StatusCode::METHOD_NOT_ALLOWED);
+        let response = web.api(&HashMap::new(), &Method::POST, "/api/v0", &HeaderMap::new());
+        assert_eq!(response.status(), StatusCode::METHOD_NOT_ALLOWED);
+    }
+}

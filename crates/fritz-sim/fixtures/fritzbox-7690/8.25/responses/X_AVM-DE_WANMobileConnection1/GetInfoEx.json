@@ -1,0 +1,23 @@
+{
+  "out": {
+    "NewAPN": "",
+    "NewAPN_VoIP": "",
+    "NewCellList": "<CellList />\n",
+    "NewCurrentAccessTechnology": "unknown",
+    "NewEnableVoIPPDN": "0",
+    "NewIMSI": "",
+    "NewPDN1_MTU": "0",
+    "NewPDN2_MTU": "0",
+    "NewPPPAuthProtocol": "PAP",
+    "NewPPPAuthProtocolVoIP": "PAP",
+    "NewPPPUsername": "***",
+    "NewPPPUsernameVoIP": "***",
+    "NewRoaming": "0",
+    "NewSerialNumber": "",
+    "NewSignalRSRP0": "",
+    "NewSignalRSRP1": "",
+    "NewSoftwareVersion": "",
+    "NewUptime": "34583"
+  },
+  "status": "ok"
+}

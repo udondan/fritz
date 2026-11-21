@@ -1,0 +1,23 @@
+{
+  "out": {
+    "NewAccessRightController": "0",
+    "NewAccessRightInternet": "1",
+    "NewAccessRightMesh": "1",
+    "NewAccessRightSmarthome": "1",
+    "NewAccessRightSystem": "1",
+    "NewAccessRightVoIP": "0",
+    "NewAccessRightWiFi": "0",
+    "NewEnable": "0",
+    "NewEndpointID": "id-1",
+    "NewHostname": "device-49",
+    "NewMQTTClientID": "",
+    "NewMQTTControllerTopic": "",
+    "NewMQTTResponseTopic": "",
+    "NewMTP": "websocket",
+    "NewPath": "id-2",
+    "NewPort": "443",
+    "NewUseTLS": "1",
+    "NewUsername": "***"
+  },
+  "status": "ok"
+}

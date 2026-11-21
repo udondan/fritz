@@ -1,0 +1,11 @@
+{
+  "out": {
+    "NewByteCount": "0",
+    "NewKbitsAvg": "0",
+    "NewKbitsCurrent": "0",
+    "NewPPSAvg": "0",
+    "NewPPSCurrent": "0",
+    "NewPacketCount": "0"
+  },
+  "status": "ok"
+}

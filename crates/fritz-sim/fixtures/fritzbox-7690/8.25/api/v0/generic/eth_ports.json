@@ -1,0 +1,22 @@
+{
+  "eth": [
+    {
+      "UID": "eth0",
+      "carrier": "1",
+      "eee_mode": "on",
+      "label": "LAN 1",
+      "maxspeed": "2500",
+      "mode": "default",
+      "speed": "1000"
+    },
+    {
+      "UID": "eth1",
+      "carrier": "0",
+      "eee_mode": "on",
+      "label": "LAN 2",
+      "maxspeed": "1000",
+      "mode": "default",
+      "speed": "0"
+    }
+  ]
+}
