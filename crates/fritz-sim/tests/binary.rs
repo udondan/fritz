@@ -6,10 +6,7 @@ use std::process::{Command, Stdio};
 
 use tr064::{Client, Url};
 
-const FIXTURE: &str = concat!(
-    env!("CARGO_MANIFEST_DIR"),
-    "/../../fixtures/fritzbox-7690/8.25"
-);
+const FIXTURE: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/fixtures/fritzbox-7690/8.25");
 
 #[tokio::test]
 async fn serves_a_fixture_until_interrupted() {
@@ -39,7 +36,7 @@ async fn serves_a_fixture_until_interrupted() {
 #[tokio::test]
 async fn serves_https_and_prints_the_fingerprint() {
     let mut child = Command::new(env!("CARGO_BIN_EXE_fritz-sim"))
-        .args(["--fixture", FIXTURE, "--https"])
+        .args(["--fixture", "fritzbox-7690/8.25", "--https"])
         .stdout(Stdio::piped())
         .spawn()
         .unwrap();
@@ -75,4 +72,29 @@ fn fails_without_a_fixture() {
         stderr.contains("cannot read /nonexistent/tr64desc.xml"),
         "{stderr}"
     );
+}
+
+#[test]
+fn lists_the_bundled_fixtures() {
+    let output = Command::new(env!("CARGO_BIN_EXE_fritz-sim"))
+        .arg("--list")
+        .output()
+        .unwrap();
+    assert!(output.status.success());
+    let stdout = String::from_utf8(output.stdout).unwrap();
+    assert!(
+        stdout.lines().any(|l| l == "fritzbox-7690/8.25"),
+        "{stdout}"
+    );
+}
+
+#[test]
+fn fails_for_an_unknown_fixture() {
+    let output = Command::new(env!("CARGO_BIN_EXE_fritz-sim"))
+        .args(["--fixture", "fritzbox-0000/0.0"])
+        .output()
+        .unwrap();
+    assert!(!output.status.success());
+    let stderr = String::from_utf8(output.stderr).unwrap();
+    assert!(stderr.contains("fritzbox-0000"), "{stderr}");
 }

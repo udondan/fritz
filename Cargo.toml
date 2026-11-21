@@ -8,8 +8,8 @@ license = "Apache-2.0"
 repository = "https://github.com/udondan/fritz"
 authors = ["Daniel Schroeder"]
 
-# Library crates (tr064, fritz-core) use regular version requirements, so
-# their users don't run into version conflicts. The fritz binary declares its
+# Library crates (tr064, fritz-core, fritz-sim) use regular version
+# requirements, so their users don't run into version conflicts. The fritz binary declares its
 # own dependencies with exact versions. Cargo.lock pins every build.
 [workspace.dependencies]
 tr064 = { path = "crates/tr064", version = "0.1.0" }

@@ -3,12 +3,9 @@
 use std::fs;
 use std::path::Path;
 
-use fritz_sim::{Answer, Error, Fixture, Sim};
+use fritz_sim::{Answer, Error, FIXTURES, Fixture, Sim};
 
-const FIXTURE: &str = concat!(
-    env!("CARGO_MANIFEST_DIR"),
-    "/../../fixtures/fritzbox-7690/8.25"
-);
+const FIXTURE: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/fixtures/fritzbox-7690/8.25");
 
 /// A fixture with the recorded device description, no service descriptions
 /// and no responses.
@@ -181,4 +178,23 @@ async fn unrecorded_getters_answer_from_the_state() {
         let out = client.call(hosts, action, &[]).await.unwrap();
         assert_eq!(out.get(argument), Some(value), "{action}");
     }
+}
+
+#[test]
+fn loads_the_bundled_fixtures() {
+    let names = Fixture::bundled_names().unwrap();
+    assert!(names.iter().any(|n| n == "fritzbox-7690/8.25"), "{names:?}");
+    for name in &names {
+        assert!(
+            Path::new(FIXTURES)
+                .join(name)
+                .join("tr64desc.xml")
+                .is_file()
+        );
+        Fixture::bundled(name).unwrap();
+    }
+    assert!(matches!(
+        Fixture::bundled("fritzbox-0000/0.0"),
+        Err(Error::Io { .. })
+    ));
 }

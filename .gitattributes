@@ -1,2 +1,2 @@
 # Recorded with `fritz fixture anonymize`; collapsed in diffs.
-fixtures/** linguist-generated=true
+crates/fritz-sim/fixtures/** linguist-generated=true

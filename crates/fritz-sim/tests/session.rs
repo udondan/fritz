@@ -6,10 +6,7 @@ use fritz_core::{settings, smarthome};
 use fritz_sim::{Fixture, Injection, PASSWORD, Sim, USERNAME};
 use tr064::{Client, SecretString};
 
-const FIXTURE: &str = concat!(
-    env!("CARGO_MANIFEST_DIR"),
-    "/../../fixtures/fritzbox-7690/8.25"
-);
+const FIXTURE: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/fixtures/fritzbox-7690/8.25");
 const SID: &str = "AVM-SID 5e55104d0c0ffee5";
 
 async fn sim() -> Sim {

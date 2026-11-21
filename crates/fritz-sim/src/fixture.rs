@@ -8,6 +8,11 @@ use std::path::{Path, PathBuf};
 use serde_json::Value;
 use tr064::{DeviceDescription, Scpd};
 
+/// The directory of the fixtures that come with this crate, with one
+/// directory per model and FRITZ!OS version, like `fritzbox-7690/8.25`. It
+/// lies in the source of the crate, which cargo keeps for tests and builds.
+pub const FIXTURES: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/fixtures");
+
 /// Why a fixture cannot be loaded.
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
@@ -68,6 +73,33 @@ pub struct Fixture {
 }
 
 impl Fixture {
+    /// Loads a fixture that comes with this crate, by name like
+    /// `fritzbox-7690/8.25`. See [`Fixture::bundled_names`].
+    ///
+    /// # Errors
+    ///
+    /// Those of [`Fixture::load`].
+    pub fn bundled(name: &str) -> Result<Self, Error> {
+        Self::load(Path::new(FIXTURES).join(name))
+    }
+
+    /// The names of the fixtures that come with this crate, sorted, like
+    /// `fritzbox-7690/8.25`. Tests can run against each of them.
+    ///
+    /// # Errors
+    ///
+    /// [`Error::Io`] if [`FIXTURES`] cannot be read.
+    pub fn bundled_names() -> Result<Vec<String>, Error> {
+        let mut names = Vec::new();
+        for (model, dir) in entries(Path::new(FIXTURES))? {
+            for (version, _) in entries(&dir)? {
+                names.push(format!("{model}/{version}"));
+            }
+        }
+        names.sort();
+        Ok(names)
+    }
+
     /// Loads the fixture in `dir`.
     ///
     /// # Errors
