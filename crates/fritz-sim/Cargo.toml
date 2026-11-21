@@ -1,33 +1,37 @@
 [package]
 name = "fritz-sim"
 version = "0.0.0"
-description = "Stateful fake TR-064 server built from recorded fixtures, for tests"
-publish = false
+description = "Stateful fake TR-064 server built from recorded FRITZ!Box fixtures, for tests (unofficial, not affiliated with FRITZ! GmbH)"
+keywords = ["fritzbox", "tr-064", "upnp", "testing", "mock"]
+categories = ["development-tools::testing", "network-programming"]
+readme = "README.md"
 edition.workspace = true
 license.workspace = true
 repository.workspace = true
 authors.workspace = true
 
 [dependencies]
-anyhow = "=1.0.104"
-axum = "=0.8.9"
-clap = { version = "=4.6.9", features = ["derive"] }
-form_urlencoded = "=1.2.2"
-md-5 = "=0.11.0"
-pbkdf2 = { version = "=0.13.0", default-features = false, features = ["hmac"] }
-rcgen = { version = "=0.14.10", default-features = false, features = ["crypto", "pem", "ring"] }
-roxmltree = "=0.21.2"
-rustls = { version = "=0.23.46", default-features = false, features = ["ring", "std", "tls12"] }
-serde_json = "=1.0.154"
-sha2 = "=0.11.1"
-thiserror = "=2.0.21"
-tokio = { version = "=1.54.1", features = ["macros", "net", "rt-multi-thread", "signal", "time"] }
-tokio-rustls = { version = "=0.26.6", default-features = false, features = ["ring", "tls12"] }
+anyhow = "1.0.104"
+axum = "0.8.9"
+clap = { version = "4.6.9", features = ["derive"] }
+form_urlencoded = "1.2.2"
+md-5 = "0.11.0"
+pbkdf2 = { version = "0.13.0", default-features = false, features = ["hmac"] }
+rcgen = { version = "0.14.10", default-features = false, features = ["crypto", "pem", "ring"] }
+roxmltree = "0.21.2"
+rustls = { version = "0.23.46", default-features = false, features = ["ring", "std", "tls12"] }
+serde_json = "1.0.154"
+sha2 = "0.11.1"
+thiserror = "2.0.21"
+tokio = { version = "1.54.1", features = ["macros", "net", "rt-multi-thread", "signal", "time"] }
+tokio-rustls = { version = "0.26.6", default-features = false, features = ["ring", "tls12"] }
 tr064.workspace = true
 
 [lints]
 workspace = true
 
 [dev-dependencies]
-fritz-core.workspace = true
+# Path only: cargo publish leaves it out, so fritz-sim can be published
+# before fritz-core.
+fritz-core = { path = "../fritz-core" }
 tempfile = "=3.27.0"

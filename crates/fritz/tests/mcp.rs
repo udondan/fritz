@@ -11,7 +11,7 @@ use serde_json::{Value, json};
 
 const FIXTURE: &str = concat!(
     env!("CARGO_MANIFEST_DIR"),
-    "/../../fixtures/fritzbox-7690/8.25"
+    "/../fritz-sim/fixtures/fritzbox-7690/8.25"
 );
 
 /// The tool list that clients see. `FRITZ_UPDATE_GOLDEN=1` rewrites it.

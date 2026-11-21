@@ -5,10 +5,7 @@ use std::path::Path;
 
 use fritz_sim::{Answer, Error, Fixture, Sim};
 
-const FIXTURE: &str = concat!(
-    env!("CARGO_MANIFEST_DIR"),
-    "/../../fixtures/fritzbox-7690/8.25"
-);
+const FIXTURE: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/fixtures/fritzbox-7690/8.25");
 
 /// A fixture with the recorded device description, no service descriptions
 /// and no responses.
@@ -180,5 +177,32 @@ async fn unrecorded_getters_answer_from_the_state() {
     ] {
         let out = client.call(hosts, action, &[]).await.unwrap();
         assert_eq!(out.get(argument), Some(value), "{action}");
+    }
+}
+
+#[test]
+fn loads_the_bundled_fixtures() {
+    let names = Fixture::bundled_names();
+    assert!(names.iter().any(|n| n == "fritzbox-7690/8.25"), "{names:?}");
+    for name in &names {
+        Fixture::bundled(name).unwrap();
+    }
+    // The embedded fixture is the one of the files.
+    let bundled = Fixture::bundled("fritzbox-7690/8.25").unwrap();
+    let loaded = Fixture::load(FIXTURE).unwrap();
+    assert_eq!(format!("{bundled:?}").len(), format!("{loaded:?}").len());
+    assert_eq!(
+        bundled.answer("DeviceInfo1", "GetInfo", None),
+        loaded.answer("DeviceInfo1", "GetInfo", None)
+    );
+    for name in [
+        "fritzbox-0000/0.0",
+        "fritzbox-7690",
+        "fritzbox-7690/8.25/scpd",
+    ] {
+        assert!(
+            matches!(Fixture::bundled(name), Err(Error::Unknown(n)) if n == name),
+            "{name}"
+        );
     }
 }

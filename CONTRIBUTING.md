@@ -23,8 +23,10 @@ Pull requests are squash-merged, and the title becomes the commit message.
 ## Fixtures from other models
 
 Fixtures recorded from other FRITZ!Box models and FRITZ!OS versions are
-welcome. Recording one only reads from the device, and nothing personal ends
-up in the repository:
+welcome. They live in `crates/fritz-sim/fixtures/` and are published with
+`fritz-sim`, so every project that tests against it gains the device.
+Recording one only reads from the device, and nothing personal ends up in the
+repository:
 
 1. Set up a user on the device as described in [docs/box-setup.md](docs/box-setup.md).
 2. Look at what a capture would read. This loads only the service
@@ -50,7 +52,7 @@ up in the repository:
 
    ```sh
    fritz fixture anonymize ~/.local/share/fritz/captures/<time> \
-     --out fixtures/<model>/<fritzos>
+     --out crates/fritz-sim/fixtures/<model>/<fritzos>
    ```
 
    Addresses, UUIDs, serial numbers, host and WLAN names, user names, phone
@@ -62,7 +64,7 @@ up in the repository:
    request:
 
    ```sh
-   fritz fixture check
+   fritz fixture check crates/fritz-sim/fixtures
    ```
 
    It names the files and kinds of the personal values it finds, never the

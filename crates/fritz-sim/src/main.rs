@@ -2,7 +2,7 @@
 //! real device.
 
 use std::net::{IpAddr, Ipv4Addr, SocketAddr};
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 use clap::Parser;
 use fritz_sim::{Fixture, Options, Sim};
@@ -11,9 +11,13 @@ use fritz_sim::{Fixture, Options, Sim};
 #[derive(Debug, Parser)]
 #[command(version)]
 struct Args {
-    /// The fixture directory, like fixtures/fritzbox-7690/8.25.
+    /// A fixture that comes with fritz-sim, like fritzbox-7690/8.25, or the
+    /// directory of another one.
+    #[arg(long, required_unless_present = "list")]
+    fixture: Option<PathBuf>,
+    /// Print the names of the fixtures that come with fritz-sim.
     #[arg(long)]
-    fixture: PathBuf,
+    list: bool,
     /// The port to listen on. 0 picks a free one.
     #[arg(long, default_value_t = 0)]
     port: u16,
@@ -34,7 +38,13 @@ struct Args {
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     let args = Args::parse();
-    let fixture = Fixture::load(&args.fixture)?;
+    if args.list {
+        for name in Fixture::bundled_names() {
+            println!("{name}");
+        }
+        return Ok(());
+    }
+    let fixture = load(&args.fixture.unwrap_or_default())?;
     let options = Options {
         address: SocketAddr::new(args.address, args.port),
         username: args.username,
@@ -48,4 +58,15 @@ async fn main() -> anyhow::Result<()> {
     }
     tokio::signal::ctrl_c().await?;
     Ok(())
+}
+
+/// Loads the bundled fixture of the name, unless a directory has that name,
+/// or else the fixture in the directory.
+fn load(fixture: &Path) -> Result<Fixture, fritz_sim::Error> {
+    let name = fixture.to_string_lossy();
+    if !fixture.is_dir() && Fixture::bundled_names().iter().any(|n| *n == name) {
+        Fixture::bundled(&name)
+    } else {
+        Fixture::load(fixture)
+    }
 }

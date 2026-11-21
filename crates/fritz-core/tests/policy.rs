@@ -22,7 +22,7 @@ fn fixtures(root: &Path) -> Vec<std::path::PathBuf> {
 
 #[test]
 fn classifies_every_action_of_the_fixtures() {
-    let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../fixtures");
+    let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../fritz-sim/fixtures");
     // The class depends on the service name and the action, so services
     // with the same name in several fixtures or versions give one line.
     let mut lines = BTreeSet::new();

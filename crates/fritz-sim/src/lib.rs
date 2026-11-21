@@ -27,7 +27,7 @@
 //! # async fn example() -> Result<(), Box<dyn std::error::Error>> {
 //! use fritz_sim::{Fixture, Injection, Sim};
 //!
-//! let sim = Sim::start(Fixture::load("fixtures/fritzbox-7690/8.25")?).await?;
+//! let sim = Sim::start(Fixture::bundled("fritzbox-7690/8.25")?).await?;
 //! let client = sim.client().build()?;
 //! let description = client.description().await?;
 //! let wlan = description.service("WLANConfiguration1")?;
@@ -453,10 +453,7 @@ async fn handle(
 mod tests {
     use super::*;
 
-    const FIXTURE: &str = concat!(
-        env!("CARGO_MANIFEST_DIR"),
-        "/../../fixtures/fritzbox-7690/8.25"
-    );
+    const FIXTURE: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/fixtures/fritzbox-7690/8.25");
     const WLAN: &str = "urn:dslforum-org:service:WLANConfiguration:1";
     const CONTROL: &str = "/upnp/control/wlanconfig1";
 

@@ -5,10 +5,7 @@ use std::time::Duration;
 use fritz_sim::{Fixture, Injection, Request, Sim};
 use tr064::{Client, DeviceDescription, Error, SecretString};
 
-const FIXTURE: &str = concat!(
-    env!("CARGO_MANIFEST_DIR"),
-    "/../../fixtures/fritzbox-7690/8.25"
-);
+const FIXTURE: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/fixtures/fritzbox-7690/8.25");
 
 async fn start() -> (Sim, Client, DeviceDescription) {
     let sim = Sim::start(Fixture::load(FIXTURE).unwrap()).await.unwrap();

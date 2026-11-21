@@ -18,8 +18,9 @@ Cargo workspace:
 - Tests must not reach the network except loopback.
 - Never log or print secrets (passwords, keys, session IDs).
 - `make lint test` must pass.
-- Library crates (`tr064`, `fritz-core`) use regular version requirements; the
-  `fritz` binary and dev-dependencies use exact versions (`=x.y.z`).
+- Library crates (`tr064`, `fritz-core`, `fritz-sim`) use regular version
+  requirements; the `fritz` binary and dev-dependencies use exact versions
+  (`=x.y.z`).
 - Conventional commits: `feat:`/`fix:` only for changes to shipped code,
   `chore:` for tooling and CI, `build(deps):` for runtime dependency updates.
 
@@ -66,8 +67,9 @@ Cargo workspace:
   time, and a device on the allow list and not on the deny list. A plan shows
   the current and new values and returns a token, which apply requires; every
   change is audited (`change/audit.rs`). SECURITY.md lists all checks.
-- `fritz-sim` serves the fixtures in `fixtures/<model>/<fritzos>/` on
-  loopback. It checks calls against the SCPDs, keeps the state that writes
+- `fritz-sim` serves the fixtures in
+  `crates/fritz-sim/fixtures/<model>/<fritzos>/` on loopback; they are
+  published with the crate (`Fixture::bundled`). It checks calls against the SCPDs, keeps the state that writes
   change, serves list documents and the Smart Home REST API, can inject
   faults, delays and a locked login (`Sim::inject`), and records requests.
   The CLI and MCP tests remove inherited `FRITZ_*` variables.

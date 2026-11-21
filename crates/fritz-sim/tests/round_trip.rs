@@ -7,7 +7,7 @@ use std::time::Duration;
 use fritz_core::capture::{self, Options};
 use fritz_sim::{Fixture, Sim};
 
-const FIXTURES: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/../../fixtures");
+const FIXTURES: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/fixtures");
 
 /// The files of personal lists, left out of a capture by default.
 const PERSONAL: [&str; 6] = [

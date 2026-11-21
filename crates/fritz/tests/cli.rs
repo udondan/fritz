@@ -470,7 +470,7 @@ fn reports_an_invalid_configuration() {
 async fn trusts_the_certificate_on_first_use() {
     let fixture = concat!(
         env!("CARGO_MANIFEST_DIR"),
-        "/../../fixtures/fritzbox-7690/8.25"
+        "/../fritz-sim/fixtures/fritzbox-7690/8.25"
     );
     let options = fritz_sim::Options {
         https: true,
@@ -618,7 +618,7 @@ fn reports_where_the_password_comes_from() {
 
 const FIXTURE: &str = concat!(
     env!("CARGO_MANIFEST_DIR"),
-    "/../../fixtures/fritzbox-7690/8.25"
+    "/../fritz-sim/fixtures/fritzbox-7690/8.25"
 );
 
 /// The session ID of the simulator.

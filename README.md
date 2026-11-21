@@ -30,7 +30,7 @@ status and settings of a FRITZ!Box router.
 | ---------------------------------- | ---------------------------------------------------------------------- |
 | [`tr064`](crates/tr064)            | Vendor-neutral TR-064 (UPnP/SOAP) client library                       |
 | [`fritz-core`](crates/fritz-core)  | FRITZ!-specific logic: login, Smart Home API, policy, redaction        |
-| [`fritz-sim`](crates/fritz-sim)    | Stateful fake TR-064 server for tests, built from recorded fixtures    |
+| [`fritz-sim`](crates/fritz-sim)    | Fake FRITZ!Box for tests, built from recorded fixtures                 |
 | [`fritz`](crates/fritz)            | The `fritz` binary: CLI and `fritz mcp`                                |
 
 ## MCP server

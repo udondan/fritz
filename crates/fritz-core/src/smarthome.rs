@@ -290,7 +290,7 @@ mod tests {
 
     const FIXTURE: &str = include_str!(concat!(
         env!("CARGO_MANIFEST_DIR"),
-        "/../../fixtures/fritzbox-7690/8.25/api/v0/smarthome/overview.json"
+        "/../fritz-sim/fixtures/fritzbox-7690/8.25/api/v0/smarthome/overview.json"
     ));
 
     #[test]
