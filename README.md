@@ -127,3 +127,10 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
 ## License
 
 [Apache-2.0](LICENSE)
+
+## Disclaimer
+
+This is an unofficial, independent open source project. It is not affiliated
+with FRITZ! GmbH (formerly AVM). FRITZ! and FRITZ!Box are trademarks of
+FRITZ! GmbH. The names are only used to describe compatibility. Use this tool
+at your own risk. Changing router settings can cut off your network access.
