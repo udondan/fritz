@@ -2,6 +2,7 @@
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/banner-dark.webp">
+  <source media="(prefers-color-scheme: light)" srcset="docs/banner-light.webp">
   <img alt="fritz – CLI + MCP for your FRITZ!Box" src="docs/banner-light.webp">
 </picture>
 
