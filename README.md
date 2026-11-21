@@ -14,10 +14,12 @@
 A command line tool and MCP server that lets you and your AI agents read the
 status and settings of a FRITZ!Box router.
 
+> [!NOTE]
 > **Unofficial.** This project is not affiliated with, endorsed by or supported
 > by FRITZ! GmbH (formerly AVM). FRITZ! and FRITZ!Box are trademarks of
 > FRITZ! GmbH.
 
+> [!WARNING]
 > **Work in progress.** Nothing is released yet. The first goal is read-only
 > access over TR-064. Changing settings will come later, behind several
 > explicit opt-ins.
