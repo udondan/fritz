@@ -6,6 +6,8 @@
   <img alt="fritz – CLI + MCP for your FRITZ!Box" src="docs/banner-light.webp">
 </picture>
 
+[![Release](https://img.shields.io/github/v/release/udondan/fritz?filter=fritz-v*&label=release)](https://github.com/udondan/fritz/releases/latest)
+[![Docker](https://img.shields.io/docker/v/udondan/fritz?sort=semver&label=docker)](https://hub.docker.com/r/udondan/fritz)
 [![CI](https://github.com/udondan/fritz/actions/workflows/test.yml/badge.svg?branch=main)](https://github.com/udondan/fritz/actions/workflows/test.yml)
 [![codecov](https://codecov.io/gh/udondan/fritz/graph/badge.svg)](https://codecov.io/gh/udondan/fritz)
 [![Maintainability](https://qlty.sh/gh/udondan/projects/fritz/maintainability.svg)](https://qlty.sh/gh/udondan/projects/fritz)
@@ -51,12 +53,35 @@ cosign verify udondan/fritz \
 
 ## Crates
 
-| Crate                              | Purpose                                                                |
-| ---------------------------------- | ---------------------------------------------------------------------- |
-| [`tr064`](crates/tr064)            | Vendor-neutral TR-064 (UPnP/SOAP) client library                       |
-| [`fritz-core`](crates/fritz-core)  | FRITZ!-specific logic: login, Smart Home API, policy, redaction        |
-| [`fritz-sim`](crates/fritz-sim)    | Fake FRITZ!Box for tests, built from recorded fixtures                 |
-| [`fritz`](crates/fritz)            | The `fritz` binary: CLI and `fritz mcp`                                |
+| Crate | Purpose | Version |
+| --- | --- | --- |
+| [`tr064`](crates/tr064) | Vendor-neutral TR-064 (UPnP/SOAP) client library | [![tr064 on crates.io][tr064-crate-badge]][tr064-crate] [![tr064 on docs.rs][tr064-docs-badge]][tr064-docs] [![tr064 release][tr064-release-badge]][tr064-release] |
+| [`fritz-core`](crates/fritz-core) | FRITZ!-specific logic: login, Smart Home API, policy, redaction | [![fritz-core on crates.io][fritz-core-crate-badge]][fritz-core-crate] [![fritz-core on docs.rs][fritz-core-docs-badge]][fritz-core-docs] [![fritz-core release][fritz-core-release-badge]][fritz-core-release] |
+| [`fritz-sim`](crates/fritz-sim) | Fake FRITZ!Box for tests, built from recorded fixtures | [![fritz-sim on crates.io][fritz-sim-crate-badge]][fritz-sim-crate] [![fritz-sim on docs.rs][fritz-sim-docs-badge]][fritz-sim-docs] [![fritz-sim release][fritz-sim-release-badge]][fritz-sim-release] |
+| [`fritz`](crates/fritz) | The `fritz` binary: CLI and `fritz mcp` | [![fritz on crates.io][fritz-crate-badge]][fritz-crate] [![fritz release][fritz-release-badge]][fritz-release] |
+
+[tr064-crate-badge]: https://img.shields.io/crates/v/tr064?label=crates.io
+[tr064-crate]: https://crates.io/crates/tr064
+[tr064-docs-badge]: https://img.shields.io/docsrs/tr064
+[tr064-docs]: https://docs.rs/tr064
+[tr064-release-badge]: https://img.shields.io/github/v/release/udondan/fritz?filter=tr064-v*&label=release
+[tr064-release]: https://github.com/udondan/fritz/releases?q=tr064-v&expanded=true
+[fritz-core-crate-badge]: https://img.shields.io/crates/v/fritz-core?label=crates.io
+[fritz-core-crate]: https://crates.io/crates/fritz-core
+[fritz-core-docs-badge]: https://img.shields.io/docsrs/fritz-core
+[fritz-core-docs]: https://docs.rs/fritz-core
+[fritz-core-release-badge]: https://img.shields.io/github/v/release/udondan/fritz?filter=fritz-core-v*&label=release
+[fritz-core-release]: https://github.com/udondan/fritz/releases?q=fritz-core-v&expanded=true
+[fritz-sim-crate-badge]: https://img.shields.io/crates/v/fritz-sim?label=crates.io
+[fritz-sim-crate]: https://crates.io/crates/fritz-sim
+[fritz-sim-docs-badge]: https://img.shields.io/docsrs/fritz-sim
+[fritz-sim-docs]: https://docs.rs/fritz-sim
+[fritz-sim-release-badge]: https://img.shields.io/github/v/release/udondan/fritz?filter=fritz-sim-v*&label=release
+[fritz-sim-release]: https://github.com/udondan/fritz/releases?q=fritz-sim-v&expanded=true
+[fritz-crate-badge]: https://img.shields.io/crates/v/fritz?label=crates.io
+[fritz-crate]: https://crates.io/crates/fritz
+[fritz-release-badge]: https://img.shields.io/github/v/release/udondan/fritz?filter=fritz-v*&label=release
+[fritz-release]: https://github.com/udondan/fritz/releases?q=fritz-v&expanded=true
 
 ## MCP server
 
