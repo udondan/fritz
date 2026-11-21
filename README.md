@@ -1,5 +1,10 @@
 # fritz
 
+[![CI](https://github.com/udondan/fritz/actions/workflows/test.yml/badge.svg?branch=main)](https://github.com/udondan/fritz/actions/workflows/test.yml)
+[![codecov](https://codecov.io/gh/udondan/fritz/graph/badge.svg)](https://codecov.io/gh/udondan/fritz)
+[![Maintainability](https://qlty.sh/gh/udondan/projects/fritz/maintainability.svg)](https://qlty.sh/gh/udondan/projects/fritz)
+[![License](https://img.shields.io/github/license/udondan/fritz)](LICENSE)
+
 A command line tool and MCP server that lets you and your AI agents read the
 status and settings of a FRITZ!Box router.
 
