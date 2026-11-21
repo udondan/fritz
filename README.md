@@ -1,12 +1,25 @@
 # fritz
 
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/banner-dark.webp">
+  <source media="(prefers-color-scheme: light)" srcset="docs/banner-light.webp">
+  <img alt="fritz – CLI + MCP for your FRITZ!Box" src="docs/banner-light.webp">
+</picture>
+
+[![CI](https://github.com/udondan/fritz/actions/workflows/test.yml/badge.svg?branch=main)](https://github.com/udondan/fritz/actions/workflows/test.yml)
+[![codecov](https://codecov.io/gh/udondan/fritz/graph/badge.svg)](https://codecov.io/gh/udondan/fritz)
+[![Maintainability](https://qlty.sh/gh/udondan/projects/fritz/maintainability.svg)](https://qlty.sh/gh/udondan/projects/fritz)
+[![License](https://img.shields.io/github/license/udondan/fritz)](LICENSE)
+
 A command line tool and MCP server that lets you and your AI agents read the
 status and settings of a FRITZ!Box router.
 
+> [!NOTE]
 > **Unofficial.** This project is not affiliated with, endorsed by or supported
 > by FRITZ! GmbH (formerly AVM). FRITZ! and FRITZ!Box are trademarks of
 > FRITZ! GmbH.
 
+> [!WARNING]
 > **Work in progress.** Nothing is released yet. The first goal is read-only
 > access over TR-064. Changing settings will come later, behind several
 > explicit opt-ins.
@@ -114,3 +127,10 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
 ## License
 
 [Apache-2.0](LICENSE)
+
+## Disclaimer
+
+This is an unofficial, independent open source project. It is not affiliated
+with FRITZ! GmbH (formerly AVM). FRITZ! and FRITZ!Box are trademarks of
+FRITZ! GmbH. The names are only used to describe compatibility. Use this tool
+at your own risk. Changing router settings can cut off your network access.
