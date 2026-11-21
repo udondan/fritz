@@ -1,0 +1,26 @@
+---
+name: Release Please
+
+# Opens the release pull request and, once it is merged, creates the tags and
+# draft releases. Releases in this repository are immutable once published, so
+# they start as drafts; the tags start the Publish workflow, which attaches
+# the binaries and publishes the releases.
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+permissions: {}
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      # Runs with a personal token: tags created with the GITHUB_TOKEN would
+      # not start the Publish workflow.
+      - uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5.0.0
+        with:
+          token: ${{ secrets.OVERRIDE_TOKEN }}
