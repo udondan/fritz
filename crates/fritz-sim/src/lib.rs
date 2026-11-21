@@ -62,7 +62,7 @@ mod tls;
 mod web;
 
 use device::{Device, Fault, Hooks, short_id};
-pub use fixture::{Answer, Error, FIXTURES, Fixture};
+pub use fixture::{Answer, Error, Fixture};
 use tls::TlsListener;
 use web::Web;
 

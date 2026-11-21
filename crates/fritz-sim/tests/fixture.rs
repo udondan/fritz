@@ -3,7 +3,7 @@
 use std::fs;
 use std::path::Path;
 
-use fritz_sim::{Answer, Error, FIXTURES, Fixture, Sim};
+use fritz_sim::{Answer, Error, Fixture, Sim};
 
 const FIXTURE: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/fixtures/fritzbox-7690/8.25");
 
@@ -182,19 +182,27 @@ async fn unrecorded_getters_answer_from_the_state() {
 
 #[test]
 fn loads_the_bundled_fixtures() {
-    let names = Fixture::bundled_names().unwrap();
+    let names = Fixture::bundled_names();
     assert!(names.iter().any(|n| n == "fritzbox-7690/8.25"), "{names:?}");
     for name in &names {
-        assert!(
-            Path::new(FIXTURES)
-                .join(name)
-                .join("tr64desc.xml")
-                .is_file()
-        );
         Fixture::bundled(name).unwrap();
     }
-    assert!(matches!(
-        Fixture::bundled("fritzbox-0000/0.0"),
-        Err(Error::Io { .. })
-    ));
+    // The embedded fixture is the one of the files.
+    let bundled = Fixture::bundled("fritzbox-7690/8.25").unwrap();
+    let loaded = Fixture::load(FIXTURE).unwrap();
+    assert_eq!(format!("{bundled:?}").len(), format!("{loaded:?}").len());
+    assert_eq!(
+        bundled.answer("DeviceInfo1", "GetInfo", None),
+        loaded.answer("DeviceInfo1", "GetInfo", None)
+    );
+    for name in [
+        "fritzbox-0000/0.0",
+        "fritzbox-7690",
+        "fritzbox-7690/8.25/scpd",
+    ] {
+        assert!(
+            matches!(Fixture::bundled(name), Err(Error::Unknown(n)) if n == name),
+            "{name}"
+        );
+    }
 }

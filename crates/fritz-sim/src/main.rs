@@ -39,7 +39,7 @@ struct Args {
 async fn main() -> anyhow::Result<()> {
     let args = Args::parse();
     if args.list {
-        for name in Fixture::bundled_names()? {
+        for name in Fixture::bundled_names() {
             println!("{name}");
         }
         return Ok(());
@@ -60,11 +60,13 @@ async fn main() -> anyhow::Result<()> {
     Ok(())
 }
 
-/// Loads the fixture in a directory, or else the bundled one of the name.
+/// Loads the bundled fixture of the name, unless a directory has that name,
+/// or else the fixture in the directory.
 fn load(fixture: &Path) -> Result<Fixture, fritz_sim::Error> {
-    if fixture.is_dir() {
-        Fixture::load(fixture)
+    let name = fixture.to_string_lossy();
+    if !fixture.is_dir() && Fixture::bundled_names().iter().any(|n| *n == name) {
+        Fixture::bundled(&name)
     } else {
-        Fixture::bundled(&fixture.to_string_lossy())
+        Fixture::load(fixture)
     }
 }
