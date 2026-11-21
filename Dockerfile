@@ -1,5 +1,9 @@
-# Builds a static fritz binary and runs it on Alpine.
-FROM rust:1.100-alpine AS builder
+# Runs a static fritz binary on Alpine. By default it is built from the source;
+# releases pass `--build-arg BINARY=prebuilt` and copy the musl binaries of
+# the release from dist/<arch>/fritz, so no Rust is compiled under emulation.
+ARG BINARY=source
+
+FROM rust:1.100-alpine AS source
 
 # ring needs a C compiler and the musl headers.
 RUN apk add --no-cache musl-dev
@@ -10,6 +14,15 @@ RUN cargo build --release --locked -p fritz \
     && cp target/release/fritz /usr/local/bin/fritz
 
 
+FROM scratch AS prebuilt
+ARG TARGETARCH
+COPY dist/${TARGETARCH}/fritz /usr/local/bin/fritz
+
+
+# BuildKit only builds the stage that is used.
+FROM ${BINARY} AS binary
+
+
 FROM alpine:3.24
 
 LABEL com.docker.desktop.mcp="true"
@@ -17,7 +30,7 @@ LABEL com.docker.desktop.mcp.name="fritz"
 
 # apk upgrade pulls fixes for Alpine packages released after the base image.
 RUN apk upgrade --no-cache && adduser -D -H -u 10001 fritz
-COPY --from=builder /usr/local/bin/fritz /usr/local/bin/fritz
+COPY --from=binary /usr/local/bin/fritz /usr/local/bin/fritz
 USER 10001
 
 # A container has no keychain: the password comes from FRITZ_PASSWORD, the

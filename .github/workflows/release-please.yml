@@ -1,0 +1,51 @@
+---
+name: Release Please
+
+# Opens the release pull request and, once it is merged, creates the tags and
+# draft releases. Releases in this repository are immutable once published, so
+# they start as drafts; the tags start the Publish workflow, which attaches
+# the binaries and publishes the releases.
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+permissions: {}
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      # Runs with a personal token: tags created with the GITHUB_TOKEN would
+      # not start the Publish workflow, and commits pushed with it would not
+      # start the checks of the release pull request.
+      - id: release
+        uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5.0.0
+        with:
+          token: ${{ secrets.OVERRIDE_TOKEN }}
+
+      # Release Please bumps the versions in the crate manifests only. The
+      # requirements in the root [workspace.dependencies] and Cargo.lock
+      # follow in a commit on the release pull request.
+      - if: steps.release.outputs.pr
+        uses: actions/checkout@v7
+        with: # zizmor: ignore[artipacked] pushes to the release pull request
+          ref: ${{ fromJSON(steps.release.outputs.pr).headBranchName }}
+          token: ${{ secrets.OVERRIDE_TOKEN }}
+
+      - if: steps.release.outputs.pr
+        name: Sync the workspace versions
+        run: |
+          rustup update stable
+          rustup default stable
+          bash .github/scripts/sync-workspace-versions.sh
+          if git diff --quiet; then
+            exit 0
+          fi
+          git add Cargo.toml Cargo.lock
+          git -c user.name=udondan -c user.email=6443408+udondan@users.noreply.github.com \
+            commit -m "chore: sync the workspace versions"
+          git push

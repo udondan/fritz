@@ -1,0 +1,39 @@
+{
+  "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
+  "release-type": "rust",
+  "bootstrap-sha": "5fba022bced39b11089f1eca5e8f45793be88fda",
+  "bump-minor-pre-major": true,
+  "bump-patch-for-minor-pre-major": true,
+  "draft": true,
+  "force-tag-creation": true,
+  "prerelease": false,
+  "changelog-sections": [
+    { "type": "feat", "section": "Features" },
+    { "type": "feature", "section": "Features" },
+    { "type": "fix", "section": "Bug Fixes" },
+    { "type": "perf", "section": "Performance Improvements" },
+    { "type": "revert", "section": "Reverts" },
+    { "type": "build", "scope": "deps", "section": "Dependencies" },
+    { "type": "deps", "section": "Dependencies", "hidden": true },
+    { "type": "docs", "section": "Documentation", "hidden": true },
+    { "type": "chore", "section": "Miscellaneous Chores", "hidden": true },
+    { "type": "style", "section": "Styles", "hidden": true },
+    { "type": "refactor", "section": "Code Refactoring", "hidden": true },
+    { "type": "test", "section": "Tests", "hidden": true },
+    { "type": "build", "section": "Build System", "hidden": true },
+    { "type": "ci", "section": "Continuous Integration", "hidden": true }
+  ],
+  "plugins": [
+    {
+      "type": "linked-versions",
+      "groupName": "fritz",
+      "components": ["fritz", "fritz-core", "fritz-sim"]
+    }
+  ],
+  "packages": {
+    "crates/tr064": { "component": "tr064" },
+    "crates/fritz-core": { "component": "fritz-core" },
+    "crates/fritz-sim": { "component": "fritz-sim" },
+    "crates/fritz": { "component": "fritz" }
+  }
+}
