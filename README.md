@@ -20,9 +20,15 @@ status and settings of a FRITZ!Box router.
 > FRITZ! GmbH.
 
 > [!WARNING]
-> **Work in progress.** Nothing is released yet. The first goal is read-only
-> access over TR-064. Changing settings will come later, behind several
-> explicit opt-ins.
+> **Early release.** Reading works over TR-064 and the Smart Home REST API.
+> Released builds cannot change anything; changing settings needs the cargo
+> feature `write` and several explicit opt-ins (see [SECURITY.md](SECURITY.md)).
+
+## Installation
+
+```sh
+cargo install fritz
+```
 
 ## Crates
 

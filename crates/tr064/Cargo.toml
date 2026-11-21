@@ -1,6 +1,6 @@
 [package]
 name = "tr064"
-version = "0.1.0"
+version = "0.1.1"
 description = "Vendor-neutral client for the TR-064 (UPnP/SOAP) device management protocol"
 keywords = ["tr-064", "upnp", "soap", "router"]
 categories = ["network-programming", "api-bindings"]
