@@ -1,5 +1,5 @@
 # Builds a static fritz binary and runs it on Alpine.
-FROM rust:1.99-alpine AS builder
+FROM rust:1.100-alpine AS builder
 
 # ring needs a C compiler and the musl headers.
 RUN apk add --no-cache musl-dev
