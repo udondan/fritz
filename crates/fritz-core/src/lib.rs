@@ -26,3 +26,8 @@ pub mod settings;
 pub mod smarthome;
 pub mod status;
 pub mod telephony;
+
+// Compiles the example of the README.
+#[cfg(doctest)]
+#[doc = include_str!("../README.md")]
+struct ReadmeDoctests;
