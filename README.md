@@ -1,9 +1,9 @@
 # fritz
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/banner-dark.webp">
-  <source media="(prefers-color-scheme: light)" srcset="docs/banner-light.webp">
-  <img alt="fritz – CLI + MCP for your FRITZ!Box" src="docs/banner-light.webp">
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/udondan/fritz/main/docs/banner-dark.webp">
+  <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/udondan/fritz/main/docs/banner-light.webp">
+  <img alt="fritz – CLI + MCP for your FRITZ!Box" src="https://raw.githubusercontent.com/udondan/fritz/main/docs/banner-light.webp">
 </picture>
 
 [![Release](https://img.shields.io/github/v/release/udondan/fritz?filter=fritz-v*&label=release)](https://github.com/udondan/fritz/releases/latest)
@@ -11,7 +11,7 @@
 [![CI](https://github.com/udondan/fritz/actions/workflows/test.yml/badge.svg?branch=main)](https://github.com/udondan/fritz/actions/workflows/test.yml)
 [![codecov](https://codecov.io/gh/udondan/fritz/graph/badge.svg)](https://codecov.io/gh/udondan/fritz)
 [![Maintainability](https://qlty.sh/gh/udondan/projects/fritz/maintainability.svg)](https://qlty.sh/gh/udondan/projects/fritz)
-[![License](https://img.shields.io/github/license/udondan/fritz)](LICENSE)
+[![License](https://img.shields.io/github/license/udondan/fritz)](https://github.com/udondan/fritz/blob/main/LICENSE)
 
 A command line tool and MCP server that lets you and your AI agents read the
 status and settings of a FRITZ!Box router.
@@ -24,7 +24,7 @@ status and settings of a FRITZ!Box router.
 > [!WARNING]
 > **Early release.** Reading works over TR-064 and the Smart Home REST API.
 > Released builds cannot change anything; changing settings needs the cargo
-> feature `write` and several explicit opt-ins (see [SECURITY.md](SECURITY.md)).
+> feature `write` and several explicit opt-ins (see [SECURITY.md](https://github.com/udondan/fritz/blob/main/SECURITY.md)).
 
 ## Installation
 
@@ -55,10 +55,10 @@ cosign verify udondan/fritz \
 
 | Crate | crates.io | docs.rs | Purpose |
 | --- | --- | --- | --- |
-| [`tr064`](crates/tr064) | [![tr064 on crates.io][tr064-crate-badge]][tr064-crate] | [![tr064 on docs.rs][tr064-docs-badge]][tr064-docs] | Vendor-neutral TR-064 (UPnP/SOAP) client |
-| [`fritz-core`](crates/fritz-core) | [![fritz-core on crates.io][fritz-core-crate-badge]][fritz-core-crate] | [![fritz-core on docs.rs][fritz-core-docs-badge]][fritz-core-docs] | FRITZ!-specific logic: login, Smart Home API, policy, redaction |
-| [`fritz-sim`](crates/fritz-sim) | [![fritz-sim on crates.io][fritz-sim-crate-badge]][fritz-sim-crate] | [![fritz-sim on docs.rs][fritz-sim-docs-badge]][fritz-sim-docs] | Fake FRITZ!Box for tests, built from recorded fixtures |
-| [`fritz`](crates/fritz) | [![fritz on crates.io][fritz-crate-badge]][fritz-crate] | – | The binary: CLI and `fritz mcp` |
+| [`tr064`](https://github.com/udondan/fritz/tree/main/crates/tr064) | [![tr064 on crates.io][tr064-crate-badge]][tr064-crate] | [![tr064 on docs.rs][tr064-docs-badge]][tr064-docs] | Vendor-neutral TR-064 (UPnP/SOAP) client |
+| [`fritz-core`](https://github.com/udondan/fritz/tree/main/crates/fritz-core) | [![fritz-core on crates.io][fritz-core-crate-badge]][fritz-core-crate] | [![fritz-core on docs.rs][fritz-core-docs-badge]][fritz-core-docs] | FRITZ!-specific logic: login, Smart Home API, policy, redaction |
+| [`fritz-sim`](https://github.com/udondan/fritz/tree/main/crates/fritz-sim) | [![fritz-sim on crates.io][fritz-sim-crate-badge]][fritz-sim-crate] | [![fritz-sim on docs.rs][fritz-sim-docs-badge]][fritz-sim-docs] | Fake FRITZ!Box for tests, built from recorded fixtures |
+| [`fritz`](https://github.com/udondan/fritz/tree/main/crates/fritz) | [![fritz on crates.io][fritz-crate-badge]][fritz-crate] | – | The binary: CLI and `fritz mcp` |
 
 [tr064-crate-badge]: https://img.shields.io/crates/v/tr064?label=
 [tr064-crate]: https://crates.io/crates/tr064
@@ -117,7 +117,7 @@ Errors from the device come back as JSON with a `status` (`denied`,
 `retry_after` in seconds.
 
 Agents that use the CLI instead can load the skill in
-[skills/fritz/SKILL.md](skills/fritz/SKILL.md).
+[skills/fritz/SKILL.md](https://github.com/udondan/fritz/blob/main/skills/fritz/SKILL.md).
 
 ### Docker
 
@@ -134,7 +134,7 @@ docker run --rm -i \
 
 `mise run docker-build` builds the image from source. For the Docker MCP
 Toolkit, `mise run docker` builds it and adds
-[docker-mcp.yml](docker-mcp.yml) to the profile `fritz`. Set the secrets
+[docker-mcp.yml](https://github.com/udondan/fritz/blob/main/docker-mcp.yml) to the profile `fritz`. Set the secrets
 `fritz.host`, `fritz.username`, `fritz.password` and `fritz.fingerprint`
 with `docker mcp secret set`. The container must be able to reach the box.
 
@@ -155,20 +155,20 @@ With `FRITZ_ALLOW_WRITE=1`, `fritz mcp` of such a build also offers
 `fritz_plan_change` and `fritz_apply_change`, which work the same way.
 
 Changes are only made to devices on the allow list, and never to those on the
-deny list. See [SECURITY.md](SECURITY.md#changes) for all checks.
+deny list. See [SECURITY.md](https://github.com/udondan/fritz/blob/main/SECURITY.md#changes) for all checks.
 
 ## Security
 
-`fritz` is read-only by default. See [SECURITY.md](SECURITY.md) for the security
+`fritz` is read-only by default. See [SECURITY.md](https://github.com/udondan/fritz/blob/main/SECURITY.md) for the security
 model and how to report a vulnerability.
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md).
+See [CONTRIBUTING.md](https://github.com/udondan/fritz/blob/main/CONTRIBUTING.md).
 
 ## License
 
-[Apache-2.0](LICENSE)
+[Apache-2.0](https://github.com/udondan/fritz/blob/main/LICENSE)
 
 ## Disclaimer
 

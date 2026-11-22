@@ -2,6 +2,7 @@
 name = "fritz-core"
 version = "0.1.1"
 description = "FRITZ!Box specific logic for the fritz CLI and MCP server (unofficial, not affiliated with FRITZ! GmbH)"
+readme = "README.md"
 keywords = ["fritzbox", "tr-064", "router"]
 categories = ["network-programming"]
 edition.workspace = true
