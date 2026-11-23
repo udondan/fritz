@@ -229,9 +229,14 @@ pub struct Outcome {
     pub side_effects: Vec<SideEffect>,
 }
 
-/// The values the getters of a service return, by getter and output
-/// argument.
-type Snapshot = BTreeMap<(String, String), String>;
+/// What the getters of a service return: the values by getter and output
+/// argument, as they are, and the getters that failed. Never leaves the
+/// crate; side effects show the values [redacted](redact::value).
+#[derive(Debug, Default)]
+struct Snapshot {
+    values: BTreeMap<(String, String), String>,
+    failed: BTreeSet<String>,
+}
 
 /// Plans and applies changes to a device.
 #[derive(Debug)]
@@ -538,14 +543,14 @@ impl Changer {
     /// state variables the inputs of the change refer to. A getter is
     /// called if it only reads and the inputs of the change give all of its
     /// own, like an index; it may return other entries, but the same ones
-    /// before and after.
+    /// before and after. Personal values like the event log are left out.
     async fn snapshot(
         &self,
         checked: &Checked,
         arguments: &[(String, String)],
     ) -> Result<Snapshot, Error> {
         let inputs = inputs(checked, arguments);
-        let mut values = Snapshot::new();
+        let mut snapshot = Snapshot::default();
         for getter in &checked.scpd.actions {
             if policy::classify(&checked.service, getter) != Class::Read {
                 continue;
@@ -560,7 +565,8 @@ impl Changer {
             else {
                 continue;
             };
-            let output = match generic::call(
+            // Unredacted, so that a changed secret shows up as well.
+            let output = match generic::send(
                 &self.client,
                 &checked.service,
                 getter,
@@ -569,7 +575,10 @@ impl Changer {
             .await
             {
                 Ok(output) => output,
-                Err(error) if is_answer(&error) => continue,
+                Err(error) if is_answer(&error) => {
+                    snapshot.failed.insert(getter.name.clone());
+                    continue;
+                }
                 Err(error) => return Err(error.into()),
             };
             for (name, value) in output {
@@ -577,12 +586,12 @@ impl Changer {
                     .outputs()
                     .find(|o| o.name == name)
                     .is_none_or(|o| inputs.contains_key(o.related_state_variable.as_str()));
-                if !planned {
-                    values.insert((getter.name.clone(), name), value);
+                if !(planned || policy::is_personal_output(&name)) {
+                    snapshot.values.insert((getter.name.clone(), name), value);
                 }
             }
         }
-        Ok(values)
+        Ok(snapshot)
     }
 
     /// Logs a refused change, and returns the reason.
@@ -657,14 +666,24 @@ fn inputs<'a>(
 }
 
 /// The values that differ between `before` and `after`, except those that
-/// already differ between `before` and `again`, read right after it.
+/// already differ between `before` and `again`, read right after it, and
+/// those of getters that failed in any of them.
 fn side_effects(before: &Snapshot, again: &Snapshot, after: &Snapshot) -> Vec<SideEffect> {
-    let keys: BTreeSet<&(String, String)> = before.keys().chain(after.keys()).collect();
+    let snapshots = [before, again, after];
+    let keys: BTreeSet<&(String, String)> =
+        before.values.keys().chain(after.values.keys()).collect();
     keys.into_iter()
-        .filter(|key| before.get(*key) != after.get(*key) && before.get(*key) == again.get(*key))
+        .filter(|(getter, _)| snapshots.iter().all(|s| !s.failed.contains(getter)))
+        .filter(|key| {
+            let [before, again, after] = snapshots.map(|s| s.values.get(*key));
+            before != after && before == again
+        })
         .map(|key| {
             let (getter, argument) = key;
-            let shown = |snapshot: &Snapshot| snapshot.get(key).map(|v| redact::value(argument, v));
+            let shown = |snapshot: &Snapshot| {
+                let value = snapshot.values.get(key)?;
+                Some(redact::value(argument, value))
+            };
             SideEffect {
                 getter: getter.clone(),
                 argument: argument.clone(),
@@ -837,30 +856,38 @@ mod tests {
 
     #[test]
     fn finds_side_effects() {
-        let snapshot = |values: &[(&str, &str)]| -> Snapshot {
-            values
+        let snapshot = |values: &[(&str, &str, &str)]| Snapshot {
+            values: values
                 .iter()
-                .map(|(n, v)| (("GetInfo".to_owned(), (*n).to_owned()), (*v).to_owned()))
-                .collect()
+                .map(|(g, n, v)| (((*g).to_owned(), (*n).to_owned()), (*v).to_owned()))
+                .collect(),
+            failed: BTreeSet::new(),
         };
         let before = snapshot(&[
-            ("NewChannel", "6"),
-            ("NewCount", "1"),
-            ("NewKeep", "x"),
-            ("NewGone", "y"),
+            ("GetInfo", "NewChannel", "6"),
+            ("GetInfo", "NewCount", "1"),
+            ("GetInfo", "NewKeep", "x"),
+            ("GetInfo", "NewGone", "y"),
+            ("GetInfo", "NewKey", "old"),
+            ("GetStatus", "NewStatus", "Up"),
         ]);
         let again = snapshot(&[
-            ("NewChannel", "6"),
-            ("NewCount", "2"),
-            ("NewKeep", "x"),
-            ("NewGone", "y"),
+            ("GetInfo", "NewChannel", "6"),
+            ("GetInfo", "NewCount", "2"),
+            ("GetInfo", "NewKeep", "x"),
+            ("GetInfo", "NewGone", "y"),
+            ("GetInfo", "NewKey", "old"),
+            ("GetStatus", "NewStatus", "Up"),
         ]);
-        let after = snapshot(&[
-            ("NewChannel", "1"),
-            ("NewCount", "3"),
-            ("NewKeep", "x"),
-            ("NewPassword", "secret"),
+        let mut after = snapshot(&[
+            ("GetInfo", "NewChannel", "1"),
+            ("GetInfo", "NewCount", "3"),
+            ("GetInfo", "NewKeep", "x"),
+            ("GetInfo", "NewPassword", "secret"),
+            ("GetInfo", "NewKey", "new"),
         ]);
+        // A getter that fails afterwards changed nothing.
+        after.failed.insert("GetStatus".to_owned());
         let effects = side_effects(&before, &again, &after);
         let effect = |argument: &str, before: Option<&str>, after: Option<&str>| SideEffect {
             getter: "GetInfo".to_owned(),
@@ -873,6 +900,7 @@ mod tests {
             [
                 effect("NewChannel", Some("6"), Some("1")),
                 effect("NewGone", Some("y"), None),
+                effect("NewKey", Some(redact::HIDDEN), Some(redact::HIDDEN)),
                 effect("NewPassword", None, Some(redact::HIDDEN)),
             ]
         );

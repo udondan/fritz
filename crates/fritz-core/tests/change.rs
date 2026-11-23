@@ -528,6 +528,42 @@ async fn reports_side_effects() {
 }
 
 #[tokio::test]
+async fn leaves_personal_values_out_of_side_effects() {
+    let setup = Setup::new().await;
+    let all = Permit {
+        write: true,
+        critical: true,
+    };
+    let mut changer = setup.changer(all, allow());
+    let code = vec![(
+        "NewProvisioningCode".to_owned(),
+        "000.000.000.000".to_owned(),
+    )];
+    for (variable, value) in [("DeviceLog", "call from 0301234567"), ("UpTime", "1")] {
+        setup.sim.inject(Injection::side_effect(
+            "DeviceInfo1",
+            "SetProvisioningCode",
+            variable,
+            value,
+        ));
+    }
+    let plan = changer
+        .plan("DeviceInfo1", "SetProvisioningCode", &code)
+        .await
+        .unwrap();
+    let outcome = changer
+        .apply("DeviceInfo1", "SetProvisioningCode", &code, &plan.token)
+        .await
+        .unwrap();
+    let arguments: Vec<_> = outcome
+        .side_effects
+        .iter()
+        .map(|e| e.argument.as_str())
+        .collect();
+    assert_eq!(arguments, ["NewUpTime"]);
+}
+
+#[tokio::test]
 async fn reads_nothing_when_the_snapshot_fails() {
     let setup = Setup::new().await;
     let mut changer = setup.allowed();
