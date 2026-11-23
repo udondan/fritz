@@ -26,6 +26,30 @@ status and settings of a FRITZ!Box router.
 > Released builds cannot change anything; changing settings needs the cargo
 > feature `write` and several explicit opt-ins (see [SECURITY.md](https://github.com/udondan/fritz/blob/main/SECURITY.md)).
 
+## Contents
+
+- [Installation](#installation)
+- [Usage](#usage)
+  - [Set up](#set-up)
+  - [Status and internet](#status-and-internet)
+  - [Hosts and mesh](#hosts-and-mesh)
+  - [Wireless networks](#wireless-networks)
+  - [Smart Home](#smart-home)
+  - [Ports, telephony and capabilities](#ports-telephony-and-capabilities)
+  - [Settings](#settings)
+  - [Calls, phonebook and event log](#calls-phonebook-and-event-log)
+  - [Any TR-064 action](#any-tr-064-action)
+  - [JSON output](#json-output)
+  - [Several devices and the environment](#several-devices-and-the-environment)
+- [MCP server](#mcp-server)
+  - [Docker](#docker)
+- [Changes](#changes)
+- [Crates](#crates)
+- [Security](#security)
+- [Contributing](#contributing)
+- [License](#license)
+- [Disclaimer](#disclaimer)
+
 ## Installation
 
 ```sh
@@ -51,29 +75,272 @@ cosign verify udondan/fritz \
   --certificate-oidc-issuer https://token.actions.githubusercontent.com
 ```
 
-## Crates
+## Usage
 
-| Crate | crates.io | docs.rs | Purpose |
-| --- | --- | --- | --- |
-| [`tr064`](https://github.com/udondan/fritz/tree/main/crates/tr064) | [![tr064 on crates.io][tr064-crate-badge]][tr064-crate] | [![tr064 on docs.rs][tr064-docs-badge]][tr064-docs] | Vendor-neutral TR-064 (UPnP/SOAP) client |
-| [`fritz-core`](https://github.com/udondan/fritz/tree/main/crates/fritz-core) | [![fritz-core on crates.io][fritz-core-crate-badge]][fritz-core-crate] | [![fritz-core on docs.rs][fritz-core-docs-badge]][fritz-core-docs] | FRITZ!-specific logic: login, Smart Home API, policy, redaction |
-| [`fritz-sim`](https://github.com/udondan/fritz/tree/main/crates/fritz-sim) | [![fritz-sim on crates.io][fritz-sim-crate-badge]][fritz-sim-crate] | [![fritz-sim on docs.rs][fritz-sim-docs-badge]][fritz-sim-docs] | Fake FRITZ!Box for tests, built from recorded fixtures |
-| [`fritz`](https://github.com/udondan/fritz/tree/main/crates/fritz) | [![fritz on crates.io][fritz-crate-badge]][fritz-crate] | – | The binary: CLI and `fritz mcp` |
+The examples show made-up data. Every command takes `--output json` (see
+[JSON output](#json-output)) and `--help`.
 
-[tr064-crate-badge]: https://img.shields.io/crates/v/tr064?label=
-[tr064-crate]: https://crates.io/crates/tr064
-[tr064-docs-badge]: https://img.shields.io/docsrs/tr064?label=
-[tr064-docs]: https://docs.rs/tr064
-[fritz-core-crate-badge]: https://img.shields.io/crates/v/fritz-core?label=
-[fritz-core-crate]: https://crates.io/crates/fritz-core
-[fritz-core-docs-badge]: https://img.shields.io/docsrs/fritz-core?label=
-[fritz-core-docs]: https://docs.rs/fritz-core
-[fritz-sim-crate-badge]: https://img.shields.io/crates/v/fritz-sim?label=
-[fritz-sim-crate]: https://crates.io/crates/fritz-sim
-[fritz-sim-docs-badge]: https://img.shields.io/docsrs/fritz-sim?label=
-[fritz-sim-docs]: https://docs.rs/fritz-sim
-[fritz-crate-badge]: https://img.shields.io/crates/v/fritz?label=
-[fritz-crate]: https://crates.io/crates/fritz
+### Set up
+
+`fritz` logs in with a user of its own. [docs/box-setup.md](https://github.com/udondan/fritz/blob/main/docs/box-setup.md)
+shows how to create one on the FRITZ!Box with no more rights than needed.
+Then save the address and the user to a profile:
+
+```console
+$ fritz config init --host 192.168.178.1 --user agent
+saved the profile default to /home/me/.config/fritz/config.toml
+```
+
+`fritz` talks to the box over HTTPS on port 49443. The box has a self-signed
+certificate, so trust it once; `fritz` then refuses any other certificate.
+Compare the fingerprint with the certificate in the web interface of the box:
+
+```console
+$ fritz tls trust
+https://192.168.178.1:49443/ presents the certificate
+  3F:A1:77:0C:5D:E2:94:1B:C8:60:2E:7A:D3:19:B4:8F:06:CA:51:E9:72:3D:8B:A4:1F:C0:66:95:2E:B7:D8:4C
+Compare it with the certificate in the web interface of the device.
+Trust it? [y/N] y
+the profile default trusts the certificate 3F:A1:77:0C:…:D8:4C of https://192.168.178.1:49443/
+```
+
+Store the password in the keychain of the system (Keychain on macOS,
+Credential Manager on Windows, Secret Service on Linux):
+
+```console
+$ fritz auth login
+Password of agent@192.168.178.1:
+stored the password of agent@192.168.178.1 in the keychain
+$ fritz config show
+config       /home/me/.config/fritz/config.toml
+profile      default
+address      https://192.168.178.1:49443/
+user         agent
+certificate  3F:A1:77:0C:5D:E2:94:1B:C8:60:2E:7A:D3:19:B4:8F:06:CA:51:E9:72:3D:8B:A4:1F:C0:66:95:2E:B7:D8:4C
+password     from the keychain
+```
+
+| Command | Does |
+| --- | --- |
+| `fritz config init` / `show` | Save `--host`, `--user` and `--fingerprint` to a profile / show the settings in effect |
+| `fritz tls fingerprint` / `trust` / `forget` | Print / trust / forget the certificate of the device |
+| `fritz auth login` / `logout` / `status` | Store / remove the password in the keychain / tell where it comes from |
+
+FRITZ!Repeaters have only a password: leave out `--user` for them.
+
+### Status and internet
+
+```console
+$ fritz overview
+Model       FRITZ!Box 7690
+Firmware    285.08.25
+Uptime      8d 19h 13m
+Update      none
+Two-factor  on
+Internet    Connected over DSL (link Up), 2001:db8::1, for 9h 36m
+Rights      BoxAdmin: readwrite, Phone: readwrite, HomeAuto: readwrite
+
+$ fritz internet
+Status         Connected
+Access         DSL
+Link           Up
+Provider       Example ISP
+Address        2001:db8::1
+DNS servers    2001:db8::2, 2001:db8::3
+Connected for  9h 36m
+Link speed     ↓ 276.3 Mbit/s  ↑ 45.9 Mbit/s
+DSL            Up
+DSL rate       ↓ 274.8 Mbit/s  ↑ 45.9 Mbit/s
+DSL maximum    ↓ 276.3 Mbit/s  ↑ 45.9 Mbit/s
+Noise margin   ↓ 7.0 dB  ↑ 8.0 dB
+Attenuation    ↓ 14.0 dB  ↑ 10.0 dB
+```
+
+### Hosts and mesh
+
+`fritz hosts` lists every device the box knows, `--active` only those
+connected now:
+
+```console
+$ fritz hosts --active
+NAME    IP              MAC                ACTIVE  INTERFACE
+laptop  192.168.178.20  02:00:5E:10:00:01  yes     802.11
+phone   192.168.178.21  02:00:5E:10:00:02  yes     802.11
+nas     192.168.178.10  02:00:5E:10:00:03  yes     Ethernet
+tv      192.168.178.30  02:00:5E:10:00:04  yes     Ethernet
+```
+
+```console
+$ fritz mesh
+NODE      ROLE    MODEL                   MAC
+fritzbox  master  FRITZ!Box 7690          02:00:5E:10:00:A0
+repeater  slave   FRITZ!Repeater 1200 AX  02:00:5E:10:00:A1
+
+FROM      TO        TYPE  INTERFACE  STATE      RATE
+fritzbox  repeater  WLAN  AP:5G:0    CONNECTED  ↓ 1201.0 Mbit/s  ↑ 1201.0 Mbit/s
+fritzbox  laptop    WLAN  AP:5G:0    CONNECTED  ↓ 866.7 Mbit/s  ↑ 433.3 Mbit/s
+repeater  tv        LAN   LAN:1      CONNECTED  ↓ 0 kbit/s  ↑ 0 kbit/s
+```
+
+### Wireless networks
+
+```console
+$ fritz wlan
+SERVICE             SSID        BAND     CHANNEL  STANDARD  STATUS    CLIENTS
+WLANConfiguration1  Home        2.4 GHz  6        be        Up        4
+WLANConfiguration2  Home        5 GHz    48       be        Up        11
+WLANConfiguration3  Home-Guest           6                  Disabled  0
+```
+
+### Smart Home
+
+Read through the web interface, on FRITZ!OS 8.20 and later:
+
+```console
+$ fritz smarthome
+NAME         CATEGORY    CONNECTED  SWITCH  TEMPERATURE  TARGET   POWER   ENERGY   BATTERY  OTHER
+coffee       socket      yes        on      21.5 °C               23.4 W  1053 Wh           228.1 V
+living room  thermostat  yes                20.5 °C      21.0 °C                   80%
+hallway      lamp        yes        off                                                     level 25%
+window       sensor      no                                                        10% low  humidity 55%, alert open
+```
+
+### Ports, telephony and capabilities
+
+```console
+$ fritz ports
+UPnP  on
+No port forwardings.
+
+$ fritz telephony
+NUMBER    TYPE   NAME
+03012345  eVoIP
+
+ACCOUNT  NUMBER    REGISTRAR        STATUS
+1        03012345  sip.example.net  registered
+
+ANSWERING MACHINE  NAME  ENABLED
+0                  Home  no
+
+HANDSET  NAME     MODEL         ACTIVE  UPDATE
+1        Kitchen  FRITZ!Fon C5  no      no
+
+$ fritz capabilities
+Features    dsl, wlan, hosts, port_forwarding, upnp, parental_controls, telephony, dect, smarthome, myfritz
+Rights      BoxAdmin: readwrite, Phone: readwrite, HomeAuto: readwrite
+Two-factor  on
+Services    37
+```
+
+### Settings
+
+`fritz settings` reads settings that TR-064 doesn't offer, like DNS, IPv6,
+DHCP and the ports, through the web interface. Secrets are hidden. Without
+arguments it reads the common modules; name modules to read only those:
+
+```console
+$ fritz settings ipv6
+ipv6.dhcpv6d_mode          dhcpv6d_mode_stateless
+ipv6.enabled               1
+ipv6.ip_prefix             2001:db8:1::
+ipv6.ip_prefixlen          64
+ipv6.mtu_override          1492
+ipv6.radv_enabled          1
+ipv6.ulamode               ulamode_dynamic
+```
+
+### Calls, phonebook and event log
+
+These name people and numbers. The CLI shows them to you; `fritz mcp` only
+serves them with `--personal`.
+
+```console
+$ fritz calls --limit 3
+DATE              TYPE      NUMBER        NAME   OWN NUMBER  DEVICE   MINUTES
+2026-11-20 17:40  missed    015712345678         03012345             0
+2026-11-20 09:15  outgoing  03098765      Alice  03012345    Kitchen  12
+2026-11-19 20:01  incoming  03098765      Alice  03012345    Kitchen  65
+
+$ fritz phonebook alice
+PHONEBOOK  NAME   NUMBER        TYPE
+Phonebook  Alice  03098765      home
+Phonebook  Alice  015798765432  mobile
+
+$ fritz log --limit 2
+TIME                 MESSAGE
+2026-11-20 17:40:12  WLAN device logged on (5 GHz), 866 Mbit/s, laptop, IP 192.168.178.20
+2026-11-20 08:02:55  Internet connection established successfully.
+```
+
+### Any TR-064 action
+
+`fritz tr64` reaches every service and action of the device. Listing and
+describing them needs no login. `call` only runs actions that read and
+refuses all others before anything is sent:
+
+```console
+$ fritz tr64 actions WLANConfiguration1
+write     SetEnable
+read      GetInfo
+critical  SetSecurityKeys
+secret    GetSecurityKeys
+…
+
+$ fritz tr64 describe WLANConfiguration1 GetInfo
+GetInfo (read)
+  out  NewEnable    boolean
+  out  NewStatus    string (Up, Disabled)
+  out  NewChannel   ui1
+  out  NewSSID      string
+  …
+
+$ fritz tr64 call WLANConfiguration1 GetInfo
+NewEnable   1
+NewStatus   Up
+NewChannel  6
+NewSSID     Home
+…
+
+$ fritz tr64 call WLANConfiguration1 GetSecurityKeys
+Error: GetSecurityKeys is secret: the name points to a secret; only actions that read are called
+```
+
+Inputs go after the action, like `fritz tr64 call Hosts1 GetGenericHostEntry NewIndex=0`.
+
+### JSON output
+
+The output is a table on a terminal and JSON otherwise, for scripts and
+agents. `--output` picks one:
+
+```console
+$ fritz wlan --output json | jq '.[0]'
+{
+  "service": "WLANConfiguration1",
+  "ssid": "Home",
+  "band": "2.4 GHz",
+  "channel": 6,
+  "standard": "be",
+  "enabled": true,
+  "status": "Up",
+  "clients": 4
+}
+```
+
+### Several devices and the environment
+
+Each device gets a profile; `--profile` picks one, the first is the default:
+
+```sh
+fritz --profile repeater config init --host 192.168.178.4
+fritz --profile repeater tls trust
+fritz --profile repeater auth login
+fritz --profile repeater overview
+```
+
+In scripts and containers, the environment replaces the profile and the
+keychain: `FRITZ_HOST`, `FRITZ_USERNAME`, `FRITZ_PASSWORD` and
+`FRITZ_TLS_FINGERPRINT`. [docs/box-setup.md](https://github.com/udondan/fritz/blob/main/docs/box-setup.md#5-without-a-configuration-file)
+lists all variables.
 
 ## MCP server
 
@@ -160,6 +427,30 @@ With `FRITZ_ALLOW_WRITE=1`, `fritz mcp` of such a build also offers
 
 Changes are only made to devices on the allow list, and never to those on the
 deny list. See [SECURITY.md](https://github.com/udondan/fritz/blob/main/SECURITY.md#changes) for all checks.
+
+## Crates
+
+| Crate | crates.io | docs.rs | Purpose |
+| --- | --- | --- | --- |
+| [`tr064`](https://github.com/udondan/fritz/tree/main/crates/tr064) | [![tr064 on crates.io][tr064-crate-badge]][tr064-crate] | [![tr064 on docs.rs][tr064-docs-badge]][tr064-docs] | Vendor-neutral TR-064 (UPnP/SOAP) client |
+| [`fritz-core`](https://github.com/udondan/fritz/tree/main/crates/fritz-core) | [![fritz-core on crates.io][fritz-core-crate-badge]][fritz-core-crate] | [![fritz-core on docs.rs][fritz-core-docs-badge]][fritz-core-docs] | FRITZ!-specific logic: login, Smart Home API, policy, redaction |
+| [`fritz-sim`](https://github.com/udondan/fritz/tree/main/crates/fritz-sim) | [![fritz-sim on crates.io][fritz-sim-crate-badge]][fritz-sim-crate] | [![fritz-sim on docs.rs][fritz-sim-docs-badge]][fritz-sim-docs] | Fake FRITZ!Box for tests, built from recorded fixtures |
+| [`fritz`](https://github.com/udondan/fritz/tree/main/crates/fritz) | [![fritz on crates.io][fritz-crate-badge]][fritz-crate] | – | The binary: CLI and `fritz mcp` |
+
+[tr064-crate-badge]: https://img.shields.io/crates/v/tr064?label=
+[tr064-crate]: https://crates.io/crates/tr064
+[tr064-docs-badge]: https://img.shields.io/docsrs/tr064?label=
+[tr064-docs]: https://docs.rs/tr064
+[fritz-core-crate-badge]: https://img.shields.io/crates/v/fritz-core?label=
+[fritz-core-crate]: https://crates.io/crates/fritz-core
+[fritz-core-docs-badge]: https://img.shields.io/docsrs/fritz-core?label=
+[fritz-core-docs]: https://docs.rs/fritz-core
+[fritz-sim-crate-badge]: https://img.shields.io/crates/v/fritz-sim?label=
+[fritz-sim-crate]: https://crates.io/crates/fritz-sim
+[fritz-sim-docs-badge]: https://img.shields.io/docsrs/fritz-sim?label=
+[fritz-sim-docs]: https://docs.rs/fritz-sim
+[fritz-crate-badge]: https://img.shields.io/crates/v/fritz?label=
+[fritz-crate]: https://crates.io/crates/fritz
 
 ## Security
 
