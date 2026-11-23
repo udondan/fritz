@@ -15,7 +15,7 @@ use anyhow::{Context as _, bail};
 use reqwest::Url;
 use reqwest::header::{ACCEPT, USER_AGENT};
 use rustls::ClientConfig;
-use rustls_platform_verifier::BuilderVerifierExt as _;
+use rustls_platform_verifier::BuilderVerifierExt;
 use semver::Version;
 use serde::{Deserialize, Serialize};
 
@@ -238,19 +238,19 @@ fn request_error(error: &reqwest::Error, timeout: Duration) -> anyhow::Error {
 /// An HTTP client that trusts the roots of the system and takes the proxy
 /// from `HTTPS_PROXY`, except for loopback addresses.
 fn client(url: &Url, timeout: Duration) -> anyhow::Result<reqwest::Client> {
-    let provider = Arc::new(rustls::crypto::ring::default_provider());
-    let tls = ClientConfig::builder_with_provider(provider)
-        .with_safe_default_protocol_versions()?
-        .with_platform_verifier()?
-        .with_no_client_auth();
     let mut builder = reqwest::Client::builder()
-        .tls_backend_preconfigured(tls)
         .timeout(timeout)
         .https_only(url.scheme() == "https");
     if is_loopback(url) {
         builder = builder.no_proxy();
     }
-    Ok(builder.build()?)
+    let provider = Arc::new(rustls::crypto::ring::default_provider());
+    ClientConfig::builder_with_provider(provider)
+        .with_safe_default_protocol_versions()
+        .and_then(BuilderVerifierExt::with_platform_verifier)
+        .map(|tls| builder.tls_backend_preconfigured(tls.with_no_client_auth()))
+        .map_err(anyhow::Error::from)
+        .and_then(|builder| builder.build().map_err(anyhow::Error::from))
 }
 
 #[cfg(test)]
@@ -258,6 +258,7 @@ mod tests {
     use axum::Router;
     use axum::http::StatusCode;
     use axum::routing::get;
+    use tokio::io::{AsyncReadExt as _, AsyncWriteExt as _};
 
     use super::*;
     use crate::status::tests::text;
@@ -352,6 +353,23 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn tells_when_the_answer_breaks_off() {
+        let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+        let url = format!("http://{}/releases", listener.local_addr().unwrap());
+        tokio::spawn(async move {
+            let (mut stream, _) = listener.accept().await.unwrap();
+            let mut request = [0; 1024];
+            let _ = stream.read(&mut request).await;
+            let head = "HTTP/1.1 200 OK\r\ncontent-length: 100\r\n\r\n[";
+            stream.write_all(head.as_bytes()).await.unwrap();
+        });
+        let error = latest(&Url::parse(&url).unwrap(), TIMEOUT)
+            .await
+            .unwrap_err();
+        assert!(error.to_string().contains("cannot reach GitHub"), "{error}");
+    }
+
+    #[tokio::test]
     async fn gives_up_after_the_timeout() {
         let url = server(StatusCode::OK, "[]".into(), Duration::from_secs(5)).await;
         let error = latest(&url, Duration::from_millis(200)).await.unwrap_err();
@@ -370,6 +388,12 @@ mod tests {
             .await
             .unwrap_err();
         assert!(error.to_string().contains("offline"), "{error}");
+    }
+
+    #[test]
+    fn sets_up_https_clients_without_connecting() {
+        let url = releases_url(None).unwrap();
+        assert!(client(&url, TIMEOUT).is_ok());
     }
 
     #[test]
