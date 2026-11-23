@@ -37,8 +37,11 @@ Cargo workspace:
 - `make hooks`: installs a pre-commit hook with the qlty checks of CI (needs
   `qlty` and `jq`) and a pre-push hook that runs `make coverage`: Codecov
   needs every changed line covered, and `scripts/patch-coverage.py` checks
-  that locally (needs `cargo-llvm-cov`). CI also runs actionlint, shellcheck and zizmor, with the
-  versions in `mise.toml`.
+  that locally. `make coverage` measures in a Linux container (needs Docker),
+  because CI measures on Linux, which counts lines that macOS does not, like
+  error paths. `FRITZ_COVERAGE=native` uses the local `cargo-llvm-cov`
+  instead. Run it before every push. CI also runs actionlint, shellcheck and
+  zizmor, with the versions in `mise.toml`.
 - The MCP tool list is checked against
   `crates/fritz/tests/data/mcp-tools.json`. After changing tools, review the
   difference and rewrite it with

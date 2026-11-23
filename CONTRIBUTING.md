@@ -13,12 +13,21 @@ The pre-commit hook needs [qlty](https://docs.qlty.sh/cli/quickstart) and
 `jq`. Like CI, it blocks a commit on lint findings and on code smells that are
 new compared to `origin/main`.
 
-The pre-push hook runs `make coverage`, which needs
-[cargo-llvm-cov](https://github.com/taiki-e/cargo-llvm-cov) and Python 3. Like
+The pre-push hook runs `make coverage`, which needs Docker and Python 3. Like
 the patch status of Codecov, it blocks a push if a line under `crates/` that
 changed against `origin/main` is executable but no test runs it. It measures
 the working tree and only runs when Rust files changed; `git push --no-verify`
 skips it.
+
+CI measures coverage on Linux, where llvm-cov counts lines that macOS does not,
+like error paths after `?`. So `make coverage` measures in a Linux container
+with the current stable toolchain (`scripts/coverage-linux.sh`). Docker
+volumes named `fritz-coverage-cargo` and `fritz-coverage-target` keep the
+toolchain and the build between runs; remove them with
+`docker volume rm fritz-coverage-cargo fritz-coverage-target`. To measure with
+the local toolchain and
+[cargo-llvm-cov](https://github.com/taiki-e/cargo-llvm-cov) instead, set
+`FRITZ_COVERAGE=native`.
 
 All tests run against recorded fixtures and the simulator in `fritz-sim`. CI
 never talks to a real device.
