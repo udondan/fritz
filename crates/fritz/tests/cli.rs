@@ -1348,10 +1348,21 @@ async fn reads_devices_with_only_a_password() {
         username: fritz_core::connection::PASSWORD_ONLY_USERNAME.to_owned(),
         ..fritz_sim::Options::default()
     };
-    let fixture = fritz_sim::Fixture::load(FIXTURE).unwrap();
+    let fixture = concat!(
+        env!("CARGO_MANIFEST_DIR"),
+        "/../fritz-sim/fixtures/fritzwlan-repeater-1750e/7.32"
+    );
+    let fixture = fritz_sim::Fixture::load(fixture).unwrap();
     let sim = fritz_sim::Sim::start_with(fixture, options).await.unwrap();
-    let args = strings(&["--host", sim.url().as_str(), "overview"]);
-    let env = vec![("FRITZ_PASSWORD", fritz_sim::PASSWORD)];
-    let overview = success(&fritz_async(args, env).await);
-    assert!(overview.contains("FRITZ!Box 7690"), "{overview}");
+    let read = |command: &str| {
+        let args = strings(&["--host", sim.url().as_str(), "--output", "text", command]);
+        fritz_async(args, vec![("FRITZ_PASSWORD", fritz_sim::PASSWORD)])
+    };
+
+    let overview = success(&read("overview").await);
+    assert!(overview.contains("FRITZ!WLAN Repeater 1750E"), "{overview}");
+    let wlan = success(&read("wlan").await);
+    assert!(wlan.contains("wlan-1"), "{wlan}");
+    let hosts = success(&read("hosts").await);
+    assert!(hosts.contains("device-1"), "{hosts}");
 }
