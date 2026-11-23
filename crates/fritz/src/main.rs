@@ -366,7 +366,7 @@ async fn main() -> anyhow::Result<()> {
         Command::Config(ConfigCommand::Init { password_command }) => {
             settings::init(&mut load()?, password_command, out)
         }
-        Command::Config(ConfigCommand::Show) => settings::show(&load()?, out),
+        Command::Config(ConfigCommand::Show) => settings::show(&load()?, out).await,
         Command::Config(ConfigCommand::List) => settings::list(&load()?, format, out),
         Command::Tls(TlsCommand::Fingerprint) => tls::fingerprint(&load()?, out).await,
         Command::Tls(TlsCommand::Trust) => {
@@ -375,7 +375,7 @@ async fn main() -> anyhow::Result<()> {
         Command::Tls(TlsCommand::Forget) => tls::forget(&mut load()?, out),
         Command::Auth(AuthCommand::Login) => auth::login(&load()?, system::read_password, out),
         Command::Auth(AuthCommand::Logout) => auth::logout(&load()?, out),
-        Command::Auth(AuthCommand::Status) => auth::status(&load()?, out),
+        Command::Auth(AuthCommand::Status) => auth::status(&load()?, out).await,
         Command::Tr064(command) => tr64(&load()?, command, out).await,
         #[cfg(feature = "write")]
         Command::Change(args) => change::run(&load()?, args, format, out).await,
@@ -452,7 +452,7 @@ async fn capture(context: &Context, args: CaptureArgs) -> anyhow::Result<()> {
     }
     let out = args.out.expect("clap requires --out without --plan");
     check_outside_git(&out)?;
-    let (password, _) = context.password(&target)?;
+    let (password, _) = context.password(&target).await?;
     if url.scheme() == "http" {
         eprintln!("warning: the answers travel unencrypted, use https and run `fritz tls trust`");
     }

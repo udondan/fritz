@@ -128,7 +128,7 @@ pub(crate) async fn call(
     let (service, scpd) = service(&target.client()?.build()?, reference).await?;
     let action = generic::action(&service, &scpd, name)?;
     generic::check(&service, action, &arguments)?;
-    let client = context.client()?;
+    let client = context.client().await?;
     let output = generic::call(&client, &service, action, &arguments)
         .await
         .with_context(|| format!("{} failed", action.name))?;

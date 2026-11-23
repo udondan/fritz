@@ -611,7 +611,8 @@ impl Server {
         self.respond(async {
             let arguments: Vec<(String, String)> = query.arguments.into_iter().collect();
             let plan = self
-                .changer()?
+                .changer()
+                .await?
                 .plan(&query.service, &query.action, &arguments)
                 .await?;
             Ok(plan)
@@ -640,7 +641,8 @@ impl Server {
             } = query.change;
             let arguments: Vec<(String, String)> = arguments.into_iter().collect();
             let outcome = self
-                .changer()?
+                .changer()
+                .await?
                 .apply(&service, &action, &arguments, &query.token)
                 .await?;
             Ok(outcome)
@@ -655,7 +657,7 @@ impl Server {
     /// `FRITZ_STATE_DIR` or the user. It reads the identity of the device
     /// again for every change.
     #[cfg(feature = "write")]
-    fn changer(&self) -> anyhow::Result<Changer> {
+    async fn changer(&self) -> anyhow::Result<Changer> {
         let dir = std::env::var_os("FRITZ_STATE_DIR")
             .map(std::path::PathBuf::from)
             .or_else(change::default_dir)
@@ -666,7 +668,7 @@ impl Server {
             dir,
             source: "mcp",
         };
-        Ok(Changer::new(self.context.client()?, settings))
+        Ok(Changer::new(self.context.client().await?, settings))
     }
 
     /// The reader of the device, read when it is first needed.

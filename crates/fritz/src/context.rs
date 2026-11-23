@@ -3,7 +3,6 @@
 
 use std::io::{self, BufRead};
 use std::path::{Path, PathBuf};
-use std::sync::{Mutex, PoisonError};
 
 use anyhow::{Context as _, bail};
 use fritz_core::config::{Config, Profile};
@@ -11,6 +10,7 @@ use fritz_core::connection::{DEFAULT_HOST, Overrides, Target};
 use fritz_core::secrets::command::{self, PasswordCommand};
 use fritz_core::secrets::{self, Keychain, Source};
 use fritz_core::session::Session;
+use tokio::sync::Mutex;
 use tr064::SecretString;
 
 /// The environment variable that turns the keychain off, for containers and
@@ -157,11 +157,11 @@ impl Context {
     /// The password for the target and where it came from: the one of the
     /// environment, else the output of the password command, else the one
     /// in the keychain. Opens the keychain only when it is needed.
-    pub(crate) fn password(&self, target: &Target) -> anyhow::Result<(SecretString, Source)> {
+    pub(crate) async fn password(&self, target: &Target) -> anyhow::Result<(SecretString, Source)> {
         let account = target.account()?;
         if let (None, Some(command)) = (&self.password, self.password_command()) {
             let source = Source::Command(command.name().to_owned());
-            return Ok((self.run(command)?, source));
+            return Ok((self.run(command).await?, source));
         }
         let keychain = match (&self.password, &self.keychains) {
             (Some(_), _) | (None, Keychains::Disabled) => None,
@@ -174,13 +174,12 @@ impl Context {
         )?)
     }
 
-    /// Runs the password command, once per run. Warns if others may change
-    /// the configuration file, and with it the command.
-    fn run(&self, command: &PasswordCommand) -> anyhow::Result<SecretString> {
-        let mut cached = self
-            .command_password
-            .lock()
-            .unwrap_or_else(PoisonError::into_inner);
+    /// Runs the password command, once per run, on a thread of its own, so
+    /// that the MCP server keeps answering meanwhile. Warns if others may
+    /// change the configuration file, and with it the command.
+    async fn run(&self, command: &PasswordCommand) -> anyhow::Result<SecretString> {
+        // Held while the command runs, so that it runs only once.
+        let mut cached = self.command_password.lock().await;
         if let Some(password) = &*cached {
             return Ok(password.clone());
         }
@@ -191,15 +190,16 @@ impl Context {
                  run `chmod go-w {path}`"
             );
         }
-        let password = command.run(command::TIMEOUT)?;
+        let command = command.clone();
+        let password = tokio::task::spawn_blocking(move || command.run(command::TIMEOUT)).await??;
         *cached = Some(password.clone());
         Ok(password)
     }
 
     /// A client for the target with the password, for calls of actions.
-    pub(crate) fn client(&self) -> anyhow::Result<tr064::Client> {
+    pub(crate) async fn client(&self) -> anyhow::Result<tr064::Client> {
         let target = self.target()?;
-        let (password, _) = self.password(&target)?;
+        let (password, _) = self.password(&target).await?;
         let builder = target.client()?.credentials(target.username()?, password);
         Ok(builder.build()?)
     }
@@ -208,7 +208,7 @@ impl Context {
     /// password.
     pub(crate) async fn session(&self) -> anyhow::Result<Session> {
         let target = self.target()?;
-        let (password, _) = self.password(&target)?;
+        let (password, _) = self.password(&target).await?;
         let web = target.web();
         let client = web.client()?.build()?;
         Ok(Session::login(client, web.web_username(), &password).await?)
@@ -288,24 +288,24 @@ pub(crate) mod tests {
         assert_eq!(config.profiles["default"], profile);
     }
 
-    #[test]
-    fn finds_passwords() {
+    #[tokio::test]
+    async fn finds_passwords() {
         let dir = tempfile::tempdir().unwrap();
         let mut context = context(dir.path(), agent());
         let target = context.target().unwrap();
-        assert!(context.password(&target).is_err());
+        assert!(context.password(&target).await.is_err());
 
         let keychain = context.keychain().unwrap();
         keychain
             .set("agent@192.168.178.1", &"stored".into())
             .unwrap();
-        let (password, source) = context.password(&target).unwrap();
+        let (password, source) = context.password(&target).await.unwrap();
         assert_eq!(password.expose_secret(), "stored");
         assert_eq!(source, Source::Keychain);
 
         context.password = Some("given".into());
         context.keychains = Keychains::Disabled;
-        let (password, source) = context.password(&target).unwrap();
+        let (password, source) = context.password(&target).await.unwrap();
         assert_eq!(password.expose_secret(), "given");
         assert_eq!(source, Source::Environment);
     }
@@ -333,8 +333,8 @@ pub(crate) mod tests {
     }
 
     #[cfg(unix)]
-    #[test]
-    fn takes_the_environment_then_the_command_then_the_keychain() {
+    #[tokio::test]
+    async fn takes_the_environment_then_the_command_then_the_keychain() {
         let dir = tempfile::tempdir().unwrap();
         let mut context = with_profile_command(dir.path(), printf("profile\\n"));
         let target = context.target().unwrap();
@@ -344,22 +344,22 @@ pub(crate) mod tests {
             .set("agent@192.168.178.1", &"stored".into())
             .unwrap();
         context.password = Some("given".into());
-        let (password, source) = context.password(&target).unwrap();
+        let (password, source) = context.password(&target).await.unwrap();
         assert_eq!(password.expose_secret(), "given");
         assert_eq!(source, Source::Environment);
 
         context.password = None;
-        let (password, source) = context.password(&target).unwrap();
+        let (password, source) = context.password(&target).await.unwrap();
         assert_eq!(password.expose_secret(), "profile");
         assert_eq!(source, Source::Command("printf".to_owned()));
 
         // The command of the environment wins, but the output of the first
         // run is kept.
         let mut context = context.with_password_command(Some(printf("environment")));
-        let (password, _) = context.password(&target).unwrap();
+        let (password, _) = context.password(&target).await.unwrap();
         assert_eq!(password.expose_secret(), "profile");
         context.command_password = Mutex::default();
-        let (password, _) = context.password(&target).unwrap();
+        let (password, _) = context.password(&target).await.unwrap();
         assert_eq!(password.expose_secret(), "environment");
 
         let context = context.with_password_command(None);
@@ -367,28 +367,28 @@ pub(crate) mod tests {
         profile.password_command = None;
         let mut context = context;
         context.save_profile(profile).unwrap();
-        let (password, source) = context.password(&target).unwrap();
+        let (password, source) = context.password(&target).await.unwrap();
         assert_eq!(password.expose_secret(), "stored");
         assert_eq!(source, Source::Keychain);
     }
 
     #[cfg(unix)]
-    #[test]
-    fn reports_a_failed_command_and_tries_again() {
+    #[tokio::test]
+    async fn reports_a_failed_command_and_tries_again() {
         let dir = tempfile::tempdir().unwrap();
         let context = with_profile_command(dir.path(), printf(""));
         let target = context.target().unwrap();
-        let error = context.password(&target).unwrap_err();
+        let error = context.password(&target).await.unwrap_err();
         assert_eq!(
             error.to_string(),
             "the password command `printf` printed no password"
         );
-        assert!(context.command_password.lock().unwrap().is_none());
+        assert!(context.command_password.lock().await.is_none());
     }
 
     #[cfg(unix)]
-    #[test]
-    fn warns_about_a_configuration_others_may_change() {
+    #[tokio::test]
+    async fn warns_about_a_configuration_others_may_change() {
         use std::os::unix::fs::PermissionsExt as _;
 
         let dir = tempfile::tempdir().unwrap();
@@ -396,7 +396,7 @@ pub(crate) mod tests {
         let mode = std::fs::Permissions::from_mode(0o666);
         std::fs::set_permissions(context.path(), mode).unwrap();
         let target = context.target().unwrap();
-        let (password, _) = context.password(&target).unwrap();
+        let (password, _) = context.password(&target).await.unwrap();
         assert_eq!(password.expose_secret(), "secret");
     }
 }

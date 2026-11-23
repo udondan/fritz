@@ -33,7 +33,7 @@ pub(crate) fn init(
 }
 
 /// Shows the settings in effect, without the password.
-pub(crate) fn show(context: &Context, out: &mut impl Write) -> anyhow::Result<()> {
+pub(crate) async fn show(context: &Context, out: &mut impl Write) -> anyhow::Result<()> {
     let target = context.target()?;
     let none = || "none".to_owned();
     let profile = context
@@ -44,7 +44,7 @@ pub(crate) fn show(context: &Context, out: &mut impl Write) -> anyhow::Result<()
         ("https", None) => "not trusted, run `fritz tls trust`".to_owned(),
         _ => "none, the connection is not encrypted".to_owned(),
     };
-    let password = match context.password(&target) {
+    let password = match context.password(&target).await {
         Ok((_, source)) => format!("from {source}"),
         Err(error) => format!("{error:#}"),
     };
@@ -115,8 +115,8 @@ mod tests {
 
     const FINGERPRINT: &str = "00:11:22:33:44:55:66:77:88:99:AA:BB:CC:DD:EE:FF:00:11:22:33:44:55:66:77:88:99:AA:BB:CC:DD:EE:FF";
 
-    #[test]
-    fn creates_and_shows_a_profile() {
+    #[tokio::test]
+    async fn creates_and_shows_a_profile() {
         let dir = tempfile::tempdir().unwrap();
         let mut context = context(dir.path(), agent());
         let mut out = Vec::new();
@@ -128,7 +128,7 @@ mod tests {
         );
 
         let mut out = Vec::new();
-        show(&context, &mut out).unwrap();
+        show(&context, &mut out).await.unwrap();
         assert_eq!(
             String::from_utf8(out).unwrap(),
             format!(

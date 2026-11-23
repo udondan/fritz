@@ -40,9 +40,9 @@ pub(crate) fn logout(context: &Context, out: &mut impl Write) -> anyhow::Result<
 }
 
 /// Tells where the password comes from. Fails without one.
-pub(crate) fn status(context: &Context, out: &mut impl Write) -> anyhow::Result<()> {
+pub(crate) async fn status(context: &Context, out: &mut impl Write) -> anyhow::Result<()> {
     let target = context.target()?;
-    let (_, source) = context.password(&target)?;
+    let (_, source) = context.password(&target).await?;
     let account = target.account()?;
     let ran = if matches!(source, Source::Command(_)) {
         ", which ran successfully"
@@ -63,13 +63,13 @@ mod tests {
         String::from_utf8(out).unwrap()
     }
 
-    #[test]
-    fn logs_in_and_out() {
+    #[tokio::test]
+    async fn logs_in_and_out() {
         let dir = tempfile::tempdir().unwrap();
         let context = context(dir.path(), agent());
 
         let mut out = Vec::new();
-        let error = status(&context, &mut out).unwrap_err();
+        let error = status(&context, &mut out).await.unwrap_err();
         assert!(error.to_string().starts_with("no password"), "{error}");
 
         let mut out = Vec::new();
@@ -88,7 +88,7 @@ mod tests {
 
         let mut out = Vec::new();
         assert_eq!(
-            run(status(&context, &mut out), out),
+            run(status(&context, &mut out).await, out),
             "the password of agent@192.168.178.1 comes from the keychain\n"
         );
 
@@ -105,15 +105,15 @@ mod tests {
     }
 
     #[cfg(unix)]
-    #[test]
-    fn tells_that_the_command_ran() {
+    #[tokio::test]
+    async fn tells_that_the_command_ran() {
         let dir = tempfile::tempdir().unwrap();
         let command = vec!["printf".to_owned(), "secret".to_owned()];
         let context =
             context(dir.path(), agent()).with_password_command(Some(command.try_into().unwrap()));
         let mut out = Vec::new();
         assert_eq!(
-            run(status(&context, &mut out), out),
+            run(status(&context, &mut out).await, out),
             "the password of agent@192.168.178.1 comes from the command `printf`, \
              which ran successfully\n"
         );
