@@ -45,6 +45,9 @@ $(archive x86_64-unknown-linux-musl)
 
   def install
     bin.install "fritz"
+    bash_completion.install "completions/fritz.bash" => "fritz"
+    zsh_completion.install "completions/_fritz"
+    fish_completion.install "completions/fritz.fish"
   end
 
   test do

@@ -515,6 +515,73 @@ fn reports_an_invalid_configuration() {
     );
 }
 
+const SHELLS: [&str; 5] = ["bash", "elvish", "fish", "powershell", "zsh"];
+
+/// The completions of the words for the shell, as the shell gets them.
+fn complete(shell: &str, words: &[&str], env: &[(&str, &str)]) -> String {
+    let index = words.len().to_string();
+    let mut args = vec!["--", "fritz"];
+    args.extend(words);
+    let mut env = env.to_vec();
+    env.extend([
+        ("COMPLETE", shell),
+        ("_CLAP_IFS", "\n"),
+        ("_CLAP_COMPLETE_INDEX", &index),
+    ]);
+    success(&fritz_with(&args, &env))
+}
+
+#[test]
+fn prints_completion_scripts() {
+    for shell in SHELLS {
+        let script = success(&fritz(&["completion", shell]));
+        assert!(script.contains("COMPLETE"), "{shell}: {script}");
+        assert!(script.contains("fritz"), "{shell}: {script}");
+        // The script asks `fritz` for the commands.
+        let commands = complete(shell, &[""], &[]);
+        for command in ["overview", "hosts", "tr064", "completion"] {
+            assert!(commands.contains(command), "{shell}: {commands}");
+        }
+    }
+    let zsh = success(&fritz(&["completion", "zsh"]));
+    assert!(zsh.starts_with("#compdef fritz\n"), "{zsh}");
+    let output = fritz(&["completion", "sh"]);
+    assert!(!output.status.success());
+    let output = fritz(&["completion", "--help"]);
+    assert!(success(&output).contains("fritz completion zsh > \"${fpath[1]}/_fritz\""));
+}
+
+#[test]
+fn completes_the_profiles() {
+    let config = Config::new();
+    let output = config.run(&["config", "init", "--host", "192.0.2.1"]);
+    assert!(output.status.success(), "{}", stderr(&output));
+    let env = [("FRITZ_CONFIG", config.path.as_str())];
+    let output = config.run(&["--profile", "office", "config", "init", "--host", "office"]);
+    assert!(output.status.success(), "{}", stderr(&output));
+    let profiles = complete("fish", &["--profile", ""], &env);
+    assert_eq!(profiles, "default\t192.0.2.1\noffice\toffice\n");
+    let profiles = complete("bash", &["hosts", "--profile", "of"], &env);
+    assert_eq!(profiles, "office");
+    let zsh = complete("zsh", &["--profile", ""], &env);
+    assert!(zsh.contains("default:192.0.2.1"), "{zsh}");
+
+    // `--config` wins over the environment.
+    let other = Config::new();
+    let output = other.run(&["--profile", "lab", "config", "init"]);
+    assert!(output.status.success(), "{}", stderr(&output));
+    let words = ["--config", other.path.as_str(), "--profile", ""];
+    assert_eq!(complete("bash", &words, &env), "lab");
+    let words = [format!("--config={}", other.path)];
+    let words = [words[0].as_str(), "--profile", ""];
+    assert_eq!(complete("bash", &words, &env), "lab");
+
+    // Nothing for a missing or invalid file, and no error.
+    assert_eq!(complete("bash", &["--profile", ""], &[]), "");
+    std::fs::write(&config.path, "unknown = 1\n").unwrap();
+    assert_eq!(complete("bash", &["--profile", ""], &env), "");
+}
+
 #[tokio::test(flavor = "multi_thread")]
 async fn trusts_the_certificate_on_first_use() {
     let fixture = concat!(
