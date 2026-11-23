@@ -142,8 +142,8 @@ enum Command {
     #[command(subcommand)]
     Auth(AuthCommand),
     /// The services and actions of the device. Calls only actions that read.
-    #[command(subcommand)]
-    Tr64(Tr64Command),
+    #[command(subcommand, name = "tr064", alias = "tr64")]
+    Tr064(Tr064Command),
     /// Plan and apply changes. Needs `FRITZ_ALLOW_WRITE=1`, and the identity
     /// of the device on the allow list in the configuration.
     #[cfg(feature = "write")]
@@ -197,7 +197,7 @@ enum AuthCommand {
 }
 
 #[derive(Debug, Subcommand)]
-enum Tr64Command {
+enum Tr064Command {
     /// List the services. Needs no login.
     Services,
     /// List the actions of a service with their classes: read, personal,
@@ -342,7 +342,7 @@ async fn main() -> anyhow::Result<()> {
         Command::Auth(AuthCommand::Login) => auth::login(&load()?, system::read_password, out),
         Command::Auth(AuthCommand::Logout) => auth::logout(&load()?, out),
         Command::Auth(AuthCommand::Status) => auth::status(&load()?, out),
-        Command::Tr64(command) => tr64(&load()?, command, out).await,
+        Command::Tr064(command) => tr64(&load()?, command, out).await,
         #[cfg(feature = "write")]
         Command::Change(args) => change::run(&load()?, args, format, out).await,
         Command::Capture(args) => capture(&load()?, args).await,
@@ -352,16 +352,16 @@ async fn main() -> anyhow::Result<()> {
 
 async fn tr64(
     context: &Context,
-    command: Tr64Command,
+    command: Tr064Command,
     out: &mut impl io::Write,
 ) -> anyhow::Result<()> {
     match command {
-        Tr64Command::Services => tr64::services(context, out).await,
-        Tr64Command::Actions { service } => tr64::actions(context, &service, out).await,
-        Tr64Command::Describe { service, action } => {
+        Tr064Command::Services => tr64::services(context, out).await,
+        Tr064Command::Actions { service } => tr64::actions(context, &service, out).await,
+        Tr064Command::Describe { service, action } => {
             tr64::describe(context, &service, &action, out).await
         }
-        Tr64Command::Call {
+        Tr064Command::Call {
             service,
             action,
             arguments,
