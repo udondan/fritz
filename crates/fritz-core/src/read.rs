@@ -175,6 +175,13 @@ impl Reader {
         Ok(Some((reported, entries)))
     }
 
+    /// The client, for the one call of a secret getter in
+    /// [`wlan::join`](crate::wlan::join), which does not pass
+    /// [`generic::check`].
+    pub(crate) fn client(&self) -> &Client {
+        &self.client
+    }
+
     /// The device description.
     pub fn description(&self) -> &DeviceDescription {
         &self.description

@@ -17,6 +17,7 @@ mod logging;
 mod mcp;
 mod output;
 mod personal;
+mod qr;
 mod settings;
 mod status;
 mod system;
@@ -121,19 +122,7 @@ enum Command {
         tree: bool,
     },
     /// The wireless networks, and which is the guest network.
-    Wlan {
-        /// Only this network, with its details: its service, like
-        /// `WLANConfiguration2`, its number, like `2`, or its SSID.
-        network: Option<String>,
-        /// Also the clients of each network: name, IP, MAC, signal and
-        /// rate.
-        #[arg(long)]
-        clients: bool,
-        /// Also the security settings, radio, WPS, night time switch-off and
-        /// statistics of each network, with hints on weak settings.
-        #[arg(long)]
-        details: bool,
-    },
+    Wlan(WlanArgs),
     /// The internet connection and, for DSL, the line.
     Internet,
     /// The LAN interfaces and wireless networks with their counters, and
@@ -231,6 +220,32 @@ enum Command {
         #[arg(value_enum)]
         shell: completion::Shell,
     },
+}
+
+#[derive(Debug, Args)]
+#[command(args_conflicts_with_subcommands = true)]
+struct WlanArgs {
+    #[command(subcommand)]
+    command: Option<WlanCommand>,
+    /// Only this network, with its details: its service, like
+    /// `WLANConfiguration2`, its number, like `2`, or its SSID.
+    network: Option<String>,
+    /// Also the clients of each network: name, IP, MAC, signal and
+    /// rate.
+    #[arg(long)]
+    clients: bool,
+    /// Also the security settings, radio, WPS, night time switch-off and
+    /// statistics of each network, with hints on weak settings.
+    #[arg(long)]
+    details: bool,
+}
+
+#[derive(Debug, Subcommand)]
+enum WlanCommand {
+    /// A QR code with the SSID and password of a network, which a phone
+    /// scans to join it: on the terminal, or as PNG or SVG file. Reads the
+    /// password, which nothing else does.
+    Qr(qr::QrArgs),
 }
 
 #[derive(Debug, Subcommand)]
@@ -433,11 +448,16 @@ async fn run(
         Command::Overview { system } => status::overview(&load()?, system, format, out).await,
         Command::Hosts(args) => status::hosts(&load()?, args, format, out).await,
         Command::Mesh { tree } => status::mesh(&load()?, tree, format, out).await,
-        Command::Wlan {
+        Command::Wlan(WlanArgs {
+            command: Some(WlanCommand::Qr(args)),
+            ..
+        }) => qr::run(&load()?, args, io::stdout().is_terminal(), out).await,
+        Command::Wlan(WlanArgs {
+            command: None,
             network,
             clients,
             details,
-        } => {
+        }) => {
             let views = fritz_core::wlan::Views {
                 clients,
                 details: details || network.is_some(),

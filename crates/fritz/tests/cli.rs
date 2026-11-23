@@ -1389,6 +1389,145 @@ async fn prints_the_details_of_each_wireless_network() {
     );
 }
 
+/// The simulator with fake passphrases for the first and the guest network.
+async fn passphrase_sim() -> fritz_sim::Sim {
+    let keys = |passphrase: &str| {
+        fritz_sim::Answer::Ok(
+            [
+                ("NewKeyPassphrase", passphrase),
+                ("NewPreSharedKey", "fake-qr-pre-shared-key"),
+            ]
+            .into_iter()
+            .map(|(n, v)| (n.to_owned(), v.to_owned()))
+            .collect(),
+        )
+    };
+    let fixture = fritz_sim::Fixture::load(FIXTURE)
+        .unwrap()
+        .with_answer(
+            "WLANConfiguration1",
+            "GetSecurityKeys",
+            None,
+            keys("fake-qr-passphrase"),
+        )
+        .with_answer(
+            "WLANConfiguration3",
+            "GetSecurityKeys",
+            None,
+            keys("fake-qr-guest-passphrase"),
+        );
+    fritz_sim::Sim::start(fixture).await.unwrap()
+}
+
+/// How often the simulator was asked for the passphrase.
+fn passphrase_calls(sim: &fritz_sim::Sim) -> usize {
+    sim.requests()
+        .into_iter()
+        .filter(|r| r.action.as_deref() == Some("GetSecurityKeys"))
+        .count()
+}
+
+/// Decodes the QR code of a PNG file.
+fn decode_png(path: &Path) -> String {
+    let file = std::io::Cursor::new(std::fs::read(path).unwrap());
+    let mut decoder = png::Decoder::new(file).read_info().unwrap();
+    let mut pixels = vec![0; decoder.output_buffer_size().unwrap()];
+    let info = decoder.next_frame(&mut pixels).unwrap();
+    let (width, height) = (info.width as usize, info.height as usize);
+    let mut image =
+        rqrr::PreparedImage::prepare_from_greyscale(width, height, |x, y| pixels[y * width + x]);
+    let grids = image.detect_grids();
+    assert_eq!(grids.len(), 1);
+    grids[0].decode().unwrap().1
+}
+
+#[tokio::test(flavor = "multi_thread")]
+async fn shows_a_qr_code_to_join_a_wireless_network() {
+    let sim = passphrase_sim().await;
+    let password = Some(fritz_sim::PASSWORD);
+    let dir = tempfile::tempdir().unwrap();
+
+    // Without a terminal and a file, nothing is asked.
+    for args in [
+        &["wlan", "qr"][..],
+        &["wlan", "qr", "1"][..],
+        &["wlan", "qr", "--format", "png"][..],
+    ] {
+        let error = failure(&run(&sim, args, password).await);
+        assert!(error.contains("--out <file>"), "{error}");
+    }
+    let png = dir.path().join("code.png");
+    let png = png.to_str().unwrap();
+    let args = ["wlan", "qr", "--out", png, "--show-password"];
+    let error = failure(&run(&sim, &args, password).await);
+    assert!(
+        error.contains("--show-password needs a terminal"),
+        "{error}"
+    );
+    assert_eq!(sim.requests().len(), 0);
+
+    // The guest network by default; it is off.
+    let output = run(&sim, &["wlan", "qr", "--out", png], password).await;
+    let text = success(&output);
+    assert_eq!(
+        text,
+        format!(
+            "saved the code of wlan-2 to {png}\n\
+             Service   WLANConfiguration3\n\
+             SSID      wlan-2\n\
+             Security  WPA\n\
+             Hidden    no\n\
+             Guest     yes\n"
+        )
+    );
+    assert!(stderr(&output).contains("WLANConfiguration3 is switched off"));
+    assert_eq!(
+        decode_png(Path::new(png)),
+        "WIFI:T:WPA;S:wlan-2;P:fake-qr-guest-passphrase;;"
+    );
+    assert_eq!(passphrase_calls(&sim), 1);
+
+    // A network by its SSID, as SVG and as text.
+    let svg = dir.path().join("code.svg");
+    let svg = svg.to_str().unwrap();
+    let text = success(&run(&sim, &["wlan", "qr", "wlan-1", "--out", svg], password).await);
+    assert!(text.contains("Service   WLANConfiguration1\n"), "{text}");
+    let image = std::fs::read_to_string(svg).unwrap();
+    assert!(image.starts_with("<?xml"), "{image}");
+    assert!(image.contains("<path fill=\"#000\" d=\"M"), "{image}");
+    let plain = dir.path().join("code");
+    let plain = plain.to_str().unwrap();
+    let args = ["wlan", "qr", "1", "--out", plain, "--format", "text"];
+    success(&run(&sim, &args, password).await);
+    assert!(std::fs::read_to_string(plain).unwrap().contains('█'));
+    assert_eq!(passphrase_calls(&sim), 3);
+
+    // The passphrase is never logged, and the other keys never shown.
+    let args = ["wlan", "qr", "1", "--out", png];
+    let log = logged(&sim, &args, fritz_sim::PASSWORD, "trace").await;
+    assert!(log.contains("GetSecurityKeys"), "{log}");
+    assert!(!log.contains("fake-qr"), "{log}");
+
+    // Errors.
+    let output = run(&sim, &["wlan", "qr", "nothing", "--out", png], password).await;
+    let error = failure(&output);
+    assert!(
+        error.contains("no wireless network is named \"nothing\""),
+        "{error}"
+    );
+    sim.inject(Injection::fault(
+        "WLANConfiguration1",
+        "GetSecurityKeys",
+        606,
+    ));
+    let error = failure(&run(&sim, &["wlan", "qr", "1", "--out", png], password).await);
+    assert!(!error.contains("fake-qr"), "{error}");
+    let missing = dir.path().join("missing/code.png");
+    let missing = missing.to_str().unwrap();
+    let error = failure(&run(&sim, &["wlan", "qr", "--out", missing], password).await);
+    assert!(error.contains("cannot write"), "{error}");
+}
+
 #[tokio::test(flavor = "multi_thread")]
 async fn prints_the_interfaces() {
     let fixture = fritz_sim::Fixture::load(FIXTURE).unwrap();
@@ -2067,7 +2206,8 @@ async fn reads_devices_with_only_a_password() {
 }
 
 /// The values that must never be logged: the password, the session ID, the
-/// nonce of the simulator, the WLAN keys of the fixture, and any part of an
+/// nonce of the simulator, the WLAN keys of the fixture, the fake passphrases
+/// of the QR code tests, and any part of an
 /// `Authorization` header.
 const SECRETS: &[&str] = &[
     fritz_sim::PASSWORD,
@@ -2075,6 +2215,7 @@ const SECRETS: &[&str] = &[
     "F1A2B3C4D5E6F708",
     "fixture-wlan-key",
     "fixture-guest-key",
+    "fake-qr-",
     "Authorization",
     "AVM-SID",
     "cnonce",

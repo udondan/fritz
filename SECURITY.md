@@ -23,6 +23,14 @@ default:
   The class of every action of the recorded fixtures is kept in
   [`policy.txt`](crates/fritz-core/tests/data/policy.txt), so that every
   change of the policy shows up in review.
+- **One narrow path to a passphrase.** `fritz wlan qr` reads the passphrase
+  of a wireless network to show it as a QR code. It calls only
+  `GetSecurityKeys` of a `WLANConfiguration` service, without inputs, keeps
+  only `NewKeyPassphrase` in memory that is wiped when dropped, and drops the
+  other keys at once. The code goes only to a terminal or to a file only the
+  user can read; the password is shown only with `--show-password`, on a
+  terminal. The action stays `secret` everywhere else: `fritz tr064 call`,
+  the capture and the MCP server, which has no tool for it, refuse it.
 - **No secrets in output.** Passwords, keys, session IDs and similar values are
   redacted from every output, error and log line.
 - **The debug log** (`-v`, `FRITZ_LOG`) goes to stderr and, with
