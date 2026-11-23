@@ -326,12 +326,28 @@ async fn main() -> anyhow::Result<()> {
             system::keychains(),
         )
     };
-    if let Command::Mcp { personal } = cli.command {
+    let result = run(cli.command, format, load).await;
+    if let (Format::Yaml, Err(error)) = (format, &result) {
+        io::Write::flush(&mut io::stdout())?;
+        output::yaml(&output::failure(error), &mut io::stderr())?;
+        std::process::exit(1);
+    }
+    result
+}
+
+/// Runs a command with the context from `load`, which it loads only when
+/// the command needs it.
+async fn run(
+    command: Command,
+    format: Format,
+    load: impl FnOnce() -> anyhow::Result<Context>,
+) -> anyhow::Result<()> {
+    if let Command::Mcp { personal } = command {
         // Before stdout is locked: the transport writes to it.
         return mcp::serve(load()?, personal).await;
     }
     let out = &mut io::stdout().lock();
-    let result = match cli.command {
+    match command {
         Command::Mcp { .. } => unreachable!("served above"),
         Command::Overview => status::overview(&load()?, format, out).await,
         Command::Hosts { active } => status::hosts(&load()?, active, format, out).await,
@@ -365,13 +381,7 @@ async fn main() -> anyhow::Result<()> {
         Command::Capture(args) => capture(&load()?, args).await,
         Command::Fixture(command) => fixture(&command),
         Command::Completion { shell } => Ok(completion::script(shell, out)?),
-    };
-    if let (Format::Yaml, Err(error)) = (format, &result) {
-        io::Write::flush(out)?;
-        output::yaml(&output::failure(error), &mut io::stderr())?;
-        std::process::exit(1);
     }
-    result
 }
 
 async fn tr64(

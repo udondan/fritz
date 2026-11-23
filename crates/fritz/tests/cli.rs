@@ -510,6 +510,15 @@ fn reports_an_invalid_configuration() {
         "{}",
         stderr(&output)
     );
+    // With YAML, as YAML.
+    let output = config.run(&["--output", "yaml", "overview"]);
+    assert_eq!(output.status.code(), Some(1));
+    let error: serde_json::Value = serde_saphyr::from_str(&stderr(&output)).unwrap();
+    let message = error["error"].as_str().unwrap();
+    assert!(
+        message.contains("is not a valid configuration"),
+        "{message}"
+    );
 }
 
 const SHELLS: [&str; 5] = ["bash", "elvish", "fish", "powershell", "zsh"];
