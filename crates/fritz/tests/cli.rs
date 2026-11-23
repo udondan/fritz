@@ -1557,6 +1557,21 @@ async fn logs_requests_without_secrets() {
     let log = stderr(&run(&sim, &["wlan"], Some(password)).await);
     assert_eq!(log, "");
 
+    // Credentials in the host never reach the log.
+    let mut host = sim.url().clone();
+    host.set_username("intruder").unwrap();
+    host.set_password(Some("host-secret")).unwrap();
+    let args = ["--host", host.as_str(), "-vv", "tr064", "services"];
+    let log = stderr(&fritz_with(&args, &[]));
+    assert!(
+        log.contains("fritz::context: device url=http://127.0.0.1:"),
+        "{log}"
+    );
+    assert!(
+        !log.contains("host-secret") && !log.contains("intruder"),
+        "{log}"
+    );
+
     let output = fritz_with(&["config", "show"], &[("FRITZ_LOG", "tr064=loud")]);
     assert!(
         failure(&output).contains("invalid FRITZ_LOG \"tr064=loud\""),

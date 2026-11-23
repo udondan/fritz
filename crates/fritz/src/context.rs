@@ -90,7 +90,12 @@ impl Context {
         let name = profile.map(|(name, _)| name);
         let user = target.username.as_deref();
         let pinned = target.fingerprint.is_some();
-        tracing::debug!(profile = name, url = %target.url, user, pinned, "device");
+        // A host like `http://user:password@host` must not show its password.
+        let mut url = target.url.clone();
+        url.set_username("")
+            .and_then(|()| url.set_password(None))
+            .ok();
+        tracing::debug!(profile = name, %url, user, pinned, "device");
         Ok(target)
     }
 

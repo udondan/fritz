@@ -74,15 +74,23 @@ pub(crate) fn init(verbose: u8) -> anyhow::Result<()> {
         .context("cannot start the log")
 }
 
-/// Opens the log file for appending, readable only by the user.
+/// Opens the log file for appending, readable only by the user, also if it
+/// existed with other permissions.
 fn open(path: &Path) -> anyhow::Result<File> {
     let mut options = OpenOptions::new();
     options.create(true).append(true);
     #[cfg(unix)]
     std::os::unix::fs::OpenOptionsExt::mode(&mut options, 0o600);
-    options
-        .open(path)
-        .with_context(|| format!("cannot open the log file {}", path.display()))
+    let open = || -> io::Result<File> {
+        let file = options.open(path)?;
+        #[cfg(unix)]
+        {
+            use std::os::unix::fs::PermissionsExt as _;
+            file.set_permissions(std::fs::Permissions::from_mode(0o600))?;
+        }
+        Ok(file)
+    };
+    open().with_context(|| format!("cannot open the log file {}", path.display()))
 }
 
 #[cfg(test)]
@@ -117,8 +125,12 @@ mod tests {
         #[cfg(unix)]
         {
             use std::os::unix::fs::PermissionsExt as _;
-            let mode = std::fs::metadata(&path).unwrap().permissions().mode();
-            assert_eq!(mode & 0o777, 0o600);
+            let mode = || std::fs::metadata(&path).unwrap().permissions().mode() & 0o777;
+            assert_eq!(mode(), 0o600);
+            // An existing file that others can read is restricted.
+            std::fs::set_permissions(&path, std::fs::Permissions::from_mode(0o644)).unwrap();
+            open(&path).unwrap();
+            assert_eq!(mode(), 0o600);
         }
         let error = open(&dir.path().join("missing/fritz.log")).unwrap_err();
         assert!(error.to_string().starts_with("cannot open the log file "));
