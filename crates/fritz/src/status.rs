@@ -13,6 +13,10 @@ use fritz_core::smarthome::{self, Device, Target, Unit};
 use fritz_core::status::{self, Connection, Host, Hosts, Internet, Overview, Wlan};
 use serde::Serialize;
 
+mod tree;
+
+use tree::mesh_tree;
+
 use crate::context::Context;
 
 /// How to print the result.
@@ -143,7 +147,7 @@ fn internet_pairs(internet: &Internet) -> Vec<(&'static str, Option<String>)> {
 }
 
 /// Rates in kbit/s, like `↓ 100 Mbit/s ↑ 40 Mbit/s`.
-fn rates(down: Option<u64>, up: Option<u64>) -> Option<String> {
+pub(crate) fn rates(down: Option<u64>, up: Option<u64>) -> Option<String> {
     both(down.map(rate), up.map(rate))
 }
 
@@ -223,9 +227,11 @@ fn host_table(hosts: &Hosts, out: &mut impl Write) -> anyhow::Result<()> {
     table(&["NAME", "IP", "MAC", "ACTIVE", "INTERFACE"], rows, out)
 }
 
-/// Prints the mesh: its nodes, and the links between all nodes.
+/// Prints the mesh: its nodes, and the links between all nodes, or with
+/// `tree` the tree of the devices below the nodes they are connected to.
 pub(crate) async fn mesh(
     context: &Context,
+    tree: bool,
     format: Format,
     out: &mut impl Write,
 ) -> anyhow::Result<()> {
@@ -234,9 +240,11 @@ pub(crate) async fn mesh(
         .await
         .context("cannot read the mesh")?
         .context("the device has no mesh list, or the user may not read it")?;
-    match format {
-        Format::Json => json(&mesh, out),
-        Format::Text => mesh_tables(&mesh, out),
+    match (format, tree) {
+        (Format::Json, false) => json(&mesh, out),
+        (Format::Json, true) => json(&mesh.tree(), out),
+        (Format::Text, false) => mesh_tables(&mesh, out),
+        (Format::Text, true) => mesh_tree(&mesh.tree(), out),
     }
 }
 
@@ -679,12 +687,14 @@ pub(crate) mod tests {
         let mesh = Mesh {
             nodes: vec![
                 Node {
+                    uid: "n-1".to_owned(),
                     name: Some("box".to_owned()),
                     role: Some("master".to_owned()),
                     meshed: true,
                     ..Node::default()
                 },
                 Node {
+                    uid: "n-2".to_owned(),
                     name: Some("host".to_owned()),
                     ..Node::default()
                 },
@@ -692,11 +702,18 @@ pub(crate) mod tests {
             links: vec![Link {
                 from: "box".to_owned(),
                 to: "host".to_owned(),
+                from_uid: "n-1".to_owned(),
+                to_uid: "n-2".to_owned(),
                 rate_rx: Some(800),
                 rate_tx: Some(2000),
                 ..Link::default()
             }],
         };
+        let tree_output = text(|out| mesh_tree(&mesh.tree(), out));
+        assert_eq!(
+            tree_output,
+            "box (master)\n└── host  ↓ 2.0 Mbit/s  ↑ 800 kbit/s\n"
+        );
         let output = text(|out| mesh_tables(&mesh, out));
         assert_eq!(
             output,

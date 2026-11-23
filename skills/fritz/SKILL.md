@@ -29,6 +29,7 @@ is not a terminal.
 | Which wireless networks, how many clients?  | `fritz wlan`                         |
 | Which devices are (or were) on the network? | `fritz hosts`, `fritz hosts --active`|
 | How are the mesh repeaters connected?       | `fritz mesh`                         |
+| Which repeater is a device connected to?    | `fritz mesh --tree`                  |
 | Smart Home devices and their values         | `fritz smarthome`                    |
 | Which ports are forwarded, is UPnP on?      | `fritz ports`                        |
 | Numbers, deflections, answering machines    | `fritz telephony`                    |
