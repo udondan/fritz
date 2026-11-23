@@ -45,10 +45,48 @@ jobs:
     secrets:
       update-token: ${{ secrets.OVERRIDE_TOKEN }}
 
+  # Pull requests run the build and the image only if files changed that they
+  # use. Pushes to main skip this job and always run everything. The tests only
+  # read files under crates/.
+  changes:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      pull-requests: read # paths-filter lists the files of the pull request via the API
+    outputs:
+      code: ${{ steps.filter.outputs.code }}
+      docker: ${{ steps.filter.outputs.docker }}
+    steps:
+      - uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4.0.3
+        id: filter
+        with:
+          filters: |
+            code:
+              - crates/**
+              - Cargo.toml
+              - Cargo.lock
+              - clippy.toml
+              - codecov.yml
+              - .github/workflows/test.yml
+            docker:
+              - crates/**
+              - Cargo.toml
+              - Cargo.lock
+              - Dockerfile
+              - .dockerignore
+              - docker-mcp.yml
+              - mise.toml
+              - .github/workflows/test.yml
+
   build:
-    needs: boarding-gate
-    # The wait is skipped for forks.
-    if: ${{ !cancelled() && (needs.boarding-gate.result == 'success' || needs.boarding-gate.result == 'skipped') }}
+    needs: [boarding-gate, changes]
+    # The wait is skipped for forks, changes outside of pull requests.
+    if: >-
+      ${{ !cancelled()
+      && (needs.boarding-gate.result == 'success' || needs.boarding-gate.result == 'skipped')
+      && (needs.changes.result == 'skipped' || (needs.changes.result == 'success' && needs.changes.outputs.code == 'true')) }}
     runs-on: ubuntu-latest
     timeout-minutes: 30
     permissions:
@@ -205,6 +243,8 @@ jobs:
   # connect.
   docker:
     name: Docker
+    needs: changes
+    if: ${{ !cancelled() && (needs.changes.result == 'skipped' || (needs.changes.result == 'success' && needs.changes.outputs.docker == 'true')) }}
     runs-on: ubuntu-latest
     timeout-minutes: 30
     permissions:
@@ -242,9 +282,12 @@ jobs:
 
   # The only required status check. Every job must have run and succeeded: a
   # skipped job must never let a PR become mergeable, least of all through
-  # automerge. Only coverage may be skipped: it is skipped on main and when
-  # build didn't succeed, and build fails this job then anyway. boarding-gate
-  # may be skipped only for pull requests from forks.
+  # automerge. Only these may be skipped:
+  # - coverage: on main and when build didn't succeed, which fails this job
+  #   anyway, or when build was skipped for lack of changes;
+  # - boarding-gate: for pull requests from forks;
+  # - changes: outside of pull requests;
+  # - build and docker: when changes found nothing they use.
   required:
     if: always()
     runs-on: ubuntu-latest
@@ -253,6 +296,7 @@ jobs:
       - actions
       - boarding-gate
       - build
+      - changes
       - coverage
       - docker
       - qlty
@@ -261,8 +305,19 @@ jobs:
         env:
           RESULTS: ${{ toJSON(needs) }}
           FORK: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository }}
+          PULL_REQUEST: ${{ github.event_name == 'pull_request' }}
         run: |
-          failed=$(echo "$RESULTS" | jq -r --argjson fork "$FORK" 'to_entries[] | select(.value.result != "success" and (.value.result != "skipped" or (.key != "coverage" and (.key != "boarding-gate" or ($fork | not))))) | "\(.key): \(.value.result)"')
+          failed=$(echo "$RESULTS" | jq -r --argjson fork "$FORK" --argjson pr "$PULL_REQUEST" '
+            (.changes.outputs // {}) as $changed
+            | def may_skip:
+                .key == "coverage"
+                or (.key == "boarding-gate" and $fork)
+                or (.key == "changes" and ($pr | not))
+                or (.key == "build" and $pr and $changed.code == "false")
+                or (.key == "docker" and $pr and $changed.docker == "false");
+              to_entries[]
+              | select(.value.result != "success" and (.value.result != "skipped" or (may_skip | not)))
+              | "\(.key): \(.value.result)"')
           if [ -n "$failed" ]; then
             echo "::error::Not all jobs succeeded:"
             echo "$failed"
