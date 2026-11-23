@@ -25,9 +25,13 @@ Unofficial, not affiliated with FRITZ! GmbH.
 
 The fixtures come with the crate:
 
-| Fixture              | Device         | FRITZ!OS |
-| -------------------- | -------------- | -------- |
-| `fritzbox-7690/8.25` | FRITZ!Box 7690 | 8.25     |
+| Fixture                         | Device                    | FRITZ!OS |
+| ------------------------------- | ------------------------- | -------- |
+| `fritzbox-7690/8.25`            | FRITZ!Box 7690            | 8.25     |
+| `fritzwlan-repeater-1750e/7.32` | FRITZ!WLAN Repeater 1750E | 7.32     |
+
+The repeater has only a password and takes any user name; start the
+simulator with `--username dslf-config` to log in without `--user`.
 
 `fritz-sim --list` prints them. Every fixture is a directory with the files
 of one device; see [`Fixture`](https://docs.rs/fritz-sim/latest/fritz_sim/struct.Fixture.html)

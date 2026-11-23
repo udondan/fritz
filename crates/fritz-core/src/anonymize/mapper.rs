@@ -32,6 +32,8 @@ static IPV6: LazyLock<Regex> =
 static LEAF: LazyLock<Regex> =
     LazyLock::new(|| regex(r"<([A-Za-z_][\w.:-]*)([^<>]*)>([^<]+)</([A-Za-z_][\w.:-]*)>"));
 static ATTRIBUTE: LazyLock<Regex> = LazyLock::new(|| regex(r#"([A-Za-z_][\w.:-]*)="([^"]*)""#));
+/// The model name of a device description.
+static MODEL: LazyLock<Regex> = LazyLock::new(|| regex(r"<modelName>([^<]+)</modelName>"));
 
 /// The domains of e-mail placeholders and other examples, which stay.
 const EXAMPLE_DOMAINS: &[&str] = &["example.com", "example.net", "example.org"];
@@ -102,12 +104,23 @@ impl Mapper {
 
     /// Replaces the personal values in an XML document: those of elements
     /// and attributes with personal names, then those [anywhere](Self::text).
+    ///
+    /// The `friendlyName` of a device description stays if it is a model
+    /// name, as on a FRITZ!Box, and is the name of a device otherwise, as on
+    /// a FRITZ!Repeater, which shows the name its owner gave it.
     pub(super) fn xml(&mut self, xml: &str) -> String {
+        let models: Vec<String> = MODEL.captures_iter(xml).map(|c| c[1].to_owned()).collect();
         let xml = ATTRIBUTE.replace_all(xml, |c: &Captures| match rules::element(&c[1]) {
             Some(kind) => format!(r#"{}="{}""#, &c[1], self.named(kind, &c[2])),
             None => c[0].to_owned(),
         });
-        let xml = LEAF.replace_all(&xml, |c: &Captures| match rules::element(&c[1]) {
+        let kind = |c: &Captures| {
+            rules::element(&c[1]).or_else(|| {
+                (&c[1] == "friendlyName" && !models.iter().any(|m| m == &c[3]))
+                    .then_some(Kind::Device)
+            })
+        };
+        let xml = LEAF.replace_all(&xml, |c: &Captures| match kind(c) {
             Some(kind) if c[1] == c[4] => {
                 format!(
                     "<{}{}>{}</{}>",

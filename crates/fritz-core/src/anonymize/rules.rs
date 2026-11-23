@@ -39,8 +39,9 @@ pub(super) fn field(name: &str) -> Option<Kind> {
 
 /// The kind of personal value an XML element or attribute holds, if any,
 /// for lists like `<List><Item><HostName>…</HostName></Item></List>` and
-/// for the device description. Its `friendlyName` is the model name, not a
-/// name given by the owner, unlike the `X_AVM-DE_FriendlyName` of a host.
+/// for the device description. Its `friendlyName` is not covered here: it is
+/// the model name on a FRITZ!Box but a name given by the owner on a
+/// FRITZ!Repeater, which the mapper tells apart by the `modelName`.
 pub(super) fn element(name: &str) -> Option<Kind> {
     let name = name.rsplit(':').next().unwrap_or(name);
     Some(match key(name).as_str() {
