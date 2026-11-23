@@ -10,13 +10,15 @@ use anyhow::Context as _;
 use fritz_core::lists::{Mesh, Node};
 use fritz_core::read::Reader;
 use fritz_core::smarthome::{self, Device, Target, Unit};
-use fritz_core::status::{self, Connection, Host, Hosts, Internet, Overview, Wlan};
+use fritz_core::status::{self, Connection, Host, Hosts, Internet, Overview};
 
 mod host;
 mod tree;
+mod wlan;
 
 pub(crate) use host::{HostsArgs, hosts};
 use tree::mesh_tree;
+pub(crate) use wlan::wlan;
 
 use crate::context::Context;
 use crate::output::{Format, show};
@@ -252,39 +254,6 @@ fn address(node: &Node) -> String {
         (Some(ip), _) => ip.clone(),
         (None, _) => "-".to_owned(),
     }
-}
-
-/// Prints the wireless networks.
-pub(crate) async fn wlan(
-    context: &Context,
-    format: Format,
-    out: &mut impl Write,
-) -> anyhow::Result<()> {
-    let mut reader = reader(context).await?;
-    let wlans = status::wlans(&mut reader)
-        .await
-        .context("cannot read the wireless networks")?;
-    show(wlans.as_slice(), format, out, wlan_table)
-}
-
-fn wlan_table(wlans: &[Wlan], out: &mut impl Write) -> anyhow::Result<()> {
-    let text = |value: Option<String>| value.unwrap_or_default();
-    let number = |value: Option<u32>| value.map_or_else(String::new, |v| v.to_string());
-    let rows = wlans.iter().map(|w| {
-        vec![
-            w.service.clone(),
-            text(w.ssid.clone()),
-            text(w.band.clone()),
-            number(w.channel),
-            text(w.standard.clone()),
-            text(w.status.clone()),
-            number(w.clients),
-        ]
-    });
-    let headers = [
-        "SERVICE", "SSID", "BAND", "CHANNEL", "STANDARD", "STATUS", "CLIENTS",
-    ];
-    table(&headers, rows, out)
 }
 
 /// Prints the Smart Home devices. Logs in to the web interface for this,
@@ -699,16 +668,6 @@ pub(crate) mod tests {
              \n\
              FROM  TO    TYPE  INTERFACE  STATE  RATE\n\
              box   host                          ↓ 2.0 Mbit/s  ↑ 800 kbit/s\n"
-        );
-        let wlans = [Wlan {
-            service: "WLANConfiguration1".to_owned(),
-            channel: Some(6),
-            ..Wlan::default()
-        }];
-        let output = text(|out| wlan_table(&wlans, out));
-        assert!(
-            output.ends_with("WLANConfiguration1              6\n"),
-            "{output}"
         );
     }
 }

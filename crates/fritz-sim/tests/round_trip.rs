@@ -19,6 +19,10 @@ const PERSONAL: [&str; 6] = [
     "responses/X_AVM-DE_OnTel1/GetPhonebookList.json",
 ];
 
+/// The list of the clients of the wireless networks, which a capture does
+/// not read; its fixtures are written by hand.
+const WLAN_CLIENTS: &str = "lists/wlandevicelist.xml";
+
 /// The fixture directories, like `fritzbox-7690/8.25`.
 fn fixtures() -> Vec<PathBuf> {
     let mut dirs = Vec::new();
@@ -67,7 +71,9 @@ async fn capturing_the_simulator_gives_the_fixture() {
         // Nor, by default, personal lists, whose fixtures are written by hand.
         expected.retain(|(name, _)| {
             let name = name.to_string_lossy();
-            !name.starts_with("api") && !PERSONAL.iter().any(|p| name.starts_with(p))
+            !name.starts_with("api")
+                && !name.starts_with(WLAN_CLIENTS)
+                && !PERSONAL.iter().any(|p| name.starts_with(p))
         });
         let actual = files(out.path());
         let names = |files: &[(PathBuf, String)]| -> Vec<PathBuf> {

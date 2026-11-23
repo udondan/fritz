@@ -1322,6 +1322,38 @@ async fn reports_errors_as_yaml() {
 }
 
 #[tokio::test(flavor = "multi_thread")]
+async fn prints_the_clients_of_each_wireless_network() {
+    let fixture = fritz_sim::Fixture::load(FIXTURE).unwrap();
+    let sim = fritz_sim::Sim::start(fixture).await.unwrap();
+    let password = Some(fritz_sim::PASSWORD);
+
+    let json: serde_json::Value =
+        serde_json::from_str(&success(&run(&sim, &["wlan", "--clients"], password).await)).unwrap();
+    assert_eq!(json[1]["client_count"], 11, "{json}");
+    assert_eq!(json[1]["guest"], false, "{json}");
+    assert_eq!(json[1]["clients"][0]["name"], "device-14", "{json}");
+    assert_eq!(json[1]["clients"][0]["signal"], 91, "{json}");
+    assert_eq!(json[1]["clients"][0]["rate"], 2401, "{json}");
+    assert_eq!(json[2]["guest"], true, "{json}");
+    assert_eq!(json[2]["clients"], serde_json::json!([]), "{json}");
+
+    let text = success(&run(&sim, &["--output", "text", "wlan", "--clients"], password).await);
+    assert!(
+        text.starts_with("WLANConfiguration1  wlan-1  2.4 GHz  ch 6  be  Up  4 clients\n"),
+        "{text}"
+    );
+    assert!(text.contains("\n  NAME "), "{text}");
+    assert!(
+        text.contains("  device-14  192.0.2.15  AA:BB:CC:00:00:10  91 %"),
+        "{text}"
+    );
+    assert!(
+        text.ends_with("\nWLANConfiguration3  wlan-2  guest  ch 6  Disabled  0 clients\n"),
+        "{text}"
+    );
+}
+
+#[tokio::test(flavor = "multi_thread")]
 async fn prints_the_state_as_text() {
     let fixture = fritz_sim::Fixture::load(FIXTURE).unwrap();
     let sim = fritz_sim::Sim::start(fixture).await.unwrap();
@@ -1346,11 +1378,17 @@ async fn prints_the_state_as_text() {
     );
     let wlan = text("wlan").await;
     assert!(
-        wlan.starts_with("SERVICE             SSID    BAND     CHANNEL"),
+        wlan.starts_with("SERVICE             SSID    TYPE   BAND     CHANNEL"),
         "{wlan}"
     );
     assert!(
-        wlan.contains("WLANConfiguration1  wlan-1  2.4 GHz  6        be        Up        4\n"),
+        wlan.contains(
+            "WLANConfiguration1  wlan-1         2.4 GHz  6        be        Up        4\n"
+        ),
+        "{wlan}"
+    );
+    assert!(
+        wlan.contains("WLANConfiguration3  wlan-2  guest           6"),
         "{wlan}"
     );
     let hosts = text("hosts").await;

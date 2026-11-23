@@ -246,11 +246,36 @@ the addresses of hosts, and a note on stderr says why.
 
 ```console
 $ fritz wlan
-SERVICE             SSID        BAND     CHANNEL  STANDARD  STATUS    CLIENTS
-WLANConfiguration1  Home        2.4 GHz  6        be        Up        4
-WLANConfiguration2  Home        5 GHz    48       be        Up        11
-WLANConfiguration3  Home-Guest           6                  Disabled  0
+SERVICE             SSID        TYPE   BAND     CHANNEL  STANDARD  STATUS    CLIENTS
+WLANConfiguration1  Home               2.4 GHz  6        be        Up        2
+WLANConfiguration2  Home               5 GHz    48       be        Up        1
+WLANConfiguration3  Home-Guest  guest           6                  Up        1
 ```
+
+The guest network is the one the device reports as such. `--clients` also
+lists the clients of each network, with their names from the host table, the
+signal strength in percent and the rate:
+
+```console
+$ fritz wlan --clients
+WLANConfiguration1  Home  2.4 GHz  ch 6  be  Up  2 clients
+  NAME     IP              MAC                SIGNAL  RATE
+  phone    192.168.178.21  AA:BB:CC:00:00:01  71 %    144 Mbit/s
+  printer  192.168.178.30  AA:BB:CC:00:00:02  52 %    72 Mbit/s
+
+WLANConfiguration2  Home  5 GHz  ch 48  be  Up  1 client
+  NAME    IP              MAC                SIGNAL  RATE
+  laptop  192.168.178.20  AA:BB:CC:00:00:03  91 %    2401 Mbit/s
+
+WLANConfiguration3  Home-Guest  guest  ch 6  Up  1 client
+  NAME  IP              MAC                SIGNAL  RATE
+        192.168.179.20  AA:BB:CC:00:00:04  64 %    86 Mbit/s
+```
+
+The device reports the clients of all networks in one list, read once: a
+client belongs to the guest network by its guest flag, or else to the network
+on its channel. Where there is no list, or where it disagrees with the number
+of clients of a network, `fritz` asks for one client per call.
 
 ### Smart Home
 
@@ -392,7 +417,8 @@ $ fritz wlan --output json | jq '.[0]'
   "standard": "be",
   "enabled": true,
   "status": "Up",
-  "clients": 4
+  "guest": false,
+  "client_count": 2
 }
 ```
 
@@ -545,7 +571,7 @@ claude mcp add fritz -- fritz --host 192.168.178.1 --user agent mcp
 | ----------------------- | ----------------------------------------------------------- |
 | `fritz_overview`        | Model, firmware, uptime, update, connection, rights         |
 | `fritz_internet`        | Internet connection, addresses, DNS, rates, DSL line        |
-| `fritz_wlan`            | Wireless networks                                           |
+| `fritz_wlan`            | Wireless networks, guest network, `clients` of each         |
 | `fritz_hosts`           | Known hosts, paginated, or one host by `mac` or `ip`        |
 | `fritz_mesh`            | Mesh nodes with IPs and links, or a tree of who is where    |
 | `fritz_smarthome`       | Smart Home devices (FRITZ!OS 8.20 and later)                |

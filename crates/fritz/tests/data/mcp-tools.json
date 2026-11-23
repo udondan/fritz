@@ -348,9 +348,16 @@
   },
   {
     "name": "fritz_wlan",
-    "description": "Wireless networks: SSID, band, channel, standard, status, clients.",
+    "description": "Wireless networks: SSID, band, channel, standard, status, guest network, number of clients, and with `clients` the clients of each.",
     "inputSchema": {
-      "properties": {},
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "clients": {
+          "default": false,
+          "description": "Also the clients of each network: name, IP, MAC, signal in percent\nand rate in Mbit/s.",
+          "type": "boolean"
+        }
+      },
       "type": "object"
     },
     "annotations": {

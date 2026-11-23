@@ -109,8 +109,13 @@ enum Command {
         #[arg(long)]
         tree: bool,
     },
-    /// The wireless networks.
-    Wlan,
+    /// The wireless networks, and which is the guest network.
+    Wlan {
+        /// Also the clients of each network: name, IP, MAC, signal and
+        /// rate.
+        #[arg(long)]
+        clients: bool,
+    },
     /// The internet connection and, for DSL, the line.
     Internet,
     /// The Smart Home devices and their values, read through the web
@@ -404,7 +409,10 @@ async fn run(
         Command::Overview => status::overview(&load()?, format, out).await,
         Command::Hosts(args) => status::hosts(&load()?, args, format, out).await,
         Command::Mesh { tree } => status::mesh(&load()?, tree, format, out).await,
-        Command::Wlan => status::wlan(&load()?, format, out).await,
+        Command::Wlan { clients } => {
+            let views = fritz_core::wlan::Views { clients };
+            status::wlan(&load()?, views, format, out).await
+        }
         Command::Internet => status::internet(&load()?, format, out).await,
         Command::Smarthome => status::smarthome(&load()?, format, out).await,
         Command::Ports => device::ports(&load()?, format, out).await,

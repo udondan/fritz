@@ -36,6 +36,7 @@ use fritz_core::settings;
 use fritz_core::smarthome;
 use fritz_core::status::{self, Host};
 use fritz_core::telephony;
+use fritz_core::wlan;
 use rmcp::handler::server::router::tool::ToolRouter;
 use rmcp::handler::server::wrapper::Parameters;
 use rmcp::model::{CallToolResult, ContentBlock, Implementation, ServerCapabilities, ServerConfig};
@@ -104,6 +105,15 @@ pub(crate) struct MeshQuery {
     /// with its links up.
     #[serde(default)]
     tree: bool,
+}
+
+/// The views of `fritz_wlan`.
+#[derive(Debug, Default, Deserialize, JsonSchema)]
+pub(crate) struct WlanQuery {
+    /// Also the clients of each network: name, IP, MAC, signal in percent
+    /// and rate in Mbit/s.
+    #[serde(default)]
+    clients: bool,
 }
 
 /// The filters and the page of `fritz_hosts`.
@@ -297,13 +307,16 @@ impl Server {
     }
 
     #[tool(
-        description = "Wireless networks: SSID, band, channel, standard, status, clients.",
+        description = "Wireless networks: SSID, band, channel, standard, status, guest network, number of clients, and with `clients` the clients of each.",
         annotations(read_only_hint = true, open_world_hint = false)
     )]
-    async fn fritz_wlan(&self) -> CallToolResult {
+    async fn fritz_wlan(&self, Parameters(query): Parameters<WlanQuery>) -> CallToolResult {
         self.respond(async {
             let mut reader = self.reader().await?;
-            Ok(status::wlans(&mut reader).await?)
+            let views = wlan::Views {
+                clients: query.clients,
+            };
+            Ok(wlan::wlans(&mut reader, views).await?)
         })
         .await
     }
