@@ -1,6 +1,7 @@
 //! End-to-end tests of `fritz mcp`, with a client that starts the binary.
 
 use std::path::Path;
+use std::process::Stdio;
 
 use fritz_sim::{Injection, Sim};
 use rmcp::model::CallToolRequestParams;
@@ -41,6 +42,11 @@ async fn connect_with(sim: &Sim, extra: &[&str]) -> Client {
 
 /// Like [`connect_with`], with more variables, which win over the others.
 async fn connect_env(sim: &Sim, extra: &[&str], vars: &[(&str, &str)]) -> Client {
+    connect_stderr(sim, extra, vars, Stdio::inherit()).await
+}
+
+/// Like [`connect_env`], with stderr going to `stderr`.
+async fn connect_stderr(sim: &Sim, extra: &[&str], vars: &[(&str, &str)], stderr: Stdio) -> Client {
     let missing = Path::new(env!("CARGO_TARGET_TMPDIR")).join("missing/config.toml");
     let url = sim.url().to_string();
     let command = tokio::process::Command::new(env!("CARGO_BIN_EXE_fritz")).configure(|cmd| {
@@ -54,9 +60,11 @@ async fn connect_env(sim: &Sim, extra: &[&str], vars: &[(&str, &str)]) -> Client
             .env("FRITZ_PASSWORD", fritz_sim::PASSWORD)
             .envs(vars.iter().copied());
     });
-    ().serve(TokioChildProcess::new(command).unwrap())
-        .await
-        .unwrap()
+    let (transport, _) = TokioChildProcess::builder(command)
+        .stderr(stderr)
+        .spawn()
+        .unwrap();
+    ().serve(transport).await.unwrap()
 }
 
 /// Calls a tool, and returns whether it failed and its JSON.
@@ -401,6 +409,57 @@ async fn reports_faults_with_a_status() {
     assert_eq!(error["status"], "confirmation_required", "{error}");
     assert!(error.get("retry_after").is_none(), "{error}");
     client.cancel().await.unwrap();
+}
+
+#[tokio::test]
+async fn logs_to_a_file_without_secrets() {
+    let sim = sim().await;
+    let dir = tempfile::tempdir().unwrap();
+    let file = dir.path().join("fritz.log");
+    let stderr = dir.path().join("stderr.log");
+    let vars = [
+        ("FRITZ_LOG", "trace"),
+        ("FRITZ_LOG_FILE", file.to_str().unwrap()),
+    ];
+    let output = std::fs::File::create(&stderr).unwrap();
+    let client = connect_stderr(&sim, &[], &vars, output.into()).await;
+
+    // stdout still carries only the protocol.
+    let hosts = success(&client, "fritz_hosts", json!({})).await;
+    assert_eq!(hosts["total"], 50, "{hosts}");
+    let settings = success(&client, "fritz_settings", json!({"modules": ["wlan"]})).await;
+    assert!(settings.is_object(), "{settings}");
+    client.cancel().await.unwrap();
+
+    let log = std::fs::read_to_string(&file).unwrap();
+    // The same lines on stderr, apart from the time.
+    let events = |log: &str| -> Vec<String> {
+        log.lines()
+            .map(|line| line.split_once(' ').unwrap().1.to_owned())
+            .collect()
+    };
+    let stderr = std::fs::read_to_string(&stderr).unwrap();
+    assert_eq!(events(&log), events(&stderr));
+    assert!(
+        log.contains("X_AVM-DE_GetHostListPath\" status=200"),
+        "{log}"
+    );
+    assert!(
+        log.contains("/devicehostlist.lua?sid=*** status=200"),
+        "{log}"
+    );
+    for secret in [
+        fritz_sim::PASSWORD,
+        "5e55104d0c0ffee5",
+        "F1A2B3C4D5E6F708",
+        "fixture-wlan-key",
+        "fixture-guest-key",
+        "Authorization",
+        "cnonce",
+        "response=",
+    ] {
+        assert!(!log.contains(secret), "{secret} in {log}");
+    }
 }
 
 /// The tools that change the device, in builds with the feature `write`.

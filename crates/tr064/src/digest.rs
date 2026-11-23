@@ -1,7 +1,7 @@
 //! HTTP Digest access authentication (RFC 7616), as far as TR-064 devices use
 //! it: the algorithms MD5 and SHA-256, with or without `qop=auth`.
 
-use std::fmt::Write as _;
+use std::fmt::{self, Write as _};
 use std::iter;
 
 use md5::Md5;
@@ -73,6 +73,20 @@ impl Challenge {
             algorithm,
             qop,
         })
+    }
+}
+
+/// The challenge as it may be logged: without the nonce and the opaque
+/// value, which belong to the answer.
+impl fmt::Display for Challenge {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "realm={:?}, algorithm={}, qop={}",
+            self.realm,
+            self.algorithm.name(),
+            if self.qop { "auth" } else { "none" }
+        )
     }
 }
 
@@ -192,6 +206,20 @@ mod tests {
     fn response_of(header: &str) -> &str {
         let start = header.find("response=\"").unwrap() + 10;
         &header[start..start + header[start..].find('"').unwrap()]
+    }
+
+    #[test]
+    fn shows_challenges_without_the_nonce() {
+        let challenge = Challenge::parse(&RFC7616.replace("ALGO", "SHA-256")).unwrap();
+        assert_eq!(
+            challenge.to_string(),
+            r#"realm="http-auth@example.org", algorithm=SHA-256, qop=auth"#
+        );
+        let challenge = Challenge::parse(r#"Digest realm="r", nonce="n""#).unwrap();
+        assert_eq!(
+            challenge.to_string(),
+            r#"realm="r", algorithm=MD5, qop=none"#
+        );
     }
 
     #[test]

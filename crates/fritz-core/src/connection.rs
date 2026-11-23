@@ -2,9 +2,12 @@
 //! certificate, from a profile and the overrides of the command line or the
 //! environment.
 
+use std::sync::Arc;
+
 use tr064::{Client, ClientBuilder, Fingerprint, Url};
 
 use crate::config::Profile;
+use crate::redact;
 
 /// The host when neither the command line nor a profile names one.
 pub const DEFAULT_HOST: &str = "fritz.box";
@@ -193,9 +196,10 @@ impl Target {
     }
 
     /// A client builder for the device, with the certificate pinned for
-    /// `https`. Without credentials, which only actions need.
+    /// `https` and the log redacted by [`redact::Log`]. Without credentials,
+    /// which only actions need.
     pub fn client(&self) -> Result<ClientBuilder, Error> {
-        let builder = Client::builder(self.url.clone());
+        let builder = Client::builder(self.url.clone()).redact(Arc::new(redact::Log));
         match (self.url.scheme(), self.fingerprint) {
             ("https", Some(fingerprint)) => Ok(builder.pin(fingerprint)),
             ("https", None) => Err(Error::NotTrusted(self.url.clone())),

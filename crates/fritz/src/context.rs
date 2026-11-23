@@ -86,7 +86,12 @@ impl Context {
     /// as the default, must exist.
     pub(crate) fn target(&self) -> anyhow::Result<Target> {
         let profile = self.config.profile(self.profile.as_deref())?;
-        Ok(Target::resolve(profile.map(|(_, p)| p), &self.overrides)?)
+        let target = Target::resolve(profile.map(|(_, p)| p), &self.overrides)?;
+        let name = profile.map(|(name, _)| name);
+        let user = target.username.as_deref();
+        let pinned = target.fingerprint.is_some();
+        tracing::debug!(profile = name, url = %target.url, user, pinned, "device");
+        Ok(target)
     }
 
     /// The name of the profile that commands write to: the given one, else
@@ -139,11 +144,10 @@ impl Context {
             (Some(_), _) | (None, Keychains::Disabled) => None,
             _ => Some(self.keychain()?),
         };
-        Ok(secrets::password(
-            self.password.clone(),
-            keychain.as_ref(),
-            &account,
-        )?)
+        let (password, source) =
+            secrets::password(self.password.clone(), keychain.as_ref(), &account)?;
+        tracing::debug!(%account, %source, "password found");
+        Ok((password, source))
     }
 
     /// A client for the target with the password, for calls of actions.

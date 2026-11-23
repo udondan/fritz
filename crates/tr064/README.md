@@ -11,6 +11,8 @@ routers, modems and gateways use for device management.
   retries rejected credentials, so a wrong password does not lock the account
 - TLS with a pinned certificate fingerprint for devices with self-signed
   certificates, and a helper to fetch the fingerprint on first use
+- Logs requests through `tracing`, with argument values and query
+  parameters hidden unless a `Redact` hook shows them
 - rustls only, no OpenSSL
 
 ## Example

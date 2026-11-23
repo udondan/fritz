@@ -1434,3 +1434,185 @@ async fn reads_devices_with_only_a_password() {
         assert!(hosts.contains("device-1"), "{hosts}");
     }
 }
+
+/// The values that must never be logged: the password, the session ID, the
+/// nonce of the simulator, the WLAN keys of the fixture, and any part of an
+/// `Authorization` header.
+const SECRETS: &[&str] = &[
+    fritz_sim::PASSWORD,
+    SESSION,
+    "F1A2B3C4D5E6F708",
+    "fixture-wlan-key",
+    "fixture-guest-key",
+    "Authorization",
+    "AVM-SID",
+    "cnonce",
+    "response=",
+];
+
+/// Runs `fritz` against `sim` once without and once with `FRITZ_LOG`, and
+/// returns the log. stdout and the exit status must be the same, and the
+/// log must not contain any of the [`SECRETS`].
+async fn logged(sim: &fritz_sim::Sim, args: &[&str], password: &str, log: &str) -> String {
+    let mut all = strings(&["--host", sim.url().as_str(), "--user", fritz_sim::USERNAME]);
+    all.extend(strings(args));
+    let password = ("FRITZ_PASSWORD".to_owned(), password.to_owned());
+    let plain = fritz_blocking(all.clone(), vec![password.clone()], "").await;
+    let env = vec![password, ("FRITZ_LOG".to_owned(), log.to_owned())];
+    let output = fritz_blocking(all, env, "").await;
+    assert_eq!(stdout(&output), stdout(&plain), "{args:?}");
+    assert_eq!(output.status.code(), plain.status.code(), "{args:?}");
+    let log = stderr(&output);
+    for secret in SECRETS {
+        assert!(
+            !log.contains(secret),
+            "{secret} in the log of {args:?}: {log}"
+        );
+    }
+    log
+}
+
+#[tokio::test(flavor = "multi_thread")]
+async fn logs_requests_without_secrets() {
+    let fixture = fritz_sim::Fixture::load(FIXTURE).unwrap();
+    let sim = fritz_sim::Sim::start(fixture).await.unwrap();
+    let password = fritz_sim::PASSWORD;
+    let authority = sim.url().authority().to_owned();
+
+    let log = logged(&sim, &["hosts"], password, "trace").await;
+    for expected in [
+        &format!(
+            "INFO tr064::client: request method=POST url=http://{authority}/upnp/control/hosts \
+             action=\"urn:dslforum-org:service:Hosts:1#X_AVM-DE_GetHostListPath\" status=200"
+        ),
+        &format!("url=http://{authority}/devicehostlist.lua?sid=*** status=200"),
+        r#"answer action="X_AVM-DE_GetHostListPath" arguments=NewX_AVM-DE_HostListPath="/devicehostlist.lua?sid=***""#,
+        "the device asks for Digest authentication challenge=realm=",
+        "the device accepted the Digest answer",
+        "fritz::context: password found account=fritz-sim@127.0.0.1 source=the environment variable FRITZ_PASSWORD",
+        "fritz::context: device url=http://",
+        "TRACE tr064::client: document bytes=",
+    ] {
+        assert!(log.contains(expected), "{expected} in {log}");
+    }
+
+    // Secrets of the web interface, and the session.
+    let log = logged(&sim, &["settings", "wlan"], password, "trace").await;
+    assert!(
+        log.contains("logged in to the web interface rights="),
+        "{log}"
+    );
+    assert!(log.contains("/api/v0/generic/wlan status=200"), "{log}");
+    logged(&sim, &["smarthome"], password, "trace").await;
+    // Personal lists only with their size.
+    let log = logged(&sim, &["calls"], password, "trace").await;
+    assert!(log.contains("NewCallListURL=\"("), "{log}");
+    assert!(
+        log.contains("/calllist.lua?sid=***&max=50 status=200"),
+        "{log}"
+    );
+    logged(&sim, &["phonebook"], password, "trace").await;
+    let log = logged(&sim, &["overview"], password, "trace").await;
+    assert!(log.contains(r#"NewDeviceLog="("#), "{log}");
+    // A secret getter is refused before anything is sent.
+    let call = ["tr064", "call", "WLANConfiguration1", "GetSecurityKeys"];
+    let log = logged(&sim, &call, password, "trace").await;
+    assert!(!log.contains("GetSecurityKeys\" status"), "{log}");
+
+    // Failures.
+    let log = logged(&sim, &["overview"], "wrong", "debug").await;
+    assert!(
+        log.contains("the device rejected the Digest answer"),
+        "{log}"
+    );
+    let log = logged(&sim, &["smarthome"], "wrong", "debug").await;
+    assert!(
+        log.contains("the web interface rejected the login"),
+        "{log}"
+    );
+    sim.inject(Injection::LockLogin);
+    let log = logged(&sim, &["smarthome"], password, "debug").await;
+    assert!(log.contains("the web interface blocks logins"), "{log}");
+    sim.clear_injections();
+    sim.inject(Injection::fault("DeviceInfo1", "GetInfo", 868));
+    let call = ["tr064", "call", "DeviceInfo1", "GetInfo"];
+    let log = logged(&sim, &call, password, "debug").await;
+    assert!(
+        log.contains(
+            "the device asks to wait before trying again status=\"busy\" retry_after_seconds=120"
+        ),
+        "{log}"
+    );
+    sim.clear_injections();
+
+    // -v is info, -vv debug, and trace only with FRITZ_LOG.
+    let info = success(&run(&sim, &["-v", "wlan"], Some(password)).await);
+    let output = run(&sim, &["-v", "wlan"], Some(password)).await;
+    assert_eq!(stdout(&output), info);
+    let log = stderr(&output);
+    assert!(log.contains(" INFO tr064::client: request "), "{log}");
+    assert!(!log.contains("DEBUG") && !log.contains("TRACE"), "{log}");
+    let log = stderr(&run(&sim, &["-vv", "wlan"], Some(password)).await);
+    assert!(log.contains("DEBUG") && !log.contains("TRACE"), "{log}");
+    let log = stderr(&run(&sim, &["wlan"], Some(password)).await);
+    assert_eq!(log, "");
+
+    let output = fritz_with(&["config", "show"], &[("FRITZ_LOG", "tr064=loud")]);
+    assert!(
+        failure(&output).contains("invalid FRITZ_LOG \"tr064=loud\""),
+        "{}",
+        stderr(&output)
+    );
+}
+
+#[tokio::test(flavor = "multi_thread")]
+async fn logs_the_check_of_the_certificate() {
+    let fixture = fritz_sim::Fixture::load(FIXTURE).unwrap();
+    let options = fritz_sim::Options {
+        https: true,
+        ..fritz_sim::Options::default()
+    };
+    let sim = fritz_sim::Sim::start_with(fixture, options).await.unwrap();
+    let pinned = sim.fingerprint().unwrap().to_string();
+    let host = sim.url().as_str();
+    let debug = [("FRITZ_LOG", "debug")];
+
+    let args = [
+        "--host",
+        host,
+        "--fingerprint",
+        &pinned,
+        "tr064",
+        "services",
+    ];
+    let output = fritz_with(&args, &debug);
+    let log = stderr(&output);
+    assert!(output.status.success(), "{log}");
+    assert!(
+        log.contains(&format!(
+            "the certificate matches the pinned one fingerprint={pinned}"
+        )),
+        "{log}"
+    );
+    let args = [
+        "--host",
+        host,
+        "--fingerprint",
+        FINGERPRINT,
+        "tr064",
+        "services",
+    ];
+    let log = failure(&fritz_with(&args, &debug));
+    assert!(
+        log.contains("the certificate does not match the pinned one"),
+        "{log}"
+    );
+    let args = ["--host", host, "tls", "fingerprint"];
+    let output = fritz_with(&args, &debug);
+    let log = stderr(&output);
+    assert!(output.status.success(), "{log}");
+    assert!(
+        log.contains("no pinned certificate, reading its fingerprint"),
+        "{log}"
+    );
+}

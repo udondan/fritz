@@ -149,7 +149,7 @@ fn denial(service: &Service, action: &Action) -> Option<String> {
 
 /// Whether a getter returns personal data: calls, contacts, voice messages
 /// and the event log, which names devices and numbers in free text.
-fn is_personal(service: &Service, action: &str) -> bool {
+pub(crate) fn is_personal(service: &Service, action: &str) -> bool {
     match service.name() {
         "X_AVM-DE_OnTel" => action == "GetCallList" || action.starts_with("GetPhonebook"),
         "X_AVM-DE_TAM" => action == "GetMessageList",

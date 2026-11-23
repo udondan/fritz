@@ -120,6 +120,8 @@ keychain:
 | `FRITZ_PROFILE` | `--profile` | The profile to use instead of the default one. |
 | `FRITZ_CONFIG` | `--config` | Another configuration file. |
 | `FRITZ_NO_KEYCHAIN` | | Any value keeps `fritz` away from the keychain. |
+| `FRITZ_LOG` | `-v`, `-vv` | The level of the log on stderr, like `debug`, or a level per crate, like `tr064=trace`. |
+| `FRITZ_LOG_FILE` | | A file that gets the log as well. |
 
 Options and variables take precedence over the profile. The user and the
 certificate of the profile apply only to its own host (the user also over

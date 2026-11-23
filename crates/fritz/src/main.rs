@@ -10,6 +10,7 @@ mod auth;
 mod change;
 mod context;
 mod device;
+mod logging;
 mod mcp;
 mod personal;
 mod settings;
@@ -22,7 +23,7 @@ use std::io::{self, IsTerminal as _};
 use std::path::{Path, PathBuf};
 
 use anyhow::{Context as _, bail};
-use clap::{Args, Parser, Subcommand};
+use clap::{ArgAction, Args, Parser, Subcommand};
 use fritz_core::anonymize;
 use fritz_core::capture::{self, Options, Plan};
 use fritz_core::connection::Overrides;
@@ -73,6 +74,12 @@ struct Global {
     /// pipes, like `fritz hosts | grep phone`.
     #[arg(short, long, global = true, value_enum, env = "FRITZ_OUTPUT")]
     output: Option<Format>,
+    /// Log the requests to stderr, with secrets hidden: -v one line per
+    /// request, -vv also the details. `FRITZ_LOG` sets the level instead,
+    /// like `debug` or `trace`, also per crate like `tr064=debug`, and
+    /// `FRITZ_LOG_FILE` writes the log to a file too.
+    #[arg(short, long, global = true, action = ArgAction::Count)]
+    verbose: u8,
 }
 
 #[derive(Debug, Subcommand)]
@@ -291,6 +298,7 @@ struct CaptureArgs {
 #[tokio::main(flavor = "current_thread")]
 async fn main() -> anyhow::Result<()> {
     let cli = Cli::parse();
+    logging::init(cli.global.verbose)?;
     let global = cli.global;
     let format = global
         .output

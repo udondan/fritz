@@ -449,3 +449,123 @@ async fn reports_unreachable_devices() {
     assert!(matches!(err, Error::Http(_)));
     assert!(err.to_string().starts_with("HTTP request failed: "));
 }
+
+/// Shows every value except those of names with `Secret`.
+#[derive(Debug)]
+struct ShowPlain;
+
+impl tr064::Redact for ShowPlain {
+    fn argument(&self, _: &Service, _: &str, name: &str, value: &str) -> String {
+        self.parameter(name, value)
+    }
+
+    fn parameter(&self, name: &str, value: &str) -> String {
+        if name.contains("Secret") {
+            tr064::HIDDEN.to_owned()
+        } else {
+            value.to_owned()
+        }
+    }
+}
+
+/// Collects the log.
+#[derive(Clone, Default)]
+struct Log(Arc<std::sync::Mutex<Vec<u8>>>);
+
+impl std::io::Write for Log {
+    fn write(&mut self, buf: &[u8]) -> std::io::Result<usize> {
+        self.0.lock().unwrap().extend_from_slice(buf);
+        Ok(buf.len())
+    }
+
+    fn flush(&mut self) -> std::io::Result<()> {
+        Ok(())
+    }
+}
+
+impl Log {
+    fn text(&self) -> String {
+        String::from_utf8(self.0.lock().unwrap().clone()).unwrap()
+    }
+}
+
+#[tokio::test]
+async fn logs_requests_without_secrets() {
+    let log = Log::default();
+    let writer = log.clone();
+    let subscriber = tracing_subscriber::fmt()
+        .with_max_level(tracing::Level::TRACE)
+        .with_writer(move || writer.clone())
+        .finish();
+    // Global: a subscriber of one thread can miss events whose callsites
+    // other tests registered first. The other tests may log here too.
+    tracing::subscriber::set_global_default(subscriber).unwrap();
+
+    let (url, _) = start().await;
+    let client = Client::builder(url.clone())
+        .credentials("user", SecretString::from("secret"))
+        .redact(Arc::new(ShowPlain))
+        .build()
+        .unwrap();
+    let service = device_info(&client).await;
+    client
+        .call(&service, "Echo", &[("NewValue", "plain")])
+        .await
+        .unwrap();
+    client
+        .call(&service, "Echo", &[("NewSecret", "hidden-value")])
+        .await
+        .unwrap();
+    client
+        .get("/protected?NewSecret=token-value&x=1")
+        .await
+        .unwrap();
+    client.get("/expire").await.unwrap();
+    client.get("/protected").await.unwrap();
+    client.get("/basic").await.unwrap_err();
+    client.get("/missing").await.unwrap_err();
+    let wrong = self::client(url.clone(), "wrong-password");
+    wrong.get("/protected").await.unwrap_err();
+    let listener = std::net::TcpListener::bind("127.0.0.1:0").unwrap();
+    let gone = Url::parse(&format!("http://{}", listener.local_addr().unwrap())).unwrap();
+    drop(listener);
+    let client = Client::builder(gone).build().unwrap();
+    client.get("/").await.unwrap_err();
+
+    let text = log.text();
+    let control = format!(
+        "url=http://{}/upnp/control/deviceinfo action=\"{SERVICE_TYPE}#Echo\" status=200",
+        url.authority()
+    );
+    for expected in [
+        "INFO tr064::client: request method=GET url=http://",
+        "/tr64desc.xml status=200",
+        &control,
+        r#"call action="Echo" arguments=NewValue="plain""#,
+        r#"answer action="Echo" arguments=NewValue="plain""#,
+        r#"arguments=NewSecret="***""#,
+        "/protected?NewSecret=***&x=1 status=200",
+        "document bytes=7",
+        r#"the device asks for Digest authentication challenge=realm="test", algorithm=MD5, qop=auth"#,
+        "answering the previous Digest challenge again",
+        "the device accepted the Digest answer",
+        "the device rejected the Digest answer",
+        "/basic error=unsupported authentication challenge",
+        "/missing status=404",
+        "request failed method=GET url=http://127.0.0.1:",
+        "error=HTTP request failed: ",
+    ] {
+        assert!(text.contains(expected), "{expected} in {text}");
+    }
+    for secret in [
+        "hidden-value",
+        "token-value",
+        "wrong-password",
+        "nonce-",
+        "cnonce",
+        "response=",
+        "Authorization",
+    ] {
+        assert!(!text.contains(secret), "{secret} in {text}");
+    }
+}

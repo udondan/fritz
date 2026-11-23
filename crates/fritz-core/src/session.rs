@@ -70,14 +70,20 @@ impl Session {
     ) -> Result<Self, Error> {
         let info = SessionInfo::parse(&client.get(LOGIN).await?)?;
         if info.block_time > 0 {
+            tracing::debug!(seconds = info.block_time, "the web interface blocks logins");
             return Err(Error::Blocked(info.block_time));
         }
         let response = response(&info.challenge, password.expose_secret())?;
         let form = [("username", username), ("response", response.as_str())];
         let info = SessionInfo::parse(&client.post_form(LOGIN, &form).await?)?;
         if info.sid == NO_SESSION {
+            tracing::debug!(
+                block_seconds = info.block_time,
+                "the web interface rejected the login"
+            );
             return Err(Error::Rejected(info.block_time));
         }
+        tracing::debug!(rights = info.rights.len(), "logged in to the web interface");
         Ok(Self {
             client,
             sid: SecretString::from(info.sid),

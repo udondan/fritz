@@ -67,5 +67,8 @@ Anything else goes through TR-064:
   867 (blocked, up to an hour) and 868 (busy, up to two minutes) are
   temporary: wait instead of retrying in a loop. 606 means the user lacks
   the right.
+- If a command fails in a way you cannot explain, run it again with `-vv`:
+  the log on stderr shows the requests and their status, with secrets
+  hidden.
 - `fritz mcp` serves the same data to MCP clients; prefer its tools when
   they are connected. Calls, contacts and the log need `fritz mcp --personal`.

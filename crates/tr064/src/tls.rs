@@ -127,10 +127,20 @@ impl ServerCertVerifier for PinnedVerifier {
         let found = Fingerprint::of(end_entity);
         *self.seen.lock().unwrap_or_else(PoisonError::into_inner) = Some(found);
         match self.expected {
-            Some(expected) if expected != found => Err(rustls::Error::InvalidCertificate(
-                CertificateError::ApplicationVerificationFailure,
-            )),
-            _ => Ok(ServerCertVerified::assertion()),
+            Some(expected) if expected != found => {
+                tracing::debug!(%expected, %found, "the certificate does not match the pinned one");
+                Err(rustls::Error::InvalidCertificate(
+                    CertificateError::ApplicationVerificationFailure,
+                ))
+            }
+            Some(_) => {
+                tracing::debug!(fingerprint = %found, "the certificate matches the pinned one");
+                Ok(ServerCertVerified::assertion())
+            }
+            None => {
+                tracing::debug!(fingerprint = %found, "no pinned certificate, reading its fingerprint");
+                Ok(ServerCertVerified::assertion())
+            }
         }
     }
 

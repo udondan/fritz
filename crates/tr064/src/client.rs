@@ -1,13 +1,14 @@
 //! The HTTP side: fetching documents and calling actions.
 
 use std::sync::{Arc, Mutex};
-use std::time::Duration;
+use std::time::{Duration, Instant};
 
 use reqwest::header::{AUTHORIZATION, CONTENT_TYPE, HeaderValue, WWW_AUTHENTICATE};
 use reqwest::{Method, RequestBuilder, Response, StatusCode, Url, redirect};
 use secrecy::{ExposeSecret as _, SecretString};
 
 use crate::digest::{Challenge, DigestAuth};
+use crate::logging::{self, HideValues, Redact};
 use crate::tls::PinnedVerifier;
 use crate::{Arguments, DeviceDescription, Error, Fingerprint, Scpd, Service, soap};
 
@@ -22,6 +23,7 @@ pub struct Client {
     credentials: Option<(String, SecretString)>,
     /// The answer to the last challenge, reused until the device rejects it.
     auth: Mutex<Option<DigestAuth>>,
+    redact: Arc<dyn Redact>,
 }
 
 /// Configures a [`Client`].
@@ -31,6 +33,7 @@ pub struct ClientBuilder {
     credentials: Option<(String, SecretString)>,
     timeout: Duration,
     pin: Option<Fingerprint>,
+    redact: Arc<dyn Redact>,
 }
 
 impl ClientBuilder {
@@ -56,6 +59,14 @@ impl ClientBuilder {
     #[must_use]
     pub fn pin(mut self, fingerprint: Fingerprint) -> Self {
         self.pin = Some(fingerprint);
+        self
+    }
+
+    /// How values appear in the log, see [`Redact`]. By default, every
+    /// value is hidden.
+    #[must_use]
+    pub fn redact(mut self, redact: Arc<dyn Redact>) -> Self {
+        self.redact = redact;
         self
     }
 
@@ -95,6 +106,7 @@ impl ClientBuilder {
             base: self.base,
             credentials: self.credentials,
             auth: Mutex::new(None),
+            redact: self.redact,
         })
     }
 }
@@ -109,6 +121,7 @@ impl Client {
             credentials: None,
             timeout: DEFAULT_TIMEOUT,
             pin: None,
+            redact: Arc::new(HideValues),
         }
     }
 
@@ -145,8 +158,8 @@ impl Client {
         // Reports an invalid header now, before the request is cloned.
         let (http, request) = request.build_split();
         let request = RequestBuilder::from_parts(http, request?);
-        let response = self.send(request, &Method::GET, &url).await?;
-        text(response).await
+        let response = self.send(request, &Method::GET, &url, None).await?;
+        self.document(response).await
     }
 
     /// Posts a form, `application/x-www-form-urlencoded`, to a path of the
@@ -167,8 +180,8 @@ impl Client {
             .post(url.clone())
             .header(CONTENT_TYPE, "application/x-www-form-urlencoded")
             .body(body);
-        let response = self.send(request, &Method::POST, &url).await?;
-        text(response).await
+        let response = self.send(request, &Method::POST, &url, None).await?;
+        self.document(response).await
     }
 
     /// Fetches and parses the device description `/tr64desc.xml`.
@@ -203,6 +216,11 @@ impl Client {
     ) -> Result<Arguments, Error> {
         let url = self.url(&service.control_url)?;
         let body = soap::envelope(&service.service_type, action, arguments)?;
+        if tracing::enabled!(tracing::Level::TRACE) {
+            let shown =
+                logging::arguments(&*self.redact, service, action, arguments.iter().copied());
+            tracing::trace!(action, arguments = %shown, "call");
+        }
         let soap_action = format!("\"{}#{action}\"", service.service_type);
         let request = self
             .http
@@ -210,8 +228,23 @@ impl Client {
             .header("SOAPAction", soap_action)
             .header(CONTENT_TYPE, r#"text/xml; charset="utf-8""#)
             .body(body);
-        let response = self.send(request, &Method::POST, &url).await?;
-        soap::parse_response(&text(response).await?, action)
+        let response = self
+            .send(request, &Method::POST, &url, Some((service, action)))
+            .await?;
+        let out = soap::parse_response(&text(response).await?, action)?;
+        if tracing::enabled!(tracing::Level::TRACE) {
+            let shown = logging::arguments(&*self.redact, service, action, out.iter());
+            tracing::trace!(action, arguments = %shown, "answer");
+        }
+        Ok(out)
+    }
+
+    /// The body of a document. Only its size is logged: documents can hold
+    /// secrets and personal data the client knows nothing about.
+    async fn document(&self, response: Response) -> Result<String, Error> {
+        let body = text(response).await?;
+        tracing::trace!(bytes = body.len(), "document");
+        Ok(body)
     }
 
     /// Resolves `path` against the base URL. Credentials must only ever go to
@@ -231,12 +264,40 @@ impl Client {
         }
     }
 
-    /// Sends a request. A cached authorization is reused; it only gets there
+    /// Sends a request and logs it: the action, if it is a call, the URL
+    /// with redacted values, and the status or error.
+    async fn send(
+        &self,
+        request: RequestBuilder,
+        method: &Method,
+        url: &Url,
+        call: Option<(&Service, &str)>,
+    ) -> Result<Response, Error> {
+        let start = Instant::now();
+        let result = self.authorized(request, method, url).await;
+        let elapsed_ms = start.elapsed().as_millis();
+        let action = call.map(|(service, action)| format!("{}#{action}", service.service_type));
+        let shown = logging::url(url, &*self.redact);
+        match &result {
+            Ok(response) => {
+                let status = response.status().as_u16();
+                tracing::info!(%method, url = %shown, action, status, elapsed_ms, "request");
+            }
+            Err(error) => {
+                let error = logging::error(error);
+                tracing::info!(%method, url = %shown, action, %error, elapsed_ms, "request failed");
+            }
+        }
+        let response = result?;
+        check_status(response, url).await
+    }
+
+    /// Sends a request with authorization. A cached authorization is reused; it only gets there
     /// after the device accepted it. If the device rejects it, the nonce has
     /// expired, so the client answers the new challenge once. If the device
     /// rejects a fresh answer, the credentials are wrong and the client stops,
     /// so that a wrong password does not lock the account.
-    async fn send(
+    async fn authorized(
         &self,
         request: RequestBuilder,
         method: &Method,
@@ -247,6 +308,9 @@ impl Client {
             None => url.path().to_owned(),
         };
         let cached = self.cached_authorization(method, &uri);
+        if cached.is_some() {
+            tracing::debug!("answering the previous Digest challenge again");
+        }
         let mut response = self.execute(with_authorization(&request, cached)).await?;
         if response.status() == StatusCode::UNAUTHORIZED {
             *self.lock() = None;
@@ -255,11 +319,13 @@ impl Client {
                 .execute(with_authorization(&request, Some(header)))
                 .await?;
             if response.status() == StatusCode::UNAUTHORIZED {
+                tracing::debug!("the device rejected the Digest answer, not trying again");
                 return Err(Error::AuthenticationFailed);
             }
+            tracing::debug!("the device accepted the Digest answer");
             *self.lock() = Some(auth);
         }
-        check_status(response, url).await
+        Ok(response)
     }
 
     /// Sends one request, reporting a certificate mismatch as such.
@@ -278,7 +344,9 @@ impl Client {
             .credentials
             .as_ref()
             .ok_or(Error::CredentialsRequired)?;
-        let mut auth = DigestAuth::new(challenge(response.headers().get_all(WWW_AUTHENTICATE))?);
+        let challenge = challenge(response.headers().get_all(WWW_AUTHENTICATE))?;
+        tracing::debug!(%challenge, "the device asks for Digest authentication");
+        let mut auth = DigestAuth::new(challenge);
         let header = auth.authorization(username, password.expose_secret(), method.as_str(), uri);
         Ok((auth, header))
     }
