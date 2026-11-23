@@ -42,6 +42,7 @@ status and settings of a FRITZ!Box router.
   - [JSON output](#json-output)
   - [Several devices and the environment](#several-devices-and-the-environment)
   - [Debug log](#debug-log)
+  - [Shell completion](#shell-completion)
 - [MCP server](#mcp-server)
   - [Docker](#docker)
 - [Changes](#changes)
@@ -60,8 +61,10 @@ docker pull udondan/fritz             # see Docker below
 ```
 
 The [releases](https://github.com/udondan/fritz/releases) also have binaries
-for Linux (x86_64, aarch64, static), macOS and Windows. `SHA256SUMS.txt` lists
-their checksums and is signed with the GPG key `F111A9BDD62F384A`:
+for Linux (x86_64, aarch64, static), macOS and Windows, with the
+[completion scripts](#shell-completion) in `completions/`; Homebrew installs
+them for bash, zsh and fish. `SHA256SUMS.txt` lists the checksums of the
+archives and is signed with the GPG key `F111A9BDD62F384A`:
 
 ```sh
 gpg --verify SHA256SUMS.txt.asc SHA256SUMS.txt
@@ -393,6 +396,22 @@ client may not show stderr.
 The log hides the same secrets as the output: passwords, keys and session
 IDs become `***`, even in URLs. Calls, contacts and the event log only
 appear with their size, and documents like host lists never appear at all.
+
+### Shell completion
+
+`fritz completion <shell>` prints the completion script for bash, zsh, fish,
+elvish or PowerShell. It completes the commands, the options and the names
+of the profiles from the configuration file. On every completion the script
+calls `fritz` from the `PATH`, which never contacts the device. Write the
+script again after an update of fritz:
+
+```sh
+fritz completion bash > ~/.local/share/bash-completion/completions/fritz
+fritz completion zsh > "${fpath[1]}/_fritz"
+fritz completion fish > ~/.config/fish/completions/fritz.fish
+```
+
+`fritz completion --help` shows the commands for elvish and PowerShell.
 
 ## MCP server
 
