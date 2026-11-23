@@ -33,10 +33,24 @@ default:
   of personal actions only appear with their size. A bare level only enables
   the crates of `fritz`; other crates log only when named and are not
   redacted.
-- **Credentials** come from the environment or the OS keychain, never from
-  config files or command line arguments.
+- **Credentials** come from the environment, a password command, or the OS
+  keychain, never from config files or command line arguments.
+- **A password command** (`password_command` in the profile, or
+  `FRITZ_PASSWORD_COMMAND`) comes only from the configuration file or the
+  environment, never from the device or an MCP client. It is a list of
+  arguments and runs without a shell, with a timeout of 30 seconds. Its
+  output is kept only in memory and never printed; errors name the command,
+  not its output. Without a terminal, like under `fritz mcp`, the command
+  gets no input, so it cannot read the messages of the MCP client. `fritz`
+  warns when others may change the configuration file that holds the
+  command.
 - **TLS** to the device is pinned to the certificate fingerprint you confirmed
   on first use. There is no option to turn verification off.
+- **No other hosts on its own.** `fritz` only talks to the device. The one
+  exception is `fritz version --check`, which runs only when asked for (never
+  in `fritz mcp`), asks the GitHub API over HTTPS with the system's root
+  certificates for the latest release, sends nothing but a generic user
+  agent, and downloads nothing else.
 - **Two-factor confirmation** that the device asks for is reported back, never
   bypassed.
 - **Data from the device** (host names, network names, phone book entries) is

@@ -1,6 +1,6 @@
 //! The configuration file: named profiles with the address of a device, the
-//! user and the trusted certificate. Passwords never go here, see
-//! [`secrets`](crate::secrets).
+//! user, the trusted certificate and optionally a command that prints the
+//! password. Passwords never go here, see [`secrets`](crate::secrets).
 //!
 //! ```toml
 //! default_profile = "home"
@@ -9,6 +9,7 @@
 //! host = "192.168.178.1"
 //! username = "agent"
 //! fingerprint = "AB:CD:…"
+//! password_command = ["op", "read", "op://Private/FRITZ!Box/password"]
 //!
 //! [write]
 //! deny = ["<identity of the device>"]
@@ -25,6 +26,7 @@ use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use tr064::Fingerprint;
 
 use crate::identity::Targets;
+use crate::secrets::command::PasswordCommand;
 
 /// The configuration file could not be read or written.
 #[derive(Debug, thiserror::Error)]
@@ -95,6 +97,10 @@ pub struct Profile {
         deserialize_with = "deserialize_fingerprint"
     )]
     pub fingerprint: Option<Fingerprint>,
+    /// The command that prints the password, see
+    /// [`command`](crate::secrets::command).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub password_command: Option<PasswordCommand>,
 }
 
 #[expect(clippy::ref_option, reason = "the signature serde expects")]
@@ -157,6 +163,22 @@ impl Config {
         std::fs::rename(&temporary, path).map_err(write)
     }
 
+    /// Whether others than the owner may change the file, which matters
+    /// when it contains a password command. Always `false` on systems
+    /// without Unix permissions, and when the file cannot be read.
+    pub fn writable_by_others(path: &Path) -> bool {
+        #[cfg(unix)]
+        {
+            use std::os::unix::fs::PermissionsExt as _;
+            std::fs::metadata(path).is_ok_and(|m| m.permissions().mode() & 0o022 != 0)
+        }
+        #[cfg(not(unix))]
+        {
+            let _ = path;
+            false
+        }
+    }
+
     /// The name of the profile to use: the given one, else the default one.
     /// `None` if neither is set.
     pub fn profile_name<'a>(&'a self, name: Option<&'a str>) -> Option<&'a str> {
@@ -188,6 +210,11 @@ mod tests {
             host: "192.168.178.1".to_owned(),
             username: Some("agent".to_owned()),
             fingerprint: Some(FINGERPRINT.parse().unwrap()),
+            password_command: Some(
+                vec!["pass".to_owned(), "fritz".to_owned()]
+                    .try_into()
+                    .unwrap(),
+            ),
         }
     }
 
@@ -219,6 +246,10 @@ mod tests {
             "{text}"
         );
         assert!(text.contains("[write]\ndeny = [\""), "{text}");
+        assert!(
+            text.contains("password_command = [\"pass\", \"fritz\"]"),
+            "{text}"
+        );
         assert!(!dir.path().join("nested/config.toml.tmp").exists());
         assert_eq!(Config::load(&path).unwrap(), config);
     }
@@ -241,6 +272,7 @@ mod tests {
             "[profile.home]\nhost = \"fritz.box\"\nfingerprint = \"00\"\n",
             "unknown = 1\n",
             "[write]\nallow = [\"00\"]\n",
+            "[profile.home]\nhost = \"fritz.box\"\npassword_command = []\n",
         ] {
             std::fs::write(&path, text).unwrap();
             let error = Config::load(&path).unwrap_err();
@@ -281,6 +313,29 @@ mod tests {
         config.default_profile = Some("home".to_owned());
         assert_eq!(config.profile(None).unwrap(), Some(("home", &home())));
         assert_eq!(config.profile_name(Some("lab")), Some("lab"));
+    }
+
+    #[test]
+    fn tells_whether_others_may_write() {
+        let dir = tempfile::tempdir().unwrap();
+        let path = dir.path().join("config.toml");
+        assert!(!Config::writable_by_others(&path));
+        Config::default().save(&path).unwrap();
+        #[cfg(unix)]
+        {
+            use std::os::unix::fs::PermissionsExt as _;
+            let set = |mode| {
+                std::fs::set_permissions(&path, std::fs::Permissions::from_mode(mode)).unwrap();
+            };
+            set(0o600);
+            assert!(!Config::writable_by_others(&path));
+            set(0o620);
+            assert!(Config::writable_by_others(&path));
+            set(0o602);
+            assert!(Config::writable_by_others(&path));
+        }
+        #[cfg(not(unix))]
+        assert!(!Config::writable_by_others(&path));
     }
 
     #[test]

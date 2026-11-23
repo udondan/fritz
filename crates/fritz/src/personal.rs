@@ -1,5 +1,5 @@
 //! `fritz calls`, `phonebook` and `log`: the personal lists of the device,
-//! as text or JSON.
+//! as text, JSON or YAML.
 
 use std::io::Write;
 
@@ -7,20 +7,8 @@ use anyhow::Context as _;
 use fritz_core::personal::{self, Call, LogEntry, Phonebook};
 
 use crate::context::Context;
-use crate::status::{Format, json, reader, table};
-
-/// Prints `items` as JSON, or as text with `text`.
-fn show<T: serde::Serialize, W: Write>(
-    items: &[T],
-    format: Format,
-    out: &mut W,
-    text: fn(&[T], &mut W) -> anyhow::Result<()>,
-) -> anyhow::Result<()> {
-    match format {
-        Format::Json => json(&items, out),
-        Format::Text => text(items, out),
-    }
-}
+use crate::output::{Format, show};
+use crate::status::{reader, table};
 
 /// Prints the latest calls.
 pub(crate) async fn calls(
@@ -32,7 +20,7 @@ pub(crate) async fn calls(
     let calls = personal::calls(&mut reader(context).await?, limit)
         .await
         .context("cannot read the calls")?;
-    show(&calls, format, out, calls_table)
+    show(calls.as_slice(), format, out, calls_table)
 }
 
 fn calls_table(calls: &[Call], out: &mut impl Write) -> anyhow::Result<()> {
@@ -80,7 +68,7 @@ pub(crate) async fn phonebook(
         Some(text) => personal::search(phonebooks, text),
         None => phonebooks,
     };
-    show(&phonebooks, format, out, contacts_table)
+    show(phonebooks.as_slice(), format, out, contacts_table)
 }
 
 /// A row per number, and one for a contact without a number.
@@ -133,7 +121,7 @@ pub(crate) async fn log(
     let log = personal::log(&mut reader(context).await?, limit)
         .await
         .context("cannot read the event log")?;
-    show(&log, format, out, log_lines)
+    show(log.as_slice(), format, out, log_lines)
 }
 
 fn log_lines(log: &[LogEntry], out: &mut impl Write) -> anyhow::Result<()> {

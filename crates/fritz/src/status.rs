@@ -1,5 +1,5 @@
 //! `fritz overview`, `hosts`, `mesh`, `wlan`, `internet` and `smarthome`:
-//! the state of the device as text or JSON.
+//! the state of the device as text, JSON or YAML.
 //!
 //! Values from the device are untrusted: control characters in them are
 //! replaced in text output, so a host name cannot steer the terminal.
@@ -11,30 +11,16 @@ use fritz_core::lists::Mesh;
 use fritz_core::read::Reader;
 use fritz_core::smarthome::{self, Device, Target, Unit};
 use fritz_core::status::{self, Connection, Host, Hosts, Internet, Overview, Wlan};
-use serde::Serialize;
 
 mod tree;
 
 use tree::mesh_tree;
 
 use crate::context::Context;
-
-/// How to print the result.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, clap::ValueEnum)]
-pub(crate) enum Format {
-    Text,
-    Json,
-}
-
-impl Format {
-    /// Text for a terminal, else JSON.
-    pub(crate) fn for_terminal(terminal: bool) -> Self {
-        if terminal { Self::Text } else { Self::Json }
-    }
-}
+use crate::output::{Format, show};
 
 pub(crate) async fn reader(context: &Context) -> anyhow::Result<Reader> {
-    let client = context.client()?;
+    let client = context.client().await?;
     Reader::new(client)
         .await
         .context("cannot read the device description")
@@ -50,10 +36,9 @@ pub(crate) async fn overview(
     let overview = status::overview(&mut reader)
         .await
         .context("cannot read the overview")?;
-    match format {
-        Format::Json => json(&overview, out),
-        Format::Text => pairs(&overview_pairs(&overview), out),
-    }
+    show(&overview, format, out, |o, out| {
+        pairs(&overview_pairs(o), out)
+    })
 }
 
 fn overview_pairs(overview: &Overview) -> Vec<(&'static str, Option<String>)> {
@@ -104,10 +89,9 @@ pub(crate) async fn internet(
     let internet = status::internet(&mut reader)
         .await
         .context("cannot read the internet connection")?;
-    match format {
-        Format::Json => json(&internet, out),
-        Format::Text => pairs(&internet_pairs(&internet), out),
-    }
+    show(&internet, format, out, |i, out| {
+        pairs(&internet_pairs(i), out)
+    })
 }
 
 fn internet_pairs(internet: &Internet) -> Vec<(&'static str, Option<String>)> {
@@ -195,10 +179,7 @@ pub(crate) async fn hosts(
     if active {
         hosts.hosts.retain(|h| h.active);
     }
-    match format {
-        Format::Json => json(&hosts, out),
-        Format::Text => host_table(&hosts, out),
-    }
+    show(&hosts, format, out, host_table)
 }
 
 /// A line that tells how many hosts were not read, or nothing.
@@ -240,11 +221,10 @@ pub(crate) async fn mesh(
         .await
         .context("cannot read the mesh")?
         .context("the device has no mesh list, or the user may not read it")?;
-    match (format, tree) {
-        (Format::Json, false) => json(&mesh, out),
-        (Format::Json, true) => json(&mesh.tree(), out),
-        (Format::Text, false) => mesh_tables(&mesh, out),
-        (Format::Text, true) => mesh_tree(&mesh.tree(), out),
+    if tree {
+        show(mesh.tree().as_slice(), format, out, mesh_tree)
+    } else {
+        show(&mesh, format, out, mesh_tables)
     }
 }
 
@@ -283,10 +263,7 @@ pub(crate) async fn wlan(
     let wlans = status::wlans(&mut reader)
         .await
         .context("cannot read the wireless networks")?;
-    match format {
-        Format::Json => json(&wlans, out),
-        Format::Text => wlan_table(&wlans, out),
-    }
+    show(wlans.as_slice(), format, out, wlan_table)
 }
 
 fn wlan_table(wlans: &[Wlan], out: &mut impl Write) -> anyhow::Result<()> {
@@ -325,10 +302,7 @@ pub(crate) async fn smarthome(
     let logout = session.logout().await;
     let devices = devices.context("cannot read the Smart Home devices")?;
     logout.context("cannot log out of the web interface")?;
-    match format {
-        Format::Json => json(&devices, out),
-        Format::Text => smarthome_table(&devices, out),
-    }
+    show(devices.as_slice(), format, out, smarthome_table)
 }
 
 /// One line per unit, so devices with several units, like a plug with a
@@ -404,12 +378,6 @@ fn other(unit: &Unit) -> String {
     values.extend(unit.humidity.map(|h| format!("humidity {h}%")));
     values.extend(unit.alerts.iter().map(|a| format!("alert {a}")));
     values.join(", ")
-}
-
-pub(crate) fn json(value: &impl Serialize, out: &mut impl Write) -> anyhow::Result<()> {
-    serde_json::to_writer_pretty(&mut *out, value)?;
-    writeln!(out)?;
-    Ok(())
 }
 
 /// Prints the pairs that have a value, one per line, with aligned values.
@@ -488,12 +456,6 @@ pub(crate) mod tests {
         let mut out = Vec::new();
         write(&mut out).unwrap();
         String::from_utf8(out).unwrap()
-    }
-
-    #[test]
-    fn prints_text_only_to_terminals() {
-        assert_eq!(Format::for_terminal(true), Format::Text);
-        assert_eq!(Format::for_terminal(false), Format::Json);
     }
 
     #[test]
