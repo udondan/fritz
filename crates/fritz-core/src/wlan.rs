@@ -238,7 +238,7 @@ fn names(hosts: &[status::Host]) -> HashMap<String, String> {
 }
 
 /// The frequency band in MHz as text, like `2400` as `2.4 GHz`.
-fn band(megahertz: &str) -> Option<String> {
+pub(crate) fn band(megahertz: &str) -> Option<String> {
     match megahertz {
         "2400" => Some("2.4 GHz".to_owned()),
         "5000" => Some("5 GHz".to_owned()),

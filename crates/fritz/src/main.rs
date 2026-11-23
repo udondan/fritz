@@ -12,6 +12,7 @@ mod change;
 mod completion;
 mod context;
 mod device;
+mod interfaces;
 mod logging;
 mod mcp;
 mod output;
@@ -22,6 +23,7 @@ mod system;
 mod tls;
 mod tr64;
 mod version;
+mod watch;
 
 use std::io::{self, IsTerminal as _, Write as _};
 use std::path::{Path, PathBuf};
@@ -118,6 +120,12 @@ enum Command {
     },
     /// The internet connection and, for DSL, the line.
     Internet,
+    /// The LAN interfaces and wireless networks with their counters, and
+    /// the LAN ports. The ports need a login to the web interface.
+    Interfaces {
+        #[command(flatten)]
+        watch: watch::Options,
+    },
     /// The Smart Home devices and their values, read through the web
     /// interface (FRITZ!OS 8.20 and later).
     Smarthome,
@@ -414,6 +422,7 @@ async fn run(
             status::wlan(&load()?, views, format, out).await
         }
         Command::Internet => status::internet(&load()?, format, out).await,
+        Command::Interfaces { watch } => interfaces::interfaces(&load()?, watch, format, out).await,
         Command::Smarthome => status::smarthome(&load()?, format, out).await,
         Command::Ports => device::ports(&load()?, format, out).await,
         Command::Telephony => device::telephony(&load()?, format, out).await,

@@ -16,6 +16,7 @@ pub mod fault;
 pub mod generic;
 pub mod host;
 pub mod identity;
+pub mod interfaces;
 pub mod lists;
 mod names;
 pub mod personal;

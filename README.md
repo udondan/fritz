@@ -34,6 +34,7 @@ status and settings of a FRITZ!Box router.
   - [Status and internet](#status-and-internet)
   - [Hosts and mesh](#hosts-and-mesh)
   - [Wireless networks](#wireless-networks)
+  - [Interfaces and counters](#interfaces-and-counters)
   - [Smart Home](#smart-home)
   - [Ports, telephony and capabilities](#ports-telephony-and-capabilities)
   - [Settings](#settings)
@@ -276,6 +277,41 @@ The device reports the clients of all networks in one list, read once: a
 client belongs to the guest network by its guest flag, or else to the network
 on its channel. Where there is no list, or where it disagrees with the number
 of clients of a network, `fritz` asks for one client per call.
+
+### Interfaces and counters
+
+`fritz interfaces` shows the LAN interface and the wireless networks with
+their status, link, bytes and packets, and errors and discarded packets
+where the device reports them (FRITZ!OS does not over TR-064). The LAN ports
+come from the web interface; if it cannot be read, a note says why.
+
+```console
+$ fritz interfaces
+INTERFACE                    NAME        STATUS    LINK                RECEIVED  SENT    PACKETS RECEIVED  PACKETS SENT  ERRORS  DISCARDED
+LANEthernetInterfaceConfig1              Up        Auto, Auto duplex   876.4 GB  1.1 TB  709553279         1029439075
+WLANConfiguration1           Home        Up        2.4 GHz, channel 6                    48211907          93127730
+WLANConfiguration2           Home        Up        5 GHz, channel 48                     301947112         512033871
+WLANConfiguration3           Home-Guest  Disabled  6 GHz, channel 37                     0                 0
+
+PORT   CONNECTED  SPEED        MAXIMUM      ENERGY SAVING
+LAN 1  yes        1000 Mbit/s  2500 Mbit/s  on
+LAN 2  no                      1000 Mbit/s  on
+```
+
+`--watch` reads again every `--interval` seconds (default 5) and prints the
+rates and the new errors since the read before, until interrupted or after
+`--count` intervals. With `--output json`, each interval is one line
+(NDJSON). A counter that falls is taken as wrapped around at 2^32 if it fit
+in 32 bits, and as reset otherwise; a reset leaves the change out.
+
+```console
+$ fritz interfaces --watch --interval 10
+INTERFACE                    NAME        STATUS    RECEIVED     SENT        PACKETS RECEIVED  PACKETS SENT  ERRORS  DISCARDED
+LANEthernetInterfaceConfig1              Up        48.2 Mbit/s  2.1 Mbit/s  4211.6/s          1893.2/s
+WLANConfiguration1           Home        Up                                 12.4/s            15.0/s
+WLANConfiguration2           Home        Up                                 3920.8/s          2104.4/s
+WLANConfiguration3           Home-Guest  Disabled                           0.0/s             0.0/s
+```
 
 ### Smart Home
 
@@ -572,6 +608,7 @@ claude mcp add fritz -- fritz --host 192.168.178.1 --user agent mcp
 | `fritz_overview`        | Model, firmware, uptime, update, connection, rights         |
 | `fritz_internet`        | Internet connection, addresses, DNS, rates, DSL line        |
 | `fritz_wlan`            | Wireless networks, guest network, `clients` of each         |
+| `fritz_interfaces`      | LAN and WLAN counters of bytes, packets, errors; LAN ports  |
 | `fritz_hosts`           | Known hosts, paginated, or one host by `mac` or `ip`        |
 | `fritz_mesh`            | Mesh nodes with IPs and links, or a tree of who is where    |
 | `fritz_smarthome`       | Smart Home devices (FRITZ!OS 8.20 and later)                |

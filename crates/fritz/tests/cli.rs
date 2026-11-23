@@ -1354,6 +1354,90 @@ async fn prints_the_clients_of_each_wireless_network() {
 }
 
 #[tokio::test(flavor = "multi_thread")]
+async fn prints_the_interfaces() {
+    let fixture = fritz_sim::Fixture::load(FIXTURE).unwrap();
+    let sim = fritz_sim::Sim::start(fixture).await.unwrap();
+    let password = Some(fritz_sim::PASSWORD);
+
+    let json = success(&run(&sim, &["--output", "json", "interfaces"], password).await);
+    let json: serde_json::Value = serde_json::from_str(&json).unwrap();
+    assert_eq!(
+        json["lan"][0]["bytes_sent"], 1_137_729_983_971_u64,
+        "{json}"
+    );
+    assert_eq!(json["ports"][0]["name"], "LAN 1", "{json}");
+    assert_eq!(json["wlan"].as_array().unwrap().len(), 3, "{json}");
+    assert!(json.get("ports_unavailable").is_none(), "{json}");
+
+    let text = success(&run(&sim, &["--output", "text", "interfaces"], password).await);
+    assert!(text.starts_with("INTERFACE "), "{text}");
+    assert!(
+        text.contains("LANEthernetInterfaceConfig1  ") && text.contains("\nPORT "),
+        "{text}"
+    );
+
+    sim.inject(Injection::counter(
+        "LANEthernetInterfaceConfig1",
+        "Stats.BytesSent",
+        1000,
+        None,
+    ));
+    let watch = |output: &str, count: &str| {
+        let args = [
+            "--output",
+            output,
+            "interfaces",
+            "--watch",
+            "--interval",
+            "1",
+            "--count",
+            count,
+        ];
+        strings(&args)
+    };
+    let args = watch("json", "2");
+    let args: Vec<&str> = args.iter().map(String::as_str).collect();
+    let lines = success(&run(&sim, &args, password).await);
+    let samples: Vec<serde_json::Value> = lines
+        .lines()
+        .map(|line| serde_json::from_str(line).unwrap())
+        .collect();
+    assert_eq!(samples.len(), 2, "{lines}");
+    for sample in &samples {
+        let lan = &sample["interfaces"][0];
+        assert_eq!(lan["service"], "LANEthernetInterfaceConfig1", "{sample}");
+        assert_eq!(lan["changes"]["bytes_sent"], 1000, "{sample}");
+        assert!(lan["bytes_sent_per_second"].as_f64().unwrap() > 0.0);
+    }
+    let args = watch("text", "2");
+    let args: Vec<&str> = args.iter().map(String::as_str).collect();
+    let text = success(&run(&sim, &args, password).await);
+    assert!(text.starts_with("INTERFACE "), "{text}");
+    assert!(text.contains("\n\nINTERFACE "), "{text}");
+    assert!(text.contains("bit/s"), "{text}");
+
+    let error = failure(&run(&sim, &["interfaces", "--watch"], Some("wrong")).await);
+    assert!(error.contains("cannot read the interfaces"), "{error}");
+}
+
+#[tokio::test(flavor = "multi_thread")]
+async fn reads_the_interfaces_without_ports() {
+    // The repeater has no LAN ports in its web interface.
+    let fixture = fritz_sim::Fixture::bundled("fritz-repeater-2400/8.25").unwrap();
+    let sim = fritz_sim::Sim::start(fixture).await.unwrap();
+    let password = Some(fritz_sim::PASSWORD);
+    let json = success(&run(&sim, &["--output", "json", "interfaces"], password).await);
+    let json: serde_json::Value = serde_json::from_str(&json).unwrap();
+    let unavailable = json["ports_unavailable"].as_str().unwrap();
+    assert!(
+        unavailable.starts_with("cannot read the LAN ports"),
+        "{unavailable}"
+    );
+    let text = success(&run(&sim, &["--output", "text", "interfaces"], password).await);
+    assert!(text.contains("\nLAN ports  unavailable: "), "{text}");
+}
+
+#[tokio::test(flavor = "multi_thread")]
 async fn prints_the_state_as_text() {
     let fixture = fritz_sim::Fixture::load(FIXTURE).unwrap();
     let sim = fritz_sim::Sim::start(fixture).await.unwrap();
@@ -1439,6 +1523,7 @@ async fn reports_failed_reads() {
         ("overview", "cannot read the overview"),
         ("internet", "cannot read the internet connection"),
         ("wlan", "cannot read the wireless networks"),
+        ("interfaces", "cannot read the interfaces"),
         ("hosts", "cannot read the hosts"),
         ("mesh", "cannot read the mesh"),
         ("smarthome", "cannot log in to the web interface"),

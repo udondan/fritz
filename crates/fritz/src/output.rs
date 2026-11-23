@@ -46,7 +46,6 @@ where
 /// Prints one sample of a command that keeps printing, like a watch: JSON
 /// as one line per sample, YAML as one document per sample, each after a
 /// line `---`, or text with `text`.
-#[cfg_attr(not(test), expect(dead_code, reason = "for commands that watch"))]
 pub(crate) fn sample<T, W>(
     value: &T,
     format: Format,

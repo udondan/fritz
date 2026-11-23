@@ -322,6 +322,18 @@ impl Server {
     }
 
     #[tool(
+        description = "LAN interfaces and wireless networks with byte, packet and error counters; LAN ports.",
+        annotations(read_only_hint = true, open_world_hint = false)
+    )]
+    async fn fritz_interfaces(&self) -> CallToolResult {
+        self.respond(async {
+            let mut reader = self.reader().await?;
+            crate::interfaces::snapshot(&self.context, &mut reader).await
+        })
+        .await
+    }
+
+    #[tool(
         description = "Port forwardings and whether UPnP lets hosts open ports.",
         annotations(read_only_hint = true, open_world_hint = false)
     )]
