@@ -34,7 +34,7 @@ impl Format {
 }
 
 pub(crate) async fn reader(context: &Context) -> anyhow::Result<Reader> {
-    let client = context.client()?;
+    let client = context.client().await?;
     Reader::new(client)
         .await
         .context("cannot read the device description")

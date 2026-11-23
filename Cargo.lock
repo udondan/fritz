@@ -828,6 +828,7 @@ dependencies = [
  "pbkdf2",
  "regex",
  "roxmltree",
+ "rustix",
  "secrecy",
  "serde",
  "serde_json",
