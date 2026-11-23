@@ -150,6 +150,41 @@
     }
   },
   {
+    "name": "fritz_dns",
+    "description": "Why a name does or does not resolve: local domain, DNS servers handed out and host table of the router, answers of the router's DNS server and of this machine's resolver, this machine's resolvers and search domains, and a verdict with the likely cause. Asks only for this name; changes nothing.",
+    "inputSchema": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "expected_ip": {
+          "description": "The address the answers should have.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "name": {
+          "description": "Like `nas.fritz.box` or `nas`.",
+          "type": "string"
+        },
+        "router_dns": {
+          "description": "The DNS server asked as the router, like `192.168.178.1`. Default:\nthe LAN address of the device.",
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "type": "object"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "openWorldHint": true
+    }
+  },
+  {
     "name": "fritz_doctor",
     "description": "Checks the setup step by step: configuration, host, port, certificate, password source, login, rights, two-factor, web interface, Smart Home. Each check: status (ok, warn, fail, skip), detail and hint. Call first when other tools fail.",
     "inputSchema": {

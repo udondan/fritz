@@ -70,6 +70,7 @@ use tr064::{ClientBuilder, Fingerprint, SecretString, Service, Url};
 mod auth;
 mod callmonitor;
 mod device;
+pub mod dns;
 mod fixture;
 mod soap;
 mod tls;

@@ -132,6 +132,31 @@ async fn checks_the_setup() {
 }
 
 #[tokio::test(flavor = "multi_thread")]
+async fn diagnoses_name_resolution() {
+    let sim = sim().await;
+    let records = [("localhost", "127.0.0.1"), ("localhost", "::1")];
+    let dns = fritz_sim::dns::DnsServer::start(&records).await.unwrap();
+    let server = dns.address().to_string();
+    let client = connect(&sim).await;
+    let arguments = json!({"name": "localhost", "expected_ip": "127.0.0.1", "router_dns": server});
+    let report = success(&client, "fritz_dns", arguments).await;
+    assert_eq!(report["verdict"]["cause"], "ok", "{report}");
+    assert_eq!(report["expected"]["router"], true, "{report}");
+    let report = success(&client, "fritz_dns", json!({"name": "device-2.local"})).await;
+    assert_eq!(report["verdict"]["cause"], "mdns", "{report}");
+    for arguments in [
+        json!({"name": "a b"}),
+        json!({"name": "nas", "expected_ip": "nas"}),
+        json!({"name": "nas", "router_dns": "router"}),
+    ] {
+        let error = failure(&client, "fritz_dns", arguments).await;
+        assert!(error.to_string().contains("not"), "{error}");
+    }
+    assert_eq!(dns.queries().len(), 2);
+    client.cancel().await.unwrap();
+}
+
+#[tokio::test(flavor = "multi_thread")]
 async fn lists_tools_within_the_budget() {
     let sim = sim().await;
     // All tools, the personal ones included.

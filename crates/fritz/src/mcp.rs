@@ -28,6 +28,7 @@ use fritz_core::capture::short_id;
 #[cfg(feature = "write")]
 use fritz_core::change::{self, Changer, Permit, Settings};
 use fritz_core::diagnose::{self, ROUTER, System};
+use fritz_core::dns;
 use fritz_core::firmware;
 use fritz_core::generic;
 use fritz_core::host::{self, Lookup};
@@ -239,6 +240,18 @@ pub(crate) struct DiagnoseQuery {
     /// addresses, not with `router`.
     #[serde(default)]
     ports: Vec<u16>,
+}
+
+/// The name of `fritz_dns`.
+#[derive(Debug, Default, Deserialize, JsonSchema)]
+pub(crate) struct DnsQuery {
+    /// Like `nas.fritz.box` or `nas`.
+    name: String,
+    /// The address the answers should have.
+    expected_ip: Option<String>,
+    /// The DNS server asked as the router, like `192.168.178.1`. Default:
+    /// the LAN address of the device.
+    router_dns: Option<String>,
 }
 
 /// The modules of `fritz_settings`.
@@ -577,6 +590,19 @@ impl Server {
             } else {
                 users.without_names(PERSONAL_HIDDEN)
             })
+        })
+        .await
+    }
+
+    #[tool(
+        description = "Why a name does or does not resolve: local domain, DNS servers handed out and host table of the router, answers of the router's DNS server and of this machine's resolver, this machine's resolvers and search domains, and a verdict with the likely cause. Asks only for this name; changes nothing.",
+        annotations(read_only_hint = true, open_world_hint = true)
+    )]
+    async fn fritz_dns(&self, Parameters(query): Parameters<DnsQuery>) -> CallToolResult {
+        self.respond(async {
+            let request = dns_request(&query)?;
+            let mut reader = self.reader().await?;
+            Ok(dns::diagnose(&mut reader, &dns::System, &request).await?)
         })
         .await
     }
@@ -1035,6 +1061,29 @@ fn lookup(query: &HostsQuery) -> anyhow::Result<Option<Lookup>> {
         (None, Some(ip)) => Ok(Some(Lookup::ip(ip)?)),
         (None, None) => Ok(None),
     }
+}
+
+/// The request of `fritz_dns`, checked before anything is asked.
+fn dns_request(query: &DnsQuery) -> anyhow::Result<dns::Request> {
+    let expected = query
+        .expected_ip
+        .as_deref()
+        .map(|ip| {
+            ip.parse()
+                .with_context(|| format!("{ip:?} is not an IP address"))
+        })
+        .transpose()?;
+    let router_dns = query
+        .router_dns
+        .as_deref()
+        .map(dns::parse_server)
+        .transpose()
+        .map_err(anyhow::Error::msg)?;
+    Ok(dns::Request {
+        name: dns::check_name(&query.name)?,
+        expected,
+        router_dns,
+    })
 }
 
 /// The page of the hosts that match the query.
