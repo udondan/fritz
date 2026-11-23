@@ -27,6 +27,14 @@ const CERTIFICATE: &str = "certificate";
 
 /// Diagnoses the device of `target`. Sends no credentials.
 pub async fn router(target: &Target, network: &impl Network) -> Report {
+    // Credentials in the address are never sent and must not be shown.
+    let mut target = target.clone();
+    target
+        .url
+        .set_username("")
+        .and_then(|()| target.url.set_password(None))
+        .ok();
+    let target = &target;
     let url = &target.url;
     let host = url.host_str().unwrap_or_default();
     let host = host.trim_start_matches('[').trim_end_matches(']');
@@ -38,13 +46,8 @@ pub async fn router(target: &Target, network: &impl Network) -> Report {
         web(target).await,
         certificate(target, presented),
     ];
-    let mut shown = url.clone();
-    shown
-        .set_username("")
-        .and_then(|()| shown.set_password(None))
-        .ok();
     Report {
-        target: shown.to_string(),
+        target: url.to_string(),
         host: None,
         checks,
     }

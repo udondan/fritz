@@ -3588,4 +3588,16 @@ async fn diagnoses_the_device() {
     let report: serde_json::Value = serde_json::from_str(&stdout(&output)).unwrap();
     assert_eq!(report["checks"][1]["status"], "fail", "{report}");
     assert_eq!(report["checks"][3]["status"], "unknown", "{report}");
+
+    let with_password = unreachable_url("http").replacen("://", "://user:secret-pw@", 1);
+    let args = ["--host", &with_password, "-o", "json", "diagnose", "router"];
+    let output = fritz_async(strings(&args), Vec::new()).await;
+    failure(&output);
+    let text = format!(
+        "{}{}",
+        stdout(&output),
+        String::from_utf8_lossy(&output.stderr)
+    );
+    assert!(!text.contains("secret-pw"), "{text}");
+    assert!(!text.contains("user:"), "{text}");
 }
