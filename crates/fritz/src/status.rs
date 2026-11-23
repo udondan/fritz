@@ -14,10 +14,12 @@ use fritz_core::status::{self, Connection, Host, Hosts, Internet, Overview};
 use fritz_core::system::{self, Range, Section};
 use serde::Serialize;
 
+mod firmware;
 mod host;
 mod tree;
 mod wlan;
 
+pub(crate) use firmware::firmware;
 pub(crate) use host::{HostsArgs, hosts};
 use tree::mesh_tree;
 pub(crate) use wlan::wlan;

@@ -155,6 +155,11 @@ async fn reads_the_state() {
     let internet = success(&client, "fritz_internet", json!({})).await;
     assert_eq!(internet["status"], "Connected", "{internet}");
 
+    let firmware = success(&client, "fritz_firmware", json!({})).await;
+    assert_eq!(firmware["state"], "none", "{firmware}");
+    assert_eq!(firmware["installed"], "285.08.25", "{firmware}");
+    assert!(firmware["offered"].is_null(), "{firmware}");
+
     let wlan = success(&client, "fritz_wlan", json!({})).await;
     assert!(!wlan.as_array().unwrap().is_empty(), "{wlan}");
     assert!(wlan[0].get("clients").is_none(), "{wlan}");

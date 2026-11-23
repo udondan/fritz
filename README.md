@@ -196,6 +196,24 @@ Noise margin   ↓ 7.0 dB  ↑ 8.0 dB
 Attenuation    ↓ 14.0 dB  ↑ 10.0 dB
 ```
 
+`fritz firmware` shows more about updates than the overview: the version the
+device offers, the kind of build, what automatic updates do and how the last
+update went. The state is `available`, `none`, `unknown` (the device does not
+tell, for example after a failed check) or `unsupported` (the device has no
+update service). What the device does not report is `unknown`, never `none`.
+It only reads what the device knows; it never asks the device to check for a
+new version. The download URL is never shown. In JSON, all fields are
+present, with `null` for what the device does not report.
+
+```console
+$ fritz firmware
+Installed    285.08.25 (release)
+Offered      none
+Auto update  install all updates
+Last update  successful, 2026-08-02 03:28, from 285.08.22
+State        no update offered
+```
+
 ### Hosts and mesh
 
 `fritz hosts` lists every device the box knows, `--active` only those
@@ -708,6 +726,7 @@ claude mcp add fritz -- fritz --host 192.168.178.1 --user agent mcp
 | ----------------------- | ----------------------------------------------------------- |
 | `fritz_overview`        | Model, firmware, uptime, connection, rights, `system` load  |
 | `fritz_internet`        | Internet connection, addresses, DNS, rates, DSL line        |
+| `fritz_firmware`        | Installed and offered firmware, auto update, last update    |
 | `fritz_wlan`            | Wireless networks, guest network, `clients`, `details`      |
 | `fritz_interfaces`      | LAN and WLAN counters of bytes, packets, errors; LAN ports  |
 | `fritz_hosts`           | Known hosts, paginated, or one host by `mac` or `ip`        |

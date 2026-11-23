@@ -2146,6 +2146,49 @@ mod change {
 }
 
 #[tokio::test(flavor = "multi_thread")]
+async fn shows_the_firmware() {
+    let fixture = fritz_sim::Fixture::load(FIXTURE).unwrap();
+    let sim = fritz_sim::Sim::start(fixture).await.unwrap();
+    let password = Some(fritz_sim::PASSWORD);
+
+    let text = success(&run(&sim, &["-o", "text", "firmware"], password).await);
+    assert_eq!(
+        text,
+        "Installed    285.08.25 (release)\n\
+         Offered      none\n\
+         Auto update  install all updates\n\
+         Last update  successful, 2026-08-02 03:28, from 285.08.22\n\
+         State        no update offered\n"
+    );
+    let json = success(&run(&sim, &["-o", "json", "firmware"], password).await);
+    let firmware: serde_json::Value = serde_json::from_str(&json).unwrap();
+    assert_eq!(
+        firmware,
+        serde_json::json!({
+            "state": "none",
+            "installed": "285.08.25",
+            "build_type": "Release",
+            "offered": null,
+            "info_url": null,
+            "update_state": "Stopped",
+            "auto_update": "all",
+            "last_update_time": "2026-08-02T03:28:11+02:00",
+            "last_update_result": "succeeded",
+            "previous_version": "285.08.22",
+        })
+    );
+    // Only getters.
+    assert!(
+        sim.requests()
+            .iter()
+            .filter_map(|r| r.action.as_deref())
+            .all(|a| a.starts_with("Get") || a.starts_with("X_AVM-DE_Get")),
+        "{:?}",
+        sim.requests()
+    );
+}
+
+#[tokio::test(flavor = "multi_thread")]
 async fn shows_the_load_of_the_device() {
     let fixture = fritz_sim::Fixture::load(FIXTURE).unwrap();
     let sim = fritz_sim::Sim::start(fixture).await.unwrap();
