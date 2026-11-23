@@ -115,6 +115,20 @@ fn names_missing_forwarding() {
     assert_eq!(verdict(&outside).cause, Cause::ClientFails);
     outside.name = "fritz.box.".to_owned();
     assert_eq!(verdict(&outside).cause, Cause::NotForwarded);
+    // A name without a dot goes to the resolver of the search domain, which
+    // asks the router already.
+    let mut short = report.clone();
+    short.name = "nas".to_owned();
+    short.client_answer.name = "nas".to_owned();
+    let mut supplemental = config(&["192.168.178.1"], &[]);
+    supplemental.resolvers[0].domain = Some("fritz.box".to_owned());
+    short
+        .client_config
+        .as_mut()
+        .unwrap()
+        .resolvers
+        .push(supplemental.resolvers.remove(0));
+    assert_eq!(verdict(&short).cause, Cause::ClientFails);
     // A local resolver, whose upstream servers are unknown.
     report.client_config = Some(config(&["127.0.0.53"], &["fritz.box"]));
     let (_, message) = judge(&report);

@@ -646,8 +646,15 @@ fn client_fails(report: &Report) -> Verdict {
         .server
         .as_deref()
         .or(report.router.address.as_deref());
+    // A name without a dot is asked with the search domain, which may have
+    // a resolver of its own: the one of the full name the router was asked.
+    let asked = if name.contains('.') {
+        name
+    } else {
+        report.router_answer.name.as_str()
+    };
     let servers = config
-        .and_then(|c| c.resolver_for(&report.client_answer.name))
+        .and_then(|c| c.resolver_for(asked))
         .map_or_else(Vec::new, |r| r.nameservers.clone());
     let identified = !servers.is_empty()
         && servers
