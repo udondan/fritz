@@ -14,6 +14,7 @@ use fritz_core::status::{self, Connection, Host, Hosts, Internet, Overview};
 use fritz_core::system::{self, Range, Section};
 use serde::Serialize;
 
+mod exposure;
 mod firmware;
 mod history;
 mod host;
@@ -22,6 +23,7 @@ mod tree;
 mod users;
 mod wlan;
 
+pub(crate) use exposure::{WARNING as EXPOSURE_WARNING, exposure};
 pub(crate) use firmware::firmware;
 pub(crate) use history::{SmarthomeArgs, range as history_range, read as read_history};
 pub(crate) use host::{HostsArgs, hosts};

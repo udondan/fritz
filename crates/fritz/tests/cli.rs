@@ -2727,6 +2727,84 @@ async fn lists_the_powerline_adapters() {
 }
 
 #[tokio::test(flavor = "multi_thread")]
+async fn shows_what_is_reachable_from_the_internet() {
+    let fixture = fritz_sim::Fixture::load(FIXTURE).unwrap();
+    let sim = fritz_sim::Sim::start(fixture).await.unwrap();
+    let password = Some(fritz_sim::PASSWORD);
+
+    let text = success(&run(&sim, &["-o", "text", "exposure", "--strict"], password).await);
+    assert_eq!(
+        text,
+        "ITEM             STATE    LEVEL   DETAILS\n\
+         Remote access    on       notice  HTTPS port 49032, Let's Encrypt off\n\
+         MyFRITZ          on       info    registered, server-3.example.net, no services shared\n\
+         Dynamic DNS      off      info\n\
+         Port forwarding  none     info\n\
+         Exposed host     off      info\n\
+         UPnP             on       notice\n\
+         Storage via FTP  off      info\n\
+         Shared links     none     info\n\
+         VPN              unknown  info\n\
+         TR-069           on       info    provider management, https://url-2.example.net/, \
+         periodic inform off\n\
+         USP              none     info\n\
+         \n\
+         notice   Remote access: web interface reachable from the internet, \
+         certificate signed by the device itself\n\
+         notice   UPnP: hosts may open ports themselves\n\
+         info     TR-069: the provider may manage the device\n"
+    );
+    let json = success(&run(&sim, &["-o", "json", "exposure"], password).await);
+    let exposure: serde_json::Value = serde_json::from_str(&json).unwrap();
+    assert_eq!(exposure["items"][0]["kind"], "remote_access", "{exposure}");
+    assert_eq!(exposure["items"][0]["severity"], "notice", "{exposure}");
+    assert_eq!(exposure["remote_access"]["port"], 49032, "{exposure}");
+    assert_eq!(exposure["exposed_host"], false, "{exposure}");
+    // Only getters, and the web interface only with GET.
+    for request in sim.requests() {
+        if let Some(action) = &request.action {
+            assert!(
+                action.starts_with("Get") || action.starts_with("X_AVM-DE_Get"),
+                "{action}"
+            );
+        }
+        if request.path.starts_with("/api/") {
+            assert_eq!(request.method, "GET", "{request:?}");
+        }
+    }
+}
+
+#[tokio::test(flavor = "multi_thread")]
+async fn fails_strictly_on_warnings_of_the_exposure() {
+    let fixture = fritz_sim::Fixture::load(FIXTURE).unwrap().with_api(
+        "/api/v0/generic/forwardrules",
+        r#"{"use_exposed_host": "1"}"#,
+    );
+    let sim = fritz_sim::Sim::start(fixture).await.unwrap();
+    let password = Some(fritz_sim::PASSWORD);
+
+    let text = success(&run(&sim, &["-o", "text", "exposure"], password).await);
+    assert!(
+        text.contains("Exposed host     on       warning\n"),
+        "{text}"
+    );
+    assert!(
+        text.contains("\nwarning  Exposed host: all ports of one host are open\n"),
+        "{text}"
+    );
+    let strict = run(&sim, &["-o", "json", "exposure", "--strict"], password).await;
+    assert_eq!(strict.status.code(), Some(3), "{}", stderr(&strict));
+    let exposure: serde_json::Value = serde_json::from_str(&stdout(&strict)).unwrap();
+    assert_eq!(exposure["exposed_host"], true, "{exposure}");
+
+    // Without a login to the web interface, the exposed host is unknown.
+    let fixture = fritz_sim::Fixture::bundled("fritz-repeater-2400/8.25").unwrap();
+    let sim = fritz_sim::Sim::start(fixture).await.unwrap();
+    let text = success(&run(&sim, &["-o", "text", "exposure", "--strict"], password).await);
+    assert!(text.contains("Exposed host     unknown  info"), "{text}");
+}
+
+#[tokio::test(flavor = "multi_thread")]
 async fn shows_the_users() {
     let fixture = fritz_sim::Fixture::load(FIXTURE).unwrap();
     let sim = fritz_sim::Sim::start(fixture).await.unwrap();

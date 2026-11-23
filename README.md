@@ -38,6 +38,7 @@ status and settings of a FRITZ!Box router.
   - [Interfaces and counters](#interfaces-and-counters)
   - [Smart Home](#smart-home)
   - [Ports, telephony and capabilities](#ports-telephony-and-capabilities)
+  - [Exposure](#exposure)
   - [Settings](#settings)
   - [Calls, phonebook and event log](#calls-phonebook-and-event-log)
   - [Any TR-064 action](#any-tr-064-action)
@@ -698,6 +699,41 @@ Client resolvers  default: 192.168.178.1, search example.org (from scutil --dns)
 Verdict           search_domain_missing: the router answers nas.fritz.box, but this machine does not add the search domain fritz.box to nas; use the full name, or add fritz.box to the search domains of this machine
 ```
 
+### Exposure
+
+`fritz exposure` shows what can be reached from the internet or managed from
+outside: remote access, MyFRITZ, dynamic DNS, port forwardings, the exposed
+host, UPnP, FTP, shared links, VPN, TR-069 and USP. Each item has a state
+(`on`, `off` or `unknown` when the device doesn't offer it) and a severity
+(`info`, `notice` or `warning`), with hints below the table. The exposed host
+and VPN connections are read through the web interface; without a login there
+they are `unknown`. Passwords and link URLs are never read.
+
+```console
+$ fritz exposure
+ITEM             STATE    LEVEL   DETAILS
+Remote access    on       notice  HTTPS port 49032, Let's Encrypt off
+MyFRITZ          on       info    registered, abc123.myfritz.net, no services shared
+Dynamic DNS      off      info
+Port forwarding  none     info
+Exposed host     off      info
+UPnP             on       notice
+Storage via FTP  off      info
+Shared links     none     info
+VPN              none     info
+TR-069           on       info    provider management, https://acs.example.net/, periodic inform off
+USP              none     info
+
+notice   Remote access: web interface reachable from the internet, certificate signed by the device itself
+notice   UPnP: hosts may open ports themselves
+info     TR-069: the provider may manage the device
+```
+
+The exit code is 0 even with findings. With `--strict`, it is 3 when an item
+has the severity `warning`, for example an exposed host or FTP without TLS.
+The MCP tool `fritz_exposure` hides addresses, domains, names and hosts unless
+`fritz mcp` runs with `--personal`.
+
 ### Settings
 
 `fritz settings` reads settings that TR-064 doesn't offer, like DNS, IPv6,
@@ -1015,6 +1051,7 @@ claude mcp add fritz -- fritz --host 192.168.178.1 --user agent mcp
 | `fritz_capabilities`    | Features of the device, rights of the user, two-factor      |
 | `fritz_users`           | Users (names need `--personal`), login settings, hints      |
 | `fritz_dns`             | Why a name resolves or not: evidence and the likely cause   |
+| `fritz_exposure`        | What is reachable from outside, with severity and hints     |
 | `fritz_settings`        | Settings like DNS, IPv6, MTU, DHCP and time, secrets hidden |
 | `fritz_list_services`   | TR-064 services, or the actions of one with their class     |
 | `fritz_describe_action` | The arguments of an action and their types                  |

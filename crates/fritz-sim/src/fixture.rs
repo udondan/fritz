@@ -227,6 +227,15 @@ impl Fixture {
         self.pages.insert(format!("/{name}"), json.into());
         self
     }
+
+    /// Serves `json` at `path` of the REST API, like
+    /// `/api/v0/generic/vpn`, in place of the document of the fixture. For
+    /// tests of documents the fixture lacks.
+    #[must_use]
+    pub fn with_api(mut self, path: &str, json: impl Into<String>) -> Self {
+        self.api.insert(path.to_owned(), json.into());
+        self
+    }
 }
 
 /// Parses a recorded answer: `{"status": "ok", "out": {…}}` or

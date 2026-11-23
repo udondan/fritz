@@ -29,6 +29,7 @@ use fritz_core::capture::short_id;
 use fritz_core::change::{self, Changer, Permit, Settings};
 use fritz_core::diagnose::{self, ROUTER, System};
 use fritz_core::dns;
+use fritz_core::exposure;
 use fritz_core::firmware;
 use fritz_core::generic;
 use fritz_core::host::{self, Lookup};
@@ -603,6 +604,25 @@ impl Server {
             let request = dns_request(&query)?;
             let mut reader = self.reader().await?;
             Ok(dns::diagnose(&mut reader, &dns::System, &request).await?)
+        })
+        .await
+    }
+
+    #[tool(
+        description = "What can be reached from the internet or managed from outside: remote access, MyFRITZ, dynamic DNS, port forwardings, exposed host, UPnP, FTP, shared links, VPN, TR-069, USP. Each item has a state (on, off, unknown), a count for lists, a severity (info, notice, warning) and hints. Addresses, domains, names and hosts hidden without `--personal`. Link URLs and passwords are never read.",
+        annotations(read_only_hint = true, open_world_hint = false)
+    )]
+    async fn fritz_exposure(&self) -> CallToolResult {
+        self.respond(async {
+            let mut reader = self.reader().await?;
+            // The exposed host and VPN need the web interface.
+            let session = self.context.session().await.ok();
+            let exposure = exposure::exposure(&mut reader, session).await?;
+            Ok(if self.personal {
+                exposure
+            } else {
+                exposure.without_identifying(PERSONAL_HIDDEN)
+            })
         })
         .await
     }
