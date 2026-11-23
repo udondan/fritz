@@ -115,11 +115,10 @@ fn deserialize_fingerprint<'de, D: Deserializer<'de>>(
 
 impl Config {
     /// The usual place of the configuration file, like
-    /// `~/.config/fritz/config.toml` on Linux. `None` if the home directory
-    /// is unknown.
+    /// `~/.config/fritz/config.toml` on Linux and macOS, see
+    /// [`dirs`](crate::dirs). `None` if the home directory is unknown.
     pub fn default_path() -> Option<PathBuf> {
-        directories::ProjectDirs::from("", "", "fritz")
-            .map(|dirs| dirs.config_dir().join("config.toml"))
+        crate::dirs::config().map(|dir| dir.join("config.toml"))
     }
 
     /// Reads the configuration, or returns an empty one if the file does not
