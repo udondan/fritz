@@ -27,6 +27,7 @@ use fritz_core::capabilities;
 use fritz_core::capture::short_id;
 #[cfg(feature = "write")]
 use fritz_core::change::{self, Changer, Permit, Settings};
+use fritz_core::diagnose::{self, ROUTER, System};
 use fritz_core::firmware;
 use fritz_core::generic;
 use fritz_core::host::{self, Lookup};
@@ -61,6 +62,9 @@ const PAGE: usize = 50;
 
 /// The most hosts in one page.
 const MAX_PAGE: usize = 200;
+
+/// The most TCP ports `fritz_diagnose` probes in one call.
+const MAX_PORTS: usize = 8;
 
 /// The longest value of an action that is returned whole, in characters.
 const MAX_VALUE: usize = 4096;
@@ -222,6 +226,18 @@ pub(crate) struct HostsQuery {
     offset: usize,
     /// Hosts to return, at most 200. Default 50.
     limit: Option<usize>,
+}
+
+/// The host and the ports of `fritz_diagnose`.
+#[derive(Debug, Default, Deserialize, JsonSchema)]
+pub(crate) struct DiagnoseQuery {
+    /// A host the device knows, by name, MAC or IPv4 address, or `router`
+    /// for the device itself.
+    host: String,
+    /// TCP ports to probe on the host, at most 8. Only on private
+    /// addresses, not with `router`.
+    #[serde(default)]
+    ports: Vec<u16>,
 }
 
 /// The modules of `fritz_settings`.
@@ -589,6 +605,32 @@ impl Server {
             }
             let hosts = status::hosts(&mut reader).await?;
             Ok(serde_json::to_value(page(hosts, &query))?)
+        })
+        .await
+    }
+
+    #[tool(
+        description = "Diagnoses a host end to end: known to the device, active, address, link with mesh node and signal, whether its name resolves to that address, and whether TCP ports are open, closed or filtered. Each check passes, fails with a hint, or is skipped. `router` checks the device: private address, TR-064 over HTTPS and HTTP, web interface, certificate.",
+        annotations(read_only_hint = true, open_world_hint = false)
+    )]
+    async fn fritz_diagnose(&self, Parameters(query): Parameters<DiagnoseQuery>) -> CallToolResult {
+        self.respond(async {
+            if query.ports.len() > MAX_PORTS {
+                bail!("give at most {MAX_PORTS} ports");
+            }
+            let network = System::default();
+            if query.host == ROUTER {
+                if !query.ports.is_empty() {
+                    bail!("ports are for hosts, not for the device itself");
+                }
+                return Ok(diagnose::router(&self.context.target()?, &network).await);
+            }
+            let options = diagnose::Options {
+                ports: query.ports,
+                private_only: true,
+            };
+            let mut reader = self.reader().await?;
+            Ok(diagnose::host(&mut reader, &network, &query.host, &options).await?)
         })
         .await
     }

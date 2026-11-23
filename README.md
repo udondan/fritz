@@ -342,6 +342,38 @@ Office  FRITZ!Powerline 1260  02:00:5E:10:00:07  yes     none
 Cellar  FRITZ!Powerline 540E  02:00:5E:10:00:08  no      available
 ```
 
+#### Diagnose a host
+
+`fritz diagnose` checks a host end to end and says which step fails: whether
+the box knows it (by name, MAC or IPv4 address), whether the box sees it
+connected, its address, its link with the mesh node and, for clients of the
+box's own wireless networks, the signal, whether its name resolves to that
+address on this machine, and with `--port` whether TCP ports are open, closed
+or filtered (no answer within 1 s). A failed check comes with a hint, and the
+exit code is 1 if a check fails.
+
+```console
+$ fritz diagnose nas --port 445
+Diagnose nas  →  192.168.178.23
+  ✓ known to the device  nas (DHCP)
+  ✓ active
+  ✓ address              192.168.178.23, DHCP
+  ✓ link                 LAN, 1000 Mbit/s, via repeater
+  ✗ name resolves        192.168.178.40 (device: 192.168.178.23)
+      DNS returns 192.168.178.40, the device knows 192.168.178.23
+  ✓ TCP 445              open
+```
+
+`fritz diagnose router` checks the box itself: the configured host resolves
+to a private address, TR-064 answers over HTTPS and HTTP, the web interface
+answers, and the certificate is the trusted one. It sends no credentials.
+
+Name resolution and the port probes run on this machine, so they show what
+this machine sees. In JSON, `checks` lists every check with `name`, `status`
+(`pass`, `fail`, `skip` or `unknown`), `detail` and `hint`, and `host` has
+the host as `fritz hosts` shows it. A host named `router` is diagnosed by its
+MAC or IP address.
+
 ### Wireless networks
 
 ```console
@@ -919,6 +951,7 @@ claude mcp add fritz -- fritz --host 192.168.178.1 --user agent mcp
 | `fritz_traffic`         | WAN rates, utilization, totals; averages: `sample_seconds`  |
 | `fritz_hosts`           | Known hosts, paginated, or one host by `mac` or `ip`        |
 | `fritz_mesh`            | Mesh nodes with IPs and links, or a tree of who is where    |
+| `fritz_diagnose`        | Checks a host end to end, or `router`; up to 8 `ports`      |
 | `fritz_powerline`       | Powerline adapters, whether active, updates                 |
 | `fritz_smarthome`       | Smart Home devices (FRITZ!OS 8.20 and later); with `history` and `device` the history of one device, in short or with `values` |
 | `fritz_ports`           | Port forwardings and whether UPnP is on                     |
@@ -940,6 +973,9 @@ that `DeviceInfo:GetInfo` returns as well. The option adds three tools:
 | `fritz_calls`     | Latest calls, filtered by `kind`, `days` and `search`       |
 | `fritz_phonebook` | Contacts of all phonebooks, filtered by `search`, paginated |
 | `fritz_log`       | Event log, filtered by `search`, `since` and `category`     |
+
+`fritz_diagnose` only probes ports of hosts the box knows and only on
+private addresses.
 
 Errors from the device come back as JSON with a `status` (`denied`,
 `confirmation_required`, `blocked` or `busy`) and, where it helps,

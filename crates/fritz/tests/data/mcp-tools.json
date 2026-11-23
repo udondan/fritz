@@ -118,6 +118,38 @@
     }
   },
   {
+    "name": "fritz_diagnose",
+    "description": "Diagnoses a host end to end: known to the device, active, address, link with mesh node and signal, whether its name resolves to that address, and whether TCP ports are open, closed or filtered. Each check passes, fails with a hint, or is skipped. `router` checks the device: private address, TR-064 over HTTPS and HTTP, web interface, certificate.",
+    "inputSchema": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "host": {
+          "description": "A host the device knows, by name, MAC or IPv4 address, or `router`\nfor the device itself.",
+          "type": "string"
+        },
+        "ports": {
+          "default": [],
+          "description": "TCP ports to probe on the host, at most 8. Only on private\naddresses, not with `router`.",
+          "items": {
+            "format": "uint16",
+            "maximum": 65535,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "host"
+      ],
+      "type": "object"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "openWorldHint": false
+    }
+  },
+  {
     "name": "fritz_firmware",
     "description": "Firmware: state (available, none, unknown, unsupported), installed and offered version, info URL, auto update, last update. Does not check for updates.",
     "inputSchema": {
