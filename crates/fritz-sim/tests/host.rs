@@ -113,6 +113,57 @@ async fn fails_when_the_device_cannot_answer() {
     sim.clear_injections();
     sim.inject(Injection::fault("Hosts1", "X_AVM-DE_GetHostListPath", 868));
     assert!(host::lookup(&mut reader, &lookup).await.is_err());
+
+    sim.clear_injections();
+    let lookup = Lookup::ip("192.0.2.2").unwrap();
+    sim.inject(Injection::fault(
+        "Hosts1",
+        "X_AVM-DE_GetSpecificHostEntryByIP",
+        868,
+    ));
+    assert!(host::lookup(&mut reader, &lookup).await.is_err());
+}
+
+fn answer(values: &[(&str, &str)]) -> Answer {
+    Answer::Ok(
+        values
+            .iter()
+            .map(|(n, v)| ((*n).to_owned(), (*v).to_owned()))
+            .collect(),
+    )
+}
+
+#[tokio::test]
+async fn adds_the_entry_by_mac_address_to_a_lookup_by_ip_address() {
+    let by_ip = answer(&[
+        ("NewMACAddress", "AA:BB:CC:00:00:03"),
+        ("NewHostName", "device-2"),
+        ("NewActive", "1"),
+        ("NewX_AVM-DE_Speed", "1000"),
+    ]);
+    let entry = answer(&[
+        ("NewIPAddress", "192.0.2.2"),
+        ("NewAddressSource", "DHCP"),
+        ("NewLeaseTimeRemaining", "3600"),
+    ]);
+    let fixture = Fixture::load(FIXTURE)
+        .unwrap()
+        .with_answer("Hosts1", "X_AVM-DE_GetSpecificHostEntryByIP", None, by_ip)
+        .with_answer("Hosts1", "GetSpecificHostEntry", None, entry);
+    let sim = Sim::start(fixture).await.unwrap();
+    let mut reader = reader(&sim).await;
+    sim.inject(Injection::fault("Hosts1", "X_AVM-DE_GetHostListPath", 606));
+
+    let lookup = Lookup::ip("192.0.2.2").unwrap();
+    let detail = host::lookup(&mut reader, &lookup).await.unwrap().unwrap();
+    assert_eq!(detail.host.mac.as_deref(), Some("AA:BB:CC:00:00:03"));
+    assert_eq!(detail.host.speed, Some(1000));
+    assert_eq!(detail.host.address_source.as_deref(), Some("DHCP"));
+    assert_eq!(detail.lease_remaining, Some(3600));
+    assert_eq!(
+        detail.attached_to.unwrap().node.as_deref(),
+        Some("device-50")
+    );
 }
 
 #[tokio::test]

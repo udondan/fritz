@@ -533,13 +533,19 @@ fn creates_and_shows_profiles() {
         config.text()
     );
 
-    let output = config.run(&["--profile", "missing", "config", "show"]);
-    assert!(!output.status.success());
-    assert!(
-        stderr(&output).contains("there is no profile named missing"),
-        "{}",
-        stderr(&output)
-    );
+    for command in [
+        &["config", "show"][..],
+        &["hosts", "--mac", "AA:BB:CC:00:00:03"],
+    ] {
+        let args = [&["--profile", "missing"][..], command].concat();
+        let output = config.run(&args);
+        assert!(!output.status.success());
+        assert!(
+            stderr(&output).contains("there is no profile named missing"),
+            "{}",
+            stderr(&output)
+        );
+    }
 }
 
 #[test]

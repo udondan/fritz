@@ -113,9 +113,10 @@ pub struct Attachment {
     pub rate_up: Option<u64>,
 }
 
-/// Looks up the host with an address: its entry, which the device looks up
-/// by the address, its item in the host list, and its link in the mesh.
-/// `None` if neither the entry nor the host list has it.
+/// Looks up the host with an address: its item in the host list, its entry,
+/// which the device looks up by the MAC address, and its link in the mesh.
+/// For an IP address, the device first names the MAC address of the host.
+/// `None` if neither the entries nor the host list have it.
 ///
 /// # Errors
 ///
@@ -123,28 +124,33 @@ pub struct Attachment {
 /// [`Reader::try_read`], and [`Error::InvalidDocument`] for a list that
 /// cannot be parsed.
 pub async fn lookup(reader: &mut Reader, lookup: &Lookup) -> Result<Option<Detail>, Error> {
-    let (action, input, value) = match lookup {
-        Lookup::Mac(mac) => ("GetSpecificHostEntry", "NewMACAddress", mac.clone()),
-        Lookup::Ip(ip) => (
-            "X_AVM-DE_GetSpecificHostEntryByIP",
-            "NewIPAddress",
-            ip.to_string(),
-        ),
+    let by_ip = match lookup {
+        Lookup::Mac(_) => None,
+        Lookup::Ip(ip) => {
+            let ip = ip.to_string();
+            let input = [("NewIPAddress", ip.as_str())];
+            reader
+                .try_read("Hosts1", "X_AVM-DE_GetSpecificHostEntryByIP", &input)
+                .await?
+        }
     };
-    let entry = reader
-        .try_read("Hosts1", action, &[(input, &value)])
-        .await?;
     let listed = host_list(reader)
         .await?
         .into_iter()
         .find(|h| lookup.matches(h));
-    if entry.is_none() && listed.is_none() {
-        return Ok(None);
-    }
+    let found = listed.is_some() || by_ip.is_some();
     let mut host = listed.unwrap_or_default();
     match lookup {
         Lookup::Mac(mac) => host.mac = host.mac.or_else(|| Some(mac.clone())),
         Lookup::Ip(ip) => host.ip = host.ip.or_else(|| Some(ip.to_string())),
+    }
+    let host = match &by_ip {
+        Some(by_ip) => overlay(host, by_ip),
+        None => host,
+    };
+    let entry = entry(reader, host.mac.as_deref()).await?;
+    if !found && entry.is_none() {
+        return Ok(None);
     }
     Ok(Some(complete(reader, host, entry.as_ref()).await?))
 }
@@ -156,16 +162,17 @@ pub async fn lookup(reader: &mut Reader, lookup: &Lookup) -> Result<Option<Detai
 ///
 /// Like [`lookup`].
 pub async fn detail(reader: &mut Reader, host: Host) -> Result<Detail, Error> {
-    let entry = match host.mac.clone() {
-        Some(mac) => {
-            let input = [("NewMACAddress", mac.as_str())];
-            reader
-                .try_read("Hosts1", "GetSpecificHostEntry", &input)
-                .await?
-        }
-        None => None,
-    };
+    let entry = entry(reader, host.mac.as_deref()).await?;
     complete(reader, host, entry.as_ref()).await
+}
+
+/// The entry of the host with the MAC address `mac`, if the device has one.
+async fn entry(reader: &mut Reader, mac: Option<&str>) -> Result<Option<Values>, Error> {
+    let Some(mac) = mac else { return Ok(None) };
+    let input = [("NewMACAddress", mac)];
+    reader
+        .try_read("Hosts1", "GetSpecificHostEntry", &input)
+        .await
 }
 
 /// The host with the values of its entry, and its link in the mesh.
