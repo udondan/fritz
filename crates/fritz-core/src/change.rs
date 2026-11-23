@@ -264,6 +264,30 @@ struct Checked {
     identity: Identity,
 }
 
+/// The identity of the device and its unique device name, from its
+/// description and `DeviceInfo:GetInfo`. Only reads.
+///
+/// # Errors
+///
+/// [`Error::Unidentified`] if the device has no UDN or serial number, and
+/// the errors of reading them.
+pub async fn identity(client: &Client) -> Result<(Identity, String), Error> {
+    let description = client.description().await?;
+    let udn = description
+        .device
+        .udn
+        .filter(|u| !u.is_empty())
+        .ok_or(Error::Unidentified("the device description has no UDN"))?;
+    let serial = reboot::Probe::new(client)
+        .await?
+        .read(client)
+        .await?
+        .serial
+        .filter(|s| !s.is_empty())
+        .ok_or(Error::Unidentified("the device has no serial number"))?;
+    Ok((Identity::of(&udn, &serial), udn))
+}
+
 impl Changer {
     /// Changes the device of `client`, which needs credentials.
     pub fn new(client: Client, settings: Settings) -> Self {
@@ -289,20 +313,7 @@ impl Changer {
         if let Some((identity, _)) = &self.identity {
             return Ok(identity.clone());
         }
-        let description = self.client.description().await?;
-        let udn = description
-            .device
-            .udn
-            .filter(|u| !u.is_empty())
-            .ok_or(Error::Unidentified("the device description has no UDN"))?;
-        let serial = reboot::Probe::new(&self.client)
-            .await?
-            .read(&self.client)
-            .await?
-            .serial
-            .filter(|s| !s.is_empty())
-            .ok_or(Error::Unidentified("the device has no serial number"))?;
-        let identity = Identity::of(&udn, &serial);
+        let (identity, udn) = identity(&self.client).await?;
         self.identity = Some((identity.clone(), udn));
         Ok(identity)
     }

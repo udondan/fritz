@@ -54,6 +54,7 @@ use tokio::sync::{MappedMutexGuard, Mutex, MutexGuard};
 use tr064::Direction;
 
 use crate::context::Context;
+use crate::doctor;
 use crate::personal::find_log;
 use crate::tr64::kind;
 
@@ -552,6 +553,15 @@ impl Server {
             Ok(capabilities::capabilities(&mut reader).await?)
         })
         .await
+    }
+
+    #[tool(
+        description = "Checks the setup step by step: configuration, host, port, certificate, password source, login, rights, two-factor, web interface, Smart Home. Each check: status (ok, warn, fail, skip), detail and hint. Call first when other tools fail.",
+        annotations(read_only_hint = true, open_world_hint = false)
+    )]
+    async fn fritz_doctor(&self) -> CallToolResult {
+        self.respond(async { Ok(doctor::report(Ok(&self.context)).await) })
+            .await
     }
 
     #[tool(

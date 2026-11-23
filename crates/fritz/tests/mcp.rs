@@ -117,6 +117,21 @@ async fn hides_user_names_without_personal() {
 }
 
 #[tokio::test(flavor = "multi_thread")]
+async fn checks_the_setup() {
+    let sim = sim().await;
+    let client = connect(&sim).await;
+    let checks = success(&client, "fritz_doctor", json!({})).await;
+    let text = checks.to_string();
+    assert!(!text.contains(fritz_sim::PASSWORD), "{text}");
+    assert!(!text.contains("5e55104d0c0ffee5"), "{text}");
+    assert_eq!(checks[5]["check"], "Login", "{checks}");
+    assert_eq!(checks[5]["status"], "ok", "{checks}");
+    assert_eq!(checks[8]["check"], "Web interface", "{checks}");
+    assert_eq!(checks[8]["status"], "ok", "{checks}");
+    client.cancel().await.unwrap();
+}
+
+#[tokio::test(flavor = "multi_thread")]
 async fn lists_tools_within_the_budget() {
     let sim = sim().await;
     // All tools, the personal ones included.
