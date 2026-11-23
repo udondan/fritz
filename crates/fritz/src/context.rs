@@ -77,6 +77,11 @@ impl Context {
         &self.overrides
     }
 
+    /// The contents of the configuration file.
+    pub(crate) fn config(&self) -> &Config {
+        &self.config
+    }
+
     /// The device to work with. A profile that is named, by `--profile` or
     /// as the default, must exist.
     pub(crate) fn target(&self) -> anyhow::Result<Target> {

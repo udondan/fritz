@@ -422,6 +422,15 @@ fn creates_and_shows_profiles() {
         "{stdout}"
     );
 
+    let output = config.run(&["config", "list", "--output", "text"]);
+    assert!(output.status.success(), "{}", stderr(&output));
+    assert_eq!(
+        String::from_utf8_lossy(&output.stdout),
+        "DEFAULT  PROFILE  HOST                    USER   TRUSTED\n\
+         *        default  http://127.0.0.1:49000  agent  no\n\
+         \x20        lab      lab.example             -      no\n"
+    );
+
     // Without a host, the profile names the default one.
     let output = config.run(&["--profile", "bare", "config", "init"]);
     assert!(output.status.success(), "{}", stderr(&output));
@@ -439,6 +448,28 @@ fn creates_and_shows_profiles() {
         stderr(&output).contains("there is no profile named missing"),
         "{}",
         stderr(&output)
+    );
+}
+
+#[test]
+fn lists_the_profiles() {
+    let output = fritz(&["config", "list", "--output", "text"]);
+    assert!(output.status.success(), "{}", stderr(&output));
+    let stdout = stdout(&output);
+    assert!(stdout.starts_with("no profiles in "), "{stdout}");
+    assert!(stdout.ends_with(", run `fritz config init`\n"), "{stdout}");
+    let output = fritz(&["config", "list", "--output", "json"]);
+    assert_eq!(success(&output), "[]\n");
+
+    let config = Config::new();
+    let output = config.run(&["config", "init", "--host", "192.168.178.1"]);
+    assert!(output.status.success(), "{}", stderr(&output));
+    let output = config.run(&["config", "list", "--output", "json"]);
+    let value: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
+    assert_eq!(
+        value,
+        serde_json::json!([{"name": "default", "default": true, "host": "192.168.178.1",
+                            "username": null, "fingerprint": null}])
     );
 }
 

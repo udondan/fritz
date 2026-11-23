@@ -122,7 +122,7 @@ password     from the keychain
 
 | Command | Does |
 | --- | --- |
-| `fritz config init` / `show` | Save `--host`, `--user` and `--fingerprint` to a profile / show the settings in effect |
+| `fritz config init` / `show` / `list` | Save `--host`, `--user` and `--fingerprint` to a profile / show the settings in effect / list the profiles |
 | `fritz tls fingerprint` / `trust` / `forget` | Print / trust / forget the certificate of the device |
 | `fritz auth login` / `logout` / `status` | Store / remove the password in the keychain / tell where it comes from |
 
@@ -310,8 +310,9 @@ Inputs go after the action, like `fritz tr64 call Hosts1 GetGenericHostEntry New
 ### JSON output
 
 The commands from `overview` to `log` print a table on a terminal and JSON
-otherwise, for scripts and agents. `--output` picks one. `config`, `tls`,
-`auth` and `tr64` always print text.
+otherwise, for scripts and agents, and so does `config list`. `--output`
+picks one. The other `config` commands, `tls`, `auth` and `tr64` always
+print text.
 
 ```console
 $ fritz wlan --output json | jq '.[0]'
@@ -336,6 +337,15 @@ fritz --profile repeater config init --host 192.168.178.4
 fritz --profile repeater tls trust
 fritz --profile repeater auth login
 fritz --profile repeater overview
+```
+
+`fritz config list` shows all profiles and marks the default one:
+
+```console
+$ fritz config list
+DEFAULT  PROFILE   HOST           USER   TRUSTED
+*        default   192.168.178.1  agent  yes
+         repeater  192.168.178.4  -      yes
 ```
 
 In scripts and containers, the environment replaces the profile and the
