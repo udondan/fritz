@@ -30,16 +30,9 @@ jobs:
   # don't take the runners at once; most of them are tested again after a
   # rebase anyway. A skipped job fails the required job, so the jobs run even
   # if boarding-gate failed and fail in their first step.
-  #
-  # For now, pushes to main and the release-please pull request skip the
-  # queue, so the next pull request doesn't wait behind their runs after every
-  # merge. Revert with #122.
   boarding-gate:
     name: Queue
-    if: >-
-      github.event_name == 'pull_request'
-      && github.event.pull_request.head.repo.full_name == github.repository
-      && !startsWith(github.head_ref, 'release-please--')
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
     permissions:
       actions: read
       contents: write # lock refs under refs/boarding-gate/
@@ -349,8 +342,7 @@ jobs:
   # automerge. Only these may be skipped:
   # - coverage: on main and when build didn't succeed, which fails this job
   #   anyway, or when build was skipped for lack of changes;
-  # - boarding-gate: for pull requests from forks and, for now (#122), for
-  #   pushes and the release-please pull request;
+  # - boarding-gate: for pull requests from forks;
   # - changes: outside of pull requests;
   # - build, docker and actions: when changes found nothing they use.
   required:
@@ -371,13 +363,12 @@ jobs:
           RESULTS: ${{ toJSON(needs) }}
           FORK: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository }}
           PULL_REQUEST: ${{ github.event_name == 'pull_request' }}
-          UNQUEUED: ${{ github.event_name != 'pull_request' || startsWith(github.head_ref, 'release-please--') }}
         run: |
-          failed=$(echo "$RESULTS" | jq -r --argjson fork "$FORK" --argjson pr "$PULL_REQUEST" --argjson unqueued "$UNQUEUED" '
+          failed=$(echo "$RESULTS" | jq -r --argjson fork "$FORK" --argjson pr "$PULL_REQUEST" '
             (.changes.outputs // {}) as $changed
             | def may_skip:
                 .key == "coverage"
-                or (.key == "boarding-gate" and ($fork or $unqueued))
+                or (.key == "boarding-gate" and $fork)
                 or (.key == "changes" and ($pr | not))
                 or (.key == "build" and $pr and $changed.code == "false")
                 or (.key == "docker" and $pr and $changed.docker == "false")
