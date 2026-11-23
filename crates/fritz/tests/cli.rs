@@ -670,9 +670,9 @@ const FIXTURE: &str = concat!(
 /// The session ID of the simulator.
 const SESSION: &str = "5e55104d0c0ffee5";
 
-/// Runs `fritz tr64` against `sim` as its user, with the given password.
+/// Runs `fritz tr064` against `sim` as its user, with the given password.
 async fn tr64(sim: &fritz_sim::Sim, args: &[&str], password: Option<&str>) -> Output {
-    let mut all = vec!["tr64"];
+    let mut all = vec!["tr064"];
     all.extend(args);
     run(sim, &all, password).await
 }
@@ -844,6 +844,7 @@ async fn calls_only_actions_that_read() {
 #[test]
 fn reports_an_unreachable_device_for_tr64() {
     let url = unreachable_url("http");
+    // `tr64` is the old name of `tr064`.
     let output = fritz(&["--host", &url, "tr64", "services"]);
     assert!(!output.status.success());
     assert!(

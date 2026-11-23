@@ -19,7 +19,7 @@ default:
   lists, phone books, voice messages, the event log), `secret` (getters that
   could return passwords or keys), `write`, or `critical` (changes that can
   lock you out, cost money, expose or reset the device, and any action of an
-  unknown kind). `fritz tr64 call` only runs `read` and `personal` actions.
+  unknown kind). `fritz tr064 call` only runs `read` and `personal` actions.
   The class of every action of the recorded fixtures is kept in
   [`policy.txt`](crates/fritz-core/tests/data/policy.txt), so that every
   change of the policy shows up in review.

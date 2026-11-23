@@ -57,7 +57,7 @@ Cargo workspace:
   password source of every command.
 - `fritz-core/src/policy.rs` classifies every action by the names in its SCPD
   alone (read, denied getter, write, critical), before anything is sent. Read
-  paths only run plain getters. Calls of arbitrary actions (`fritz tr64 call`,
+  paths only run plain getters. Calls of arbitrary actions (`fritz tr064 call`,
   `fritz_call_action`) go through `generic::call`.
 - Values from the device pass `redact` before they are shown or stored. Calls,
   phonebooks and the event log are personal and only served with `--personal`
