@@ -173,20 +173,24 @@ async fn refuses_when_the_uptime_cannot_be_read() {
 
 #[tokio::test]
 async fn tells_when_it_is_unknown_whether_the_device_got_the_restart() {
-    let setup = Setup::router().await;
-    setup
-        .sim
-        .inject(Injection::disconnect("DeviceConfig1", "Reboot"));
-    let mut changer = setup.changer(CRITICAL);
-    let plan = changer.plan_reboot().await.unwrap();
-    let reboot = changer.reboot(&plan.token).await.unwrap();
-    let report = reboot.report();
-    assert_eq!(report.outcome, State::Unknown);
-    assert!(
-        report.error.as_deref().unwrap().contains("HTTP"),
-        "{report:?}"
-    );
-    assert_eq!(setup.events(), ["planned", "sending", "failed"]);
+    let broken = [
+        (Injection::disconnect("DeviceConfig1", "Reboot"), "HTTP"),
+        (Injection::truncate("DeviceConfig1", "Reboot"), "XML"),
+    ];
+    for (injection, error) in broken {
+        let setup = Setup::router().await;
+        setup.sim.inject(injection);
+        let mut changer = setup.changer(CRITICAL);
+        let plan = changer.plan_reboot().await.unwrap();
+        let reboot = changer.reboot(&plan.token).await.unwrap();
+        let report = reboot.report();
+        assert_eq!(report.outcome, State::Unknown);
+        assert!(
+            report.error.as_deref().unwrap().contains(error),
+            "{report:?}"
+        );
+        assert_eq!(setup.events(), ["planned", "sending", "failed"]);
+    }
 }
 
 #[tokio::test]

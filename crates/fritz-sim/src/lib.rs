@@ -147,6 +147,10 @@ pub enum Injection {
     /// Calls of an action break off without an answer, like a connection
     /// that fails while the call is sent. The call changes nothing.
     Disconnect { service: String, action: String },
+    /// Calls of an action answer with a body that ends early, like a
+    /// connection that closes while the answer is sent. The call changes
+    /// nothing.
+    Truncate { service: String, action: String },
     /// A call of `Reboot` of `DeviceConfig1` restarts the device: it
     /// answers the call, breaks off the next `down` requests without an
     /// answer, and then answers again, with the uptime of `DeviceInfo1`
@@ -159,6 +163,14 @@ impl Injection {
     /// Calls of `action` of `service` break off without an answer.
     pub fn disconnect(service: impl Into<String>, action: impl Into<String>) -> Self {
         Self::Disconnect {
+            service: service.into(),
+            action: action.into(),
+        }
+    }
+
+    /// Calls of `action` of `service` answer with a body that ends early.
+    pub fn truncate(service: impl Into<String>, action: impl Into<String>) -> Self {
+        Self::Truncate {
             service: service.into(),
             action: action.into(),
         }
@@ -487,8 +499,8 @@ impl Inner {
             .trim_matches('"');
         let expected = format!("{}#{}", service.service_type, call.action);
         let result = if soap_action == expected && call.service_type == service.service_type {
-            if self.disconnects(&service, &call.action) {
-                return broken();
+            if let Some(response) = self.breaks(&service, &call.action) {
+                return response;
             }
             let hooks = self.hooks(&service, &call.action);
             let result = self
@@ -518,11 +530,18 @@ impl Inner {
         }
     }
 
-    /// Whether calls of `action` break off.
-    fn disconnects(&self, service: &Service, action: &str) -> bool {
-        self.injections.iter().any(|i| {
-            matches!(i, Injection::Disconnect { service: reference, action: name }
-                if name == action && service.matches(reference))
+    /// The broken answer to calls of `action`, if they break off.
+    fn breaks(&self, service: &Service, action: &str) -> Option<Response> {
+        self.injections.iter().find_map(|i| match i {
+            Injection::Disconnect {
+                service: reference,
+                action: name,
+            } if name == action && service.matches(reference) => Some(broken()),
+            Injection::Truncate {
+                service: reference,
+                action: name,
+            } if name == action && service.matches(reference) => Some(truncated()),
+            _ => None,
         })
     }
 
@@ -593,6 +612,11 @@ impl Inner {
 /// client gets no answer.
 fn broken() -> Response {
     (StatusCode::OK, [(CONTENT_LENGTH, "1")], Body::new(Broken)).into_response()
+}
+
+/// A response whose SOAP envelope ends early.
+fn truncated() -> Response {
+    (StatusCode::OK, "<?xml version=\"1.0\"?><s:Envelope").into_response()
 }
 
 /// A body that fails.

@@ -240,9 +240,11 @@ impl Changer {
                 let _ = self.log(Event::Applied, subject(&service, ACTION, &[]), None, None);
                 (State::Accepted, None)
             }
-            Err(Error::Call(generic::Error::Tr064(error @ tr064::Error::Http(_)))) => {
-                (State::Unknown, Some(error.to_string()))
-            }
+            Err(Error::Call(generic::Error::Tr064(
+                error @ (tr064::Error::Http(_)
+                | tr064::Error::Xml(_)
+                | tr064::Error::InvalidResponse(_)),
+            ))) => (State::Unknown, Some(error.to_string())),
             Err(error) => return Err(error),
         };
         let udn = self.identity.clone().map_or_default(|(_, udn)| udn);
@@ -281,10 +283,13 @@ impl Changer {
         let deadline = start + wait.budget;
         let mut report = reboot.report.clone();
         let mut down = false;
-        let mut left = wait.budget;
-        while !left.is_zero() {
+        loop {
+            let left = deadline.saturating_duration_since(Instant::now());
+            if left.is_zero() {
+                break;
+            }
             tokio::time::sleep(wait.interval.min(left)).await;
-            left = deadline.saturating_duration_since(Instant::now());
+            let left = deadline.saturating_duration_since(Instant::now());
             let read = reboot.probe.read(&self.client);
             let Ok(Ok(info)) = tokio::time::timeout(left, read).await else {
                 if !down {
