@@ -1371,11 +1371,13 @@ async fn prints_the_state_as_text() {
     let output = run(&sim, &["--output", "text", "mesh", "--tree"], password).await;
     assert_eq!(
         success(&output),
-        "device-50 (master, FRITZ!Box 7690)  192.0.2.34\n\
-         ├── device-51 (slave, FRITZ!Repeater 1200 AX)  -  \
+        "NODE               IP          ROLE    MODEL                   CONNECTION\n\
+         device-50          192.0.2.34  master  FRITZ!Box 7690\n\
+         ├── device-51      -           slave   FRITZ!Repeater 1200 AX  \
          WLAN 5 GHz ↓ 1201.0 Mbit/s  ↑ 1201.0 Mbit/s\n\
-         │   └── device-47  192.0.2.30  LAN\n\
-         └── device-2  192.0.2.2  WLAN 5 GHz ↓ 866.7 Mbit/s  ↑ 433.3 Mbit/s\n"
+         │   └── device-47  192.0.2.30                                  LAN\n\
+         └── device-2       192.0.2.2                                   \
+         WLAN 5 GHz ↓ 866.7 Mbit/s  ↑ 433.3 Mbit/s\n"
     );
     let smarthome = text("smarthome").await;
     assert!(smarthome.starts_with("NAME "), "{smarthome}");

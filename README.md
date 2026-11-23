@@ -227,10 +227,11 @@ repeater  tv        LAN   LAN:1      CONNECTED  ↓ 0 kbit/s  ↑ 0 kbit/s
 
 ```console
 $ fritz mesh --tree
-fritzbox (master, FRITZ!Box 7690)  192.168.178.1
-├── repeater (slave, FRITZ!Repeater 1200 AX)  192.168.178.40  WLAN 5 GHz ↓ 1201.0 Mbit/s  ↑ 1201.0 Mbit/s
-│   └── tv  192.168.178.30  LAN
-└── laptop  192.168.178.20  WLAN 5 GHz ↓ 866.7 Mbit/s  ↑ 433.3 Mbit/s
+NODE          IP              ROLE    MODEL                   CONNECTION
+fritzbox      192.168.178.1   master  FRITZ!Box 7690
+├── repeater  192.168.178.40  slave   FRITZ!Repeater 1200 AX  WLAN 5 GHz ↓ 1201.0 Mbit/s  ↑ 1201.0 Mbit/s
+│   └── tv    192.168.178.30                                  LAN
+└── laptop    192.168.178.20                                  WLAN 5 GHz ↓ 866.7 Mbit/s  ↑ 433.3 Mbit/s
 ```
 
 The IP addresses come from the host list, joined by the MAC addresses of

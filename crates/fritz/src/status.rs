@@ -685,9 +685,10 @@ pub(crate) mod tests {
         let tree_output = text(|out| mesh_tree(&mesh.tree(), out));
         assert_eq!(
             tree_output,
-            "box (master)  192.0.2.1\n\
-             └── host  192.0.2.5 (inactive)  ↓ 2.0 Mbit/s  ↑ 800 kbit/s\n\
-             repeater (slave)  -\n"
+            "NODE      IP                    ROLE    MODEL  CONNECTION\n\
+             box       192.0.2.1             master\n\
+             └── host  192.0.2.5 (inactive)                 ↓ 2.0 Mbit/s  ↑ 800 kbit/s\n\
+             repeater  -                     slave\n"
         );
         let output = text(|out| mesh_tables(&mesh, out));
         assert_eq!(

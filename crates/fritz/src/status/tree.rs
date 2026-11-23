@@ -4,11 +4,8 @@ use std::io::Write;
 
 use fritz_core::lists::Branch;
 
-use super::{address, rates};
+use super::{address, rates, table};
 
-/// Draws the tree like the command `tree`: a line for every device, with
-/// its role and model if it is a mesh node, then how it is connected to the
-/// device above it.
 /// The band of a wireless interface like `AP:5G:0`.
 fn band(interface: &str) -> Option<&'static str> {
     interface.split(':').find_map(|part| match part {
@@ -19,15 +16,23 @@ fn band(interface: &str) -> Option<&'static str> {
     })
 }
 
+/// Draws the tree like the command `tree`, as a table: a row for every
+/// device, with its address, its role and model if it is a mesh node, and
+/// how it is connected to the device above it.
 pub(super) fn mesh_tree(roots: &[Branch], out: &mut impl Write) -> anyhow::Result<()> {
+    let mut rows = Vec::new();
     for root in roots {
-        writeln!(out, "{}", tree_line(root))?;
-        tree_children(&root.children, "", out)?;
+        rows.push(tree_row(root, ""));
+        tree_children(&root.children, "", &mut rows);
     }
-    Ok(())
+    table(
+        &["NODE", "IP", "ROLE", "MODEL", "CONNECTION"],
+        rows.into_iter(),
+        out,
+    )
 }
 
-fn tree_children(branches: &[Branch], indent: &str, out: &mut impl Write) -> anyhow::Result<()> {
+fn tree_children(branches: &[Branch], indent: &str, rows: &mut Vec<Vec<String>>) {
     for (i, branch) in branches.iter().enumerate() {
         let last = i + 1 == branches.len();
         let (fork, more) = if last {
@@ -35,25 +40,24 @@ fn tree_children(branches: &[Branch], indent: &str, out: &mut impl Write) -> any
         } else {
             ("├── ", "│   ")
         };
-        writeln!(out, "{indent}{fork}{}", tree_line(branch))?;
-        tree_children(&branch.children, &format!("{indent}{more}"), out)?;
+        rows.push(tree_row(branch, &format!("{indent}{fork}")));
+        tree_children(&branch.children, &format!("{indent}{more}"), rows);
     }
-    Ok(())
 }
 
-/// Like `repeater (slave, FRITZ!Repeater 2400)  192.0.2.30  WLAN 5 GHz ↓ 866.7 Mbit/s  ↑ 780.0 Mbit/s`.
-fn tree_line(branch: &Branch) -> String {
+/// The cells of one device: the name after the lines of the tree, the
+/// address, the role and model of a mesh node, and the links to the device
+/// above, like `WLAN 5 GHz ↓ 866.7 Mbit/s  ↑ 780.0 Mbit/s`.
+fn tree_row(branch: &Branch, prefix: &str) -> Vec<String> {
     let node = branch.node;
-    let mut line = node.name.clone().unwrap_or_else(|| "?".to_owned());
-    let about: Vec<&str> = [&node.role, &node.model]
-        .into_iter()
-        .filter(|_| node.meshed)
-        .filter_map(Option::as_deref)
-        .collect();
-    if !about.is_empty() {
-        line = format!("{line} ({})", about.join(", "));
-    }
-    line = format!("{line}  {}", address(node));
+    let name = node.name.as_deref().unwrap_or("?");
+    let about = |value: &Option<String>| {
+        value
+            .as_deref()
+            .filter(|_| node.meshed)
+            .unwrap_or_default()
+            .to_owned()
+    };
     let links: Vec<String> = branch
         .uplinks
         .iter()
@@ -69,11 +73,13 @@ fn tree_line(branch: &Branch) -> String {
                 .join(" ")
         })
         .collect();
-    if !links.is_empty() {
-        line.push_str("  ");
-        line.push_str(&links.join(", "));
-    }
-    line
+    vec![
+        format!("{prefix}{name}"),
+        address(node),
+        about(&node.role),
+        about(&node.model),
+        links.join(", "),
+    ]
 }
 
 #[cfg(test)]
@@ -99,6 +105,9 @@ mod tests {
             }],
             children: Vec::new(),
         };
-        assert_eq!(tree_line(&branch), "?  -  WLAN 2.4 GHz");
+        assert_eq!(
+            tree_row(&branch, ""),
+            ["?", "-", "", "", "WLAN 2.4 GHz"]
+        );
     }
 }
