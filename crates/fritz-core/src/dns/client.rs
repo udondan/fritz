@@ -177,13 +177,20 @@ pub(crate) async fn read() -> Option<ClientConfig> {
 
 /// Reads the configuration from `source`.
 async fn read_from(source: Source) -> Option<ClientConfig> {
-    match source {
-        Source::Scutil => run("scutil", &["--dns"], CONFIG_TIMEOUT)
-            .await
-            .map(|text| parse_scutil(&text)),
-        Source::ResolvConf => read_file(Path::new("/etc/resolv.conf"), CONFIG_TIMEOUT)
-            .await
-            .map(|text| parse_resolv_conf(&text)),
+    let text = match source {
+        Source::Scutil => run("scutil", &["--dns"], CONFIG_TIMEOUT).await?,
+        Source::ResolvConf => read_file(Path::new("/etc/resolv.conf"), CONFIG_TIMEOUT).await?,
+    };
+    Some(source.parse(&text))
+}
+
+impl Source {
+    /// Parses the configuration read from this source.
+    fn parse(self, text: &str) -> ClientConfig {
+        match self {
+            Source::Scutil => parse_scutil(text),
+            Source::ResolvConf => parse_resolv_conf(text),
+        }
     }
 }
 
@@ -379,6 +386,11 @@ search fritz.box lan # comment
         assert_eq!(source("macos"), Some(Source::Scutil));
         assert_eq!(source("linux"), Some(Source::ResolvConf));
         assert_eq!(source("windows"), None);
+        assert_eq!(Source::Scutil.parse(SCUTIL), parse_scutil(SCUTIL));
+        assert_eq!(
+            Source::ResolvConf.parse("nameserver 192.0.2.1\n"),
+            parse_resolv_conf("nameserver 192.0.2.1\n")
+        );
         // Only reads; what it finds depends on the machine.
         for source in [Source::Scutil, Source::ResolvConf] {
             if let Some(config) = read_from(source).await {
