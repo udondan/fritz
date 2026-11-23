@@ -77,8 +77,8 @@ cosign verify udondan/fritz \
 
 ## Usage
 
-The examples show made-up data. Every command takes `--output json` (see
-[JSON output](#json-output)) and `--help`.
+The examples show made-up data. Every command takes `--help`; the commands
+that read the device also print JSON (see [JSON output](#json-output)).
 
 ### Set up
 
@@ -309,8 +309,9 @@ Inputs go after the action, like `fritz tr64 call Hosts1 GetGenericHostEntry New
 
 ### JSON output
 
-The output is a table on a terminal and JSON otherwise, for scripts and
-agents. `--output` picks one:
+The commands from `overview` to `log` print a table on a terminal and JSON
+otherwise, for scripts and agents. `--output` picks one. `config`, `tls`,
+`auth` and `tr64` always print text.
 
 ```console
 $ fritz wlan --output json | jq '.[0]'
