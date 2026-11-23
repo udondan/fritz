@@ -38,6 +38,7 @@ use fritz_core::settings;
 use fritz_core::smarthome;
 use fritz_core::status::{self, Host};
 use fritz_core::telephony;
+use fritz_core::users;
 use fritz_core::wlan;
 use rmcp::handler::server::router::tool::ToolRouter;
 use rmcp::handler::server::wrapper::Parameters;
@@ -450,6 +451,23 @@ impl Server {
         self.respond(async {
             let mut reader = self.reader().await?;
             Ok(capabilities::capabilities(&mut reader).await?)
+        })
+        .await
+    }
+
+    #[tool(
+        description = "Users of the device (null if not allowed; names hidden without `--personal`), rights of the current user, login settings: anonymous and button login, default password, two-factor confirmation, and hints on weak settings. No passwords are read.",
+        annotations(read_only_hint = true, open_world_hint = false)
+    )]
+    async fn fritz_users(&self) -> CallToolResult {
+        self.respond(async {
+            let mut reader = self.reader().await?;
+            let users = users::users(&mut reader).await?;
+            Ok(if self.personal {
+                users
+            } else {
+                users.without_names(PERSONAL_HIDDEN)
+            })
         })
         .await
     }

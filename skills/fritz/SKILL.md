@@ -47,6 +47,7 @@ or paste them.
 | Which ports are forwarded, is UPnP on?      | `fritz ports`                        |
 | Numbers, deflections, answering machines    | `fritz telephony`                    |
 | What does the box offer, what may I do?     | `fritz capabilities`                 |
+| Which users exist, is the login weak?       | `fritz users`                        |
 | DNS, IPv6, MTU, DHCP, time, LAN ports       | `fritz settings`                     |
 | VPN, WLAN, parental controls, traffic       | `fritz settings vpn wlan user inetstat` |
 | Is mesh steering on, which mesh role?       | `fritz settings mesh`                |

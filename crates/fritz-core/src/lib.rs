@@ -34,6 +34,7 @@ pub mod smarthome;
 pub mod status;
 pub mod system;
 pub mod telephony;
+pub mod users;
 pub mod wlan;
 
 // Compiles the example of the README.

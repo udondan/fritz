@@ -535,6 +535,24 @@ Two-factor  on
 Services    37
 ```
 
+`fritz users` lists the users of the device, your rights and how the login is
+protected, with hints on weak settings like an active default password or a
+login without password. No passwords are read; the list holds only names. If
+your user may not read the list, it shows `not allowed` (`null` in JSON). The
+MCP tool `fritz_users` hides the names unless `fritz mcp` runs with
+`--personal`.
+
+```console
+$ fritz users
+Users                   admin (last login), guest
+Your rights             BoxAdmin: readwrite, Phone: readwrite, HomeAuto: readwrite
+Login without password  no
+Login by button         no
+Default password        no
+Two-factor              off
+Hints                   two-factor confirmation off
+```
+
 ### Settings
 
 `fritz settings` reads settings that TR-064 doesn't offer, like DNS, IPv6,
@@ -799,6 +817,7 @@ claude mcp add fritz -- fritz --host 192.168.178.1 --user agent mcp
 | `fritz_ports`           | Port forwardings and whether UPnP is on                     |
 | `fritz_telephony`       | Numbers, accounts, deflections, answering machines, DECT    |
 | `fritz_capabilities`    | Features of the device, rights of the user, two-factor      |
+| `fritz_users`           | Users (names need `--personal`), login settings, hints      |
 | `fritz_settings`        | Settings like DNS, IPv6, MTU, DHCP and time, secrets hidden |
 | `fritz_list_services`   | TR-064 services, or the actions of one with their class     |
 | `fritz_describe_action` | The arguments of an action and their types                  |

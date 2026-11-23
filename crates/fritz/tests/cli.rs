@@ -2360,6 +2360,48 @@ async fn lists_the_powerline_adapters() {
 }
 
 #[tokio::test(flavor = "multi_thread")]
+async fn shows_the_users() {
+    let fixture = fritz_sim::Fixture::load(FIXTURE).unwrap();
+    let sim = fritz_sim::Sim::start(fixture).await.unwrap();
+    let password = Some(fritz_sim::PASSWORD);
+
+    let text = success(&run(&sim, &["-o", "text", "users"], password).await);
+    assert_eq!(
+        text,
+        "Users                   user-1, user-2, user-3, user-4 (last login)\n\
+         Your rights             BoxAdmin: readwrite, Phone: readwrite, Dial: readwrite, \
+         NAS: readwrite, HomeAuto: readwrite, App: readwrite\n\
+         Login without password  no\n\
+         Login by button         no\n\
+         Default password        no\n\
+         Two-factor              off\n\
+         Hints                   two-factor confirmation off\n"
+    );
+    let json = success(&run(&sim, &["-o", "json", "users"], password).await);
+    let users: serde_json::Value = serde_json::from_str(&json).unwrap();
+    assert_eq!(users["users"][3]["name"], "user-4", "{users}");
+    assert_eq!(users["users"][3]["last_login"], true, "{users}");
+    assert_eq!(
+        users["login"],
+        serde_json::json!({
+            "anonymous": false,
+            "button": false,
+            "default_password": false,
+            "two_factor": false,
+        })
+    );
+    // Only getters.
+    assert!(
+        sim.requests()
+            .iter()
+            .filter_map(|r| r.action.as_deref())
+            .all(|a| a.starts_with("Get") || a.starts_with("X_AVM-DE_Get")),
+        "{:?}",
+        sim.requests()
+    );
+}
+
+#[tokio::test(flavor = "multi_thread")]
 async fn shows_the_load_of_the_device() {
     let fixture = fritz_sim::Fixture::load(FIXTURE).unwrap();
     let sim = fritz_sim::Sim::start(fixture).await.unwrap();
