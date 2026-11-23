@@ -1,8 +1,8 @@
 # Runs a static fritz binary on Alpine. By default it is built from the source;
 # releases pass `--build-arg BINARY=prebuilt` and copy the musl binaries of
 # the release from dist/<arch>/fritz, so no Rust is compiled under emulation.
-# CI only checks that the image starts and lists its tools, and passes
-# `--build-arg PROFILE=dev`, which builds in a fraction of the time.
+# `--build-arg PROFILE=dev` builds without optimizations, in a fraction of the
+# time.
 ARG BINARY=source
 
 FROM rust:1.100-alpine AS source
