@@ -79,11 +79,8 @@ pub(crate) fn list(context: &Context, format: Format, out: &mut impl Write) -> a
     match format {
         Format::Json => json(&entries, out),
         Format::Text if entries.is_empty() => {
-            writeln!(
-                out,
-                "no profiles in {}, run `fritz config init`",
-                context.path().display()
-            )?;
+            let path = context.path().display();
+            writeln!(out, "no profiles in {path}, run `fritz config init`")?;
             Ok(())
         }
         Format::Text => table(

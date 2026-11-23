@@ -452,6 +452,28 @@ fn creates_and_shows_profiles() {
 }
 
 #[test]
+fn lists_the_profiles() {
+    let output = fritz(&["config", "list", "--output", "text"]);
+    assert!(output.status.success(), "{}", stderr(&output));
+    let stdout = stdout(&output);
+    assert!(stdout.starts_with("no profiles in "), "{stdout}");
+    assert!(stdout.ends_with(", run `fritz config init`\n"), "{stdout}");
+    let output = fritz(&["config", "list", "--output", "json"]);
+    assert_eq!(success(&output), "[]\n");
+
+    let config = Config::new();
+    let output = config.run(&["config", "init", "--host", "192.168.178.1"]);
+    assert!(output.status.success(), "{}", stderr(&output));
+    let output = config.run(&["config", "list", "--output", "json"]);
+    let value: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
+    assert_eq!(
+        value,
+        serde_json::json!([{"name": "default", "default": true, "host": "192.168.178.1",
+                            "username": null, "fingerprint": null}])
+    );
+}
+
+#[test]
 fn shows_the_defaults_without_a_file() {
     let output = fritz(&["config", "show"]);
     assert!(output.status.success(), "{}", stderr(&output));
