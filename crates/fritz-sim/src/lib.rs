@@ -23,10 +23,12 @@
 //!   PBKDF2 challenge, and serves the documents of the REST API, like
 //!   `/api/v0/smarthome/overview`, the pages of `/data.lua`, like
 //!   `ecoStat`, and the statistics of Smart Home devices of
-//!   `/webservices/homeautoswitch.lua`, for the open session.
+//!   `/webservices/homeautoswitch.lua`, for the open session. Like the
+//!   device, the page `log` remembers the category of its last field
+//!   `filter` and lists only its entries, see [`Sim::log_filter`].
 //! - Tests can [inject](Sim::inject) UPnP errors, delays, discarded writes,
 //!   side effects of writes, counters that grow, a locked login, calls that
-//!   break off and restarts, and read the [requests](Sim::requests) the
+//!   break off, restarts and pages that fail, and read the [requests](Sim::requests) the
 //!   server got.
 //!
 //! ```no_run
@@ -158,6 +160,14 @@ pub enum Injection {
     /// `GetInfo` reset to 0. With `serial`, another device comes back: it
     /// answers this serial number.
     Reboot { down: u32, serial: Option<String> },
+    /// Posts of the page `page` of `/data.lua` whose form field `field` is
+    /// `value` fail with 500, after the page took the form, like a page
+    /// that remembers its filter but breaks off its answer.
+    FailPage {
+        page: String,
+        field: String,
+        value: String,
+    },
 }
 
 impl Injection {
@@ -181,6 +191,19 @@ impl Injection {
     /// `down` requests.
     pub fn reboot(down: u32) -> Self {
         Self::Reboot { down, serial: None }
+    }
+
+    /// Posts of `page` with `value` in the form field `field` fail.
+    pub fn fail_page(
+        page: impl Into<String>,
+        field: impl Into<String>,
+        value: impl Into<String>,
+    ) -> Self {
+        Self::FailPage {
+            page: page.into(),
+            field: field.into(),
+            value: value.into(),
+        }
     }
 
     /// Calls of `action` of `service` fail with the UPnP error `code`.
@@ -272,8 +295,8 @@ impl Sim {
         let shared = Arc::new(Shared {
             options,
             inner: Mutex::new(Inner {
+                web: Web::new(&fixture.pages),
                 device: Device::new(fixture),
-                web: Web::default(),
                 injections: Vec::new(),
                 requests: Vec::new(),
                 down: 0,
@@ -334,6 +357,13 @@ impl Sim {
     /// The requests the simulator got so far, oldest first.
     pub fn requests(&self) -> Vec<Request> {
         self.shared.lock().requests.clone()
+    }
+
+    /// The category the page `log` of the web interface remembers, like
+    /// `net`: the value of its last field `filter`, or else of `filter` in
+    /// the page of the fixture. `None` if neither is there.
+    pub fn log_filter(&self) -> Option<String> {
+        self.shared.lock().web.log_filter().map(str::to_owned)
     }
 
     /// The value of a state variable of a service, like `Enable` of
@@ -426,7 +456,15 @@ impl Shared {
                 let Inner { web, device, .. } = &*inner;
                 web.api(&device.fixture.api, method, path, headers)
             }
-            _ if path == web::DATA => inner.web.page(&inner.device.fixture.pages, method, body),
+            _ if path == web::DATA => {
+                let Inner {
+                    web,
+                    device,
+                    injections,
+                    ..
+                } = &mut *inner;
+                web.page(&device.fixture.pages, injections, method, body)
+            }
             _ if path == web::HOMEAUTO => {
                 inner.web.stats(&inner.device.fixture.stats, method, body)
             }

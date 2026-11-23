@@ -4,20 +4,22 @@
 use std::io::Write;
 
 use anyhow::Context as _;
-use fritz_core::personal::{self, Call, LogEntry, Phonebook};
+use fritz_core::personal::{self, Call, CallFilter, LogEntry, LogFilter, Phonebook};
+use fritz_core::read::Reader;
 
 use crate::context::Context;
 use crate::output::{Format, show};
 use crate::status::{reader, table};
 
-/// Prints the latest calls.
+/// Prints the latest calls that pass `filter`.
 pub(crate) async fn calls(
     context: &Context,
+    filter: &CallFilter,
     limit: u32,
     format: Format,
     out: &mut impl Write,
 ) -> anyhow::Result<()> {
-    let calls = personal::calls(&mut reader(context).await?, limit)
+    let calls = personal::find_calls(&mut reader(context).await?, filter, limit)
         .await
         .context("cannot read the calls")?;
     show(calls.as_slice(), format, out, calls_table)
@@ -111,17 +113,48 @@ fn contacts_table(phonebooks: &[Phonebook], out: &mut impl Write) -> anyhow::Res
     )
 }
 
-/// Prints the latest entries of the event log.
+/// Prints the latest entries of the event log that pass `filter`.
 pub(crate) async fn log(
     context: &Context,
+    filter: &LogFilter,
     limit: usize,
     format: Format,
     out: &mut impl Write,
 ) -> anyhow::Result<()> {
-    let log = personal::log(&mut reader(context).await?, limit)
-        .await
-        .context("cannot read the event log")?;
+    let log = find_log(context, &mut reader(context).await?, filter, limit).await?;
     show(log.as_slice(), format, out, log_lines)
+}
+
+/// Reads the latest entries of the event log that pass `filter`, at most
+/// `limit`. A category needs the event log of the web interface, the
+/// only one with categories; without it, the filter fails rather than
+/// returning all entries.
+pub(crate) async fn find_log(
+    context: &Context,
+    reader: &mut Reader,
+    filter: &LogFilter,
+    limit: usize,
+) -> anyhow::Result<Vec<LogEntry>> {
+    let no_categories = "cannot filter by category: the device shows no event log with categories";
+    let log = if let Some(category) = filter.category {
+        let session = context.session().await.context(no_categories)?;
+        let log = personal::web_log(&session, category).await;
+        // The device ends the session itself after a while.
+        let _ = session.logout().await;
+        log.context(no_categories)?
+    } else {
+        personal::log(reader, usize::MAX)
+            .await
+            .context("cannot read the event log")?
+    };
+    let now = if filter.needs_now() {
+        personal::now(reader)
+            .await
+            .context("cannot read the time of the device")?
+    } else {
+        0
+    };
+    Ok(personal::filter_log(log, filter, now, limit))
 }
 
 fn log_lines(log: &[LogEntry], out: &mut impl Write) -> anyhow::Result<()> {
@@ -129,10 +162,21 @@ fn log_lines(log: &[LogEntry], out: &mut impl Write) -> anyhow::Result<()> {
         writeln!(out, "No entries.")?;
         return Ok(());
     }
-    let rows = log
-        .iter()
-        .map(|e| vec![e.time.clone().unwrap_or_default(), e.message.clone()]);
-    table(&["TIME", "MESSAGE"], rows, out)
+    let categories = log.iter().any(|e| e.category.is_some());
+    let rows = log.iter().map(|e| {
+        let mut row = vec![e.time.clone().unwrap_or_default()];
+        if categories {
+            row.push(e.category.clone().unwrap_or_default());
+        }
+        row.push(e.message.clone());
+        row
+    });
+    let headers: &[&str] = if categories {
+        &["TIME", "CATEGORY", "MESSAGE"]
+    } else {
+        &["TIME", "MESSAGE"]
+    };
+    table(headers, rows, out)
 }
 
 #[cfg(test)]
@@ -191,10 +235,12 @@ mod tests {
             LogEntry {
                 time: Some("2026-11-20 18:05:42".to_owned()),
                 message: "Internet connected.".to_owned(),
+                category: None,
             },
             LogEntry {
                 time: None,
                 message: "odd".to_owned(),
+                category: None,
             },
         ];
         assert_eq!(
@@ -204,5 +250,14 @@ mod tests {
              \x20                    odd\n"
         );
         assert_eq!(text(|out| log_lines(&[], out)), "No entries.\n");
+        let log = [LogEntry {
+            category: Some("wlan".to_owned()),
+            ..log[0].clone()
+        }];
+        assert_eq!(
+            text(|out| log_lines(&log, out)),
+            "TIME                 CATEGORY  MESSAGE\n\
+             2026-11-20 18:05:42  wlan      Internet connected.\n"
+        );
     }
 }

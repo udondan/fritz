@@ -1,6 +1,7 @@
 //! The session of the web interface and the Smart Home REST API of the
 //! simulated 7690.
 
+use fritz_core::personal::web_log;
 use fritz_core::session::{Error, Session};
 use fritz_core::smarthome::history::{HOMEAUTO, History, Range, history};
 use fritz_core::{settings, smarthome};
@@ -230,4 +231,67 @@ async fn reads_the_settings() {
     let session = login(&sim, PASSWORD).await.unwrap();
     let mesh = settings::settings(&session, &[settings::MESH.to_owned()]).await;
     assert!(mesh.unavailable["mesh"].contains("404"), "{mesh:?}");
+}
+
+/// The number of pages of `/data.lua` the simulator served.
+fn pages(sim: &Sim) -> usize {
+    sim.requests()
+        .iter()
+        .filter(|r| r.path == "/data.lua")
+        .count()
+}
+
+#[tokio::test]
+async fn restores_the_filter_of_the_event_log() {
+    let sim = sim().await;
+    let session = login(&sim, PASSWORD).await.unwrap();
+    assert_eq!(sim.log_filter().as_deref(), Some("all"));
+    let usb = web_log(&session, "usb").await.unwrap();
+    let messages: Vec<_> = usb.iter().map(|e| e.message.as_str()).collect();
+    assert_eq!(messages, ["USB storage device name-10 connected."]);
+    // Read the chosen filter, choose usb, choose the previous one again.
+    assert_eq!(pages(&sim), 3);
+    assert_eq!(sim.log_filter().as_deref(), Some("all"));
+
+    // A failed read still restores the filter.
+    sim.inject(Injection::fail_page("log", "filter", "usb"));
+    assert!(web_log(&session, "usb").await.is_err());
+    assert_eq!(pages(&sim), 6);
+    assert_eq!(sim.log_filter().as_deref(), Some("all"));
+
+    // So does a failed restore, which is reported.
+    sim.clear_injections();
+    sim.inject(Injection::fail_page("log", "filter", "all"));
+    assert!(web_log(&session, "usb").await.is_err());
+    assert_eq!(pages(&sim), 9);
+}
+
+#[tokio::test]
+async fn reads_the_chosen_filter_once() {
+    let page = r#"{"data": {"filter": "net", "log": [
+        {"date": "19.11.26", "time": "23:58:40", "msg": "Up.", "group": "net"},
+        {"date": "12.11.26", "time": "07:00:01", "msg": "Restarted.", "group": "sys"}
+    ]}}"#;
+    let fixture = Fixture::load(FIXTURE).unwrap().with_page("log", page);
+    let sim = Sim::start(fixture).await.unwrap();
+    let session = login(&sim, PASSWORD).await.unwrap();
+    let internet = web_log(&session, "internet").await.unwrap();
+    assert_eq!(internet.len(), 1);
+    assert_eq!(internet[0].message, "Up.");
+    assert_eq!(pages(&sim), 1);
+    assert_eq!(sim.log_filter().as_deref(), Some("net"));
+}
+
+#[tokio::test]
+async fn restores_nothing_without_a_chosen_filter() {
+    let page = r#"{"data": {"log": [{"msg": "Restarted.", "group": "sys"}]}}"#;
+    let fixture = Fixture::load(FIXTURE).unwrap().with_page("log", page);
+    let sim = Sim::start(fixture).await.unwrap();
+    let session = login(&sim, PASSWORD).await.unwrap();
+    assert_eq!(sim.log_filter(), None);
+    let system = web_log(&session, "system").await.unwrap();
+    assert_eq!(system[0].message, "Restarted.");
+    assert_eq!(pages(&sim), 2);
+    // The page named no filter to choose again.
+    assert_eq!(sim.log_filter().as_deref(), Some("sys"));
 }

@@ -1,0 +1,14 @@
+{
+  "pid": "log",
+  "data": {
+    "filter": "all",
+    "log": [
+      {"date": "20.11.26", "time": "12:10:05", "msg": "WLAN device name-9 has logged on (5 GHz).", "group": "wlan", "id": 754},
+      {"date": "20.11.26", "time": "09:15:02", "msg": "Telephone call to phone-2 established.", "group": "fon", "id": 551},
+      {"date": "19.11.26", "time": "23:58:40", "msg": "Internet connection established successfully.", "group": "net", "id": 23},
+      {"date": "19.11.26", "time": "23:58:10", "msg": "Internet connection was interrupted.", "group": "net", "id": 24},
+      {"date": "12.11.26", "time": "07:00:01", "msg": "The device has been restarted.", "group": "sys", "id": 101},
+      {"date": "01.11.26", "time": "18:30:00", "msg": "USB storage device name-10 connected.", "group": "usb", "id": 302}
+    ]
+  }
+}

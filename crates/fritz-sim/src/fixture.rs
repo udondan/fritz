@@ -218,6 +218,15 @@ impl Fixture {
         }
         self
     }
+
+    /// Serves `json` as the page `name` of `/data.lua`, like `log`, in
+    /// place of the page of the fixture. For tests of pages the fixture
+    /// lacks.
+    #[must_use]
+    pub fn with_page(mut self, name: &str, json: impl Into<String>) -> Self {
+        self.pages.insert(format!("/{name}"), json.into());
+        self
+    }
 }
 
 /// Parses a recorded answer: `{"status": "ok", "out": {…}}` or

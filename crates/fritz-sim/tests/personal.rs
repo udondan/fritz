@@ -3,7 +3,7 @@
 use std::collections::BTreeMap;
 
 use fritz_core::generic::Error;
-use fritz_core::personal::{self, Contact, ContactNumber};
+use fritz_core::personal::{self, CallFilter, Contact, ContactNumber};
 use fritz_core::read::Reader;
 use fritz_sim::{Answer, Fixture, Sim};
 
@@ -40,13 +40,56 @@ async fn reads_the_calls() {
     let mut reader = reader(&sim).await;
     let calls = personal::calls(&mut reader, 50).await.unwrap();
     let kinds: Vec<_> = calls.iter().map(|c| c.kind).collect();
-    assert_eq!(kinds, ["missed", "outgoing", "incoming"]);
+    assert_eq!(
+        kinds,
+        [
+            "missed",
+            "outgoing",
+            "incoming",
+            "rejected",
+            "active incoming",
+            "active outgoing"
+        ]
+    );
     assert_eq!(calls[1].number.as_deref(), Some("phone-2"));
     assert_eq!(calls[1].own_number.as_deref(), Some("phone-1"));
     assert_eq!(calls[1].date.as_deref(), Some("2026-11-20 09:15"));
     assert_eq!(calls[2].minutes, Some(65));
     // The device gets the limit, and the list is cut to it anyway.
     assert_eq!(personal::calls(&mut reader, 1).await.unwrap().len(), 1);
+}
+
+#[tokio::test]
+async fn filters_the_calls() {
+    let sim = Sim::start(fixture()).await.unwrap();
+    let mut device = reader(&sim).await;
+    // The device says it is 2026-11-20 12:25:44.
+    let now = personal::now(&mut device).await.unwrap();
+    assert_eq!(personal::timestamp("2026-11-20 12:25:44"), Some(now));
+    let filter = CallFilter {
+        kinds: vec!["active"],
+        days: Some(21),
+        search: None,
+    };
+    let calls = personal::find_calls(&mut device, &filter, 50)
+        .await
+        .unwrap();
+    let kinds: Vec<_> = calls.iter().map(|c| c.kind).collect();
+    assert_eq!(kinds, ["active incoming"]);
+    let filter = CallFilter {
+        search: Some("phone-3".to_owned()),
+        ..CallFilter::default()
+    };
+    let calls = personal::find_calls(&mut device, &filter, 1).await.unwrap();
+    assert_eq!(calls.len(), 1);
+    assert_eq!(calls[0].kind, "missed");
+
+    // Without the time of the device, the clock of this computer.
+    let sim = Sim::start(fixture().with_answer("Time1", "GetInfo", None, fault(606)))
+        .await
+        .unwrap();
+    let now = personal::now(&mut reader(&sim).await).await.unwrap();
+    assert!(now > personal::timestamp("2026-01-01").unwrap());
 }
 
 #[tokio::test]

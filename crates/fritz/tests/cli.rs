@@ -1269,6 +1269,91 @@ async fn prints_the_personal_lists() {
     assert_eq!(log[0]["message"], "DSL is ready.", "{log}");
 }
 
+/// The messages or kinds in the JSON output of `args`.
+async fn listed(sim: &fritz_sim::Sim, args: &[&str], field: &str) -> Vec<String> {
+    let output = run(sim, args, Some(fritz_sim::PASSWORD)).await;
+    let list: serde_json::Value = serde_json::from_str(&success(&output)).unwrap();
+    list.as_array()
+        .unwrap()
+        .iter()
+        .map(|item| item[field].as_str().unwrap().to_owned())
+        .collect()
+}
+
+#[tokio::test(flavor = "multi_thread")]
+async fn filters_the_calls_and_the_log() {
+    let fixture = fritz_sim::Fixture::load(FIXTURE).unwrap();
+    let sim = fritz_sim::Sim::start(fixture).await.unwrap();
+    let kinds = |args: &'static [&'static str]| listed(&sim, args, "kind");
+    assert_eq!(
+        kinds(&["calls", "--kind", "active,rejected"]).await,
+        ["rejected", "active incoming", "active outgoing"]
+    );
+    assert_eq!(
+        kinds(&["calls", "--kind", "missed", "--kind", "incoming"]).await,
+        ["missed", "incoming"]
+    );
+    // The device says it is 2026-11-20 12:25.
+    assert_eq!(
+        kinds(&["calls", "--days", "7"]).await,
+        ["missed", "outgoing", "incoming", "rejected"]
+    );
+    assert_eq!(
+        kinds(&["calls", "--search", "NAME-6", "--limit", "1"]).await,
+        ["outgoing"]
+    );
+    assert_eq!(
+        kinds(&["calls", "--kind", "all", "--days", "100"])
+            .await
+            .len(),
+        6
+    );
+    let error = failure(&run(&sim, &["calls", "--kind", "lost"], None).await);
+    assert!(error.contains("unknown kind of call"), "{error}");
+
+    let messages = |args: &'static [&'static str]| listed(&sim, args, "message");
+    assert_eq!(
+        messages(&["log", "--category", "internet", "--search", "interrupted"]).await,
+        ["Internet connection was interrupted."]
+    );
+    assert_eq!(
+        messages(&["log", "--category", "wlan", "--since", "24h"]).await,
+        ["WLAN device name-9 has logged on (5 GHz)."]
+    );
+    assert_eq!(
+        messages(&["log", "--category", "system", "--since", "2026-11-13"]).await,
+        Vec::<String>::new()
+    );
+    let output = run(
+        &sim,
+        &["-o", "text", "log", "--category", "usb"],
+        Some(fritz_sim::PASSWORD),
+    )
+    .await;
+    assert_eq!(
+        success(&output),
+        "TIME                 CATEGORY  MESSAGE\n\
+         2026-11-01 18:30:00  usb       USB storage device name-10 connected.\n"
+    );
+    // The plain log of the fixture has no time.
+    assert_eq!(
+        messages(&["log", "--since", "1w"]).await,
+        Vec::<String>::new()
+    );
+    let error = failure(&run(&sim, &["log", "--since", "soon"], None).await);
+    assert!(error.contains("is neither a duration"), "{error}");
+
+    // The repeater has no event log in its web interface.
+    let fixture = fritz_sim::Fixture::bundled("fritz-repeater-2400/8.25").unwrap();
+    let sim = fritz_sim::Sim::start(fixture).await.unwrap();
+    let args = ["log", "--category", "wlan"];
+    let error = failure(&run(&sim, &args, Some(fritz_sim::PASSWORD)).await);
+    assert!(
+        error.contains("cannot filter by category: the device shows no event log with categories"),
+        "{error}"
+    );
+}
+
 /// Every command with JSON output prints the same value as YAML.
 #[tokio::test(flavor = "multi_thread")]
 async fn prints_the_same_values_as_yaml() {

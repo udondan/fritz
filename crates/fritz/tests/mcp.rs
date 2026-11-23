@@ -508,9 +508,18 @@ async fn reads_personal_lists_only_on_request() {
 
     let client = connect_with(&sim, &["--personal"]).await;
     let calls = success(&client, "fritz_calls", json!({})).await;
-    assert_eq!(calls.as_array().unwrap().len(), 3, "{calls}");
+    assert_eq!(calls.as_array().unwrap().len(), 6, "{calls}");
     let missed = success(&client, "fritz_calls", json!({"kind": "missed"})).await;
     assert_eq!(missed.as_array().unwrap().len(), 1, "{missed}");
+    let filter = json!({"kind": "active,incoming", "days": 30, "search": "name-8"});
+    let found = success(&client, "fritz_calls", filter).await;
+    assert_eq!(found[0]["kind"], "active incoming", "{found}");
+    assert_eq!(found.as_array().unwrap().len(), 1, "{found}");
+    let error = failure(&client, "fritz_calls", json!({"kind": "lost"})).await;
+    assert!(
+        error["error"].as_str().unwrap().contains("unknown kind"),
+        "{error}"
+    );
     let latest = success(&client, "fritz_calls", json!({"limit": 1})).await;
     assert_eq!(latest[0]["kind"], "missed", "{latest}");
 
@@ -526,6 +535,14 @@ async fn reads_personal_lists_only_on_request() {
     assert_eq!(log.as_array().unwrap().len(), 1, "{log}");
     let none = success(&client, "fritz_log", json!({"search": "nothing"})).await;
     assert_eq!(none, json!([]));
+    let filter = json!({"category": "telephony", "since": "2026-11-20"});
+    let log = success(&client, "fritz_log", filter).await;
+    assert_eq!(log.as_array().unwrap().len(), 1, "{log}");
+    assert_eq!(log[0]["category"], "telephony", "{log}");
+    for filter in [json!({"category": "dsl"}), json!({"since": "soon"})] {
+        let error = failure(&client, "fritz_log", filter).await;
+        assert!(error["error"].is_string(), "{error}");
+    }
     let log = success(
         &client,
         "fritz_call_action",

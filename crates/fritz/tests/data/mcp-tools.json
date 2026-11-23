@@ -35,23 +35,39 @@
   },
   {
     "name": "fritz_calls",
-    "description": "Latest calls: kind, date, minutes, number, name, own number, device. Personal data.",
+    "description": "Latest calls: kind, date, minutes, number, name, own number, device. Filters by kind, days and name or number. Personal data.",
     "inputSchema": {
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "properties": {
+        "days": {
+          "description": "Only calls of the last this many days.",
+          "format": "uint32",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
         "kind": {
-          "description": "Only calls of this kind: `incoming`, `missed`, `outgoing`, `rejected`.",
+          "description": "Only calls of these kinds, separated by commas: `incoming`,\n`missed`, `outgoing`, `rejected`, `active` or `all`.",
           "type": [
             "string",
             "null"
           ]
         },
         "limit": {
-          "description": "Calls to return, the latest first, at most 200. Default 50.",
+          "description": "Calls to return after the filters, the latest first, at most 200.\nDefault 50.",
           "format": "uint",
           "minimum": 0,
           "type": [
             "integer",
+            "null"
+          ]
+        },
+        "search": {
+          "description": "Part of the name, or digits of the number.",
+          "type": [
+            "string",
             "null"
           ]
         }
@@ -223,12 +239,19 @@
   },
   {
     "name": "fritz_log",
-    "description": "Latest entries of the event log: connections, logins, WLAN, telephony. Personal data.",
+    "description": "Latest entries of the event log: connections, logins, WLAN, telephony. Filters by text, time and category. Personal data.",
     "inputSchema": {
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "properties": {
+        "category": {
+          "description": "Only entries of this category: `system`, `internet`, `telephony`,\n`wlan` or `usb`. Reads the event log of the web interface; fails if\nthe device shows none with categories.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
         "limit": {
-          "description": "Entries to return, the latest first, at most 200. Default 50.",
+          "description": "Entries to return after the filters, the latest first, at most 200.\nDefault 50.",
           "format": "uint",
           "minimum": 0,
           "type": [
@@ -238,6 +261,13 @@
         },
         "search": {
           "description": "Part of the message, ignoring case.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "since": {
+          "description": "Only entries since a duration ago, like `30m`, `24h`, `7d` or `2w`,\nor since a date like `2026-11-20`.",
           "type": [
             "string",
             "null"
