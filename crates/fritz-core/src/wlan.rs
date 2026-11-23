@@ -187,9 +187,9 @@ async fn one_per_call(reader: &mut Reader, service: &str) -> Result<Vec<Client>,
             MAX_CLIENTS,
         )
         .await?;
-    Ok(entries
-        .map(|(_, entries)| entries.iter().map(client).collect())
-        .unwrap_or_default())
+    Ok(entries.map_or_else(Vec::new, |(_, entries)| {
+        entries.iter().map(client).collect()
+    }))
 }
 
 /// Parses the list of the clients of all networks, like
