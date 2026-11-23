@@ -40,8 +40,12 @@ Cargo workspace:
   that locally. `make coverage` measures in a Linux container (needs Docker),
   because CI measures on Linux, which counts lines that macOS does not, like
   error paths. `FRITZ_COVERAGE=native` uses the local `cargo-llvm-cov`
-  instead. Run it before every push. CI also runs actionlint, shellcheck and
-  zizmor, with the versions in `mise.toml`.
+  instead. Run it before every push. When a commit changes `.github/` or
+  `mise.toml`, the pre-commit hook also runs actionlint (with shellcheck) and
+  zizmor in the versions of `mise.toml` (needs `mise`), like CI.
+- Where rustup is installed, `make` and the hooks put its stable toolchain
+  first in PATH, so clippy and rustfmt are the versions of CI, not older ones
+  of Homebrew. Without that, new lints only fail in CI.
 - The MCP tool list is checked against
   `crates/fritz/tests/data/mcp-tools.json`. After changing tools, review the
   difference and rewrite it with

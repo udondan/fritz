@@ -1,6 +1,12 @@
 # The latest stable Rust of rustup, like CI, where there is rustup. A
 # packaged toolchain, like Homebrew's, can be older and miss new lints.
-CARGO ?= $(if $(shell command -v rustup),rustup run stable cargo,cargo)
+# `rustup run` does not put the toolchain first in PATH, so cargo would still
+# run clippy and rustfmt of such a toolchain. Hence the PATH.
+TOOLCHAIN := $(if $(shell command -v rustup),$(shell dirname "$$(rustup which --toolchain stable cargo)"))
+ifneq ($(TOOLCHAIN),)
+export PATH := $(TOOLCHAIN):$(PATH)
+endif
+CARGO ?= cargo
 
 .PHONY: build release run test lint coverage hooks
 

@@ -12,6 +12,12 @@ make hooks  # install the hooks that run the checks of CI
 The pre-commit hook needs [qlty](https://docs.qlty.sh/cli/quickstart) and
 `jq`. Like CI, it blocks a commit on lint findings, on code that `cargo fmt`
 would change and on code smells that are new compared to `origin/main`.
+When the commit changes `.github/` or `mise.toml`, it also runs actionlint and
+zizmor in the versions of `mise.toml`, which needs [mise](https://mise.jdx.dev).
+
+Where rustup is installed, `make` and the hooks use its latest stable
+toolchain, like CI, also for clippy and rustfmt. An older toolchain, like
+Homebrew's, misses new lints that then fail in CI.
 
 The pre-push hook runs `make coverage`, which needs Docker and Python 3. Like
 the patch status of Codecov, it blocks a push if a line under `crates/` that
