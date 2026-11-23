@@ -340,6 +340,35 @@ pub async fn mesh(reader: &mut Reader) -> Result<Option<Mesh>, Error> {
         .transpose()
 }
 
+/// Adds the IP addresses of the hosts to the nodes of the `mesh`, see
+/// [`Mesh::add_addresses`]: one read of the host list, and one of the LAN
+/// settings for the address of the device itself. Returns why the mesh has
+/// no addresses of hosts, if it has none.
+pub async fn add_addresses(reader: &mut Reader, mesh: &mut Mesh) -> Option<String> {
+    let (hosts, note) = match hosts(reader).await {
+        Ok(hosts) if hosts.hosts.is_empty() => (
+            Vec::new(),
+            Some("the device has no host list, or the user may not read it".to_owned()),
+        ),
+        Ok(hosts) => (hosts.hosts, None),
+        Err(error) => (Vec::new(), Some(format!("cannot read the hosts: {error}"))),
+    };
+    let router = reader
+        .try_read("LANHostConfigManagement1", "GetIPRoutersList", &[])
+        .await
+        .ok()
+        .flatten()
+        .and_then(|v| v.text("NewIPRouters"))
+        .and_then(|v| {
+            v.split(',')
+                .map(str::trim)
+                .find(|a| !a.is_empty())
+                .map(str::to_owned)
+        });
+    mesh.add_addresses(&hosts, router.as_deref());
+    note.map(|note| format!("{note}, so the mesh shows no addresses of hosts"))
+}
+
 /// Reads the wireless networks.
 ///
 /// # Errors

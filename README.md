@@ -213,9 +213,9 @@ Attached to      fritzbox, WLAN 5 GHz ↓ 866.7 Mbit/s  ↑ 433.3 Mbit/s
 
 ```console
 $ fritz mesh
-NODE      ROLE    MODEL                   MAC
-fritzbox  master  FRITZ!Box 7690          02:00:5E:10:00:A0
-repeater  slave   FRITZ!Repeater 1200 AX  02:00:5E:10:00:A1
+NODE      IP              ROLE    MODEL                   MAC
+fritzbox  192.168.178.1   master  FRITZ!Box 7690          02:00:5E:10:00:A0
+repeater  192.168.178.40  slave   FRITZ!Repeater 1200 AX  02:00:5E:10:00:A1
 
 FROM      TO        TYPE  INTERFACE  STATE      RATE
 fritzbox  repeater  WLAN  AP:5G:0    CONNECTED  ↓ 1201.0 Mbit/s  ↑ 1201.0 Mbit/s
@@ -227,11 +227,19 @@ repeater  tv        LAN   LAN:1      CONNECTED  ↓ 0 kbit/s  ↑ 0 kbit/s
 
 ```console
 $ fritz mesh --tree
-fritzbox (master, FRITZ!Box 7690)
-├── repeater (slave, FRITZ!Repeater 1200 AX)  WLAN 5 GHz ↓ 1201.0 Mbit/s  ↑ 1201.0 Mbit/s
-│   └── tv  LAN
-└── laptop  WLAN 5 GHz ↓ 866.7 Mbit/s  ↑ 433.3 Mbit/s
+fritzbox (master, FRITZ!Box 7690)  192.168.178.1
+├── repeater (slave, FRITZ!Repeater 1200 AX)  192.168.178.40  WLAN 5 GHz ↓ 1201.0 Mbit/s  ↑ 1201.0 Mbit/s
+│   └── tv  192.168.178.30  LAN
+└── laptop  192.168.178.20  WLAN 5 GHz ↓ 866.7 Mbit/s  ↑ 433.3 Mbit/s
 ```
+
+The IP addresses come from the host list, joined by the MAC addresses of
+each node and its interfaces; the box itself has its address from its LAN
+settings. A host that is not active keeps its last address, shown as
+`192.168.178.30 (inactive)` and with `"active": false` in JSON, since the box
+may give that address to another device. An unknown address is `-`, or
+`null` in JSON. If the host list cannot be read, the mesh is shown without
+the addresses of hosts, and a note on stderr says why.
 
 ### Wireless networks
 
@@ -538,7 +546,7 @@ claude mcp add fritz -- fritz --host 192.168.178.1 --user agent mcp
 | `fritz_internet`        | Internet connection, addresses, DNS, rates, DSL line        |
 | `fritz_wlan`            | Wireless networks                                           |
 | `fritz_hosts`           | Known hosts, paginated, or one host by `mac` or `ip`        |
-| `fritz_mesh`            | Mesh nodes and links, or a tree of who is connected where   |
+| `fritz_mesh`            | Mesh nodes with IPs and links, or a tree of who is where    |
 | `fritz_smarthome`       | Smart Home devices (FRITZ!OS 8.20 and later)                |
 | `fritz_ports`           | Port forwardings and whether UPnP is on                     |
 | `fritz_telephony`       | Numbers, accounts, deflections, answering machines, DECT    |

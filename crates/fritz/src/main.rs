@@ -101,7 +101,8 @@ enum Command {
     Overview,
     /// The hosts the device knows, or one host with all details.
     Hosts(status::HostsArgs),
-    /// The mesh: its nodes and the links between all devices.
+    /// The mesh: its nodes with their IP addresses, and the links between
+    /// all devices.
     Mesh {
         /// Show the mesh as a tree: which device is connected to which
         /// router or repeater.

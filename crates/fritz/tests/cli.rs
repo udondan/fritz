@@ -1060,11 +1060,22 @@ async fn prints_the_state_as_json() {
     let active = active["hosts"].as_array().unwrap();
     assert!(!active.is_empty() && active.len() < 50, "{active:?}");
     assert!(active.iter().all(|h| h["active"] == true));
-    let mesh = json(&run(&sim, &["mesh"], password).await);
+    let output = run(&sim, &["mesh"], password).await;
+    assert_eq!(stderr(&output), "");
+    let mesh = json(&output);
     assert_eq!(mesh["nodes"][0]["name"], "device-50");
     assert_eq!(mesh["links"].as_array().unwrap().len(), 3);
+    // The device itself has its address from the LAN settings, the
+    // repeater has no host entry.
+    assert_eq!(mesh["nodes"][0]["ip"], "192.0.2.34");
+    assert!(mesh["nodes"][0].get("active").is_none());
+    assert_eq!(mesh["nodes"][1]["ip"], serde_json::Value::Null);
+    assert_eq!(mesh["nodes"][2]["ip"], "192.0.2.2");
+    assert_eq!(mesh["nodes"][2]["active"], true);
     let tree = json(&run(&sim, &["mesh", "--tree"], password).await);
     assert_eq!(tree[0]["name"], "device-50");
+    assert_eq!(tree[0]["ip"], "192.0.2.34");
+    assert_eq!(tree[0]["children"][0]["children"][0]["ip"], "192.0.2.30");
     assert_eq!(tree[0]["children"][0]["name"], "device-51");
     assert_eq!(tree[0]["children"][0]["children"][0]["name"], "device-47");
     assert_eq!(tree[0]["children"][1]["uplinks"][0]["kind"], "WLAN");
@@ -1349,14 +1360,22 @@ async fn prints_the_state_as_text() {
     assert!(mesh.starts_with("NODE "), "{mesh}");
     assert!(mesh.contains("\nFROM "), "{mesh}");
     assert!(mesh.contains("device-50  device-51"), "{mesh}");
+    assert!(
+        mesh.starts_with(
+            "NODE       IP          ROLE    MODEL                   MAC\n\
+             device-50  192.0.2.34  master  FRITZ!Box 7690          AA:BB:CC:00:00:50\n\
+             device-51  -           slave   FRITZ!Repeater 1200 AX  AA:BB:CC:00:00:52\n"
+        ),
+        "{mesh}"
+    );
     let output = run(&sim, &["--output", "text", "mesh", "--tree"], password).await;
     assert_eq!(
         success(&output),
-        "device-50 (master, FRITZ!Box 7690)\n\
-         ├── device-51 (slave, FRITZ!Repeater 1200 AX)  \
+        "device-50 (master, FRITZ!Box 7690)  192.0.2.34\n\
+         ├── device-51 (slave, FRITZ!Repeater 1200 AX)  -  \
          WLAN 5 GHz ↓ 1201.0 Mbit/s  ↑ 1201.0 Mbit/s\n\
-         │   └── device-47  LAN\n\
-         └── device-2  WLAN 5 GHz ↓ 866.7 Mbit/s  ↑ 433.3 Mbit/s\n"
+         │   └── device-47  192.0.2.30  LAN\n\
+         └── device-2  192.0.2.2  WLAN 5 GHz ↓ 866.7 Mbit/s  ↑ 433.3 Mbit/s\n"
     );
     let smarthome = text("smarthome").await;
     assert!(smarthome.starts_with("NAME "), "{smarthome}");
@@ -1400,6 +1419,32 @@ async fn reports_failed_reads() {
     sim.inject(Injection::fault("Hosts1", "X_AVM-DE_GetMeshListPath", 606));
     let error = failure(&run(&sim, &["mesh"], Some(fritz_sim::PASSWORD)).await);
     assert!(error.contains("the device has no mesh list"), "{error}");
+    // Without the host list, the mesh is shown without the addresses of
+    // hosts, and a note says why.
+    let json =
+        |output: &Output| -> serde_json::Value { serde_json::from_str(&success(output)).unwrap() };
+    sim.clear_injections();
+    sim.inject(Injection::fault("Hosts1", "X_AVM-DE_GetHostListPath", 606));
+    sim.inject(Injection::fault("Hosts1", "GetHostNumberOfEntries", 606));
+    let output = run(&sim, &["mesh"], Some(fritz_sim::PASSWORD)).await;
+    let mesh = json(&output);
+    assert_eq!(mesh["nodes"][0]["ip"], "192.0.2.34");
+    assert_eq!(mesh["nodes"][2]["ip"], serde_json::Value::Null);
+    assert_eq!(
+        stderr(&output),
+        "the device has no host list, or the user may not read it, \
+         so the mesh shows no addresses of hosts\n"
+    );
+    sim.clear_injections();
+    sim.inject(Injection::fault("Hosts1", "X_AVM-DE_GetHostListPath", 868));
+    let output = run(&sim, &["mesh"], Some(fritz_sim::PASSWORD)).await;
+    assert_eq!(json(&output)["nodes"][2]["ip"], serde_json::Value::Null);
+    assert!(
+        stderr(&output).starts_with("cannot read the hosts: "),
+        "{}",
+        stderr(&output)
+    );
+    sim.clear_injections();
     let url = unreachable_url("http");
     let output = fritz_with(
         &["--host", &url, "--user", "agent", "overview"],

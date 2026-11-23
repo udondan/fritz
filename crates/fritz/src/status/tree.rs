@@ -4,7 +4,7 @@ use std::io::Write;
 
 use fritz_core::lists::Branch;
 
-use super::rates;
+use super::{address, rates};
 
 /// Draws the tree like the command `tree`: a line for every device, with
 /// its role and model if it is a mesh node, then how it is connected to the
@@ -41,7 +41,7 @@ fn tree_children(branches: &[Branch], indent: &str, out: &mut impl Write) -> any
     Ok(())
 }
 
-/// Like `repeater (slave, FRITZ!Repeater 2400)  WLAN 5 GHz ↓ 866.7 Mbit/s  ↑ 780.0 Mbit/s`.
+/// Like `repeater (slave, FRITZ!Repeater 2400)  192.0.2.30  WLAN 5 GHz ↓ 866.7 Mbit/s  ↑ 780.0 Mbit/s`.
 fn tree_line(branch: &Branch) -> String {
     let node = branch.node;
     let mut line = node.name.clone().unwrap_or_else(|| "?".to_owned());
@@ -53,6 +53,7 @@ fn tree_line(branch: &Branch) -> String {
     if !about.is_empty() {
         line = format!("{line} ({})", about.join(", "));
     }
+    line = format!("{line}  {}", address(node));
     let links: Vec<String> = branch
         .uplinks
         .iter()
@@ -98,6 +99,6 @@ mod tests {
             }],
             children: Vec::new(),
         };
-        assert_eq!(tree_line(&branch), "?  WLAN 2.4 GHz");
+        assert_eq!(tree_line(&branch), "?  -  WLAN 2.4 GHz");
     }
 }
