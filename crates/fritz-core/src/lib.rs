@@ -5,6 +5,7 @@
 
 pub mod anonymize;
 pub mod cache;
+pub mod callmonitor;
 pub mod capabilities;
 pub mod capture;
 #[cfg(feature = "write")]

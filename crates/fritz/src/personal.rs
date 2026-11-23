@@ -4,12 +4,14 @@
 use std::io::Write;
 
 use anyhow::Context as _;
+use clap::Args;
+use fritz_core::callmonitor::{self, Event, Monitor, Names};
 use fritz_core::personal::{self, Call, CallFilter, LogEntry, LogFilter, Phonebook};
 use fritz_core::read::Reader;
 
 use crate::context::Context;
-use crate::output::{Format, show};
-use crate::status::{reader, table};
+use crate::output::{self, Format, show};
+use crate::status::{clean, reader, table};
 
 /// Prints the latest calls that pass `filter`.
 pub(crate) async fn calls(
@@ -52,6 +54,112 @@ fn calls_table(calls: &[Call], out: &mut impl Write) -> anyhow::Result<()> {
         "MINUTES",
     ];
     table(&headers, rows, out)
+}
+
+/// The options of `fritz calls --watch`.
+#[derive(Debug, Clone, Copy, Args)]
+pub(crate) struct WatchArgs {
+    /// Print the calls as they happen, from the call monitor of the device,
+    /// until interrupted. JSON prints one line per event. The call monitor
+    /// must be on: dial #96*5* on a connected phone.
+    #[arg(long, conflicts_with_all = ["kind", "days", "search"])]
+    pub(crate) watch: bool,
+    /// Stop after this many events.
+    #[arg(long, requires = "watch", value_parser = clap::value_parser!(u64).range(1..))]
+    count: Option<u64>,
+    /// Do not look up the names in the phonebooks, which needs a login.
+    #[arg(long, requires = "watch")]
+    no_lookup: bool,
+    /// The port of the call monitor.
+    #[arg(long, requires = "watch", default_value_t = callmonitor::PORT)]
+    monitor_port: u16,
+}
+
+/// Prints the events of the call monitor as they come, with the names from
+/// the phonebooks, and notes on lost connections to `err`.
+pub(crate) async fn watch_calls(
+    context: &Context,
+    args: WatchArgs,
+    format: Format,
+    out: &mut impl Write,
+    err: &mut impl Write,
+) -> anyhow::Result<()> {
+    let target = context.target()?;
+    let host = target.url.host_str().unwrap_or_default();
+    let mut monitor = Monitor::connect(host, args.monitor_port).await?;
+    let names = if args.no_lookup {
+        Names::default()
+    } else {
+        names(context, err).await
+    };
+    let mut note = |text: String| {
+        let _ = writeln!(err, "note: {text}");
+    };
+    for _ in 0..args.count.unwrap_or(u64::MAX) {
+        let mut event = monitor.next(&mut note).await;
+        names.name(&mut event);
+        output::sample(&event, format, out, event_line)?;
+    }
+    Ok(())
+}
+
+/// The names of the phonebooks, none with a warning if they cannot be
+/// read.
+async fn names(context: &Context, err: &mut impl Write) -> Names {
+    let phonebooks = async {
+        personal::phonebooks(&mut reader(context).await?)
+            .await
+            .context("cannot read the phonebooks")
+    };
+    match phonebooks.await {
+        Ok(phonebooks) => Names::new(&phonebooks),
+        Err(error) => {
+            let _ = writeln!(err, "warning: names are not shown: {error:#}");
+            Names::default()
+        }
+    }
+}
+
+/// An event as a line, like `2026-11-23 18:02:11  ring        line 0  from
+/// 030987 (name)  to 030123  SIP0`.
+fn event_line(event: &Event, out: &mut impl Write) -> anyhow::Result<()> {
+    let mut parts = vec![
+        event.time.clone(),
+        format!("{:<10}", event.kind),
+        format!("line {}", event.id),
+    ];
+    let other = match (&event.number, &event.name) {
+        (Some(number), Some(name)) => format!("{number} ({})", clean(name)),
+        (number, _) => number.clone().unwrap_or_else(|| "unknown".to_owned()),
+    };
+    let own = event
+        .own_number
+        .clone()
+        .unwrap_or_else(|| "unknown".to_owned());
+    let extension = |e: &Option<String>| format!("extension {}", e.as_deref().unwrap_or_default());
+    match event.kind {
+        "ring" => parts.extend([format!("from {other}"), format!("to {own}")]),
+        "call" => parts.extend([
+            format!("from {own}"),
+            format!("to {other}"),
+            extension(&event.extension),
+        ]),
+        "connect" => parts.extend([format!("with {other}"), extension(&event.extension)]),
+        _ => parts.push(duration(event.seconds.unwrap_or_default())),
+    }
+    parts.extend(event.line.clone());
+    writeln!(out, "{}", parts.join("  "))?;
+    Ok(())
+}
+
+/// Seconds like `1h 2m 5s`, `2m 25s` or `5s`.
+fn duration(seconds: u64) -> String {
+    let (hours, minutes, seconds) = (seconds / 3600, seconds % 3600 / 60, seconds % 60);
+    match (hours, minutes) {
+        (0, 0) => format!("{seconds}s"),
+        (0, _) => format!("{minutes}m {seconds}s"),
+        _ => format!("{hours}h {minutes}m {seconds}s"),
+    }
 }
 
 /// Prints the contacts of the phonebooks, those that match `search` if
@@ -202,6 +310,36 @@ mod tests {
              2026-11-20 18:05  missed  phone-2        phone-1             0\n"
         );
         assert_eq!(text(|out| calls_table(&[], out)), "No calls.\n");
+    }
+
+    #[test]
+    fn prints_events() {
+        let event = |kind, number: Option<&str>, name: Option<&str>| Event {
+            time: "2026-11-23 18:02:11".to_owned(),
+            kind,
+            id: 1,
+            number: number.map(str::to_owned),
+            name: name.map(str::to_owned),
+            own_number: Some("phone-1".to_owned()),
+            extension: Some("10".to_owned()),
+            line: (kind == "ring").then(|| "SIP0".to_owned()),
+            seconds: Some(3725),
+        };
+        let lines = text(|out| {
+            event_line(&event("ring", None, None), out)?;
+            event_line(&event("call", Some("phone-2"), Some("name\x1b-2")), out)?;
+            event_line(&event("connect", Some("phone-2"), None), out)?;
+            event_line(&event("disconnect", None, None), out)
+        });
+        assert_eq!(
+            lines,
+            "2026-11-23 18:02:11  ring        line 1  from unknown  to phone-1  SIP0\n\
+             2026-11-23 18:02:11  call        line 1  from phone-1  to phone-2 (name\u{FFFD}-2)  extension 10\n\
+             2026-11-23 18:02:11  connect     line 1  with phone-2  extension 10\n\
+             2026-11-23 18:02:11  disconnect  line 1  1h 2m 5s\n"
+        );
+        assert_eq!(duration(145), "2m 25s");
+        assert_eq!(duration(5), "5s");
     }
 
     #[test]

@@ -315,7 +315,7 @@ pub fn parse_log(log: &str) -> Vec<LogEntry> {
 }
 
 /// Whether `text` is a date like `20.11.26`.
-fn is_date(text: &str) -> bool {
+pub(crate) fn is_date(text: &str) -> bool {
     let parts: Vec<&str> = text.split('.').collect();
     parts.len() == 3
         && parts
@@ -347,7 +347,7 @@ fn minutes(text: &str) -> Option<u32> {
     Some(hours * 60 + minutes)
 }
 
-fn digits(text: &str) -> String {
+pub(crate) fn digits(text: &str) -> String {
     text.chars().filter(char::is_ascii_digit).collect()
 }
 

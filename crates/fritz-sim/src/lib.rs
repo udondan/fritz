@@ -30,6 +30,8 @@
 //!   side effects of writes, counters that grow, a locked login, calls that
 //!   break off, restarts and pages that fail, and read the [requests](Sim::requests) the
 //!   server got.
+//! - [`CallMonitor`] replays scripted lines of the call monitor, drops the
+//!   connection between sessions and sends lines that are not valid.
 //!
 //! ```no_run
 //! # async fn example() -> Result<(), Box<dyn std::error::Error>> {
@@ -66,12 +68,14 @@ use tokio::task::JoinHandle;
 use tr064::{ClientBuilder, Fingerprint, SecretString, Service, Url};
 
 mod auth;
+mod callmonitor;
 mod device;
 mod fixture;
 mod soap;
 mod tls;
 mod web;
 
+pub use callmonitor::CallMonitor;
 use device::{Device, Fault, Hooks, short_id};
 pub use fixture::{Answer, Error, Fixture};
 use tls::TlsListener;

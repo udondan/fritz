@@ -24,7 +24,7 @@ rustls = { version = "0.23.46", default-features = false, features = ["ring", "s
 serde_json = "1.0.154"
 sha2 = "0.11.1"
 thiserror = "2.0.21"
-tokio = { version = "1.54.1", features = ["macros", "net", "rt-multi-thread", "signal", "time"] }
+tokio = { version = "1.54.1", features = ["io-util", "macros", "net", "rt-multi-thread", "signal", "time"] }
 tokio-rustls = { version = "0.26.6", default-features = false, features = ["ring", "tls12"] }
 tr064.workspace = true
 
@@ -37,3 +37,4 @@ workspace = true
 fritz-core = { path = "../fritz-core" }
 secrecy = "=0.10.3"
 tempfile = "=3.27.0"
+tokio = { version = "=1.54.1", features = ["test-util"] }

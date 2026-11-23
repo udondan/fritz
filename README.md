@@ -679,6 +679,30 @@ TIME                 CATEGORY  MESSAGE
 2026-11-20 08:02:31  internet  Internet connection was interrupted.
 ```
 
+`fritz calls --watch` prints the calls as they happen, one line per event,
+until interrupted: `ring` (incoming), `call` (outgoing), `connect` and
+`disconnect` with the duration. The events of one call share the line
+(`id` in JSON). It reads the call monitor of the device, a stream on TCP
+port 1012 that needs no login. It is off by default: dial `#96*5*` on a
+phone connected to the device to turn it on, `#96*4*` turns it off. Names
+come from the phonebooks, read once at the start; `--no-lookup` skips them
+and the login they need.
+
+```console
+$ fritz calls --watch
+2026-11-23 18:02:11  ring        line 0  from 03098765 (Alice)  to 03012345  SIP0
+2026-11-23 18:02:15  connect     line 0  with 03098765 (Alice)  extension 10
+2026-11-23 18:04:40  disconnect  line 0  2m 25s
+2026-11-23 18:10:03  call        line 1  from 03012345  to 015712345678  extension 11  SIP0
+```
+
+`--output json` prints one JSON object per event and line, for scripts;
+`--count` stops after that many events. When the connection is lost, it
+connects again with growing waits, up to a minute, and says so on stderr;
+events it got before are not printed again. Nothing is ever sent to the
+stream. Lines that are not valid events are skipped. `--monitor-port`
+sets another port, for a device behind a port forwarding.
+
 ### Any TR-064 action
 
 `fritz tr064` reaches every service and action of the device. Listing and
