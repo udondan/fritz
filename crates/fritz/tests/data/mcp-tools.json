@@ -222,7 +222,7 @@
   },
   {
     "name": "fritz_mesh",
-    "description": "Mesh topology: nodes and the links between them, or as a tree of which device is connected to which router or repeater.",
+    "description": "Mesh topology: nodes with their IP addresses and the links between them, or as a tree of which device is connected to which router or repeater.",
     "inputSchema": {
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "properties": {

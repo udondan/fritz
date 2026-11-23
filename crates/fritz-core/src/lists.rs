@@ -36,6 +36,17 @@ pub struct Node {
     /// Whether the node is part of the mesh, rather than a host connected to
     /// it.
     pub meshed: bool,
+    /// The IPv4 address of the node, from the host list, or for the device
+    /// that leads the mesh from its LAN settings. `None` if unknown.
+    pub ip: Option<String>,
+    /// Whether the host the address is from is active. An inactive host
+    /// keeps its last address, which the device may give to another host.
+    /// `None` if the address is not from the host list.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub active: Option<bool>,
+    /// The MAC addresses of the node and of all its interfaces.
+    #[serde(skip)]
+    pub macs: Vec<String>,
 }
 
 /// A connection between two nodes.
@@ -61,6 +72,42 @@ pub struct Link {
     /// The highest rates, in kbit/s.
     pub max_rx: Option<u64>,
     pub max_tx: Option<u64>,
+}
+
+impl Mesh {
+    /// Adds the IP addresses of the `hosts` to the nodes, joined by the MAC
+    /// addresses of the nodes and their interfaces, in any case and with
+    /// any separator. An active host is preferred over an inactive one. The
+    /// device that leads the mesh is rarely a host of its own; without a
+    /// host it gets the address `router`.
+    pub fn add_addresses(&mut self, hosts: &[Host], router: Option<&str>) {
+        for node in &mut self.nodes {
+            let macs: HashSet<String> = node.macs.iter().map(|m| normal_mac(m)).collect();
+            let host = hosts
+                .iter()
+                .filter(|h| h.ip.is_some())
+                .filter(|h| {
+                    h.mac
+                        .as_deref()
+                        .is_some_and(|m| macs.contains(&normal_mac(m)))
+                })
+                .reduce(|found, h| if !found.active && h.active { h } else { found });
+            if let Some(host) = host {
+                node.ip.clone_from(&host.ip);
+                node.active = Some(host.active);
+            } else if node.role.as_deref() == Some("master") {
+                node.ip = router.map(str::to_owned);
+            }
+        }
+    }
+}
+
+/// A MAC address in upper case, without separators.
+fn normal_mac(mac: &str) -> String {
+    mac.chars()
+        .filter(char::is_ascii_hexdigit)
+        .map(|c| c.to_ascii_uppercase())
+        .collect()
 }
 
 /// The fields of an item of an XML list, by tag name, trimmed.
@@ -220,6 +267,11 @@ pub fn mesh(json: &str) -> Result<Mesh, Error> {
                 mac: text(&node["device_mac_address"]),
                 role: text(&node["mesh_role"]),
                 meshed: node["is_meshed"].as_bool().unwrap_or_default(),
+                macs: std::iter::once(&node["device_mac_address"])
+                    .chain(interfaces(node).iter().map(|i| &i["mac_address"]))
+                    .filter_map(text)
+                    .collect(),
+                ..Node::default()
             })
             .collect(),
         links,
@@ -267,12 +319,84 @@ mod tests {
     }
 
     #[test]
+    fn adds_the_addresses_of_the_hosts() {
+        let node = |uid: &str, role: Option<&str>, macs: &[&str]| Node {
+            uid: uid.to_owned(),
+            role: role.map(str::to_owned),
+            macs: macs.iter().map(|m| (*m).to_owned()).collect(),
+            ..Node::default()
+        };
+        let host = |ip: Option<&str>, mac: &str, active: bool| Host {
+            ip: ip.map(str::to_owned),
+            mac: Some(mac.to_owned()),
+            active,
+            ..Host::default()
+        };
+        let mut mesh = Mesh {
+            nodes: vec![
+                node("box", Some("master"), &["AA:BB:CC:00:00:01"]),
+                // A repeater, in the host list with the MAC of its uplink.
+                node(
+                    "repeater",
+                    Some("slave"),
+                    &["AA:BB:CC:00:00:02", "AA:BB:CC:00:00:03"],
+                ),
+                node("inactive", None, &["AA:BB:CC:00:00:04"]),
+                node("both", None, &["AA:BB:CC:00:00:05", "AA:BB:CC:00:00:06"]),
+                node("unknown", None, &["AA:BB:CC:00:00:07"]),
+                node("none", None, &[]),
+            ],
+            links: Vec::new(),
+        };
+        let hosts = [
+            host(Some("192.0.2.3"), "aa-bb-cc-00-00-03", true),
+            host(Some("192.0.2.4"), "AA:BB:CC:00:00:04", false),
+            host(Some("192.0.2.5"), "AA:BB:CC:00:00:05", false),
+            host(Some("192.0.2.6"), "aa:bb:cc:00:00:06", true),
+            host(Some("192.0.2.9"), "AA:BB:CC:00:00:05", true),
+            host(None, "AA:BB:CC:00:00:07", true),
+            Host::default(),
+        ];
+        mesh.add_addresses(&hosts, Some("192.0.2.1"));
+        let addresses: Vec<_> = mesh
+            .nodes
+            .iter()
+            .map(|n| (n.ip.as_deref(), n.active))
+            .collect();
+        assert_eq!(
+            addresses,
+            [
+                (Some("192.0.2.1"), None),
+                (Some("192.0.2.3"), Some(true)),
+                (Some("192.0.2.4"), Some(false)),
+                (Some("192.0.2.6"), Some(true)),
+                (None, None),
+                (None, None),
+            ]
+        );
+        let json = serde_json::to_value(&mesh.nodes[4]).unwrap();
+        assert_eq!(json["ip"], Value::Null);
+        assert!(json.get("active").is_none() && json.get("macs").is_none());
+        // The device itself, as a host of its own.
+        mesh.add_addresses(&[host(Some("192.0.2.8"), "AA:BB:CC:00:00:01", true)], None);
+        assert_eq!(mesh.nodes[0].ip.as_deref(), Some("192.0.2.8"));
+        let mut other = Mesh {
+            nodes: vec![node("box", Some("master"), &[])],
+            links: Vec::new(),
+        };
+        other.add_addresses(&[], None);
+        assert_eq!(other.nodes[0].ip, None);
+    }
+
+    #[test]
     fn parses_the_mesh() {
         let mesh = mesh(
             r#"{"nodes": [
                 {"uid": "n-1", "device_name": "fritz.box", "device_model": "FRITZ!Box 7690",
+                 "device_mac_address": "AA:BB:CC:00:00:01",
                  "is_meshed": true, "mesh_role": "master",
                  "node_interfaces": [{"uid": "ni-1", "name": "AP:5G:0", "type": "WLAN",
+                   "mac_address": "AA:BB:CC:00:00:11",
                    "node_links": [{"uid": "nl-1", "type": "WLAN", "state": "CONNECTED",
                      "node_1_uid": "n-1", "node_2_uid": "n-2",
                      "node_interface_1_uid": "ni-1", "node_interface_2_uid": "ni-2",
@@ -289,6 +413,10 @@ mod tests {
         assert_eq!(mesh.nodes.len(), 3);
         assert_eq!(mesh.nodes[0].name.as_deref(), Some("fritz.box"));
         assert_eq!(mesh.nodes[0].role.as_deref(), Some("master"));
+        assert_eq!(
+            mesh.nodes[0].macs,
+            ["AA:BB:CC:00:00:01", "AA:BB:CC:00:00:11"]
+        );
         assert!(mesh.nodes[0].meshed);
         assert_eq!(
             mesh.nodes[1],

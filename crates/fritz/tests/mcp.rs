@@ -161,8 +161,11 @@ async fn reads_the_state() {
 
     let mesh = success(&client, "fritz_mesh", json!({})).await;
     assert!(!mesh["nodes"].as_array().unwrap().is_empty(), "{mesh}");
+    assert_eq!(mesh["nodes"][0]["ip"], "192.0.2.34", "{mesh}");
+    assert_eq!(mesh["nodes"][2]["ip"], "192.0.2.2", "{mesh}");
     let tree = success(&client, "fritz_mesh", json!({"tree": true})).await;
     assert_eq!(tree[0]["name"], "device-50", "{tree}");
+    assert_eq!(tree[0]["ip"], "192.0.2.34", "{tree}");
     assert_eq!(tree[0]["children"][0]["name"], "device-51", "{tree}");
     assert_eq!(
         tree[0]["children"][0]["uplinks"][0]["kind"], "WLAN",
@@ -488,6 +491,28 @@ async fn logs_to_a_file_without_secrets() {
     ] {
         assert!(!log.contains(secret), "{secret} in {log}");
     }
+}
+
+#[tokio::test(flavor = "multi_thread")]
+async fn shows_the_mesh_without_the_host_list() {
+    let sim = sim().await;
+    let client = connect(&sim).await;
+    sim.inject(Injection::fault("Hosts1", "X_AVM-DE_GetHostListPath", 606));
+    sim.inject(Injection::fault("Hosts1", "GetHostNumberOfEntries", 606));
+    let params = CallToolRequestParams::new("fritz_mesh")
+        .with_arguments(json!({"tree": true}).as_object().unwrap().clone());
+    let result = client.call_tool(params).await.unwrap();
+    assert_ne!(result.is_error, Some(true));
+    let tree: Value = serde_json::from_str(&result.content[0].as_text().unwrap().text).unwrap();
+    assert_eq!(tree[0]["ip"], "192.0.2.34", "{tree}");
+    assert_eq!(tree[0]["children"][1]["ip"], Value::Null, "{tree}");
+    let note = &result.content[1].as_text().unwrap().text;
+    assert!(note.starts_with("the device has no host list"), "{note}");
+    // Without a mesh list, there is nothing to add the addresses to.
+    sim.inject(Injection::fault("Hosts1", "X_AVM-DE_GetMeshListPath", 606));
+    let mesh = success(&client, "fritz_mesh", json!({})).await;
+    assert_eq!(mesh, Value::Null);
+    client.cancel().await.unwrap();
 }
 
 /// The tools that change the device, in builds with the feature `write`.

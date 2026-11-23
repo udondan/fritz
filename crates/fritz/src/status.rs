@@ -7,7 +7,7 @@
 use std::io::Write;
 
 use anyhow::Context as _;
-use fritz_core::lists::Mesh;
+use fritz_core::lists::{Mesh, Node};
 use fritz_core::read::Reader;
 use fritz_core::smarthome::{self, Device, Target, Unit};
 use fritz_core::status::{self, Connection, Host, Hosts, Internet, Overview, Wlan};
@@ -201,10 +201,13 @@ pub(crate) async fn mesh(
     out: &mut impl Write,
 ) -> anyhow::Result<()> {
     let mut reader = reader(context).await?;
-    let mesh = status::mesh(&mut reader)
+    let mut mesh = status::mesh(&mut reader)
         .await
         .context("cannot read the mesh")?
         .context("the device has no mesh list, or the user may not read it")?;
+    if let Some(note) = status::add_addresses(&mut reader, &mut mesh).await {
+        eprintln!("{note}");
+    }
     if tree {
         show(mesh.tree().as_slice(), format, out, mesh_tree)
     } else {
@@ -216,12 +219,16 @@ pub(crate) async fn mesh(
 /// `TO`, and up the other way.
 fn mesh_tables(mesh: &Mesh, out: &mut impl Write) -> anyhow::Result<()> {
     let text = |value: &Option<String>| value.clone().unwrap_or_default();
-    let nodes = mesh
-        .nodes
-        .iter()
-        .filter(|n| n.meshed)
-        .map(|n| vec![text(&n.name), text(&n.role), text(&n.model), text(&n.mac)]);
-    table(&["NODE", "ROLE", "MODEL", "MAC"], nodes, out)?;
+    let nodes = mesh.nodes.iter().filter(|n| n.meshed).map(|n| {
+        vec![
+            text(&n.name),
+            address(n),
+            text(&n.role),
+            text(&n.model),
+            text(&n.mac),
+        ]
+    });
+    table(&["NODE", "IP", "ROLE", "MODEL", "MAC"], nodes, out)?;
     writeln!(out)?;
     let links = mesh.links.iter().map(|l| {
         vec![
@@ -235,6 +242,16 @@ fn mesh_tables(mesh: &Mesh, out: &mut impl Write) -> anyhow::Result<()> {
     });
     let headers = ["FROM", "TO", "TYPE", "INTERFACE", "STATE", "RATE"];
     table(&headers, links, out)
+}
+
+/// The IP address of a mesh node, like `192.0.2.1 (inactive)` if its host
+/// is not active, or `-` if unknown.
+fn address(node: &Node) -> String {
+    match (&node.ip, node.active) {
+        (Some(ip), Some(false)) => format!("{ip} (inactive)"),
+        (Some(ip), _) => ip.clone(),
+        (None, _) => "-".to_owned(),
+    }
 }
 
 /// Prints the wireless networks.
@@ -637,11 +654,21 @@ pub(crate) mod tests {
                     name: Some("box".to_owned()),
                     role: Some("master".to_owned()),
                     meshed: true,
+                    ip: Some("192.0.2.1".to_owned()),
                     ..Node::default()
                 },
                 Node {
                     uid: "n-2".to_owned(),
                     name: Some("host".to_owned()),
+                    ip: Some("192.0.2.5".to_owned()),
+                    active: Some(false),
+                    ..Node::default()
+                },
+                Node {
+                    uid: "n-3".to_owned(),
+                    name: Some("repeater".to_owned()),
+                    role: Some("slave".to_owned()),
+                    meshed: true,
                     ..Node::default()
                 },
             ],
@@ -658,13 +685,17 @@ pub(crate) mod tests {
         let tree_output = text(|out| mesh_tree(&mesh.tree(), out));
         assert_eq!(
             tree_output,
-            "box (master)\n└── host  ↓ 2.0 Mbit/s  ↑ 800 kbit/s\n"
+            "NODE      IP                    ROLE    MODEL  CONNECTION\n\
+             box       192.0.2.1             master\n\
+             └── host  192.0.2.5 (inactive)                 ↓ 2.0 Mbit/s  ↑ 800 kbit/s\n\
+             repeater  -                     slave\n"
         );
         let output = text(|out| mesh_tables(&mesh, out));
         assert_eq!(
             output,
-            "NODE  ROLE    MODEL  MAC\n\
-             box   master\n\
+            "NODE      IP         ROLE    MODEL  MAC\n\
+             box       192.0.2.1  master\n\
+             repeater  -          slave\n\
              \n\
              FROM  TO    TYPE  INTERFACE  STATE  RATE\n\
              box   host                          ↓ 2.0 Mbit/s  ↑ 800 kbit/s\n"

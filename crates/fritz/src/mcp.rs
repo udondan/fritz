@@ -383,19 +383,28 @@ impl Server {
     }
 
     #[tool(
-        description = "Mesh topology: nodes and the links between them, or as a tree of which device is connected to which router or repeater.",
+        description = "Mesh topology: nodes with their IP addresses and the links between them, or as a tree of which device is connected to which router or repeater.",
         annotations(read_only_hint = true, open_world_hint = false)
     )]
     async fn fritz_mesh(&self, Parameters(query): Parameters<MeshQuery>) -> CallToolResult {
-        self.respond(async {
-            let mut reader = self.reader().await?;
-            let mesh = status::mesh(&mut reader).await?;
-            Ok(match mesh {
-                Some(mesh) if query.tree => serde_json::to_value(mesh.tree())?,
-                mesh => serde_json::to_value(mesh)?,
+        let mut note = None;
+        let mut result = self
+            .respond(async {
+                let mut reader = self.reader().await?;
+                let mut mesh = status::mesh(&mut reader).await?;
+                if let Some(mesh) = &mut mesh {
+                    note = status::add_addresses(&mut reader, mesh).await;
+                }
+                Ok(match mesh {
+                    Some(mesh) if query.tree => serde_json::to_value(mesh.tree())?,
+                    mesh => serde_json::to_value(mesh)?,
+                })
             })
-        })
-        .await
+            .await;
+        if let Some(note) = note {
+            result.content.push(ContentBlock::text(note));
+        }
+        result
     }
 
     #[tool(

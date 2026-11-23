@@ -197,6 +197,58 @@ async fn reads_the_mesh() {
 }
 
 #[tokio::test]
+async fn adds_the_addresses_to_the_mesh() {
+    let dir = tempfile::tempdir().unwrap();
+    copy(FIXTURE.as_ref(), dir.path());
+    // The repeater is a host with the MAC of its uplink, in lower case,
+    // device-2 is not active, and device-47 has no host entry.
+    let path = dir.path().join("lists/devicehostlist.xml");
+    let hosts = std::fs::read_to_string(&path)
+        .unwrap()
+        .replace(
+            "<MACAddress>AA:BB:CC:00:00:03</MACAddress>\n<Active>1</Active>",
+            "<MACAddress>AA:BB:CC:00:00:03</MACAddress>\n<Active>0</Active>",
+        )
+        .replace(
+            "<MACAddress>AA:BB:CC:00:00:32</MACAddress>",
+            "<MACAddress>AA:BB:CC:00:00:99</MACAddress>",
+        )
+        .replace(
+            "</List>",
+            "<Item><IPAddress>192.0.2.40</IPAddress>\
+             <MACAddress>aa:bb:cc:00:00:53</MACAddress><Active>1</Active>\
+             <HostName>device-51</HostName></Item></List>",
+        );
+    std::fs::write(&path, hosts).unwrap();
+    let sim = Sim::start(Fixture::load(dir.path()).unwrap())
+        .await
+        .unwrap();
+    let mut reader = reader(&sim).await;
+    let mut mesh = status::mesh(&mut reader).await.unwrap().unwrap();
+    assert_eq!(status::add_addresses(&mut reader, &mut mesh).await, None);
+    let addresses: Vec<_> = mesh
+        .nodes
+        .iter()
+        .map(|n| (n.name.as_deref().unwrap(), n.ip.as_deref(), n.active))
+        .collect();
+    assert_eq!(
+        addresses,
+        [
+            ("device-50", Some("192.0.2.34"), None),
+            ("device-51", Some("192.0.2.40"), Some(true)),
+            ("device-2", Some("192.0.2.2"), Some(false)),
+            ("device-47", None, None),
+        ]
+    );
+    // One read of the host list and of the LAN settings.
+    let calls = called(&sim);
+    assert_eq!(
+        calls[calls.len() - 2..],
+        ["X_AVM-DE_GetHostListPath", "GetIPRoutersList"]
+    );
+}
+
+#[tokio::test]
 async fn rejects_lists_that_are_not_valid() {
     let dir = tempfile::tempdir().unwrap();
     copy(FIXTURE.as_ref(), dir.path());
