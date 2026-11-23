@@ -94,6 +94,15 @@ pub(crate) struct Server {
     tool_router: ToolRouter<Self>,
 }
 
+/// The form of `fritz_mesh`.
+#[derive(Debug, Default, Deserialize, JsonSchema)]
+pub(crate) struct MeshQuery {
+    /// Nest every device below the router or repeater it is connected to,
+    /// with its links up.
+    #[serde(default)]
+    tree: bool,
+}
+
 /// The filters and the page of `fritz_hosts`.
 #[derive(Debug, Default, Deserialize, JsonSchema)]
 pub(crate) struct HostsQuery {
@@ -357,13 +366,17 @@ impl Server {
     }
 
     #[tool(
-        description = "Mesh topology: nodes and the links between them.",
+        description = "Mesh topology: nodes and the links between them, or as a tree of which device is connected to which router or repeater.",
         annotations(read_only_hint = true, open_world_hint = false)
     )]
-    async fn fritz_mesh(&self) -> CallToolResult {
+    async fn fritz_mesh(&self, Parameters(query): Parameters<MeshQuery>) -> CallToolResult {
         self.respond(async {
             let mut reader = self.reader().await?;
-            Ok(status::mesh(&mut reader).await?)
+            let mesh = status::mesh(&mut reader).await?;
+            Ok(match mesh {
+                Some(mesh) if query.tree => serde_json::to_value(mesh.tree())?,
+                mesh => serde_json::to_value(mesh)?,
+            })
         })
         .await
     }
