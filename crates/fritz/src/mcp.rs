@@ -32,6 +32,7 @@ use fritz_core::host::{self, Lookup};
 use fritz_core::personal::{self, Contact};
 use fritz_core::policy::{self, Class};
 use fritz_core::ports;
+use fritz_core::powerline;
 use fritz_core::read::Reader;
 use fritz_core::settings;
 use fritz_core::smarthome;
@@ -373,6 +374,18 @@ impl Server {
         self.respond(async {
             let mut reader = self.reader().await?;
             Ok(firmware::firmware(&mut reader).await?)
+        })
+        .await
+    }
+
+    #[tool(
+        description = "Powerline adapters: name, model, MAC, active, update available and the result of the last update. `supported` is false on devices without powerline support.",
+        annotations(read_only_hint = true, open_world_hint = false)
+    )]
+    async fn fritz_powerline(&self) -> CallToolResult {
+        self.respond(async {
+            let mut reader = self.reader().await?;
+            Ok(powerline::powerline(&mut reader).await?)
         })
         .await
     }

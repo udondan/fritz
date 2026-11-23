@@ -326,6 +326,21 @@ may give that address to another device. An unknown address is `-`, or
 `null` in JSON. If the host list cannot be read, the mesh is shown without
 the addresses of hosts, and a note on stderr says why.
 
+`fritz powerline` lists the powerline adapters the box knows: name, model,
+MAC address, whether the adapter is connected, and whether the box offers a
+firmware update for it, with the result of the last update where the box
+reports one. The box does not report data rates and firmware versions of the
+adapters over TR-064. On a device without powerline support, the command
+says so, and JSON has `"supported": false`. It never starts an update. The
+energy saving of the adapters is in `fritz settings plc`.
+
+```console
+$ fritz powerline
+NAME    MODEL                 MAC                ACTIVE  UPDATE
+Office  FRITZ!Powerline 1260  02:00:5E:10:00:07  yes     none
+Cellar  FRITZ!Powerline 540E  02:00:5E:10:00:08  no      available
+```
+
 ### Wireless networks
 
 ```console
@@ -779,6 +794,7 @@ claude mcp add fritz -- fritz --host 192.168.178.1 --user agent mcp
 | `fritz_interfaces`      | LAN and WLAN counters of bytes, packets, errors; LAN ports  |
 | `fritz_hosts`           | Known hosts, paginated, or one host by `mac` or `ip`        |
 | `fritz_mesh`            | Mesh nodes with IPs and links, or a tree of who is where    |
+| `fritz_powerline`       | Powerline adapters, whether active, updates                 |
 | `fritz_smarthome`       | Smart Home devices (FRITZ!OS 8.20 and later)                |
 | `fritz_ports`           | Port forwardings and whether UPnP is on                     |
 | `fritz_telephony`       | Numbers, accounts, deflections, answering machines, DECT    |
