@@ -149,8 +149,8 @@ enum Command {
         watch: watch::Options,
     },
     /// The Smart Home devices and their values, read through the web
-    /// interface (FRITZ!OS 8.20 and later).
-    Smarthome,
+    /// interface (FRITZ!OS 8.20 and later), or the history of one device.
+    Smarthome(status::SmarthomeArgs),
     /// The port forwardings, and whether hosts may open ports through UPnP.
     Ports,
     /// The numbers, accounts, call deflections, answering machines and DECT
@@ -505,7 +505,7 @@ async fn run(
         Command::Firmware => status::firmware(&load()?, format, out).await,
         Command::Powerline => status::powerline(&load()?, format, out).await,
         Command::Interfaces { watch } => interfaces::interfaces(&load()?, watch, format, out).await,
-        Command::Smarthome => status::smarthome(&load()?, format, out).await,
+        Command::Smarthome(args) => status::smarthome(&load()?, &args, format, out).await,
         Command::Ports => device::ports(&load()?, format, out).await,
         Command::Telephony => device::telephony(&load()?, format, out).await,
         Command::Capabilities => device::capabilities(&load()?, format, out).await,

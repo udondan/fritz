@@ -24,6 +24,8 @@ pub(crate) const LOGIN: &str = "/login_sid.lua";
 pub(crate) const API: &str = "/api/";
 /// The pages of the web interface, like `ecoStat`.
 pub(crate) const DATA: &str = "/data.lua";
+/// The Smart Home HTTP interface, for statistics.
+pub(crate) const HOMEAUTO: &str = "/webservices/homeautoswitch.lua";
 
 /// The challenge of every login: 10 iterations with the salt `5e55104d`,
 /// then 10 with `c0ffee55`.
@@ -109,15 +111,10 @@ impl Web {
         method: &Method,
         body: &str,
     ) -> Response {
-        if *method != Method::POST {
-            return StatusCode::METHOD_NOT_ALLOWED.into_response();
-        }
-        let form: HashMap<String, String> = form_urlencoded::parse(body.as_bytes())
-            .into_owned()
-            .collect();
-        if !self.open || form.get("sid").map(String::as_str) != Some(SESSION) {
-            return StatusCode::FORBIDDEN.into_response();
-        }
+        let form = match self.form(method, body) {
+            Ok(form) => form,
+            Err(code) => return code.into_response(),
+        };
         match form
             .get("page")
             .and_then(|page| pages.get(&format!("/{page}")))
@@ -125,6 +122,48 @@ impl Web {
             Some(json) => ([(CONTENT_TYPE, "application/json")], json.clone()).into_response(),
             None => StatusCode::NOT_FOUND.into_response(),
         }
+    }
+
+    /// Answers a form posted to `/webservices/homeautoswitch.lua` with the
+    /// statistics of the device in the field `ain`, if the field `sid`
+    /// carries the open session. Only the command `getbasicdevicestats` is
+    /// served: the others may switch devices. Unknown devices get 400, like
+    /// on the device.
+    pub(crate) fn stats(
+        &self,
+        stats: &HashMap<String, String>,
+        method: &Method,
+        body: &str,
+    ) -> Response {
+        let form = match self.form(method, body) {
+            Ok(form) => form,
+            Err(code) => return code.into_response(),
+        };
+        if form.get("switchcmd").map(String::as_str) != Some("getbasicdevicestats") {
+            return StatusCode::BAD_REQUEST.into_response();
+        }
+        let ain: String = form
+            .get("ain")
+            .map_or_default(|ain| ain.chars().filter(|c| *c != ' ').collect());
+        match stats.get(&ain) {
+            Some(xml) => ([(CONTENT_TYPE, XML)], xml.clone()).into_response(),
+            None => StatusCode::BAD_REQUEST.into_response(),
+        }
+    }
+
+    /// The fields of a form posted in the open session, which the field
+    /// `sid` carries, or the status of the answer to anything else.
+    fn form(&self, method: &Method, body: &str) -> Result<HashMap<String, String>, StatusCode> {
+        if *method != Method::POST {
+            return Err(StatusCode::METHOD_NOT_ALLOWED);
+        }
+        let form: HashMap<String, String> = form_urlencoded::parse(body.as_bytes())
+            .into_owned()
+            .collect();
+        if !self.open || form.get("sid").map(String::as_str) != Some(SESSION) {
+            return Err(StatusCode::FORBIDDEN);
+        }
+        Ok(form)
     }
 }
 
@@ -181,6 +220,8 @@ mod tests {
         assert_eq!(response.status(), StatusCode::METHOD_NOT_ALLOWED);
         let response = web.page(&HashMap::new(), &Method::GET, "");
         assert_eq!(response.status(), StatusCode::METHOD_NOT_ALLOWED);
+        let response = web.stats(&HashMap::new(), &Method::GET, "");
+        assert_eq!(response.status(), StatusCode::METHOD_NOT_ALLOWED);
     }
 
     #[test]
@@ -197,5 +238,23 @@ mod tests {
         assert_eq!(response.status(), StatusCode::OK);
         let response = web.page(&pages, &Method::POST, &format!("page=other&sid={SESSION}"));
         assert_eq!(response.status(), StatusCode::NOT_FOUND);
+    }
+
+    #[test]
+    fn serves_only_statistics() {
+        let mut web = Web::default();
+        let stats = HashMap::from([("116300000001".to_owned(), "<devicestats/>".to_owned())]);
+        let form =
+            |command: &str, ain: &str| format!("switchcmd={command}&ain={ain}&sid={SESSION}");
+        let get = form("getbasicdevicestats", "11630+0000001");
+        let response = web.stats(&stats, &Method::POST, &get);
+        assert_eq!(response.status(), StatusCode::FORBIDDEN);
+        web.open = true;
+        let response = web.stats(&stats, &Method::POST, &get);
+        assert_eq!(response.status(), StatusCode::OK);
+        let response = web.stats(&stats, &Method::POST, &form("setswitchoff", "116300000001"));
+        assert_eq!(response.status(), StatusCode::BAD_REQUEST);
+        let response = web.stats(&stats, &Method::POST, &form("getbasicdevicestats", "1"));
+        assert_eq!(response.status(), StatusCode::BAD_REQUEST);
     }
 }

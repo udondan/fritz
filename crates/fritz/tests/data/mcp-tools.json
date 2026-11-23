@@ -376,7 +376,33 @@
     "name": "fritz_smarthome",
     "description": "Smart Home devices and their values (FRITZ!OS 8.20 and later).",
     "inputSchema": {
-      "properties": {},
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "device": {
+          "description": "The device, by name or AIN. Needs `history`.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "history": {
+          "default": false,
+          "description": "The history of `device` instead of the current values of all\ndevices: power (W) and voltage (V) over the last hours, energy (Wh)\nper day and per month, temperature (°C) and humidity (%), each as a\nseries with its interval in seconds, the time of the newest value\n(Unix seconds) and a summary (count, gaps, min, avg, max, and the\nsum for energy).",
+          "type": "boolean"
+        },
+        "range": {
+          "description": "Only `hours`, `days` or `months`.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "values": {
+          "default": false,
+          "description": "Also all values of each series, the newest first, null for gaps.",
+          "type": "boolean"
+        }
+      },
       "type": "object"
     },
     "annotations": {

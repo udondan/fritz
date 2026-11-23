@@ -1,0 +1,2 @@
+<?xml version="1.0" encoding="utf-8"?>
+<devicestats><temperature><stats count="4" grid="900" datatime="1767225600">215,213,-,210</stats></temperature><voltage><stats count="4" grid="10" datatime="1767225600">228055,229000,-,230100</stats></voltage><power><stats count="4" grid="10" datatime="1767225600">2345,2300,-,0</stats></power><energy><stats count="2" grid="2678400" datatime="1767225600">3000,2800</stats><stats count="4" grid="86400" datatime="1767225600">100,95,-,110</stats></energy></devicestats>

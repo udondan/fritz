@@ -508,6 +508,26 @@ hallway      lamp        yes        off                                         
 window       sensor      no                                                        10% low  humidity 55%, alert open
 ```
 
+The history a device keeps, by name or AIN: power and voltage over the last
+hours, energy per day and per month, temperature and humidity. Text shows
+each series in short with a trend from the oldest to the newest value;
+`--output json` gives all values, the newest first (`null` for gaps), with
+their `interval` in seconds and the time of the `newest` value in Unix
+seconds, so value `i` was measured at `newest - i * interval`. `--range
+hours|days|months` picks the series. It reads `getbasicdevicestats` of the
+Smart Home HTTP interface, which only reads.
+
+```console
+$ fritz smarthome coffee --history
+coffee (11630 0000001)
+SERIES       RANGE   INTERVAL  VALUES  LATEST     SUM        MIN        AVG        MAX        TREND
+power        hours   10 s      3/4     23.4 W                0.0 W      15.5 W     23.4 W     ▁ ██
+voltage      hours   10 s      3/4     228.1 V               228.1 V    229.1 V    230.1 V    █ ▄▁
+energy       days    1 d       3/4     100.0 Wh   305.0 Wh   95.0 Wh    101.7 Wh   110.0 Wh   █ ▁▃
+energy       months  31 d      2/2     3000.0 Wh  5800.0 Wh  2800.0 Wh  2900.0 Wh  3000.0 Wh  ▁█
+temperature  hours   15 min    3/4     21.5 °C               21.0 °C    21.3 °C    21.5 °C    ▁ ▅█
+```
+
 ### Ports, telephony and capabilities
 
 ```console
@@ -813,7 +833,7 @@ claude mcp add fritz -- fritz --host 192.168.178.1 --user agent mcp
 | `fritz_hosts`           | Known hosts, paginated, or one host by `mac` or `ip`        |
 | `fritz_mesh`            | Mesh nodes with IPs and links, or a tree of who is where    |
 | `fritz_powerline`       | Powerline adapters, whether active, updates                 |
-| `fritz_smarthome`       | Smart Home devices (FRITZ!OS 8.20 and later)                |
+| `fritz_smarthome`       | Smart Home devices (FRITZ!OS 8.20 and later); with `history` and `device` the history of one device, in short or with `values` |
 | `fritz_ports`           | Port forwardings and whether UPnP is on                     |
 | `fritz_telephony`       | Numbers, accounts, deflections, answering machines, DECT    |
 | `fritz_capabilities`    | Features of the device, rights of the user, two-factor      |

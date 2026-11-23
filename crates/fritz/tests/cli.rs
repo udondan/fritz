@@ -1084,6 +1084,34 @@ async fn prints_the_state_as_json() {
     assert_eq!(devices.as_array().unwrap().len(), 4);
     assert_eq!(devices[0]["units"][0]["power"], 23.45);
     assert_eq!(devices[1]["units"][0]["target"], 21.0);
+    let history = json(&run(&sim, &["smarthome", "device-1", "--history"], password).await);
+    assert_eq!(history["name"], "device-1");
+    assert_eq!(history["series"].as_array().unwrap().len(), 5);
+    assert_eq!(history["series"][0]["newest"], 1_767_225_600);
+    assert_eq!(
+        history["series"][0]["values"],
+        serde_json::json!([23.45, 23.0, null, 0.0])
+    );
+    let args = ["smarthome", "device-4", "--history", "--range", "hours"];
+    let history = json(&run(&sim, &args, password).await);
+    assert_eq!(history["series"][1]["kind"], "humidity");
+    let args = ["--output", "text", "smarthome", "device-2", "--history"];
+    let output = success(&run(&sim, &args, password).await);
+    assert!(
+        output.starts_with("device-2 (09995 0000002)\nSERIES "),
+        "{output}"
+    );
+    assert!(output.contains("20.5 °C"), "{output}");
+    let output = run(&sim, &["smarthome", "nothing", "--history"], password).await;
+    assert!(
+        failure(&output).contains("no Smart Home device has the name or AIN \"nothing\""),
+        "{}",
+        failure(&output)
+    );
+    // The history needs a device, and a device the history.
+    for args in [&["smarthome", "device-1"][..], &["smarthome", "--history"]] {
+        assert!(!run(&sim, args, password).await.status.success());
+    }
     // The session ID stays in memory, and the session is closed again.
     assert!(!stdout(&output).contains(SESSION) && !stderr(&output).contains(SESSION));
     let logouts = sim
@@ -1091,7 +1119,7 @@ async fn prints_the_state_as_json() {
         .iter()
         .filter(|r| r.method == "POST" && r.path == "/login_sid.lua")
         .count();
-    assert_eq!(logouts, 2, "a login and a logout");
+    assert_eq!(logouts, 10, "a login and a logout per command");
 
     // Without the host list, the hosts are read one by one.
     sim.inject(Injection::fault("Hosts1", "X_AVM-DE_GetHostListPath", 606));

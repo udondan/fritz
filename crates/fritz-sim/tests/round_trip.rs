@@ -66,14 +66,15 @@ async fn capturing_the_simulator_gives_the_fixture() {
 
         let out = tempfile::tempdir().unwrap();
         capture::write(&plan, &capture, out.path()).unwrap();
-        // The capture reads TR-064 only, not the documents of the REST API
-        // or the pages of the web interface.
+        // The capture reads TR-064 only, not the documents of the REST API,
+        // the pages of the web interface or the Smart Home statistics.
         let mut expected = files(&dir);
         // Nor, by default, personal lists, whose fixtures are written by hand.
         expected.retain(|(name, _)| {
             let name = name.to_string_lossy();
             !name.starts_with("api")
                 && !name.starts_with("data")
+                && !name.starts_with("homeauto")
                 && !name.starts_with(WLAN_CLIENTS)
                 && !PERSONAL.iter().any(|p| name.starts_with(p))
         });
