@@ -10,8 +10,8 @@ make hooks  # install the hooks that run the checks of CI
 ```
 
 The pre-commit hook needs [qlty](https://docs.qlty.sh/cli/quickstart) and
-`jq`. Like CI, it blocks a commit on lint findings and on code smells that are
-new compared to `origin/main`.
+`jq`. Like CI, it blocks a commit on lint findings, on code that `cargo fmt`
+would change and on code smells that are new compared to `origin/main`.
 
 The pre-push hook runs `make coverage`, which needs Docker and Python 3. Like
 the patch status of Codecov, it blocks a push if a line under `crates/` that

@@ -1,6 +1,8 @@
 # Runs a static fritz binary on Alpine. By default it is built from the source;
 # releases pass `--build-arg BINARY=prebuilt` and copy the musl binaries of
 # the release from dist/<arch>/fritz, so no Rust is compiled under emulation.
+# CI only checks that the image starts and lists its tools, and passes
+# `--build-arg PROFILE=dev`, which builds in a fraction of the time.
 ARG BINARY=source
 
 FROM rust:1.100-alpine AS source
@@ -8,10 +10,13 @@ FROM rust:1.100-alpine AS source
 # ring needs a C compiler and the musl headers.
 RUN apk add --no-cache musl-dev
 
+ARG PROFILE=release
 WORKDIR /src
 COPY . .
-RUN cargo build --release --locked -p fritz \
-    && cp target/release/fritz /usr/local/bin/fritz
+# Cargo writes the profile dev to target/debug.
+RUN cargo build --profile "$PROFILE" --locked -p fritz \
+    && dir=$([ "$PROFILE" = dev ] && echo debug || echo "$PROFILE") \
+    && cp "target/$dir/fritz" /usr/local/bin/fritz
 
 
 FROM scratch AS prebuilt

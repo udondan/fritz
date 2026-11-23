@@ -294,7 +294,11 @@ jobs:
           ln -s "$(mise which docker-mcp)" ~/.docker/cli-plugins/docker-mcp
           docker mcp version
 
-      - run: mise run docker-build
+      # The image of a release is built from its binaries in publish.yml. This
+      # job only checks that the image starts and lists its tools, so an
+      # unoptimized build is enough, in a fraction of the time.
+      - name: Build the image
+        run: docker build --build-arg PROFILE=dev -t udondan/fritz .
 
       - name: Run the CLI in the image
         run: |
