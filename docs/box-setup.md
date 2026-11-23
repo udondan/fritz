@@ -89,6 +89,51 @@ fritz auth login
 `fritz config show` shows the settings in effect, and `fritz auth status`
 where the password comes from.
 
+### Password from a password manager
+
+Instead of the keychain, `fritz` can run a command that prints the password,
+like the command line tool of your password manager:
+
+```sh
+fritz config init --password-command '["op", "read", "op://Private/FRITZ!Box/password"]'
+```
+
+This writes the command to the profile:
+
+```toml
+[profile.default]
+host = "192.168.178.1"
+username = "agent"
+password_command = ["op", "read", "op://Private/FRITZ!Box/password"]
+```
+
+Other examples: `pass show fritz`, `gopass show -o fritz`,
+`bw get password fritz`, `secret-tool lookup service fritz`. Give the command
+as a JSON list, or as words separated by spaces when no argument contains a
+space.
+
+- The command is a list of arguments and runs without a shell, so quotes,
+  `$` and `|` mean nothing special.
+- Its output is the password, without one trailing line break. It is kept
+  in memory only, and never printed or logged.
+- It may take 30 seconds, enough to unlock the password manager. It can ask
+  for that on the terminal: its input and its errors are those of `fritz`.
+  Without a terminal, like under `fritz mcp`, its input is empty.
+- A failure, a timeout or empty output stops `fritz` with an error that names
+  the command, never its output.
+- It runs once per run of `fritz`, so `fritz mcp` asks the password manager
+  only once.
+
+Whoever can change the configuration file can change the command, so keep the
+file writable only by you. `fritz` warns if others may change it.
+
+`fritz auth status` tells whether the command ran:
+
+```console
+$ fritz auth status
+the password of agent@192.168.178.1 comes from the command `op`, which ran successfully
+```
+
 ### Devices with only a password
 
 FRITZ!Repeaters, and a FRITZ!Box set to log in with the password alone, have
@@ -115,7 +160,8 @@ keychain:
 |---|---|---|
 | `FRITZ_HOST` | `--host` | `192.168.178.1` means `https://192.168.178.1:49443`. Use `http://192.168.178.1:49000` for unencrypted access. |
 | `FRITZ_USERNAME` | `--user` | The user on the box. Leave it out for devices with only a password. |
-| `FRITZ_PASSWORD` | | The password. It takes precedence over the keychain. |
+| `FRITZ_PASSWORD` | | The password. It takes precedence over the password command and the keychain. |
+| `FRITZ_PASSWORD_COMMAND` | | A command that prints the password, as a JSON list or as words separated by spaces. It takes precedence over the one of the profile and over the keychain. |
 | `FRITZ_TLS_FINGERPRINT` | `--fingerprint` | The SHA-256 fingerprint of the certificate, from `fritz tls fingerprint`. |
 | `FRITZ_PROFILE` | `--profile` | The profile to use instead of the default one. |
 | `FRITZ_CONFIG` | `--config` | Another configuration file. |

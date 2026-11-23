@@ -39,7 +39,7 @@ status and settings of a FRITZ!Box router.
   - [Settings](#settings)
   - [Calls, phonebook and event log](#calls-phonebook-and-event-log)
   - [Any TR-064 action](#any-tr-064-action)
-  - [JSON output](#json-output)
+  - [JSON and YAML output](#json-and-yaml-output)
   - [Several devices and the environment](#several-devices-and-the-environment)
   - [Cache](#cache)
   - [Shell completion](#shell-completion)
@@ -82,7 +82,8 @@ cosign verify udondan/fritz \
 ## Usage
 
 The examples show made-up data. Every command takes `--help`; the commands
-that read the device also print JSON (see [JSON output](#json-output)).
+that read the device also print JSON and YAML (see
+[JSON and YAML output](#json-and-yaml-output)).
 
 ### Set up
 
@@ -124,9 +125,24 @@ certificate  3F:A1:77:0C:5D:E2:94:1B:C8:60:2E:7A:D3:19:B4:8F:06:CA:51:E9:72:3D:8
 password     from the keychain
 ```
 
+If the password is in a password manager already, `fritz` can ask it instead,
+with a command that prints the password. The command is a list of arguments
+and runs without a shell; `fritz` strips one trailing line break from its
+output:
+
+```sh
+fritz config init --password-command '["op", "read", "op://Private/FRITZ!Box/password"]'
+fritz config init --password-command 'pass show fritz'
+```
+
+The password comes from `FRITZ_PASSWORD`, else from the command in
+`FRITZ_PASSWORD_COMMAND` or the profile, else from the keychain. The command
+runs once per run, at most 30 seconds, and may ask on the terminal to unlock
+the password manager. Errors name the command, never its output.
+
 | Command | Does |
 | --- | --- |
-| `fritz config init` / `show` / `list` | Save `--host`, `--user` and `--fingerprint` to a profile / show the settings in effect / list the profiles |
+| `fritz config init` / `show` / `list` | Save `--host`, `--user`, `--fingerprint` and `--password-command` to a profile / show the settings in effect / list the profiles |
 | `fritz tls fingerprint` / `trust` / `forget` | Print / trust / forget the certificate of the device |
 | `fritz auth login` / `logout` / `status` | Store / remove the password in the keychain / tell where it comes from |
 
@@ -325,11 +341,12 @@ Error: GetSecurityKeys is secret: the name points to a secret; only actions that
 
 Inputs go after the action, like `fritz tr064 call Hosts1 GetGenericHostEntry NewIndex=0`.
 
-### JSON output
+### JSON and YAML output
 
 The commands from `overview` to `log` print a table on a terminal and JSON
 otherwise, for scripts and agents, and so do `config list` and `cache show`.
-`--output` (`-o`) picks one. The other `config` and `cache` commands, `tls`,
+`--output` (`-o`) picks `text`, `json` or `yaml`. The other `config` and
+`cache` commands, `tls`,
 `auth` and `tr064` always print text.
 
 To keep text in pipes, like `fritz hosts | grep phone`, set
@@ -347,6 +364,23 @@ $ fritz wlan --output json | jq '.[0]'
   "status": "Up",
   "clients": 4
 }
+```
+
+YAML has the same fields as JSON. Strings from the device are quoted where
+needed, so a host name like `a: b` stays a string. With `--output yaml`,
+errors are YAML on stderr as well, with the fields of the errors of the MCP
+server: `error`, and for faults of the device `status` and `retry_after`.
+
+```console
+$ fritz capabilities --output yaml
+features:
+- dsl
+- wlan
+rights:
+- area: BoxAdmin
+  access: readwrite
+two_factor: true
+services: 37
 ```
 
 ### Several devices and the environment
@@ -370,8 +404,8 @@ DEFAULT  PROFILE   HOST           USER   TRUSTED
 ```
 
 In scripts and containers, the environment replaces the profile and the
-keychain: `FRITZ_HOST`, `FRITZ_USERNAME`, `FRITZ_PASSWORD` and
-`FRITZ_TLS_FINGERPRINT`. [docs/box-setup.md](https://github.com/udondan/fritz/blob/main/docs/box-setup.md#5-without-a-configuration-file)
+keychain: `FRITZ_HOST`, `FRITZ_USERNAME`, `FRITZ_PASSWORD` (or
+`FRITZ_PASSWORD_COMMAND`) and `FRITZ_TLS_FINGERPRINT`. [docs/box-setup.md](https://github.com/udondan/fritz/blob/main/docs/box-setup.md#5-without-a-configuration-file)
 lists all variables.
 
 ### Cache

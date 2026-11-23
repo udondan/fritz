@@ -7,7 +7,8 @@ use anyhow::Context as _;
 use fritz_core::cache::{self, Cache, ENV_CACHE_DIR};
 use serde::Serialize;
 
-use crate::status::{Format, json, table};
+use crate::output::{Format, show as print};
+use crate::status::table;
 
 /// The cache in the directory of `FRITZ_CACHE_DIR` or the platform.
 pub(crate) fn open() -> anyhow::Result<Cache> {
@@ -16,7 +17,7 @@ pub(crate) fn open() -> anyhow::Result<Cache> {
     Ok(Cache::new(dir))
 }
 
-/// The cache as JSON.
+/// The cache as JSON or YAML.
 #[derive(Debug, Serialize)]
 struct Listing {
     dir: PathBuf,
@@ -29,38 +30,37 @@ pub(crate) fn show(cache: &Cache, format: Format, out: &mut impl Write) -> anyho
     let devices = cache
         .list()
         .with_context(|| format!("cannot read {}", dir.display()))?;
-    match format {
-        Format::Json => json(
-            &Listing {
-                dir: dir.to_owned(),
-                devices,
-            },
-            out,
-        ),
-        Format::Text if devices.is_empty() => {
-            writeln!(out, "the cache in {} is empty", dir.display())?;
-            Ok(())
-        }
-        Format::Text => {
-            let unknown = || "?".to_owned();
-            table(
-                &["MODEL", "FIRMWARE", "DEVICE", "SCPDS", "SIZE"],
-                devices.iter().map(|entry| {
-                    let device = entry.device.as_ref();
-                    vec![
-                        device.and_then(|d| d.model.clone()).unwrap_or_else(unknown),
-                        device.map_or_else(unknown, |d| d.firmware.clone()),
-                        device.map_or_else(unknown, |d| d.id.clone()),
-                        entry.scpds.to_string(),
-                        format!("{} KiB", entry.bytes.div_ceil(1024)),
-                    ]
-                }),
-                out,
-            )?;
-            writeln!(out, "in {}", dir.display())?;
-            Ok(())
-        }
+    let listing = Listing {
+        dir: dir.to_owned(),
+        devices,
+    };
+    print(&listing, format, out, text)
+}
+
+/// The listing as a table.
+fn text(listing: &Listing, out: &mut impl Write) -> anyhow::Result<()> {
+    let dir = listing.dir.display();
+    if listing.devices.is_empty() {
+        writeln!(out, "the cache in {dir} is empty")?;
+        return Ok(());
     }
+    let unknown = || "?".to_owned();
+    table(
+        &["MODEL", "FIRMWARE", "DEVICE", "SCPDS", "SIZE"],
+        listing.devices.iter().map(|entry| {
+            let device = entry.device.as_ref();
+            vec![
+                device.and_then(|d| d.model.clone()).unwrap_or_else(unknown),
+                device.map_or_else(unknown, |d| d.firmware.clone()),
+                device.map_or_else(unknown, |d| d.id.clone()),
+                entry.scpds.to_string(),
+                format!("{} KiB", entry.bytes.div_ceil(1024)),
+            ]
+        }),
+        out,
+    )?;
+    writeln!(out, "in {dir}")?;
+    Ok(())
 }
 
 /// Removes the cached descriptions.

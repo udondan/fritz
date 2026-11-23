@@ -513,6 +513,15 @@ fn reports_an_invalid_configuration() {
         "{}",
         stderr(&output)
     );
+    // With YAML, as YAML.
+    let output = config.run(&["--output", "yaml", "overview"]);
+    assert_eq!(output.status.code(), Some(1));
+    let error: serde_json::Value = serde_saphyr::from_str(&stderr(&output)).unwrap();
+    let message = error["error"].as_str().unwrap();
+    assert!(
+        message.contains("is not a valid configuration"),
+        "{message}"
+    );
 }
 
 const SHELLS: [&str; 5] = ["bash", "elvish", "fish", "powershell", "zsh"];
@@ -1050,6 +1059,86 @@ async fn prints_the_personal_lists() {
     assert_eq!(log[0]["message"], "DSL is ready.", "{log}");
 }
 
+/// Every command with JSON output prints the same value as YAML.
+#[tokio::test(flavor = "multi_thread")]
+async fn prints_the_same_values_as_yaml() {
+    let log = fritz_sim::Answer::Ok(
+        [(
+            "NewDeviceLog".to_owned(),
+            "20.11.26 18:05:42 DSL is ready.".to_owned(),
+        )]
+        .into(),
+    );
+    let fixture = fritz_sim::Fixture::load(FIXTURE).unwrap().with_answer(
+        "DeviceInfo1",
+        "GetDeviceLog",
+        None,
+        log,
+    );
+    let sim = fritz_sim::Sim::start(fixture).await.unwrap();
+    let password = Some(fritz_sim::PASSWORD);
+    let commands: [&[&str]; 16] = [
+        &["overview"],
+        &["internet"],
+        &["wlan"],
+        &["ports"],
+        &["telephony"],
+        &["capabilities"],
+        &["hosts"],
+        &["hosts", "--active"],
+        &["mesh"],
+        &["mesh", "--tree"],
+        &["smarthome"],
+        &["settings"],
+        &["calls"],
+        &["phonebook"],
+        &["log"],
+        &["config", "list"],
+    ];
+    for command in commands {
+        let mut args = vec!["--output", "json"];
+        args.extend(command);
+        let json: serde_json::Value =
+            serde_json::from_str(&success(&run(&sim, &args, password).await)).unwrap();
+        args[1] = "yaml";
+        let yaml = success(&run(&sim, &args, password).await);
+        let value: serde_json::Value =
+            serde_saphyr::from_str(&yaml).unwrap_or_else(|e| panic!("{command:?}: {e}"));
+        assert_eq!(value, json, "{command:?}");
+    }
+    // Set in the environment.
+    let output = fritz_with(&["config", "list"], &[("FRITZ_OUTPUT", "yaml")]);
+    assert_eq!(success(&output), "[]\n");
+}
+
+/// Errors in YAML are YAML on stderr, with the fields of errors in JSON.
+#[tokio::test(flavor = "multi_thread")]
+async fn reports_errors_as_yaml() {
+    let fixture = fritz_sim::Fixture::load(FIXTURE).unwrap();
+    let sim = fritz_sim::Sim::start(fixture).await.unwrap();
+    sim.inject(Injection::fault("UserInterface1", "GetInfo", 867));
+    let output = run(&sim, &["-o", "yaml", "overview"], Some(fritz_sim::PASSWORD)).await;
+    assert_eq!(output.status.code(), Some(1));
+    assert_eq!(stdout(&output), "");
+    let error: serde_json::Value = serde_saphyr::from_str(&stderr(&output)).unwrap();
+    assert_eq!(error["status"], "blocked", "{error}");
+    assert_eq!(error["retry_after"], 3600);
+    let message = error["error"].as_str().unwrap();
+    assert!(message.contains("(UPnP error 867)"), "{message}");
+
+    let url = unreachable_url("http");
+    let args = ["-o", "yaml", "overview", "--host", &url];
+    let output = fritz_with(&args, &[("FRITZ_PASSWORD", "secret")]);
+    assert_eq!(output.status.code(), Some(1));
+    let error: serde_json::Value = serde_saphyr::from_str(&stderr(&output)).unwrap();
+    let message = error["error"].as_str().unwrap();
+    assert!(
+        message.contains("cannot read the device description"),
+        "{message}"
+    );
+    assert!(error.get("status").is_none(), "{error}");
+}
+
 #[tokio::test(flavor = "multi_thread")]
 async fn prints_the_state_as_text() {
     let fixture = fritz_sim::Fixture::load(FIXTURE).unwrap();
@@ -1332,6 +1421,24 @@ mod change {
     }
 
     #[tokio::test(flavor = "multi_thread")]
+    async fn plans_changes_in_yaml() {
+        let setup = Setup::new().await;
+        let args = [
+            "--output",
+            "yaml",
+            "plan",
+            "WLANConfiguration1",
+            "SetEnable",
+            "NewEnable=0",
+        ];
+        let yaml = success(&setup.run(&args, &[("FRITZ_ALLOW_WRITE", "1")]).await);
+        let plan: serde_json::Value = serde_saphyr::from_str(&yaml).unwrap();
+        assert_eq!(plan["changes"][0]["argument"], "NewEnable", "{plan}");
+        assert_eq!(plan["changes"][0]["after"], "0", "{plan}");
+        assert_eq!(setup.enabled().as_deref(), Some("1"));
+    }
+
+    #[tokio::test(flavor = "multi_thread")]
     async fn plans_and_applies_changes() {
         let setup = Setup::new().await;
         let args = [
@@ -1575,6 +1682,9 @@ async fn caches_the_descriptions() {
         "{json}"
     );
     assert_eq!(json["devices"][0]["scpds"], 1, "{json}");
+    let args = ["cache", "show", "--output", "yaml"];
+    let yaml = success(&cached(&sim, &cache, &args, &[]).await);
+    assert!(yaml.contains("    firmware: \"285.08.25\"\n"), "{yaml}");
 
     let clear = success(&cached(&sim, &cache, &["cache", "clear"], &[]).await);
     assert_eq!(
@@ -1605,4 +1715,144 @@ fn reports_an_unreadable_cache() {
         let message = failure(&output);
         assert!(message.contains(&format!("{error} {file}")), "{message}");
     }
+}
+
+/// A password command that prints `text` without a shell.
+#[cfg(unix)]
+fn printf(text: &str) -> String {
+    serde_json::json!(["printf", "%s", text]).to_string()
+}
+
+#[cfg(unix)]
+#[test]
+fn saves_and_runs_a_password_command() {
+    use std::os::unix::fs::PermissionsExt as _;
+
+    let config = Config::new();
+    let command = printf("from the command");
+    let output = config.run(&[
+        "config",
+        "init",
+        "--host",
+        "192.168.178.1",
+        "--user",
+        "agent",
+        "--password-command",
+        &command,
+    ]);
+    assert!(output.status.success(), "{}", stderr(&output));
+    let saved = "password_command = [\"printf\", \"%s\", \"from the command\"]\n";
+    assert!(config.text().ends_with(saved), "{}", config.text());
+
+    // Another init keeps the command.
+    let output = config.run(&["config", "init", "--user", "admin"]);
+    assert!(output.status.success(), "{}", stderr(&output));
+    assert!(config.text().contains("username = \"admin\"\n"));
+    assert!(config.text().ends_with(saved), "{}", config.text());
+
+    let output = config.run(&["auth", "status"]);
+    assert!(output.status.success(), "{}", stderr(&output));
+    assert_eq!(
+        stdout(&output),
+        "the password of admin@192.168.178.1 comes from the command `printf`, \
+         which ran successfully\n"
+    );
+    assert_eq!(stderr(&output), "");
+
+    let output = config.run(&["config", "show"]);
+    assert!(
+        stdout(&output).ends_with("password     from the command `printf`\n"),
+        "{}",
+        stdout(&output)
+    );
+
+    let mode = std::fs::Permissions::from_mode(0o664);
+    std::fs::set_permissions(&config.path, mode).unwrap();
+    let output = config.run(&["auth", "status"]);
+    assert!(output.status.success(), "{}", stderr(&output));
+    assert_eq!(
+        stderr(&output),
+        format!(
+            "warning: others may change {0}, which has the password command, \
+             run `chmod go-w {0}`\n",
+            config.path
+        )
+    );
+
+    // The environment wins over the profile and is not checked.
+    let output = fritz_with(
+        &["auth", "status"],
+        &[
+            ("FRITZ_CONFIG", &config.path),
+            ("FRITZ_PASSWORD_COMMAND", "echo from the environment"),
+        ],
+    );
+    assert!(output.status.success(), "{}", stderr(&output));
+    assert!(stdout(&output).contains("the command `echo`"));
+    assert_eq!(stderr(&output), "");
+}
+
+#[cfg(unix)]
+#[test]
+fn reports_password_command_errors_without_the_output() {
+    let args = [
+        "--host",
+        "192.168.178.1",
+        "--user",
+        "agent",
+        "auth",
+        "status",
+    ];
+    for (command, error) in [
+        (
+            r#"["sh", "-c", "echo topsecret; exit 3"]"#,
+            "the password command `sh` failed with exit status: 3",
+        ),
+        ("true", "the password command `true` printed no password"),
+        (
+            "fritz-test-no-such-program",
+            "cannot run the password command `fritz-test-no-such-program`",
+        ),
+        ("[\"sh\"", "FRITZ_PASSWORD_COMMAND is invalid"),
+    ] {
+        let output = fritz_with(&args, &[("FRITZ_PASSWORD_COMMAND", command)]);
+        assert!(!output.status.success());
+        assert!(stderr(&output).contains(error), "{}", stderr(&output));
+        assert!(
+            !stderr(&output).contains("topsecret"),
+            "{}",
+            stderr(&output)
+        );
+        assert!(
+            !stdout(&output).contains("topsecret"),
+            "{}",
+            stdout(&output)
+        );
+    }
+}
+
+#[cfg(unix)]
+#[tokio::test(flavor = "multi_thread")]
+async fn logs_in_with_a_password_command() {
+    let fixture = fritz_sim::Fixture::load(FIXTURE).unwrap();
+    let sim = fritz_sim::Sim::start(fixture).await.unwrap();
+    let args = strings(&[
+        "--host",
+        sim.url().as_str(),
+        "--user",
+        fritz_sim::USERNAME,
+        "tr064",
+        "call",
+        "DeviceInfo1",
+        "GetInfo",
+    ]);
+    let env = vec![(
+        "FRITZ_PASSWORD_COMMAND".to_owned(),
+        printf(&format!("{}\n", fritz_sim::PASSWORD)),
+    )];
+    let output = fritz_blocking(args, env, "").await;
+    let info = success(&output);
+    assert!(info.contains("NewModelName"), "{info}");
+    assert!(!info.contains(fritz_sim::PASSWORD));
+    assert!(!stderr(&output).contains(fritz_sim::PASSWORD));
 }

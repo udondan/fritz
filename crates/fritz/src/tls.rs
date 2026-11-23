@@ -61,6 +61,7 @@ pub(crate) async fn trust(
         host: context.host(),
         username: target.username.clone(),
         fingerprint: Some(found),
+        password_command: context.profile().and_then(|p| p.password_command.clone()),
     };
     context.save_profile(profile)?;
     let name = context.profile_name();
