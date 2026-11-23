@@ -1,22 +1,26 @@
+# The latest stable Rust of rustup, like CI, where there is rustup. A
+# packaged toolchain, like Homebrew's, can be older and miss new lints.
+CARGO ?= $(if $(shell command -v rustup),rustup run stable cargo,cargo)
+
 .PHONY: build release run test lint coverage hooks
 
 build:
-	@cargo build --workspace
+	@$(CARGO) build --workspace
 
 release:
-	@cargo build --release -p fritz
+	@$(CARGO) build --release -p fritz
 
 run:
-	@cargo run -p fritz
+	@$(CARGO) run -p fritz
 
 test:
-	@cargo test --workspace --all-features
-	@cargo test -p fritz --test cli -- --exact cannot_change_without_the_feature_write
+	@$(CARGO) test --workspace --all-features
+	@$(CARGO) test -p fritz --test cli -- --exact cannot_change_without_the_feature_write
 
 lint:
-	@cargo fmt --all -- --check
-	@cargo clippy --workspace --all-targets -- -D warnings
-	@cargo clippy --workspace --all-targets --all-features -- -D warnings
+	@$(CARGO) fmt --all -- --check
+	@$(CARGO) clippy --workspace --all-targets -- -D warnings
+	@$(CARGO) clippy --workspace --all-targets --all-features -- -D warnings
 
 # Checks that the tests cover every line changed against origin/main, like
 # the patch status of Codecov.
