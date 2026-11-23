@@ -39,7 +39,7 @@ use rmcp::model::{CallToolResult, ContentBlock, Implementation, ServerCapabiliti
 use rmcp::schemars::{self, JsonSchema};
 use rmcp::{ServerHandler, ServiceExt as _, tool, tool_handler, tool_router};
 use serde::{Deserialize, Serialize};
-use serde_json::{Value, json};
+use serde_json::json;
 use tokio::sync::{MappedMutexGuard, Mutex, MutexGuard};
 use tr064::Direction;
 
@@ -720,17 +720,7 @@ impl ServerHandler for Server {
 /// An error as JSON, with the status and the time to wait for faults of the
 /// device.
 fn failure(error: &anyhow::Error) -> CallToolResult {
-    let mut body = json!({ "error": format!("{error:#}") });
-    let fault = error.chain().find_map(|e| match e.downcast_ref() {
-        Some(generic::Error::Fault { fault, .. }) => Some(*fault),
-        _ => None,
-    });
-    if let Some(fault) = fault {
-        body["status"] = Value::from(fault.status());
-        if let Some(retry) = fault.retry_after() {
-            body["retry_after"] = Value::from(retry.as_secs());
-        }
-    }
+    let body = crate::output::failure(error);
     CallToolResult::error(vec![ContentBlock::text(body.to_string())])
 }
 

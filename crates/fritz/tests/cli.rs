@@ -510,6 +510,15 @@ fn reports_an_invalid_configuration() {
         "{}",
         stderr(&output)
     );
+    // With YAML, as YAML.
+    let output = config.run(&["--output", "yaml", "overview"]);
+    assert_eq!(output.status.code(), Some(1));
+    let error: serde_json::Value = serde_saphyr::from_str(&stderr(&output)).unwrap();
+    let message = error["error"].as_str().unwrap();
+    assert!(
+        message.contains("is not a valid configuration"),
+        "{message}"
+    );
 }
 
 const SHELLS: [&str; 5] = ["bash", "elvish", "fish", "powershell", "zsh"];
@@ -1047,6 +1056,86 @@ async fn prints_the_personal_lists() {
     assert_eq!(log[0]["message"], "DSL is ready.", "{log}");
 }
 
+/// Every command with JSON output prints the same value as YAML.
+#[tokio::test(flavor = "multi_thread")]
+async fn prints_the_same_values_as_yaml() {
+    let log = fritz_sim::Answer::Ok(
+        [(
+            "NewDeviceLog".to_owned(),
+            "20.11.26 18:05:42 DSL is ready.".to_owned(),
+        )]
+        .into(),
+    );
+    let fixture = fritz_sim::Fixture::load(FIXTURE).unwrap().with_answer(
+        "DeviceInfo1",
+        "GetDeviceLog",
+        None,
+        log,
+    );
+    let sim = fritz_sim::Sim::start(fixture).await.unwrap();
+    let password = Some(fritz_sim::PASSWORD);
+    let commands: [&[&str]; 16] = [
+        &["overview"],
+        &["internet"],
+        &["wlan"],
+        &["ports"],
+        &["telephony"],
+        &["capabilities"],
+        &["hosts"],
+        &["hosts", "--active"],
+        &["mesh"],
+        &["mesh", "--tree"],
+        &["smarthome"],
+        &["settings"],
+        &["calls"],
+        &["phonebook"],
+        &["log"],
+        &["config", "list"],
+    ];
+    for command in commands {
+        let mut args = vec!["--output", "json"];
+        args.extend(command);
+        let json: serde_json::Value =
+            serde_json::from_str(&success(&run(&sim, &args, password).await)).unwrap();
+        args[1] = "yaml";
+        let yaml = success(&run(&sim, &args, password).await);
+        let value: serde_json::Value =
+            serde_saphyr::from_str(&yaml).unwrap_or_else(|e| panic!("{command:?}: {e}"));
+        assert_eq!(value, json, "{command:?}");
+    }
+    // Set in the environment.
+    let output = fritz_with(&["config", "list"], &[("FRITZ_OUTPUT", "yaml")]);
+    assert_eq!(success(&output), "[]\n");
+}
+
+/// Errors in YAML are YAML on stderr, with the fields of errors in JSON.
+#[tokio::test(flavor = "multi_thread")]
+async fn reports_errors_as_yaml() {
+    let fixture = fritz_sim::Fixture::load(FIXTURE).unwrap();
+    let sim = fritz_sim::Sim::start(fixture).await.unwrap();
+    sim.inject(Injection::fault("UserInterface1", "GetInfo", 867));
+    let output = run(&sim, &["-o", "yaml", "overview"], Some(fritz_sim::PASSWORD)).await;
+    assert_eq!(output.status.code(), Some(1));
+    assert_eq!(stdout(&output), "");
+    let error: serde_json::Value = serde_saphyr::from_str(&stderr(&output)).unwrap();
+    assert_eq!(error["status"], "blocked", "{error}");
+    assert_eq!(error["retry_after"], 3600);
+    let message = error["error"].as_str().unwrap();
+    assert!(message.contains("(UPnP error 867)"), "{message}");
+
+    let url = unreachable_url("http");
+    let args = ["-o", "yaml", "overview", "--host", &url];
+    let output = fritz_with(&args, &[("FRITZ_PASSWORD", "secret")]);
+    assert_eq!(output.status.code(), Some(1));
+    let error: serde_json::Value = serde_saphyr::from_str(&stderr(&output)).unwrap();
+    let message = error["error"].as_str().unwrap();
+    assert!(
+        message.contains("cannot read the device description"),
+        "{message}"
+    );
+    assert!(error.get("status").is_none(), "{error}");
+}
+
 #[tokio::test(flavor = "multi_thread")]
 async fn prints_the_state_as_text() {
     let fixture = fritz_sim::Fixture::load(FIXTURE).unwrap();
@@ -1326,6 +1415,24 @@ mod change {
         let setup = Setup::new().await;
         let output = success(&setup.run(&["identity"], &[]).await);
         assert_eq!(output, format!("{}\n", identity()));
+    }
+
+    #[tokio::test(flavor = "multi_thread")]
+    async fn plans_changes_in_yaml() {
+        let setup = Setup::new().await;
+        let args = [
+            "--output",
+            "yaml",
+            "plan",
+            "WLANConfiguration1",
+            "SetEnable",
+            "NewEnable=0",
+        ];
+        let yaml = success(&setup.run(&args, &[("FRITZ_ALLOW_WRITE", "1")]).await);
+        let plan: serde_json::Value = serde_saphyr::from_str(&yaml).unwrap();
+        assert_eq!(plan["changes"][0]["argument"], "NewEnable", "{plan}");
+        assert_eq!(plan["changes"][0]["after"], "0", "{plan}");
+        assert_eq!(setup.enabled().as_deref(), Some("1"));
     }
 
     #[tokio::test(flavor = "multi_thread")]

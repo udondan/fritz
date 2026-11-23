@@ -1,5 +1,5 @@
 //! `fritz ports`, `telephony`, `capabilities` and `settings`: what the
-//! device offers and how it is set up, as text or JSON.
+//! device offers and how it is set up, as text, JSON or YAML.
 
 use std::io::Write;
 
@@ -10,7 +10,8 @@ use fritz_core::settings::{self, Settings};
 use fritz_core::telephony::{self, Telephony};
 
 use crate::context::Context;
-use crate::status::{Format, json, on_off, pairs, reader, table, yes_no};
+use crate::output::{Format, show};
+use crate::status::{on_off, pairs, reader, table, yes_no};
 
 /// Prints the port forwardings.
 pub(crate) async fn ports(
@@ -22,10 +23,7 @@ pub(crate) async fn ports(
     let ports = ports::ports(&mut reader)
         .await
         .context("cannot read the port forwardings")?;
-    match format {
-        Format::Json => json(&ports, out),
-        Format::Text => ports_text(&ports, out),
-    }
+    show(&ports, format, out, ports_text)
 }
 
 fn ports_text(ports: &Ports, out: &mut impl Write) -> anyhow::Result<()> {
@@ -59,10 +57,7 @@ pub(crate) async fn telephony(
     let telephony = telephony::telephony(&mut reader)
         .await
         .context("cannot read the telephony")?;
-    match format {
-        Format::Json => json(&telephony, out),
-        Format::Text => telephony_tables(&telephony, out),
-    }
+    show(&telephony, format, out, telephony_tables)
 }
 
 /// A table for each part the device has, with a blank line between them.
@@ -159,10 +154,9 @@ pub(crate) async fn capabilities(
     let capabilities = capabilities::capabilities(&mut reader)
         .await
         .context("cannot read the capabilities")?;
-    match format {
-        Format::Json => json(&capabilities, out),
-        Format::Text => pairs(&capability_pairs(&capabilities), out),
-    }
+    show(&capabilities, format, out, |c, out| {
+        pairs(&capability_pairs(c), out)
+    })
 }
 
 fn capability_pairs(capabilities: &Capabilities) -> Vec<(&'static str, Option<String>)> {
@@ -197,10 +191,7 @@ pub(crate) async fn settings(
         .logout()
         .await
         .context("cannot log out of the web interface")?;
-    match format {
-        Format::Json => json(&settings, out),
-        Format::Text => settings_text(&settings, out),
-    }
+    show(&settings, format, out, settings_text)
 }
 
 /// One line per value, with its path, like `ipv6.mtu  1492`.

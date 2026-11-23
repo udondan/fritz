@@ -12,6 +12,7 @@ mod completion;
 mod context;
 mod device;
 mod mcp;
+mod output;
 mod personal;
 mod settings;
 mod status;
@@ -32,7 +33,7 @@ use fritz_core::secrets::command::{ENV_PASSWORD_COMMAND, PasswordCommand};
 use tr064::{Client, SecretString, Url};
 
 use crate::context::Context;
-use crate::status::Format;
+use crate::output::Format;
 
 /// CLI and MCP server for FRITZ!Box routers (unofficial).
 ///
@@ -71,9 +72,10 @@ struct Global {
     /// one of the profile.
     #[arg(long, global = true, env = "FRITZ_TLS_FINGERPRINT")]
     fingerprint: Option<String>,
-    /// How to print results: text, or JSON, which is the default when the
-    /// output is not a terminal. Set `FRITZ_OUTPUT=text` to keep text in
-    /// pipes, like `fritz hosts | grep phone`.
+    /// How to print results: text, JSON, which is the default when the
+    /// output is not a terminal, or YAML. Set `FRITZ_OUTPUT=text` to keep
+    /// text in pipes, like `fritz hosts | grep phone`. With YAML, errors are
+    /// YAML on stderr as well.
     #[arg(short, long, global = true, value_enum, env = "FRITZ_OUTPUT")]
     output: Option<Format>,
 }
@@ -341,12 +343,28 @@ async fn main() -> anyhow::Result<()> {
             .with_password_command(command),
         )
     };
-    if let Command::Mcp { personal } = cli.command {
+    let result = run(cli.command, format, load).await;
+    if let (Format::Yaml, Err(error)) = (format, &result) {
+        io::Write::flush(&mut io::stdout())?;
+        output::yaml(&output::failure(error), &mut io::stderr())?;
+        std::process::exit(1);
+    }
+    result
+}
+
+/// Runs a command with the context from `load`, which it loads only when
+/// the command needs it.
+async fn run(
+    command: Command,
+    format: Format,
+    load: impl FnOnce() -> anyhow::Result<Context>,
+) -> anyhow::Result<()> {
+    if let Command::Mcp { personal } = command {
         // Before stdout is locked: the transport writes to it.
         return mcp::serve(load()?, personal).await;
     }
     let out = &mut io::stdout().lock();
-    match cli.command {
+    match command {
         Command::Mcp { .. } => unreachable!("served above"),
         Command::Overview => status::overview(&load()?, format, out).await,
         Command::Hosts { active } => status::hosts(&load()?, active, format, out).await,
