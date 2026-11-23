@@ -93,6 +93,34 @@ async fn failure(client: &Client, tool: &'static str, arguments: Value) -> Value
 }
 
 #[tokio::test(flavor = "multi_thread")]
+async fn hides_identifying_exposure_without_personal() {
+    let sim = sim().await;
+    let client = connect(&sim).await;
+    let exposure = success(&client, "fritz_exposure", json!({})).await;
+    let hidden = "(personal, needs `fritz mcp --personal`)";
+    assert_eq!(exposure["myfritz"]["address"], hidden, "{exposure}");
+    assert_eq!(exposure["tr069"]["url"], hidden, "{exposure}");
+    assert_eq!(
+        exposure["usp"]["controllers"][0]["host"], hidden,
+        "{exposure}"
+    );
+    assert_eq!(exposure["items"][0]["kind"], "remote_access", "{exposure}");
+    assert_eq!(exposure["items"][0]["state"], "on", "{exposure}");
+    assert_eq!(exposure["items"][0]["severity"], "notice", "{exposure}");
+    assert_eq!(exposure["remote_access"]["port"], 49032, "{exposure}");
+    assert!(!exposure.to_string().contains("example.net"), "{exposure}");
+    client.cancel().await.unwrap();
+
+    let client = connect_with(&sim, &["--personal"]).await;
+    let exposure = success(&client, "fritz_exposure", json!({})).await;
+    assert_eq!(
+        exposure["myfritz"]["address"], "server-3.example.net",
+        "{exposure}"
+    );
+    client.cancel().await.unwrap();
+}
+
+#[tokio::test(flavor = "multi_thread")]
 async fn hides_user_names_without_personal() {
     let sim = sim().await;
     let client = connect(&sim).await;

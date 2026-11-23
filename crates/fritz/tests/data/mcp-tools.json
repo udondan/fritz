@@ -197,6 +197,18 @@
     }
   },
   {
+    "name": "fritz_exposure",
+    "description": "What can be reached from the internet or managed from outside: remote access, MyFRITZ, dynamic DNS, port forwardings, exposed host, UPnP, FTP, shared links, VPN, TR-069, USP. Each item has a state (on, off, unknown), a count for lists, a severity (info, notice, warning) and hints. Addresses, domains, names and hosts hidden without `--personal`. Link URLs and passwords are never read.",
+    "inputSchema": {
+      "properties": {},
+      "type": "object"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "openWorldHint": false
+    }
+  },
+  {
     "name": "fritz_firmware",
     "description": "Firmware: state (available, none, unknown, unsupported), installed and offered version, info URL, auto update, last update. Does not check for updates.",
     "inputSchema": {

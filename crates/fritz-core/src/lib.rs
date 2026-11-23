@@ -18,6 +18,7 @@ pub mod discover;
 pub mod dns;
 pub mod doctor;
 pub mod dsl;
+pub mod exposure;
 pub mod fault;
 pub mod firmware;
 pub mod generic;

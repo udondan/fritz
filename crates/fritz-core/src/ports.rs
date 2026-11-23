@@ -20,6 +20,11 @@ pub struct Ports {
     /// ports themselves.
     pub upnp: Option<bool>,
     pub forwardings: Vec<Forwarding>,
+    /// Whether a list of forwardings could be read: without one, like
+    /// for missing rights, [`forwardings`](Self::forwardings) is empty but
+    /// tells nothing.
+    #[serde(skip)]
+    pub listed: bool,
 }
 
 /// A port forwarding from the internet to a host.
@@ -52,6 +57,7 @@ pub async fn ports(reader: &mut Reader) -> Result<Ports, Error> {
         .await?
         .and_then(|values| values.flag("NewEnable"));
     let mut forwardings = Vec::new();
+    let mut listed = false;
     for service in SERVICES {
         let Some((_, entries)) = reader
             .entries(
@@ -67,6 +73,7 @@ pub async fn ports(reader: &mut Reader) -> Result<Ports, Error> {
         else {
             continue;
         };
+        listed = true;
         forwardings.extend(entries.iter().map(|entry| Forwarding {
             service: service.to_owned(),
             enabled: entry.flag("NewEnabled").unwrap_or_default(),
@@ -79,5 +86,9 @@ pub async fn ports(reader: &mut Reader) -> Result<Ports, Error> {
             lease_duration: entry.number("NewLeaseDuration").filter(|&d| d != 0),
         }));
     }
-    Ok(Ports { upnp, forwardings })
+    Ok(Ports {
+        upnp,
+        forwardings,
+        listed,
+    })
 }

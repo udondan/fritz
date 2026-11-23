@@ -139,7 +139,7 @@ pub fn check_arguments(action: &Action, arguments: &[(String, String)]) -> Resul
 }
 
 /// Calls an action after [checking](check) it, and returns its output
-/// arguments with secrets [hidden](redact::value).
+/// arguments with secrets [hidden](redact::output).
 ///
 /// # Errors
 ///
@@ -154,7 +154,7 @@ pub async fn call(
     Ok(out
         .into_iter()
         .map(|(name, value)| {
-            let value = redact::value(&name, &value);
+            let value = redact::output(service, &name, &value);
             (name, value)
         })
         .collect())

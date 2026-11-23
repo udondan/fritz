@@ -201,6 +201,15 @@ enum Command {
     /// the router and of this machine, the resolvers of this machine and the
     /// likely cause. Only asks for this name; changes nothing.
     Dns(dns::DnsArgs),
+    /// What can be reached from the internet or managed from outside:
+    /// remote access, MyFRITZ, dynamic DNS, port forwardings, exposed host,
+    /// UPnP, FTP, shared links, VPN, TR-069 and USP, each with a severity
+    /// hint. The exposed host and VPN need a login to the web interface.
+    Exposure {
+        /// Exit with code 3 if an item has the severity warning.
+        #[arg(long)]
+        strict: bool,
+    },
     /// The settings of the device, like DNS and IPv6, read through the web
     /// interface. Secrets are hidden.
     Settings {
@@ -629,6 +638,7 @@ async fn run(
         Command::Capabilities => device::capabilities(&load()?, format, out).await,
         Command::Users => status::users(&load()?, format, out).await,
         Command::Dns(args) => dns::dns(&load()?, args, format, out).await,
+        Command::Exposure { strict } => exposure(&load()?, strict, format, out).await,
         Command::Settings { modules } => device::settings(&load()?, &modules, format, out).await,
         Command::Calls(args) if args.watch.watch => {
             personal::watch_calls(&load()?, args.watch, format, out, &mut io::stderr()).await
@@ -674,6 +684,21 @@ async fn run(
         }
         Command::Completion { shell } => Ok(completion::script(shell, out)?),
     }
+}
+
+/// Shows what is reachable from outside; with `strict`, exits with
+/// [`status::EXPOSURE_WARNING`] if an item has the severity warning.
+async fn exposure(
+    context: &Context,
+    strict: bool,
+    format: Format,
+    out: &mut impl io::Write,
+) -> anyhow::Result<()> {
+    if status::exposure(context, format, out).await? && strict {
+        out.flush()?;
+        std::process::exit(status::EXPOSURE_WARNING);
+    }
+    Ok(())
 }
 
 async fn tr64(
