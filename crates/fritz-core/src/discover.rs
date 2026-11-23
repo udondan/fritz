@@ -377,20 +377,24 @@ impl Discovery<System, Multicast> {
 
 impl<N: Resolver + Gateway, S: Ssdp> Discovery<N, S> {
     /// Looks for devices, with the configured `host` as the first
-    /// candidate if it is on the local network.
-    pub async fn run(&self, host: &str) -> Report {
+    /// candidate if it is on the local network. Its description is asked
+    /// for at `port`, else at the port of the options. The name resolution
+    /// gets the timeout of the options, and gives no address after it.
+    pub async fn run(&self, host: &str, port: Option<u16>) -> Report {
         let options = &self.options;
+        let resolve = tokio::time::timeout(options.timeout, self.network.resolve(host));
         let (addresses, gateway, locations) = tokio::join!(
-            self.network.resolve(host),
+            async { resolve.await.unwrap_or_default() },
             self.network.gateway(),
             self.ssdp.search(&SEARCH_TARGETS, options.search_time),
         );
         let mut candidates: Vec<(Url, Vec<Source>)> = Vec::new();
         let at = |ip: IpAddr| probe(ip).then(|| base(SocketAddr::new(ip, options.port)));
+        let port = port.unwrap_or(options.port);
         let found = (addresses
             .iter()
-            .filter_map(|ip| at(*ip))
-            .map(|url| (url, Source::Config)))
+            .filter(|ip| probe(**ip))
+            .map(|ip| (base(SocketAddr::new(*ip, port)), Source::Config)))
         .chain(gateway.and_then(at).map(|url| (url, Source::Gateway)))
         .chain(
             locations

@@ -98,7 +98,7 @@ async fn lists_verified_devices_once() {
         ssdp: discovery.network.clone(),
         ..discovery
     };
-    let report = discovery.run("fritz.box").await;
+    let report = discovery.run("fritz.box", None).await;
 
     assert_eq!(report.host, "fritz.box");
     assert_eq!(report.addresses, [LOOPBACK]);
@@ -169,7 +169,7 @@ async fn reports_a_host_outside_the_local_network() {
             ..options(49000)
         },
     };
-    let report = discovery.run("fritz.box").await;
+    let report = discovery.run("fritz.box", None).await;
     assert!(!report.local);
     assert_eq!(report.devices, []);
 
@@ -177,7 +177,7 @@ async fn reports_a_host_outside_the_local_network() {
         network: Fixed::default(),
         ..discovery
     };
-    let report = discovery.run("fritz.box").await;
+    let report = discovery.run("fritz.box", None).await;
     assert_eq!(report.addresses, [] as [IpAddr; 0]);
     assert!(!report.local);
 }
@@ -236,4 +236,56 @@ async fn asks_the_system() {
     );
     // Reads the routing table, which differs from machine to machine.
     let _ = System.gateway().await;
+}
+
+/// A name resolution that never answers, and no gateway.
+#[derive(Debug, Clone)]
+struct Hanging;
+
+impl fritz_core::discover::Resolver for Hanging {
+    fn resolve(&self, _host: &str) -> impl Future<Output = Vec<IpAddr>> + Send {
+        std::future::pending()
+    }
+}
+
+impl fritz_core::discover::Gateway for Hanging {
+    fn gateway(&self) -> impl Future<Output = Option<IpAddr>> + Send {
+        std::future::ready(None)
+    }
+}
+
+#[tokio::test]
+async fn goes_on_when_the_name_resolution_hangs() {
+    let router = sim("fritzbox-7690/8.25").await;
+    let discovery = Discovery {
+        network: Hanging,
+        ssdp: Fixed::default(),
+        options: options(router.url().port().unwrap()),
+    };
+    let report = tokio::time::timeout(Duration::from_secs(5), discovery.run("fritz.box", None))
+        .await
+        .expect("the resolution is bounded");
+    assert_eq!(report.addresses, [] as [IpAddr; 0]);
+    assert_eq!(report.devices.len(), 1);
+    assert_eq!(report.devices[0].found_by, [Source::Default]);
+}
+
+#[tokio::test]
+async fn asks_the_configured_host_at_its_port() {
+    let router = sim("fritzbox-7690/8.25").await;
+    let discovery = Discovery {
+        network: Fixed {
+            addresses: vec![LOOPBACK],
+            ..Fixed::default()
+        },
+        ssdp: Fixed::default(),
+        options: Options {
+            defaults: Vec::new(),
+            ..options(1)
+        },
+    };
+    let report = discovery.run("fritz.box", router.url().port()).await;
+    assert_eq!(report.devices.len(), 1);
+    assert_eq!(report.devices[0].found_by, [Source::Config]);
+    assert_eq!(discovery.run("fritz.box", None).await.devices, []);
 }

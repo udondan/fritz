@@ -5,6 +5,7 @@ use std::io::{self, BufRead, IsTerminal as _, Write};
 
 use anyhow::{Context as _, bail};
 use clap::Args;
+use fritz_core::connection::Target;
 use fritz_core::discover::{Device, Discovery, Gateway, Report, Resolver, Ssdp};
 
 use crate::context::{Context, read_line};
@@ -59,9 +60,18 @@ pub(crate) async fn run<N: Resolver + Gateway, S: Ssdp, O: Write, E: Write>(
     io: Io<'_, O, E>,
 ) -> anyhow::Result<()> {
     let Io { out, terminal, err } = io;
-    let target = context.target()?;
+    // Saving may create the profile of --profile, so it need not exist.
+    let target = if args.save.is_some() {
+        Target::resolve(context.profile(), context.overrides())?
+    } else {
+        context.target()?
+    };
     let host = target.url.host_str().unwrap_or_default();
-    let report = discovery.run(host).await;
+    // A description on another port than the usual one is asked for there.
+    let port = (target.url.scheme() == "http")
+        .then(|| target.url.port())
+        .flatten();
+    let report = discovery.run(host, port).await;
     output::show(&report, format, out, text)?;
     let Some(profile) = args.save else {
         return Ok(());
@@ -312,6 +322,30 @@ mod tests {
         )));
         let saved = &context.config().profiles["repeater"].host;
         assert_eq!(saved, report["devices"][1]["host"].as_str().unwrap());
+    }
+
+    #[tokio::test]
+    async fn saves_to_a_new_profile_of_the_option() {
+        let router = sim("fritzbox-7690/8.25").await;
+        let dir = tempfile::tempdir().unwrap();
+        let overrides = Overrides {
+            host: Some(router.url().to_string()),
+            ..Overrides::default()
+        };
+        let path = Some(dir.path().join("config.toml"));
+        let keychains = crate::context::Keychains::Open(crate::context::tests::mock_keychain);
+        let mut context =
+            Context::load(path, Some("new".to_owned()), overrides, None, keychains).unwrap();
+        let mut discovery = discovery(&[], vec![LOOPBACK]);
+        discovery.options.port = 1;
+        let run = discover(&mut context, &discovery, Some(None), Format::Json, None).await;
+        run.result.unwrap();
+        let report: serde_json::Value = serde_json::from_str(&run.out).unwrap();
+        assert_eq!(
+            report["devices"][0]["found_by"],
+            serde_json::json!(["config"])
+        );
+        assert!(context.config().profiles.contains_key("new"));
     }
 
     #[tokio::test]

@@ -283,7 +283,7 @@ pub(crate) mod tests {
 
     /// A mock keychain, shared by the contexts of one test.
     #[expect(clippy::unnecessary_wraps, reason = "the signature of Keychains::Open")]
-    fn mock_keychain() -> Result<Keychain, secrets::Error> {
+    pub(crate) fn mock_keychain() -> Result<Keychain, secrets::Error> {
         Ok(KEYCHAIN.with(Keychain::clone))
     }
 
