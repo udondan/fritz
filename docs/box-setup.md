@@ -122,6 +122,7 @@ keychain:
 | `FRITZ_NO_KEYCHAIN` | | Any value keeps `fritz` away from the keychain. |
 
 Options and variables take precedence over the profile. The user and the
-certificate of the profile apply only to its own host: with `--host` set to
+certificate of the profile apply only to its own host (the user also over
+another scheme or port): with `--host` set to
 another device, like `fritz --host http://192.168.178.4:49000 overview` for a
 repeater, `fritz` uses neither.

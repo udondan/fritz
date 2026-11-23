@@ -116,8 +116,9 @@ impl Target {
     /// Combines a profile with the overrides. Without either, the target is
     /// [`DEFAULT_HOST`].
     ///
-    /// The user and the certificate of the profile apply only to the host
-    /// of the profile, not to another host given as an override.
+    /// The user of the profile applies only to the host of the profile, also
+    /// over another scheme or port; its certificate only to the same
+    /// address. Neither applies to another host given as an override.
     pub fn resolve(profile: Option<&Profile>, overrides: &Overrides) -> Result<Self, Error> {
         let host = overrides
             .host
@@ -125,13 +126,19 @@ impl Target {
             .or(profile.map(|p| p.host.as_str()))
             .unwrap_or(DEFAULT_HOST);
         let url = parse_host(host)?;
-        let own = profile.filter(|p| parse_host(&p.host).is_ok_and(|own| own == url));
+        let own = profile.and_then(|p| parse_host(&p.host).ok().map(|own| (p, own)));
+        let same_host = own
+            .as_ref()
+            .filter(|(_, own)| own.host_str() == url.host_str());
+        let same_address = own.as_ref().filter(|(_, own)| *own == url);
         Ok(Self {
             username: overrides
                 .username
                 .clone()
-                .or_else(|| own.and_then(|p| p.username.clone())),
-            fingerprint: overrides.fingerprint()?.or(own.and_then(|p| p.fingerprint)),
+                .or_else(|| same_host.and_then(|(p, _)| p.username.clone())),
+            fingerprint: overrides
+                .fingerprint()?
+                .or(same_address.and_then(|(p, _)| p.fingerprint)),
             url,
         })
     }
@@ -276,6 +283,15 @@ mod tests {
         let target = Target::resolve(Some(&profile), &overrides).unwrap();
         assert_eq!(target.username.as_deref(), Some("agent"));
         assert_eq!(target.fingerprint, Some(fingerprint(1)));
+
+        // The same host over HTTP keeps the user, but not the certificate.
+        let overrides = Overrides {
+            host: Some("http://192.168.178.1:49000".to_owned()),
+            ..Overrides::default()
+        };
+        let target = Target::resolve(Some(&profile), &overrides).unwrap();
+        assert_eq!(target.username.as_deref(), Some("agent"));
+        assert_eq!(target.fingerprint, None);
 
         // Another host, like a repeater, gets neither.
         let overrides = Overrides {
