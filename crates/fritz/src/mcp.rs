@@ -114,6 +114,13 @@ pub(crate) struct WlanQuery {
     /// and rate in Mbit/s.
     #[serde(default)]
     clients: bool,
+    /// Also the details of each network: security (beacon type, encryption,
+    /// hidden SSID, MAC filter, user isolation), radio (channel, automatic
+    /// channel, possible channels, BSSID), WPS, night time switch-off,
+    /// packet statistics, and hints on weak settings like `wps_enabled`,
+    /// `tkip_allowed` or `open_network`. Keys are never read.
+    #[serde(default)]
+    details: bool,
 }
 
 /// The filters and the page of `fritz_hosts`.
@@ -307,7 +314,7 @@ impl Server {
     }
 
     #[tool(
-        description = "Wireless networks: SSID, band, channel, standard, status, guest network, number of clients, and with `clients` the clients of each.",
+        description = "Wireless networks: SSID, band, channel, standard, status, guest network, number of clients, with `clients` the clients of each, and with `details` the security settings, radio, WPS, night time switch-off, statistics and hints on weak settings.",
         annotations(read_only_hint = true, open_world_hint = false)
     )]
     async fn fritz_wlan(&self, Parameters(query): Parameters<WlanQuery>) -> CallToolResult {
@@ -315,6 +322,7 @@ impl Server {
             let mut reader = self.reader().await?;
             let views = wlan::Views {
                 clients: query.clients,
+                details: query.details,
             };
             Ok(wlan::wlans(&mut reader, views).await?)
         })

@@ -1,5 +1,5 @@
 //! The wireless networks of a device: their state, whether they are the
-//! guest network, and, when asked for, their clients.
+//! guest network, and, when asked for, their clients and details.
 //!
 //! Parts the device lacks, or that the user may not read, are left out
 //! instead of failing the whole read.
@@ -13,6 +13,10 @@ use crate::lists;
 use crate::read::{Reader, Values};
 use crate::status;
 
+mod details;
+
+pub use details::{Details, Hint, Night, Radio, Security, Statistics, Wps};
+
 /// The most clients of a network read one call per client, as a guard
 /// against a device that never ends the list.
 pub const MAX_CLIENTS: u32 = 1000;
@@ -22,6 +26,9 @@ pub const MAX_CLIENTS: u32 = 1000;
 pub struct Views {
     /// The connected clients of each network.
     pub clients: bool,
+    /// The security settings, radio, WPS, night time switch-off and
+    /// statistics of each network, with hints on weak settings.
+    pub details: bool,
 }
 
 /// A wireless network.
@@ -45,6 +52,16 @@ pub struct Wlan {
     /// The connected clients, only if [asked for](Views::clients).
     #[serde(skip_serializing_if = "Option::is_none")]
     pub clients: Option<Vec<Client>>,
+    /// The details, only if [asked for](Views::details).
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub details: Option<Details>,
+}
+
+/// A network with the answers that its details are made of.
+struct Read {
+    wlan: Wlan,
+    info: Values,
+    ext: Option<Values>,
 }
 
 /// A client connected to a wireless network.
@@ -77,7 +94,37 @@ struct Listed {
 /// [`Reader::try_read`], and [`Error::InvalidDocument`] for a list of
 /// clients or a host list that cannot be parsed.
 pub async fn wlans(reader: &mut Reader, views: Views) -> Result<Vec<Wlan>, Error> {
-    let mut wlans = Vec::new();
+    let networks = networks(reader).await?;
+    with_views(reader, networks, views).await
+}
+
+/// Like [`wlans`], only the networks that `network` names: by service, like
+/// `WLANConfiguration2`, ignoring case, by its number, like `2`, or by
+/// SSID. Several networks can share an SSID, one per band.
+///
+/// # Errors
+///
+/// The errors of [`wlans`].
+pub async fn named(reader: &mut Reader, network: &str, views: Views) -> Result<Vec<Wlan>, Error> {
+    let mut networks = networks(reader).await?;
+    networks.retain(|n| is_named(&n.wlan, network));
+    with_views(reader, networks, views).await
+}
+
+/// Whether `network` names `wlan`, see [`named`].
+fn is_named(wlan: &Wlan, network: &str) -> bool {
+    let number = wlan
+        .service
+        .get("WLANConfiguration".len()..)
+        .filter(|_| wlan.service.starts_with("WLANConfiguration"));
+    wlan.service.eq_ignore_ascii_case(network)
+        || number == Some(network)
+        || wlan.ssid.as_deref() == Some(network)
+}
+
+/// Reads the state of each network.
+async fn networks(reader: &mut Reader) -> Result<Vec<Read>, Error> {
+    let mut networks = Vec::new();
     for service in reader.services("WLANConfiguration") {
         let Some(info) = reader.try_read(&service, "GetInfo", &[]).await? else {
             continue;
@@ -86,12 +133,14 @@ pub async fn wlans(reader: &mut Reader, views: Views) -> Result<Vec<Wlan>, Error
             .try_read(&service, "GetTotalAssociations", &[])
             .await?
             .and_then(|v| v.number("NewTotalAssociations"));
-        let guest = reader
+        let ext = reader
             .try_read(&service, "X_AVM-DE_GetWLANExtInfo", &[])
-            .await?
+            .await?;
+        let guest = ext
+            .as_ref()
             .and_then(|v| v.text("NewX_AVM-DE_APType"))
             .is_some_and(|kind| kind == "guest");
-        wlans.push(Wlan {
+        let wlan = Wlan {
             band: info.get("NewX_AVM-DE_FrequencyBand").and_then(band),
             ssid: info.text("NewSSID"),
             channel: info.number("NewChannel"),
@@ -101,8 +150,32 @@ pub async fn wlans(reader: &mut Reader, views: Views) -> Result<Vec<Wlan>, Error
             guest,
             client_count,
             clients: None,
+            details: None,
             service,
-        });
+        };
+        networks.push(Read { wlan, info, ext });
+    }
+    Ok(networks)
+}
+
+/// The networks with what `views` asks for.
+async fn with_views(
+    reader: &mut Reader,
+    networks: Vec<Read>,
+    views: Views,
+) -> Result<Vec<Wlan>, Error> {
+    let mut wlans = Vec::new();
+    for Read {
+        mut wlan,
+        info,
+        ext,
+    } in networks
+    {
+        if views.details {
+            let details = details::read(reader, &wlan.service, &info, ext.as_ref()).await?;
+            wlan.details = Some(details);
+        }
+        wlans.push(wlan);
     }
     if views.clients {
         add_clients(reader, &mut wlans).await?;
@@ -250,6 +323,27 @@ pub(crate) fn band(megahertz: &str) -> Option<String> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn finds_networks_by_name() {
+        let wlan = Wlan {
+            service: "WLANConfiguration2".to_owned(),
+            ssid: Some("wlan-1".to_owned()),
+            ..Wlan::default()
+        };
+        for name in ["WLANConfiguration2", "wlanconfiguration2", "2", "wlan-1"] {
+            assert!(is_named(&wlan, name), "{name}");
+        }
+        for name in ["1", "WLANConfiguration1", "wlan", ""] {
+            assert!(!is_named(&wlan, name), "{name}");
+        }
+        let other = Wlan {
+            service: "2".to_owned(),
+            ..Wlan::default()
+        };
+        assert!(is_named(&other, "2"));
+        assert!(!is_named(&Wlan::default(), "1"));
+    }
 
     #[test]
     fn names_bands() {

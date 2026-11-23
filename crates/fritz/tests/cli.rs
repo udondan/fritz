@@ -1354,6 +1354,42 @@ async fn prints_the_clients_of_each_wireless_network() {
 }
 
 #[tokio::test(flavor = "multi_thread")]
+async fn prints_the_details_of_each_wireless_network() {
+    let fixture = fritz_sim::Fixture::load(FIXTURE).unwrap();
+    let sim = fritz_sim::Sim::start(fixture).await.unwrap();
+    let password = Some(fritz_sim::PASSWORD);
+
+    let json: serde_json::Value =
+        serde_json::from_str(&success(&run(&sim, &["wlan", "--details"], password).await)).unwrap();
+    let details = &json[0]["details"];
+    assert_eq!(details["security"]["encryption"], "WPA2, AES", "{json}");
+    assert_eq!(details["security"]["hidden"], false, "{json}");
+    assert_eq!(details["radio"]["auto_channel"], false, "{json}");
+    assert_eq!(details["wps"]["status"], "err_common", "{json}");
+    assert_eq!(details["statistics"]["packets_sent"], 0, "{json}");
+    assert_eq!(details["hints"], serde_json::json!([]), "{json}");
+    assert!(json[0].get("clients").is_none(), "{json}");
+
+    let text = success(&run(&sim, &["--output", "text", "wlan", "2"], password).await);
+    assert_eq!(
+        text,
+        "WLANConfiguration2  wlan-1  5 GHz  ch 48  be  Up  11 clients\n\
+         \x20 Security  WPA2, AES\n\
+         \x20 Channel   48, fixed\n\
+         \x20 BSSID     AA:BB:CC:00:00:3A\n\
+         \x20 Packets   0 sent, 0 received\n"
+    );
+
+    let output = run(&sim, &["wlan", "nothing"], password).await;
+    assert_eq!(output.status.code(), Some(1));
+    assert!(
+        stderr(&output).contains("no wireless network is named \"nothing\""),
+        "{}",
+        stderr(&output)
+    );
+}
+
+#[tokio::test(flavor = "multi_thread")]
 async fn prints_the_interfaces() {
     let fixture = fritz_sim::Fixture::load(FIXTURE).unwrap();
     let sim = fritz_sim::Sim::start(fixture).await.unwrap();

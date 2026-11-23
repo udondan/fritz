@@ -278,6 +278,23 @@ client belongs to the guest network by its guest flag, or else to the network
 on its channel. Where there is no list, or where it disagrees with the number
 of clients of a network, `fritz` asks for one client per call.
 
+`--details` adds the security settings, the radio, WPS, the night time
+switch-off and the packet statistics of each network. `fritz wlan <network>`
+shows one network with its details, named by its service, its number or its
+SSID. The text shows the encryption, channel, BSSID and packets, and the rest
+only where it differs from the defaults; JSON has all fields. Weak settings
+are hints, not errors: `open network`, `WEP`, `TKIP allowed`, `WPS enabled`
+and `hidden SSID`. Keys and passphrases are never read.
+
+```console
+$ fritz wlan 2
+WLANConfiguration2  Home  5 GHz  ch 48  be  Up  1 client
+  Security  WPA2/WPA3 mixed, AES
+  Channel   48, automatic
+  BSSID     AA:BB:CC:00:00:3A
+  Packets   1200 sent, 3400 received
+```
+
 ### Interfaces and counters
 
 `fritz interfaces` shows the LAN interface and the wireless networks with
@@ -607,7 +624,7 @@ claude mcp add fritz -- fritz --host 192.168.178.1 --user agent mcp
 | ----------------------- | ----------------------------------------------------------- |
 | `fritz_overview`        | Model, firmware, uptime, update, connection, rights         |
 | `fritz_internet`        | Internet connection, addresses, DNS, rates, DSL line        |
-| `fritz_wlan`            | Wireless networks, guest network, `clients` of each         |
+| `fritz_wlan`            | Wireless networks, guest network, `clients`, `details`      |
 | `fritz_interfaces`      | LAN and WLAN counters of bytes, packets, errors; LAN ports  |
 | `fritz_hosts`           | Known hosts, paginated, or one host by `mac` or `ip`        |
 | `fritz_mesh`            | Mesh nodes with IPs and links, or a tree of who is where    |

@@ -146,6 +146,16 @@ async fn reads_the_state() {
     let wlan = success(&client, "fritz_wlan", json!({"clients": true})).await;
     assert_eq!(wlan[1]["clients"][0]["name"], "device-14", "{wlan}");
     assert_eq!(wlan[2]["guest"], true, "{wlan}");
+    assert!(wlan[0].get("details").is_none(), "{wlan}");
+    let wlan = success(&client, "fritz_wlan", json!({"details": true})).await;
+    assert_eq!(
+        wlan[0]["details"]["security"]["beacon_type"], "11i",
+        "{wlan}"
+    );
+    assert_eq!(
+        wlan[2]["details"]["security"]["user_isolation"], true,
+        "{wlan}"
+    );
 
     let interfaces = success(&client, "fritz_interfaces", json!({})).await;
     assert_eq!(interfaces["lan"][0]["status"], "Up", "{interfaces}");
