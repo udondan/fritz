@@ -55,6 +55,7 @@ or paste them.
 | Is mesh steering on, which mesh role?       | `fritz settings mesh`                |
 | Who called, which calls were missed?        | `fritz calls --limit 20`             |
 | Missed calls this week, calls of a person   | `fritz calls --kind missed --days 7`, `fritz calls --search <name or number>` |
+| Wait for the next call (blocks until one comes) | `fritz calls --watch --count 1` (needs the call monitor, `#96*5*`) |
 | Whose number is this, what is X's number?   | `fritz phonebook <name or number>`   |
 | What happened on the box lately?            | `fritz log --limit 50`               |
 | When did the internet drop, WLAN last night | `fritz log --category internet --since 7d`, `fritz log --category wlan --since 12h` |

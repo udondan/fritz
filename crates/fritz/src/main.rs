@@ -479,6 +479,8 @@ struct CallsArgs {
     /// number contains its digits.
     #[arg(long)]
     search: Option<String>,
+    #[command(flatten)]
+    watch: personal::WatchArgs,
 }
 
 impl CallsArgs {
@@ -575,6 +577,9 @@ async fn run(
         Command::Capabilities => device::capabilities(&load()?, format, out).await,
         Command::Users => status::users(&load()?, format, out).await,
         Command::Settings { modules } => device::settings(&load()?, &modules, format, out).await,
+        Command::Calls(args) if args.watch.watch => {
+            personal::watch_calls(&load()?, args.watch, format, out, &mut io::stderr()).await
+        }
         Command::Calls(args) => {
             personal::calls(&load()?, &args.filter(), args.limit, format, out).await
         }

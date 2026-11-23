@@ -1359,6 +1359,63 @@ async fn filters_the_calls_and_the_log() {
     );
 }
 
+/// Watches the call monitor of the simulator: with the names of the
+/// phonebooks, without repeated events after connecting again, as text and
+/// JSON lines.
+#[tokio::test(flavor = "multi_thread")]
+async fn watches_calls() {
+    let sim = fritz_sim::Sim::start(fritz_sim::Fixture::load(FIXTURE).unwrap())
+        .await
+        .unwrap();
+    let ring = "23.11.26 18:02:11;RING;0;030987;030123;SIP0;".to_owned();
+    let disconnect = "23.11.26 18:04:40;DISCONNECT;0;145;".to_owned();
+    let sessions = vec![
+        vec![ring.clone(), "odd".to_owned()],
+        vec![ring, disconnect.clone()],
+        vec![disconnect.clone()],
+        vec![disconnect],
+    ];
+    let monitor = fritz_sim::CallMonitor::start(sessions).await.unwrap();
+    let port = monitor.port().to_string();
+    let watch = ["calls", "--watch", "--monitor-port", &port, "--count"];
+    let mut args = vec!["--output", "text"];
+    args.extend(watch);
+    args.push("2");
+    let output = run(&sim, &args, Some(fritz_sim::PASSWORD)).await;
+    assert_eq!(
+        success(&output),
+        "2026-11-23 18:02:11  ring        line 0  from 030987  to 030123  SIP0\n\
+         2026-11-23 18:04:40  disconnect  line 0  2m 25s\n"
+    );
+    assert_eq!(
+        stderr(&output),
+        "note: the call monitor closed the connection\nnote: connecting again in 1s\n"
+    );
+
+    let mut args = watch.to_vec();
+    args.push("1");
+    let output = run(&sim, &[args.as_slice(), &["--no-lookup"]].concat(), None).await;
+    let event: serde_json::Value = serde_json::from_str(&success(&output)).unwrap();
+    assert_eq!(event["kind"], "disconnect", "{event}");
+    assert_eq!(event["seconds"], 145, "{event}");
+    assert_eq!(stderr(&output), "");
+
+    let output = run(&sim, &args, None).await;
+    assert!(stdout(&output).ends_with("}\n"));
+    assert!(
+        stderr(&output).starts_with("warning: names are not shown: "),
+        "{}",
+        stderr(&output)
+    );
+    drop(monitor);
+    let output = run(&sim, &args, None).await;
+    assert!(failure(&output).contains("dial #96*5*"));
+    let output = run(&sim, &["calls", "--count", "1"], None).await;
+    assert!(failure(&output).contains("--watch"));
+    let output = run(&sim, &["calls", "--watch", "--kind", "missed"], None).await;
+    assert!(failure(&output).contains("cannot be used with"));
+}
+
 /// Every command with JSON output prints the same value as YAML.
 #[tokio::test(flavor = "multi_thread")]
 async fn prints_the_same_values_as_yaml() {

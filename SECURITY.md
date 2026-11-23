@@ -60,6 +60,11 @@ default:
   in `fritz mcp`), asks the GitHub API over HTTPS with the system's root
   certificates for the latest release, sends nothing but a generic user
   agent, and downloads nothing else.
+- **The call monitor** (`fritz calls --watch`) is a stream of the device on
+  TCP port 1012, without TLS and without login, which the user turns on.
+  `fritz` connects only to the host of the device, sends nothing, parses the
+  lines strictly and skips the ones that are not valid events, never echoing
+  them.
 - **Two-factor confirmation** that the device asks for is reported back, never
   bypassed.
 - **Data from the device** (host names, network names, phone book entries) is
