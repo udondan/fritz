@@ -1800,9 +1800,7 @@ async fn logs_requests_without_secrets() {
     let call = ["tr064", "call", "DeviceInfo1", "GetInfo"];
     let log = logged(&sim, &call, password, "debug").await;
     assert!(
-        log.contains(
-            "the device asks to wait before trying again status=\"busy\" retry_after_seconds=120"
-        ),
+        log.contains("the device asks to wait status=\"busy\" retry_after_seconds=120"),
         "{log}"
     );
     sim.clear_injections();
@@ -1833,6 +1831,15 @@ async fn logs_requests_without_secrets() {
         !log.contains("host-secret") && !log.contains("intruder"),
         "{log}"
     );
+
+    let dir = tempfile::tempdir().unwrap();
+    let missing = dir.path().join("missing/fritz.log");
+    let env = [
+        ("FRITZ_LOG", "debug"),
+        ("FRITZ_LOG_FILE", missing.to_str().unwrap()),
+    ];
+    let error = failure(&fritz_with(&["config", "show"], &env));
+    assert!(error.contains("cannot open the log file"), "{error}");
 
     let output = fritz_with(&["config", "show"], &[("FRITZ_LOG", "tr064=loud")]);
     assert!(

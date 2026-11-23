@@ -77,10 +77,8 @@ impl Session {
         let form = [("username", username), ("response", response.as_str())];
         let info = SessionInfo::parse(&client.post_form(LOGIN, &form).await?)?;
         if info.sid == NO_SESSION {
-            tracing::debug!(
-                block_seconds = info.block_time,
-                "the web interface rejected the login"
-            );
+            let block_seconds = info.block_time;
+            tracing::debug!(block_seconds, "the web interface rejected the login");
             return Err(Error::Rejected(info.block_time));
         }
         tracing::debug!(rights = info.rights.len(), "logged in to the web interface");

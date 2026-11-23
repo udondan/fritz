@@ -84,13 +84,11 @@ pub(crate) fn arguments<'a>(
 pub(crate) fn error(error: &Error) -> String {
     match error {
         Error::Http(error) => {
-            // The cause, if any, without the URL of the request.
-            let mut text = "HTTP request failed".to_owned();
-            if let Some(cause) = std::error::Error::source(error) {
-                text.push_str(": ");
-                text.push_str(&cause.to_string());
-            }
-            text
+            // The causes, without the URL of the request.
+            let causes = std::iter::successors(std::error::Error::source(error), |e| e.source());
+            causes.fold("HTTP request failed".to_owned(), |text, cause| {
+                format!("{text}: {cause}")
+            })
         }
         Error::Status { status, .. } => format!("HTTP status {status}"),
         Error::UnsupportedAuth(_) => "unsupported authentication challenge".to_owned(),

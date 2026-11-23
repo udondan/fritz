@@ -41,11 +41,7 @@ impl From<tr064::Error> for Error {
             (Some(fault), tr064::Error::Upnp { description, .. }) => {
                 if let Some(wait) = fault.retry_after() {
                     let (status, retry_after_seconds) = (fault.status(), wait.as_secs());
-                    tracing::debug!(
-                        status,
-                        retry_after_seconds,
-                        "the device asks to wait before trying again"
-                    );
+                    tracing::debug!(status, retry_after_seconds, "the device asks to wait");
                 }
                 Self::Fault { fault, description }
             }
