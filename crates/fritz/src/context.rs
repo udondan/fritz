@@ -113,6 +113,16 @@ impl Context {
         &self.overrides
     }
 
+    /// Takes `host` as if it was given with `--host`.
+    pub(crate) fn set_host(&mut self, host: String) {
+        self.overrides.host = Some(host);
+    }
+
+    /// Takes `profile` as if it was given with `--profile`.
+    pub(crate) fn set_profile(&mut self, profile: String) {
+        self.profile = Some(profile);
+    }
+
     /// The contents of the configuration file.
     pub(crate) fn config(&self) -> &Config {
         &self.config

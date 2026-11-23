@@ -67,6 +67,28 @@ in a profile, in `~/.config/fritz/config.toml` on Linux and macOS (or below
 fritz config init --host 192.168.178.1 --user agent
 ```
 
+If you don't know the address, or `fritz.box` doesn't work in your network
+(another router or a VPN in front, or a DNS server like Pi-hole that doesn't
+know the name), let `fritz` look for the devices on the local network:
+
+```console
+$ fritz discover
+fritz.box resolves to 192.168.178.1, on the local network
+
+ADDRESS         MODEL                FIRMWARE  ROLE      FOUND BY
+192.168.178.1   FRITZ!Box 7690       8.25      router    config, gateway, ssdp, default
+192.168.178.30  FRITZ!Repeater 2400  -         repeater  ssdp
+```
+
+It tries the configured host, the default gateway of your computer, an SSDP
+search and the default addresses `192.168.178.1` and `169.254.1.1`, and lists
+the devices whose device description is that of a FRITZ! router or repeater.
+It reads only this description, which needs no login, and sends no password.
+`fritz discover --save` writes the address to the profile like
+`fritz config init --host`; with several devices it asks which one, and
+`--save repeater` writes to the profile `repeater` instead. Add the user with
+`fritz config init --user agent` afterwards.
+
 `fritz` talks to the box over HTTPS on port 49443. The box uses a self-signed
 certificate, so `fritz` asks you once whether to trust it and then refuses
 any other certificate:

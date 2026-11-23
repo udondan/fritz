@@ -264,6 +264,25 @@ fn reports_an_unreachable_device() {
         "{}",
         stderr(&output)
     );
+    assert!(
+        stderr(&output)
+            .ends_with("hint: run `fritz discover` to find the device on the local network\n"),
+        "{}",
+        stderr(&output)
+    );
+}
+
+#[test]
+fn discovers_nothing_with_an_invalid_host() {
+    // Fails before anything is sent.
+    let output = fritz(&["discover", "--host", "http://192.168.178.1/path"]);
+    assert!(!output.status.success());
+    assert!(
+        stderr(&output).contains("is not a valid host: the address has a path"),
+        "{}",
+        stderr(&output)
+    );
+    assert!(!stderr(&output).contains("hint:"), "{}", stderr(&output));
 }
 
 #[test]
