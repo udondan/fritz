@@ -10,7 +10,9 @@ use secrecy::{ExposeSecret as _, SecretString};
 use crate::digest::{Challenge, DigestAuth};
 use crate::logging::{self, HideValues, Redact};
 use crate::tls::PinnedVerifier;
-use crate::{Arguments, DeviceDescription, Error, Fingerprint, Scpd, Service, soap};
+use crate::{
+    Arguments, DescriptionCache, DeviceDescription, Error, Fingerprint, Scpd, Service, soap,
+};
 
 const DEFAULT_TIMEOUT: Duration = Duration::from_secs(10);
 
@@ -24,6 +26,9 @@ pub struct Client {
     /// The answer to the last challenge, reused until the device rejects it.
     auth: Mutex<Option<DigestAuth>>,
     redact: Arc<dyn Redact>,
+    cache: Option<Arc<dyn DescriptionCache>>,
+    /// The device description as last fetched, for the cache.
+    description: Mutex<Option<Arc<str>>>,
 }
 
 /// Configures a [`Client`].
@@ -34,6 +39,7 @@ pub struct ClientBuilder {
     timeout: Duration,
     pin: Option<Fingerprint>,
     redact: Arc<dyn Redact>,
+    cache: Option<Arc<dyn DescriptionCache>>,
 }
 
 impl ClientBuilder {
@@ -67,6 +73,13 @@ impl ClientBuilder {
     #[must_use]
     pub fn redact(mut self, redact: Arc<dyn Redact>) -> Self {
         self.redact = redact;
+        self
+    }
+
+    /// A cache for the service descriptions, see [`DescriptionCache`].
+    #[must_use]
+    pub fn cache(mut self, cache: Arc<dyn DescriptionCache>) -> Self {
+        self.cache = Some(cache);
         self
     }
 
@@ -107,6 +120,8 @@ impl ClientBuilder {
             credentials: self.credentials,
             auth: Mutex::new(None),
             redact: self.redact,
+            cache: self.cache,
+            description: Mutex::new(None),
         })
     }
 }
@@ -122,6 +137,7 @@ impl Client {
             timeout: DEFAULT_TIMEOUT,
             pin: None,
             redact: Arc::new(HideValues),
+            cache: None,
         }
     }
 
@@ -190,16 +206,39 @@ impl Client {
     ///
     /// The errors of a request and of [`DeviceDescription::parse`].
     pub async fn description(&self) -> Result<DeviceDescription, Error> {
-        DeviceDescription::parse(&self.get("/tr64desc.xml").await?)
+        let xml = self.get("/tr64desc.xml").await?;
+        let description = DeviceDescription::parse(&xml)?;
+        if self.cache.is_some() {
+            *lock(&self.description) = Some(xml.into());
+        }
+        Ok(description)
     }
 
-    /// Fetches and parses the SCPD of a service.
+    /// Fetches and parses the SCPD of a service. With a
+    /// [cache](ClientBuilder::cache), and after a
+    /// [device description](Self::description) was fetched, the cache is
+    /// asked first.
     ///
     /// # Errors
     ///
     /// The errors of a request and of [`Scpd::parse`].
     pub async fn scpd(&self, service: &Service) -> Result<Scpd, Error> {
-        Scpd::parse(&self.get(&service.scpd_url).await?)
+        let url = &service.scpd_url;
+        let cache = self
+            .cache
+            .as_ref()
+            .and_then(|cache| Some((cache, lock(&self.description).clone()?)));
+        if let Some((cache, description)) = &cache
+            && let Some(scpd) = cache.scpd(description, url)
+        {
+            return Ok(scpd);
+        }
+        let xml = self.get(url).await?;
+        let scpd = Scpd::parse(&xml)?;
+        if let Some((cache, description)) = &cache {
+            cache.store(description, url, &xml, &scpd);
+        }
+        Ok(scpd)
     }
 
     /// Calls an action of a service and returns its output arguments.
@@ -360,10 +399,14 @@ impl Client {
     }
 
     fn lock(&self) -> std::sync::MutexGuard<'_, Option<DigestAuth>> {
-        self.auth
-            .lock()
-            .unwrap_or_else(std::sync::PoisonError::into_inner)
+        lock(&self.auth)
     }
+}
+
+fn lock<T>(mutex: &Mutex<T>) -> std::sync::MutexGuard<'_, T> {
+    mutex
+        .lock()
+        .unwrap_or_else(std::sync::PoisonError::into_inner)
 }
 
 /// A copy of `request` with the given `Authorization` header.

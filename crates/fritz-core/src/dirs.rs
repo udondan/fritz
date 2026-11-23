@@ -3,6 +3,10 @@
 //! `~/.local/state/fritz`, or below `$XDG_CONFIG_HOME` and
 //! `$XDG_STATE_HOME`. On Windows they are the usual ones below `%APPDATA%`
 //! and `%LOCALAPPDATA%`.
+//!
+//! The cache follows the platform: `~/.cache/fritz` or below
+//! `$XDG_CACHE_HOME` on Linux, `~/Library/Caches/fritz` on macOS, and below
+//! `%LOCALAPPDATA%` on Windows.
 
 #[cfg(not(windows))]
 use std::ffi::OsString;
@@ -46,6 +50,31 @@ pub fn state() -> Option<PathBuf> {
 #[cfg(windows)]
 pub fn state() -> Option<PathBuf> {
     directories::ProjectDirs::from("", "", NAME).map(|dirs| dirs.data_local_dir().to_owned())
+}
+
+/// The directory of the cache, like the descriptions of devices. `None` if
+/// the home directory is unknown.
+#[cfg(not(any(windows, target_os = "macos")))]
+pub fn cache() -> Option<PathBuf> {
+    xdg(
+        std::env::var_os("XDG_CACHE_HOME"),
+        home().as_deref(),
+        ".cache",
+    )
+}
+
+/// The directory of the cache, like the descriptions of devices. `None` if
+/// the home directory is unknown.
+#[cfg(target_os = "macos")]
+pub fn cache() -> Option<PathBuf> {
+    directories::BaseDirs::new().map(|dirs| dirs.cache_dir().join(NAME))
+}
+
+/// The directory of the cache, like the descriptions of devices. `None` if
+/// the home directory is unknown.
+#[cfg(windows)]
+pub fn cache() -> Option<PathBuf> {
+    directories::ProjectDirs::from("", "", NAME).map(|dirs| dirs.cache_dir().to_owned())
 }
 
 #[cfg(not(windows))]
@@ -95,7 +124,7 @@ mod tests {
 
     #[test]
     fn lies_in_a_directory_of_fritz() {
-        for dir in [config().unwrap(), state().unwrap()] {
+        for dir in [config().unwrap(), state().unwrap(), cache().unwrap()] {
             assert!(
                 dir.components().any(|part| part.as_os_str() == NAME),
                 "{}",

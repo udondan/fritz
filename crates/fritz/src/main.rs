@@ -6,6 +6,7 @@
 //! installation section of the README.
 
 mod auth;
+mod cache;
 #[cfg(feature = "write")]
 mod change;
 mod completion;
@@ -26,6 +27,7 @@ use std::io::{self, IsTerminal as _, Write as _};
 use std::path::{Path, PathBuf};
 
 use anyhow::{Context as _, bail};
+use clap::builder::BoolishValueParser;
 use clap::{ArgAction, Args, CommandFactory as _, Parser, Subcommand};
 use fritz_core::anonymize;
 use fritz_core::capture::{self, Options, Plan};
@@ -86,6 +88,10 @@ struct Global {
     /// `FRITZ_LOG_FILE` writes the log to a file too.
     #[arg(short, long, global = true, action = ArgAction::Count)]
     verbose: u8,
+    /// Fetch the service descriptions from the device instead of the cache,
+    /// and do not store them.
+    #[arg(long, global = true, env = "FRITZ_NO_CACHE", value_parser = BoolishValueParser::new())]
+    no_cache: bool,
 }
 
 #[derive(Debug, Subcommand)]
@@ -158,6 +164,10 @@ enum Command {
     /// The services and actions of the device. Calls only actions that read.
     #[command(subcommand, name = "tr064", alias = "tr64")]
     Tr064(Tr064Command),
+    /// The cached service descriptions of devices. `FRITZ_CACHE_DIR` sets
+    /// another directory.
+    #[command(subcommand)]
+    Cache(CacheCommand),
     /// Plan and apply changes. Needs `FRITZ_ALLOW_WRITE=1`, and the identity
     /// of the device on the allow list in the configuration.
     #[cfg(feature = "write")]
@@ -268,6 +278,14 @@ enum Tr064Command {
 }
 
 #[derive(Debug, Subcommand)]
+enum CacheCommand {
+    /// List the cached devices and the size of their files.
+    Show,
+    /// Remove the cached descriptions.
+    Clear,
+}
+
+#[derive(Debug, Subcommand)]
 enum FixtureCommand {
     /// Replace the personal values of a raw capture with placeholders.
     Anonymize {
@@ -359,6 +377,9 @@ async fn main() -> anyhow::Result<()> {
             )?
             .with_password_command(command),
         )
+        .map(|context| {
+            context.with_cache((!global.no_cache).then(cache::open).and_then(Result::ok))
+        })
     };
     let result = run(cli.command, format, load).await;
     if let (Format::Yaml, Err(error)) = (format, &result) {
@@ -412,6 +433,8 @@ async fn run(
         Command::Auth(AuthCommand::Logout) => auth::logout(&load()?, out),
         Command::Auth(AuthCommand::Status) => auth::status(&load()?, out).await,
         Command::Tr064(command) => tr64(&load()?, command, out).await,
+        Command::Cache(CacheCommand::Show) => cache::show(&cache::open()?, format, out),
+        Command::Cache(CacheCommand::Clear) => cache::clear(&cache::open()?, out),
         #[cfg(feature = "write")]
         Command::Change(args) => change::run(&load()?, args, format, out).await,
         Command::Capture(args) => capture(&load()?, args).await,

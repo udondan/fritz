@@ -55,6 +55,11 @@ default:
   bypassed.
 - **Data from the device** (host names, network names, phone book entries) is
   treated as untrusted input when it is handed to an AI agent.
+- **The cache** in the cache directory holds only service descriptions, which
+  the device serves without a login, as received. They are used only while the
+  device description names the same device, model and firmware version, so
+  the classes of the actions are the same as without the cache. A file that
+  cannot be parsed is fetched again.
 
 ### Changes
 

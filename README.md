@@ -42,6 +42,7 @@ status and settings of a FRITZ!Box router.
   - [JSON and YAML output](#json-and-yaml-output)
   - [Several devices and the environment](#several-devices-and-the-environment)
   - [Debug log](#debug-log)
+  - [Cache](#cache)
   - [Shell completion](#shell-completion)
   - [Version and updates](#version-and-updates)
 - [MCP server](#mcp-server)
@@ -345,8 +346,9 @@ Inputs go after the action, like `fritz tr064 call Hosts1 GetGenericHostEntry Ne
 ### JSON and YAML output
 
 The commands from `overview` to `log` print a table on a terminal and JSON
-otherwise, for scripts and agents, and so do `config list` and `version`. `--output`
-(`-o`) picks `text`, `json` or `yaml`. The other `config` commands, `tls`,
+otherwise, for scripts and agents, and so do `config list`, `cache show` and
+`version`. `--output` (`-o`) picks `text`, `json` or `yaml`. The other
+`config` and `cache` commands, `tls`,
 `auth` and `tr064` always print text.
 
 To keep text in pipes, like `fritz hosts | grep phone`, set
@@ -430,6 +432,30 @@ client may not show stderr.
 The log hides the same secrets as the output: passwords, keys and session
 IDs become `***`, even in URLs. Calls, contacts and the event log only
 appear with their size, and documents like host lists never appear at all.
+
+### Cache
+
+Before it calls an action, `fritz` needs the service description (SCPD) of
+its service. These only change with the firmware, so `fritz` keeps them in
+the cache directory: `~/.cache/fritz` on Linux (or below `$XDG_CACHE_HOME`),
+`~/Library/Caches/fritz` on macOS, and below `%LOCALAPPDATA%` on Windows.
+`FRITZ_CACHE_DIR` sets another one.
+
+Every run still fetches the device description, and uses the cache only if
+it names the same device, model and firmware version; after a firmware
+update the cache of the device is replaced. Devices whose description has no
+firmware version, like some FRITZ!Repeaters, are not cached. `--no-cache` (or
+`FRITZ_NO_CACHE=1`) skips the cache.
+
+```console
+$ fritz cache show
+MODEL           FIRMWARE   DEVICE                                     SCPDS  SIZE
+FRITZ!Box 7690  285.08.25  uuid:00000000-0000-4000-8000-000000000001  12     98 KiB
+in /home/me/.cache/fritz
+
+$ fritz cache clear
+removed the descriptions of 1 device from /home/me/.cache/fritz
+```
 
 ### Shell completion
 
