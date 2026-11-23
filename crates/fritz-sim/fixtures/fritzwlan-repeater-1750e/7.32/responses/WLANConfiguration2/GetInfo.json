@@ -1,0 +1,23 @@
+{
+  "out": {
+    "NewAllowedCharsPSK": "0123456789ABCDEFabcdef",
+    "NewAllowedCharsSSID": "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz !\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~",
+    "NewBSSID": "AA:BB:CC:00:00:BB",
+    "NewBasicAuthenticationMode": "None",
+    "NewBasicEncryptionModes": "None",
+    "NewBeaconType": "11i",
+    "NewChannel": "48",
+    "NewEnable": "1",
+    "NewMACAddressControlEnabled": "0",
+    "NewMaxBitRate": "Auto",
+    "NewMaxCharsPSK": "64",
+    "NewMaxCharsSSID": "32",
+    "NewMinCharsPSK": "64",
+    "NewMinCharsSSID": "1",
+    "NewSSID": "wlan-1",
+    "NewStandard": "ac",
+    "NewStatus": "Up",
+    "NewX_AVM-DE_PossibleBeaconTypes": "None,11i,WPAand11i,11iandWPA3"
+  },
+  "status": "ok"
+}

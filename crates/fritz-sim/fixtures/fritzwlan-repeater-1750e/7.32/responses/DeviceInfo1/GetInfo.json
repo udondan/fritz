@@ -1,0 +1,17 @@
+{
+  "out": {
+    "NewDescription": "FRITZ!WLAN Repeater 1750E 134.07.32",
+    "NewDeviceLog": "",
+    "NewHardwareVersion": "FRITZ!WLAN Repeater 1750E",
+    "NewManufacturerName": "AVM",
+    "NewManufacturerOUI": "00040E",
+    "NewModelName": "FRITZ!WLAN Repeater 1750E",
+    "NewProductClass": "FRITZ!WLAN Repeater",
+    "NewProvisioningCode": "",
+    "NewSerialNumber": "AABBCC000023",
+    "NewSoftwareVersion": "134.07.32",
+    "NewSpecVersion": "1.0",
+    "NewUpTime": "943"
+  },
+  "status": "ok"
+}

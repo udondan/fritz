@@ -1,0 +1,14 @@
+{
+  "out": {
+    "NewPasswordRequired": "0",
+    "NewPasswordUserSelectable": "1",
+    "NewUpgradeAvailable": "0",
+    "NewWarrantyDate": "0001-01-01T00:00:00",
+    "NewX_AVM-DE_DownloadURL": "",
+    "NewX_AVM-DE_InfoURL": "",
+    "NewX_AVM-DE_LaborVersion": "",
+    "NewX_AVM-DE_UpdateState": "Stopped",
+    "NewX_AVM-DE_Version": ""
+  },
+  "status": "ok"
+}

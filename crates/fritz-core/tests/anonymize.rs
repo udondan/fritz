@@ -26,7 +26,7 @@ fn finding(file: &str, kind: Kind) -> Finding {
 }
 
 const DESCRIPTION: &str = "<root><device><friendlyName>FRITZ!Box 7590</friendlyName>\
-    <serialNumber>3810D501020A</serialNumber>\
+    <modelName>FRITZ!Box 7590</modelName><serialNumber>3810D501020A</serialNumber>\
     <UDN>uuid:75802409-bccb-40e7-8e6c-3810d501020a</UDN></device></root>\n";
 
 const SCPD: &str = "<scpd><action><name>GetInfo</name>\
@@ -70,7 +70,7 @@ fn anonymizes_a_capture_consistently() {
     assert_eq!(
         read(&out, "tr64desc.xml"),
         "<root><device><friendlyName>FRITZ!Box 7590</friendlyName>\
-         <serialNumber>AABBCC000001</serialNumber>\
+         <modelName>FRITZ!Box 7590</modelName><serialNumber>AABBCC000001</serialNumber>\
          <UDN>uuid:00000000-0000-4000-8000-000000000001</UDN></device></root>\n"
     );
     assert_eq!(read(&out, "scpd/wlanconfigSCPD.xml"), SCPD);
@@ -295,4 +295,27 @@ fn labels_every_kind() {
     unique.sort();
     unique.dedup();
     assert_eq!(unique.len(), kinds.len(), "{labels:?}");
+}
+
+#[test]
+fn anonymizes_the_name_of_a_repeater() {
+    // A FRITZ!Repeater shows the name its owner gave it, not its model.
+    let temp = tempfile::tempdir().unwrap();
+    let (raw_dir, out) = (temp.path().join("raw"), temp.path().join("out"));
+    tree(
+        &raw_dir,
+        &[(
+            "tr64desc.xml",
+            "<root><device><friendlyName>Max-Repeater</friendlyName>\
+             <modelName>FRITZ!WLAN Repeater 1750E</modelName></device></root>\n",
+        )],
+    );
+
+    anonymize::anonymize(&raw_dir, &out, &["max".to_owned()]).unwrap();
+
+    assert_eq!(
+        read(&out, "tr64desc.xml"),
+        "<root><device><friendlyName>device-1</friendlyName>\
+         <modelName>FRITZ!WLAN Repeater 1750E</modelName></device></root>\n"
+    );
 }
