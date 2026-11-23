@@ -68,6 +68,16 @@
 //! # }
 //! ```
 //!
+//! # Logging
+//!
+//! The client logs through [`tracing`](https://docs.rs/tracing): one event
+//! per request at `info`, the steps of the Digest authentication and the
+//! check of the certificate at `debug`, and the arguments of action calls at
+//! `trace`. Passwords, headers, nonces and Digest answers are never logged,
+//! and of other documents only the size. Values of arguments and query
+//! parameters pass a [`Redact`] hook, which hides all of them unless the
+//! client is given [another one](ClientBuilder::redact).
+//!
 //! The client answers HTTP Digest challenges and reuses the nonce while the
 //! device accepts it. It never retries with credentials the device rejected
 //! ([`Error::AuthenticationFailed`]), so that a wrong password does not lock
@@ -80,6 +90,7 @@ mod client;
 mod description;
 mod digest;
 mod error;
+mod logging;
 mod scpd;
 mod soap;
 mod tls;
@@ -89,6 +100,7 @@ pub use cache::DescriptionCache;
 pub use client::{Client, ClientBuilder};
 pub use description::{Device, DeviceDescription, Service};
 pub use error::Error;
+pub use logging::{HIDDEN, HideValues, Redact};
 pub use reqwest::Url;
 pub use scpd::{Action, AllowedRange, Argument, Direction, Scpd, StateVariable};
 pub use secrecy::SecretString;

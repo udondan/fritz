@@ -25,6 +25,14 @@ default:
   change of the policy shows up in review.
 - **No secrets in output.** Passwords, keys, session IDs and similar values are
   redacted from every output, error and log line.
+- **The debug log** (`-v`, `FRITZ_LOG`) goes to stderr and, with
+  `FRITZ_LOG_FILE`, to a file only the user can read. It never shows headers,
+  Digest nonces or hashes, or the content of documents like host and call
+  lists. Arguments and answers of actions (only at `trace`) and query
+  parameters in URLs go through the same redaction as the output, and values
+  of personal actions only appear with their size. A bare level only enables
+  the crates of `fritz`; other crates log only when named and are not
+  redacted.
 - **Credentials** come from the environment, a password command, or the OS
   keychain, never from config files or command line arguments.
 - **A password command** (`password_command` in the profile, or

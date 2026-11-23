@@ -166,6 +166,8 @@ keychain:
 | `FRITZ_PROFILE` | `--profile` | The profile to use instead of the default one. |
 | `FRITZ_CONFIG` | `--config` | Another configuration file. |
 | `FRITZ_NO_KEYCHAIN` | | Any value keeps `fritz` away from the keychain. |
+| `FRITZ_LOG` | `-v`, `-vv` | The level of the log on stderr, like `debug`, or a level per crate, like `tr064=trace`. |
+| `FRITZ_LOG_FILE` | | A file that gets the log as well. |
 | `FRITZ_NO_CACHE` | `--no-cache` | `1` fetches the service descriptions from the device instead of the cache. |
 | `FRITZ_CACHE_DIR` | | Another directory for the cache of the service descriptions. |
 

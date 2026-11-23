@@ -23,6 +23,18 @@ skips it.
 All tests run against recorded fixtures and the simulator in `fritz-sim`. CI
 never talks to a real device.
 
+## Bug reports
+
+Please add the log of the failing command, run with `FRITZ_LOG=debug`:
+
+```sh
+FRITZ_LOG=debug fritz overview 2> fritz.log
+```
+
+The log hides passwords, keys and session IDs, but shows the address of the
+device, the user and the names of services and actions. Read it before you
+post it.
+
 ## Commits and pull requests
 
 Pull request titles follow [Conventional Commits](https://www.conventionalcommits.org/).

@@ -122,7 +122,17 @@ impl Context {
     /// as the default, must exist.
     pub(crate) fn target(&self) -> anyhow::Result<Target> {
         let profile = self.config.profile(self.profile.as_deref())?;
-        Ok(Target::resolve(profile.map(|(_, p)| p), &self.overrides)?)
+        let target = Target::resolve(profile.map(|(_, p)| p), &self.overrides)?;
+        let name = profile.map(|(name, _)| name);
+        let user = target.username.as_deref();
+        let pinned = target.fingerprint.is_some();
+        // A host like `http://user:password@host` must not show its password.
+        let mut url = target.url.clone();
+        url.set_username("")
+            .and_then(|()| url.set_password(None))
+            .ok();
+        tracing::debug!(profile = name, %url, user, pinned, "device");
+        Ok(target)
     }
 
     /// The name of the profile that commands write to: the given one, else
@@ -183,17 +193,18 @@ impl Context {
         let account = target.account()?;
         if let (None, Some(command)) = (&self.password, self.password_command()) {
             let source = Source::Command(command.name().to_owned());
-            return Ok((self.run(command).await?, source));
+            let password = self.run(command).await?;
+            tracing::debug!(%account, %source, "password found");
+            return Ok((password, source));
         }
         let keychain = match (&self.password, &self.keychains) {
             (Some(_), _) | (None, Keychains::Disabled) => None,
             _ => Some(self.keychain()?),
         };
-        Ok(secrets::password(
-            self.password.clone(),
-            keychain.as_ref(),
-            &account,
-        )?)
+        let (password, source) =
+            secrets::password(self.password.clone(), keychain.as_ref(), &account)?;
+        tracing::debug!(%account, %source, "password found");
+        Ok((password, source))
     }
 
     /// Runs the password command, once per run, on a thread of its own, so

@@ -41,6 +41,7 @@ status and settings of a FRITZ!Box router.
   - [Any TR-064 action](#any-tr-064-action)
   - [JSON and YAML output](#json-and-yaml-output)
   - [Several devices and the environment](#several-devices-and-the-environment)
+  - [Debug log](#debug-log)
   - [Cache](#cache)
   - [Shell completion](#shell-completion)
   - [Version and updates](#version-and-updates)
@@ -408,6 +409,29 @@ In scripts and containers, the environment replaces the profile and the
 keychain: `FRITZ_HOST`, `FRITZ_USERNAME`, `FRITZ_PASSWORD` (or
 `FRITZ_PASSWORD_COMMAND`) and `FRITZ_TLS_FINGERPRINT`. [docs/box-setup.md](https://github.com/udondan/fritz/blob/main/docs/box-setup.md#5-without-a-configuration-file)
 lists all variables.
+
+### Debug log
+
+`-v` logs one line per request to stderr: method, action, URL, status and
+duration. `-vv` adds the details: the profile and where the password came
+from, the Digest login (without nonces or hashes), the check of the
+certificate and faults that ask to wait. stdout stays the same, so `fritz
+mcp` can log too.
+
+```console
+$ fritz -v wlan
+2026-11-23T12:00:00.000000Z  INFO tr064::client: request method=POST url=https://192.168.178.1:49443/upnp/control/wlanconfig1 action="urn:dslforum-org:service:WLANConfiguration:1#GetInfo" status=200 elapsed_ms=41
+```
+
+`FRITZ_LOG` sets the level instead: `info`, `debug` or `trace`, which adds
+the arguments and answers of every call. It also takes a level per crate,
+like `tr064=trace,fritz_core=debug`. `FRITZ_LOG_FILE` appends the log to a
+file as well, readable only by you, for example for `fritz mcp`, whose
+client may not show stderr.
+
+The log hides the same secrets as the output: passwords, keys and session
+IDs become `***`, even in URLs. Calls, contacts and the event log only
+appear with their size, and documents like host lists never appear at all.
 
 ### Cache
 

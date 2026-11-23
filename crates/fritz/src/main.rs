@@ -12,6 +12,7 @@ mod change;
 mod completion;
 mod context;
 mod device;
+mod logging;
 mod mcp;
 mod output;
 mod personal;
@@ -27,7 +28,7 @@ use std::path::{Path, PathBuf};
 
 use anyhow::{Context as _, bail};
 use clap::builder::BoolishValueParser;
-use clap::{Args, CommandFactory as _, Parser, Subcommand};
+use clap::{ArgAction, Args, CommandFactory as _, Parser, Subcommand};
 use fritz_core::anonymize;
 use fritz_core::capture::{self, Options, Plan};
 use fritz_core::connection::Overrides;
@@ -81,6 +82,12 @@ struct Global {
     /// YAML on stderr as well.
     #[arg(short, long, global = true, value_enum, env = "FRITZ_OUTPUT")]
     output: Option<Format>,
+    /// Log the requests to stderr, with secrets hidden: -v one line per
+    /// request, -vv also the details. `FRITZ_LOG` sets the level instead,
+    /// like `debug` or `trace`, also per crate like `tr064=debug`, and
+    /// `FRITZ_LOG_FILE` writes the log to a file too.
+    #[arg(short, long, global = true, action = ArgAction::Count)]
+    verbose: u8,
     /// Fetch the service descriptions from the device instead of the cache,
     /// and do not store them.
     #[arg(long, global = true, env = "FRITZ_NO_CACHE", value_parser = BoolishValueParser::new())]
@@ -343,6 +350,7 @@ struct CaptureArgs {
 async fn main() -> anyhow::Result<()> {
     completion::complete(Cli::command);
     let cli = Cli::parse();
+    logging::init(cli.global.verbose)?;
     let global = cli.global;
     let format = global
         .output
