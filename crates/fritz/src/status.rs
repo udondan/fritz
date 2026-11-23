@@ -60,7 +60,7 @@ pub(crate) async fn overview(
     let full = Full { overview, system };
     show(&full, format, out, |full, out| {
         let mut all = overview_pairs(&full.overview);
-        all.extend(full.system.as_ref().map(system_pairs).unwrap_or_default());
+        all.extend(full.system.as_ref().map_or_default(system_pairs));
         pairs(&all, out)
     })
 }
