@@ -100,7 +100,16 @@ struct Global {
 enum Command {
     /// The model, firmware, uptime, internet connection and the rights of
     /// the user.
-    Overview,
+    Overview {
+        /// Also the load of the device: CPU load, CPU temperature and memory,
+        /// now and as the lowest, average and highest values the device
+        /// keeps (24 hours). Experimental: read from a page of the web
+        /// interface, which may change with FRITZ!OS. Needs the right to see
+        /// the settings; without it, or on devices without the page, the
+        /// section is left out with a note.
+        #[arg(long)]
+        system: bool,
+    },
     /// The hosts the device knows, or one host with all details.
     Hosts(status::HostsArgs),
     /// The mesh: its nodes with their IP addresses, and the links between
@@ -421,7 +430,7 @@ async fn run(
     let out = &mut io::stdout().lock();
     match command {
         Command::Mcp { .. } => unreachable!("served above"),
-        Command::Overview => status::overview(&load()?, format, out).await,
+        Command::Overview { system } => status::overview(&load()?, system, format, out).await,
         Command::Hosts(args) => status::hosts(&load()?, args, format, out).await,
         Command::Mesh { tree } => status::mesh(&load()?, tree, format, out).await,
         Command::Wlan {

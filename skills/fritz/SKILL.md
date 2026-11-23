@@ -29,6 +29,7 @@ or paste them.
 | Question                                    | Command                              |
 | ------------------------------------------- | ------------------------------------ |
 | Which model and firmware, is an update due? | `fritz overview`                     |
+| Is the box busy, hot or low on memory?      | `fritz overview --system` (experimental) |
 | Is the internet up, which IP, which speed?  | `fritz internet`                     |
 | Which wireless networks, how many clients?  | `fritz wlan`                         |
 | Which devices use which wireless network?   | `fritz wlan --clients`               |

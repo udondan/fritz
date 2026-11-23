@@ -52,12 +52,14 @@ pub(crate) struct Recording {
 /// responses/<service>/<action>[@<index>].json
 /// lists/<name>.<xml|json>
 /// api/<path>.json
+/// data/<page>.json
 /// ```
 ///
 /// A list document `lists/devicehostlist.xml` is served at the path
 /// `/devicehostlist.lua` that an action like `X_AVM-DE_GetHostListPath`
 /// returns. A document `api/v0/smarthome/overview.json` of the REST API is
-/// served at `/api/v0/smarthome/overview`.
+/// served at `/api/v0/smarthome/overview`. A page `data/ecoStat.json` of the
+/// web interface answers a form with `page=ecoStat` posted to `/data.lua`.
 #[derive(Debug, Clone)]
 pub struct Fixture {
     pub(crate) description_xml: String,
@@ -71,6 +73,8 @@ pub struct Fixture {
     /// The documents of the REST API by path, like
     /// `/api/v0/smarthome/overview`.
     pub(crate) api: HashMap<String, String>,
+    /// The pages of `/data.lua` by path, like `/ecoStat`.
+    pub(crate) pages: HashMap<String, String>,
 }
 
 impl Fixture {
@@ -160,11 +164,8 @@ impl Fixture {
                 lists.insert(name.to_owned(), read(&path)?);
             }
         }
-        let mut api = HashMap::new();
-        let api_dir = dir.join("api");
-        if source.is_dir(&api_dir) {
-            documents(source, &api_dir, "/api", &mut api)?;
-        }
+        let api = tree(source, &dir.join("api"), "/api")?;
+        let pages = tree(source, &dir.join("data"), "")?;
         Ok(Self {
             description_xml,
             description,
@@ -172,6 +173,7 @@ impl Fixture {
             recordings,
             lists,
             api,
+            pages,
         })
     }
 
@@ -247,6 +249,16 @@ fn answer(json: &str) -> Result<Option<Answer>, String> {
 
 /// Adds the JSON documents in `dir` and its subdirectories to `found`, by
 /// their path under `prefix` without the extension.
+/// The documents below `dir`, if it exists, by their paths after `prefix`,
+/// like `/api/v0/smarthome/overview` for `prefix` `/api`.
+fn tree(source: Source, dir: &Path, prefix: &str) -> Result<HashMap<String, String>, Error> {
+    let mut found = HashMap::new();
+    if source.is_dir(dir) {
+        documents(source, dir, prefix, &mut found)?;
+    }
+    Ok(found)
+}
+
 fn documents(
     source: Source,
     dir: &Path,

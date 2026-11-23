@@ -75,7 +75,8 @@ Cargo workspace:
 - `fritz-sim` serves the fixtures in
   `crates/fritz-sim/fixtures/<model>/<fritzos>/` on loopback; they are
   published with the crate (`Fixture::bundled`). It checks calls against the SCPDs, keeps the state that writes
-  change, serves list documents and the Smart Home REST API, can inject
+  change, serves list documents, the Smart Home REST API and pages of
+  `data.lua`, can inject
   faults, delays and a locked login (`Sim::inject`), and records requests.
   The CLI and MCP tests remove inherited `FRITZ_*` variables.
 - Fixtures come from `fritz capture` (reads only, writes outside the

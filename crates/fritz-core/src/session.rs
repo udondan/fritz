@@ -106,6 +106,18 @@ impl Session {
         Ok(self.client.get_with_headers(path, &headers).await?)
     }
 
+    /// Posts a form to a page of the web interface, like `/data.lua`, with
+    /// the session ID added as the field `sid`.
+    ///
+    /// # Errors
+    ///
+    /// The errors of the request.
+    pub async fn post(&self, path: &str, form: &[(&str, &str)]) -> Result<String, Error> {
+        let mut fields = form.to_vec();
+        fields.push(("sid", self.sid.expose_secret()));
+        Ok(self.client.post_form(path, &fields).await?)
+    }
+
     /// Ends the session. Without it, the device ends the session after a
     /// while without requests.
     ///

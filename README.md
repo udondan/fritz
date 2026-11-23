@@ -162,6 +162,23 @@ Update      none
 Two-factor  on
 Internet    Connected over DSL (link Up), 2001:db8::1, for 9h 36m
 Rights      BoxAdmin: readwrite, Phone: readwrite, HomeAuto: readwrite
+```
+
+`--system` adds the load of the device: CPU load, CPU temperature and memory
+now, and the lowest, average and highest values of the last 24 hours. It is
+experimental: the values come from a page of the web interface, which may
+change with FRITZ!OS, and need the right to see the settings. Devices without
+the page get a note instead, and the command does not fail. In JSON, the
+values are in `system`, with `null` for what the device does not show, or
+`system` is `null` and `system_note` tells why.
+
+```console
+$ fritz overview --system
+...
+System           experimental, read from the web interface
+CPU load         8% (24 h: min 6%, avg 8.2%, max 15%)
+CPU temperature  67 °C (24 h: min 62 °C, avg 65.7 °C, max 69 °C)
+Memory           49% used, 11% cache, 40% free (24 h: min 48.9%, avg 49%, max 49%)
 
 $ fritz internet
 Status         Connected
@@ -622,7 +639,7 @@ claude mcp add fritz -- fritz --host 192.168.178.1 --user agent mcp
 
 | Tool                    | Returns                                                     |
 | ----------------------- | ----------------------------------------------------------- |
-| `fritz_overview`        | Model, firmware, uptime, update, connection, rights         |
+| `fritz_overview`        | Model, firmware, uptime, connection, rights, `system` load  |
 | `fritz_internet`        | Internet connection, addresses, DNS, rates, DSL line        |
 | `fritz_wlan`            | Wireless networks, guest network, `clients`, `details`      |
 | `fritz_interfaces`      | LAN and WLAN counters of bytes, packets, errors; LAN ports  |
