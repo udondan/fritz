@@ -66,6 +66,11 @@ impl Context {
         &self.path
     }
 
+    /// The contents of the configuration file.
+    pub(crate) fn config(&self) -> &Config {
+        &self.config
+    }
+
     /// The devices that may and may never be changed.
     #[cfg(feature = "write")]
     pub(crate) fn write_targets(&self) -> &fritz_core::identity::Targets {

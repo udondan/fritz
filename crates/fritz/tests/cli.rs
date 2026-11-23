@@ -422,6 +422,15 @@ fn creates_and_shows_profiles() {
         "{stdout}"
     );
 
+    let output = config.run(&["config", "list", "--output", "text"]);
+    assert!(output.status.success(), "{}", stderr(&output));
+    assert_eq!(
+        String::from_utf8_lossy(&output.stdout),
+        "DEFAULT  PROFILE  HOST                    USER   TRUSTED\n\
+         *        default  http://127.0.0.1:49000  agent  no\n\
+         \x20        lab      lab.example             -      no\n"
+    );
+
     // Without a host, the profile names the default one.
     let output = config.run(&["--profile", "bare", "config", "init"]);
     assert!(output.status.success(), "{}", stderr(&output));

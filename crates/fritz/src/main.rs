@@ -165,6 +165,8 @@ enum ConfigCommand {
     Init,
     /// Show the settings in effect, without the password.
     Show,
+    /// List the profiles, and mark the default one.
+    List,
 }
 
 #[derive(Debug, Subcommand)]
@@ -326,6 +328,7 @@ async fn main() -> anyhow::Result<()> {
         Command::Log { limit } => personal::log(&load()?, limit, format, out).await,
         Command::Config(ConfigCommand::Init) => settings::init(&mut load()?, out),
         Command::Config(ConfigCommand::Show) => settings::show(&load()?, out),
+        Command::Config(ConfigCommand::List) => settings::list(&load()?, format, out),
         Command::Tls(TlsCommand::Fingerprint) => tls::fingerprint(&load()?, out).await,
         Command::Tls(TlsCommand::Trust) => {
             tls::trust(&mut load()?, &mut io::stdin().lock(), out).await
