@@ -103,7 +103,7 @@
   },
   {
     "name": "fritz_hosts",
-    "description": "Hosts the device knows, with IP, MAC, interface and internet access. Paginated.",
+    "description": "Hosts the device knows, with IP, MAC, interface and internet access. Paginated. With mac or ip, the one host with all details: address source, lease, guest network and the mesh node it is connected to.",
     "inputSchema": {
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "properties": {
@@ -112,12 +112,26 @@
           "description": "Only hosts that are connected now.",
           "type": "boolean"
         },
+        "ip": {
+          "description": "The host with this IPv4 address, with all details instead of a page.\nCombines only with `active`.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
         "limit": {
           "description": "Hosts to return, at most 200. Default 50.",
           "format": "uint",
           "minimum": 0,
           "type": [
             "integer",
+            "null"
+          ]
+        },
+        "mac": {
+          "description": "The host with this MAC address, like `AA:BB:CC:DD:EE:FF`, with all\ndetails instead of a page. Combines only with `active`.",
+          "type": [
+            "string",
             "null"
           ]
         },

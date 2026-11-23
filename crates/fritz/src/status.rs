@@ -12,8 +12,10 @@ use fritz_core::read::Reader;
 use fritz_core::smarthome::{self, Device, Target, Unit};
 use fritz_core::status::{self, Connection, Host, Hosts, Internet, Overview, Wlan};
 
+mod host;
 mod tree;
 
+pub(crate) use host::{HostsArgs, hosts};
 use tree::mesh_tree;
 
 use crate::context::Context;
@@ -162,24 +164,6 @@ fn both(down: Option<String>, up: Option<String>) -> Option<String> {
         (None, Some(up)) => Some(format!("↑ {up}")),
         (None, None) => None,
     }
-}
-
-/// Prints the hosts, all or only the active ones.
-pub(crate) async fn hosts(
-    context: &Context,
-    active: bool,
-    format: Format,
-    out: &mut impl Write,
-) -> anyhow::Result<()> {
-    let mut reader = reader(context).await?;
-    let mut hosts = status::hosts(&mut reader)
-        .await
-        .context("cannot read the hosts")?;
-    eprint!("{}", shortfall(&hosts));
-    if active {
-        hosts.hosts.retain(|h| h.active);
-    }
-    show(&hosts, format, out, host_table)
 }
 
 /// A line that tells how many hosts were not read, or nothing.

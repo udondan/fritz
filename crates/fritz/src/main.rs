@@ -99,12 +99,8 @@ enum Command {
     /// The model, firmware, uptime, internet connection and the rights of
     /// the user.
     Overview,
-    /// The hosts the device knows.
-    Hosts {
-        /// Only the hosts that are connected now.
-        #[arg(long)]
-        active: bool,
-    },
+    /// The hosts the device knows, or one host with all details.
+    Hosts(status::HostsArgs),
     /// The mesh: its nodes and the links between all devices.
     Mesh {
         /// Show the mesh as a tree: which device is connected to which
@@ -405,7 +401,7 @@ async fn run(
     match command {
         Command::Mcp { .. } => unreachable!("served above"),
         Command::Overview => status::overview(&load()?, format, out).await,
-        Command::Hosts { active } => status::hosts(&load()?, active, format, out).await,
+        Command::Hosts(args) => status::hosts(&load()?, args, format, out).await,
         Command::Mesh { tree } => status::mesh(&load()?, tree, format, out).await,
         Command::Wlan => status::wlan(&load()?, format, out).await,
         Command::Internet => status::internet(&load()?, format, out).await,

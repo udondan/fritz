@@ -14,6 +14,7 @@ pub mod connection;
 pub mod dirs;
 pub mod fault;
 pub mod generic;
+pub mod host;
 pub mod identity;
 pub mod lists;
 mod names;

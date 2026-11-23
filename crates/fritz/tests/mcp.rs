@@ -195,6 +195,28 @@ async fn reads_the_state() {
     let name = all["hosts"][0]["name"].as_str().unwrap().to_uppercase();
     let found = success(&client, "fritz_hosts", json!({"search": name})).await;
     assert!(found["total"].as_u64().unwrap() >= 1, "{found}");
+
+    let host = success(&client, "fritz_hosts", json!({"mac": "aa:bb:cc:00:00:03"})).await;
+    assert_eq!(host["name"], "device-2", "{host}");
+    assert_eq!(host["address_source"], "DHCP", "{host}");
+    assert_eq!(host["attached_to"]["band"], "5 GHz", "{host}");
+    let host = success(&client, "fritz_hosts", json!({"ip": "192.0.2.30"})).await;
+    assert_eq!(host["name"], "device-47", "{host}");
+    assert_eq!(host["attached_to"]["node"], "device-51", "{host}");
+    for (arguments, message) in [
+        (json!({"ip": "192.0.2.1", "active": true}), "no host has"),
+        (json!({"mac": "AA:BB:CC:00:00:FF"}), "no host has"),
+        (json!({"mac": "phone"}), "not a MAC address"),
+        (json!({"ip": "2001:db8::1"}), "not an IPv4 address"),
+        (
+            json!({"mac": "AA:BB:CC:00:00:03", "ip": "192.0.2.2"}),
+            "not both",
+        ),
+    ] {
+        let error = failure(&client, "fritz_hosts", arguments).await;
+        let error = error["error"].as_str().unwrap();
+        assert!(error.contains(message), "{error}");
+    }
     client.cancel().await.unwrap();
 }
 
@@ -409,6 +431,11 @@ async fn reports_faults_with_a_status() {
     .await;
     assert_eq!(error["status"], "confirmation_required", "{error}");
     assert!(error.get("retry_after").is_none(), "{error}");
+
+    sim.clear_injections();
+    sim.inject(Injection::fault("Hosts1", "GetSpecificHostEntry", 867));
+    let error = failure(&client, "fritz_hosts", json!({"mac": "AA:BB:CC:00:00:03"})).await;
+    assert_eq!(error["status"], "blocked", "{error}");
     client.cancel().await.unwrap();
 }
 

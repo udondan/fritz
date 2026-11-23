@@ -1084,6 +1084,83 @@ async fn prints_the_state_as_json() {
 }
 
 #[tokio::test(flavor = "multi_thread")]
+async fn looks_up_one_host() {
+    let fixture = fritz_sim::Fixture::load(FIXTURE).unwrap();
+    let sim = fritz_sim::Sim::start(fixture).await.unwrap();
+    let password = Some(fritz_sim::PASSWORD);
+    let json =
+        |output: &Output| -> serde_json::Value { serde_json::from_str(&success(output)).unwrap() };
+
+    // An exact name is found, not the names that contain it.
+    let host = json(&run(&sim, &["hosts", "DEVICE-1"], password).await);
+    assert_eq!(host["mac"], "AA:BB:CC:00:00:02", "{host}");
+    assert_eq!(host["address_source"], "DHCP", "{host}");
+    // Without an exact name, the names that contain it.
+    let host = json(&run(&sim, &["hosts", "ice-47"], password).await);
+    assert_eq!(host["name"], "device-47", "{host}");
+    assert_eq!(host["attached_to"]["node"], "device-51", "{host}");
+    let hosts = json(&run(&sim, &["hosts", "device-11"], password).await);
+    assert_eq!(hosts["hosts"].as_array().unwrap().len(), 2, "{hosts}");
+    let hosts = json(&run(&sim, &["hosts", "--active", "device-1"], password).await);
+    assert!(hosts["hosts"].as_array().unwrap().len() > 1, "{hosts}");
+
+    let output = run(
+        &sim,
+        &["--output", "text", "hosts", "--mac", "aa-bb-cc-00-00-03"],
+        password,
+    )
+    .await;
+    let text = success(&output);
+    assert!(text.starts_with("Name             device-2\n"), "{text}");
+    assert!(
+        text.contains("Attached to      device-50, WLAN 5 GHz ↓ 866.7 Mbit/s"),
+        "{text}"
+    );
+    let host = json(&run(&sim, &["hosts", "--ip", "192.0.2.30"], password).await);
+    assert_eq!(host["name"], "device-47", "{host}");
+
+    let hosts = json(&run(&sim, &["hosts", "--search", "aa:bb:cc:00:00:3"], password).await);
+    assert_eq!(hosts["hosts"].as_array().unwrap().len(), 4, "{hosts}");
+
+    for (args, message) in [
+        (
+            &["hosts", "--mac", "AA:BB:CC:00:00:FF"][..],
+            "no host has the MAC address AA:BB:CC:00:00:FF",
+        ),
+        (
+            &["hosts", "--active", "--ip", "192.0.2.1"],
+            "no active host has the IP address 192.0.2.1",
+        ),
+        (&["hosts", "printer"], "no host is named \"printer\""),
+    ] {
+        let output = run(&sim, args, password).await;
+        assert_eq!(output.status.code(), Some(1), "{args:?}");
+        assert!(stderr(&output).contains(message), "{}", stderr(&output));
+    }
+
+    // Invalid addresses are refused before anything is sent.
+    let before = sim.requests().len();
+    for args in [
+        &["hosts", "--mac", "phone"][..],
+        &["hosts", "--ip", "2001:db8::1"],
+        &["hosts", "--ip", "192.0.2.1", "--mac", "AA:BB:CC:00:00:03"],
+    ] {
+        let error = failure(&run(&sim, args, password).await);
+        assert!(error.contains("error:"), "{error}");
+    }
+    assert_eq!(sim.requests().len(), before);
+
+    sim.inject(Injection::fault("Hosts1", "X_AVM-DE_GetMeshListPath", 868));
+    for args in [
+        &["hosts", "--mac", "AA:BB:CC:00:00:03"][..],
+        &["hosts", "device-2"],
+    ] {
+        let error = failure(&run(&sim, args, password).await);
+        assert!(error.contains("cannot read the host"), "{error}");
+    }
+}
+
+#[tokio::test(flavor = "multi_thread")]
 async fn prints_the_settings() {
     let fixture = fritz_sim::Fixture::load(FIXTURE).unwrap();
     let sim = fritz_sim::Sim::start(fixture).await.unwrap();

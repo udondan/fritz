@@ -412,7 +412,7 @@ async fn reads_values_back_with_the_inputs_of_getters() {
     let setup = Setup::new().await;
     let mut changer = setup.allowed();
     let arguments = vec![
-        ("NewMACAddress".to_owned(), "AA:BB:CC:00:00:01".to_owned()),
+        ("NewMACAddress".to_owned(), "AA:BB:CC:00:00:02".to_owned()),
         ("NewHostName".to_owned(), "device-renamed".to_owned()),
     ];
     let plan = changer
