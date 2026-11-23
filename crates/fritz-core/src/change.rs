@@ -25,8 +25,12 @@
 //! Every plan, change and refusal is logged in `audit.jsonl` in the state
 //! directory, with secrets hidden. A change is logged before it is sent;
 //! if that fails, it is not sent.
+//!
+//! [`Changer::plan_reboot`] and [`Changer::reboot`] restart the device the
+//! same way, see [`reboot`].
 
 mod audit;
+pub mod reboot;
 mod tokens;
 
 use std::collections::{BTreeMap, BTreeSet, HashMap};
@@ -84,6 +88,9 @@ pub enum Error {
     /// The token does not fit the change.
     #[error("the token is unknown, used, expired or for another change")]
     InvalidToken,
+    /// Another device answers after a restart.
+    #[error("another device answers after the restart: {0}")]
+    OtherDevice(Identity),
     /// The tokens or the audit log cannot be read or written.
     #[error("cannot use {}", path.display())]
     State { path: PathBuf, source: io::Error },
@@ -244,7 +251,8 @@ pub struct Changer {
     settings: Settings,
     tokens: Tokens,
     audit: Audit,
-    identity: Option<Identity>,
+    /// The identity of the device and its UDN, once read.
+    identity: Option<(Identity, String)>,
 }
 
 /// A change that passed the checks.
@@ -278,7 +286,7 @@ impl Changer {
     /// [`Error::Unidentified`] if the device has no UDN or serial number,
     /// and the errors of reading them.
     pub async fn identity(&mut self) -> Result<Identity, Error> {
-        if let Some(identity) = &self.identity {
+        if let Some((identity, _)) = &self.identity {
             return Ok(identity.clone());
         }
         let description = self.client.description().await?;
@@ -287,16 +295,15 @@ impl Changer {
             .udn
             .filter(|u| !u.is_empty())
             .ok_or(Error::Unidentified("the device description has no UDN"))?;
-        let (service, scpd) = generic::service(&self.client, "DeviceInfo1").await?;
-        let action = generic::action(&service, &scpd, "GetInfo")?;
-        let serial = generic::send(&self.client, &service, action, &[])
+        let serial = reboot::Probe::new(&self.client)
             .await?
-            .into_iter()
-            .find(|(name, value)| name == "NewSerialNumber" && !value.is_empty())
-            .map(|(_, value)| value)
+            .read(&self.client)
+            .await?
+            .serial
+            .filter(|s| !s.is_empty())
             .ok_or(Error::Unidentified("the device has no serial number"))?;
         let identity = Identity::of(&udn, &serial);
-        self.identity = Some(identity.clone());
+        self.identity = Some((identity.clone(), udn));
         Ok(identity)
     }
 
@@ -374,38 +381,15 @@ impl Changer {
         arguments: &[(String, String)],
         token: &str,
     ) -> Result<Outcome, Error> {
-        let checked = match self.check(reference, name, arguments).await {
-            Ok(checked) => checked,
-            Err(error) => return Err(self.refuse(subject(reference, name, arguments), error)),
-        };
+        let refused = subject(reference, name, arguments);
+        let checked = self.checked(refused).await?;
         // Read twice, to tell the values that change on their own.
         let (before, again) = match self.snapshots(&checked, arguments).await {
             Ok(snapshots) => snapshots,
-            Err(error) => return Err(self.refuse(subject(reference, name, arguments), error)),
+            Err(error) => return Err(self.refuse(refused, error)),
         };
-        if let Err(error) = self
-            .tokens
-            .redeem(token, &fingerprint(&checked, arguments), now())
-        {
-            return Err(self.refuse(subject(reference, name, arguments), error));
-        }
-        let service = short_id(&checked.service).to_owned();
+        let service = self.send(&checked, refused, token).await?;
         let sent = subject(&service, name, arguments);
-        self.log(Event::Sending, sent, None, None)?;
-        let inputs: Vec<(&str, &str)> = arguments
-            .iter()
-            .map(|(n, v)| (n.as_str(), v.as_str()))
-            .collect();
-        if let Err(error) = self
-            .client
-            .call(&checked.service, &checked.action.name, &inputs)
-            .await
-        {
-            let error = Error::from(error);
-            // Logged as sending already, so a failed log loses nothing.
-            let _ = self.log(Event::Failed, sent, Some(&error), None);
-            return Err(error);
-        }
         let after = self.read_back(&checked, arguments).await?;
         let checks: Vec<Check> = checked
             .action
@@ -434,6 +418,53 @@ impl Changer {
             verified,
             side_effects,
         })
+    }
+
+    /// [Checks](Self::check) a change, and logs it as refused if it does
+    /// not pass.
+    async fn checked(&mut self, change: Subject<'_>) -> Result<Checked, Error> {
+        match self
+            .check(change.service, change.action, change.arguments)
+            .await
+        {
+            Ok(checked) => Ok(checked),
+            Err(error) => Err(self.refuse(change, error)),
+        }
+    }
+
+    /// Redeems the token of a checked change, logs the change and sends
+    /// it. Returns the short ID of the service, like `DeviceConfig1`.
+    async fn send(
+        &mut self,
+        checked: &Checked,
+        change: Subject<'_>,
+        token: &str,
+    ) -> Result<String, Error> {
+        let arguments = change.arguments;
+        if let Err(error) = self
+            .tokens
+            .redeem(token, &fingerprint(checked, arguments), now())
+        {
+            return Err(self.refuse(change, error));
+        }
+        let service = short_id(&checked.service).to_owned();
+        let sent = subject(&service, change.action, arguments);
+        self.log(Event::Sending, sent, None, None)?;
+        let inputs: Vec<(&str, &str)> = arguments
+            .iter()
+            .map(|(n, v)| (n.as_str(), v.as_str()))
+            .collect();
+        if let Err(error) = self
+            .client
+            .call(&checked.service, &checked.action.name, &inputs)
+            .await
+        {
+            let error = Error::from(error);
+            // Logged as sending already, so a failed log loses nothing.
+            let _ = self.log(Event::Failed, sent, Some(&error), None);
+            return Err(error);
+        }
+        Ok(service)
     }
 
     /// Checks a change: the class of the action, the arguments and the
@@ -616,7 +647,7 @@ impl Changer {
             time: now(),
             source: self.settings.source,
             event,
-            device: self.identity.as_ref(),
+            device: self.identity.as_ref().map(|(identity, _)| identity),
             service: subject.service,
             action: subject.action,
             arguments: &arguments,

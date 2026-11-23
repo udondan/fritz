@@ -124,6 +124,27 @@ impl Device {
             .map(String::as_str)
     }
 
+    /// Makes the getter `getter` of the service `id`, like `DeviceInfo1`,
+    /// answer `value` for its output argument `argument` from now on. `None`
+    /// if it has no such argument.
+    pub(crate) fn set_output(
+        &mut self,
+        id: &str,
+        getter: &str,
+        argument: &str,
+        value: &str,
+    ) -> Option<()> {
+        let fixture = &self.fixture;
+        let service = fixture.description.services().find(|s| short_id(s) == id)?;
+        let action = fixture.scpd(service)?.action(getter)?;
+        let variable = &outputs(action)
+            .find(|a| a.name == argument)?
+            .related_state_variable;
+        let key = (id.to_owned(), variable.clone());
+        self.written.insert(key, value.to_owned());
+        Some(())
+    }
+
     /// Answers a call of `action` with `arguments`: the output arguments, or
     /// the error.
     pub(crate) fn call(

@@ -877,6 +877,27 @@ A plan shows only the inputs of the action, but a device may change other
 settings along with them. `apply` reads the service before and after the
 change and lists the other values that changed under `also changed`.
 
+`fritz reboot` restarts a device the same way. A restart is critical, so it
+also needs `FRITZ_ALLOW_CRITICAL=1`. The plan names the device and warns
+that internet, WLAN and telephony are down while it restarts. `--wait`
+waits until the device is back. For example, a repeater with its own
+profile:
+
+```sh
+export FRITZ_ALLOW_WRITE=1 FRITZ_ALLOW_CRITICAL=1
+fritz --profile repeater reboot                        # plan: device, uptime, warning, token
+fritz --profile repeater reboot --token <token> --wait # restart and wait until it is back
+```
+
+While it waits, `fritz reboot` only reads `DeviceInfo:GetInfo`, every 5
+seconds (`--interval`) for at most 5 minutes (`--budget`, at most `1h`).
+The device is `back` once it answers with a lower uptime than before and
+the same serial number. The other outcomes are `accepted` (without
+`--wait`), `timeout` and `unknown`, when the connection broke while the
+restart was sent. Then the device may or may not restart. `fritz reboot`
+never sends the restart again on its own, and exits with an error after
+`timeout` and `unknown`.
+
 With `FRITZ_ALLOW_WRITE=1`, `fritz mcp` of such a build also offers
 `fritz_plan_change` and `fritz_apply_change`, which work the same way.
 
