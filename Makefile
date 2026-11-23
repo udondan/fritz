@@ -1,4 +1,4 @@
-.PHONY: build release run test lint hooks
+.PHONY: build release run test lint coverage hooks
 
 build:
 	@cargo build --workspace
@@ -18,10 +18,17 @@ lint:
 	@cargo clippy --workspace --all-targets -- -D warnings
 	@cargo clippy --workspace --all-targets --all-features -- -D warnings
 
-# Links the pre-commit hook into the repository's hooks directory, which all
-# worktrees share. The link points to the main checkout's copy of the script.
+# Checks that the tests cover every line changed against origin/main, like
+# the patch status of Codecov.
+coverage:
+	@.githooks/pre-push
+
+# Links the hooks into the repository's hooks directory, which all worktrees
+# share. The links point to the main checkout's copies of the scripts.
 hooks:
 	@hooks="$$(git rev-parse --path-format=absolute --git-common-dir)/hooks" && \
 		mkdir -p "$$hooks" && \
-		ln -sf ../../.githooks/pre-commit "$$hooks/pre-commit" && \
-		echo "installed $$hooks/pre-commit"
+		for hook in pre-commit pre-push; do \
+			ln -sf "../../.githooks/$$hook" "$$hooks/$$hook" && \
+			echo "installed $$hooks/$$hook"; \
+		done
