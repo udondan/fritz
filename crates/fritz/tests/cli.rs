@@ -1608,3 +1608,143 @@ async fn reads_devices_with_only_a_password() {
         assert!(hosts.contains("device-1"), "{hosts}");
     }
 }
+
+/// A password command that prints `text` without a shell.
+#[cfg(unix)]
+fn printf(text: &str) -> String {
+    serde_json::json!(["printf", "%s", text]).to_string()
+}
+
+#[cfg(unix)]
+#[test]
+fn saves_and_runs_a_password_command() {
+    use std::os::unix::fs::PermissionsExt as _;
+
+    let config = Config::new();
+    let command = printf("from the command");
+    let output = config.run(&[
+        "config",
+        "init",
+        "--host",
+        "192.168.178.1",
+        "--user",
+        "agent",
+        "--password-command",
+        &command,
+    ]);
+    assert!(output.status.success(), "{}", stderr(&output));
+    let saved = "password_command = [\"printf\", \"%s\", \"from the command\"]\n";
+    assert!(config.text().ends_with(saved), "{}", config.text());
+
+    // Another init keeps the command.
+    let output = config.run(&["config", "init", "--user", "admin"]);
+    assert!(output.status.success(), "{}", stderr(&output));
+    assert!(config.text().contains("username = \"admin\"\n"));
+    assert!(config.text().ends_with(saved), "{}", config.text());
+
+    let output = config.run(&["auth", "status"]);
+    assert!(output.status.success(), "{}", stderr(&output));
+    assert_eq!(
+        stdout(&output),
+        "the password of admin@192.168.178.1 comes from the command `printf`, \
+         which ran successfully\n"
+    );
+    assert_eq!(stderr(&output), "");
+
+    let output = config.run(&["config", "show"]);
+    assert!(
+        stdout(&output).ends_with("password     from the command `printf`\n"),
+        "{}",
+        stdout(&output)
+    );
+
+    let mode = std::fs::Permissions::from_mode(0o664);
+    std::fs::set_permissions(&config.path, mode).unwrap();
+    let output = config.run(&["auth", "status"]);
+    assert!(output.status.success(), "{}", stderr(&output));
+    assert_eq!(
+        stderr(&output),
+        format!(
+            "warning: others may change {0}, which has the password command, \
+             run `chmod go-w {0}`\n",
+            config.path
+        )
+    );
+
+    // The environment wins over the profile and is not checked.
+    let output = fritz_with(
+        &["auth", "status"],
+        &[
+            ("FRITZ_CONFIG", &config.path),
+            ("FRITZ_PASSWORD_COMMAND", "echo from the environment"),
+        ],
+    );
+    assert!(output.status.success(), "{}", stderr(&output));
+    assert!(stdout(&output).contains("the command `echo`"));
+    assert_eq!(stderr(&output), "");
+}
+
+#[cfg(unix)]
+#[test]
+fn reports_password_command_errors_without_the_output() {
+    let args = [
+        "--host",
+        "192.168.178.1",
+        "--user",
+        "agent",
+        "auth",
+        "status",
+    ];
+    for (command, error) in [
+        (
+            r#"["sh", "-c", "echo topsecret; exit 3"]"#,
+            "the password command `sh` failed with exit status: 3",
+        ),
+        ("true", "the password command `true` printed no password"),
+        (
+            "fritz-test-no-such-program",
+            "cannot run the password command `fritz-test-no-such-program`",
+        ),
+        ("[\"sh\"", "FRITZ_PASSWORD_COMMAND is invalid"),
+    ] {
+        let output = fritz_with(&args, &[("FRITZ_PASSWORD_COMMAND", command)]);
+        assert!(!output.status.success());
+        assert!(stderr(&output).contains(error), "{}", stderr(&output));
+        assert!(
+            !stderr(&output).contains("topsecret"),
+            "{}",
+            stderr(&output)
+        );
+        assert!(
+            !stdout(&output).contains("topsecret"),
+            "{}",
+            stdout(&output)
+        );
+    }
+}
+
+#[cfg(unix)]
+#[tokio::test(flavor = "multi_thread")]
+async fn logs_in_with_a_password_command() {
+    let fixture = fritz_sim::Fixture::load(FIXTURE).unwrap();
+    let sim = fritz_sim::Sim::start(fixture).await.unwrap();
+    let args = strings(&[
+        "--host",
+        sim.url().as_str(),
+        "--user",
+        fritz_sim::USERNAME,
+        "tr064",
+        "call",
+        "DeviceInfo1",
+        "GetInfo",
+    ]);
+    let env = vec![(
+        "FRITZ_PASSWORD_COMMAND".to_owned(),
+        printf(&format!("{}\n", fritz_sim::PASSWORD)),
+    )];
+    let output = fritz_blocking(args, env, "").await;
+    let info = success(&output);
+    assert!(info.contains("NewModelName"), "{info}");
+    assert!(!info.contains(fritz_sim::PASSWORD));
+    assert!(!stderr(&output).contains(fritz_sim::PASSWORD));
+}
