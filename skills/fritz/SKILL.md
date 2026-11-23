@@ -36,6 +36,7 @@ or paste them.
 | Which wireless networks, how many clients?  | `fritz wlan`                         |
 | Which devices use which wireless network?   | `fritz wlan --clients`               |
 | How secure is the WLAN, is WPS on?          | `fritz wlan --details`, `fritz wlan <network>` (exit 1: not found) |
+| How busy is the internet line right now?    | `fritz traffic`, averages: `--watch --count 3` |
 | Traffic and errors per LAN/WLAN interface   | `fritz interfaces`, rates: `--watch --count 1` |
 | Which devices are (or were) on the network? | `fritz hosts`, `fritz hosts --active`|
 | Everything about one device                 | `fritz hosts <name>`, `--mac <MAC>`, `--ip <IP>` (exit 1: not found) |

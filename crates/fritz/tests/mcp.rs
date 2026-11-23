@@ -231,6 +231,43 @@ async fn reads_the_internet_and_the_firmware() {
 }
 
 #[tokio::test(flavor = "multi_thread")]
+async fn reads_the_traffic() {
+    let sim = sim().await;
+    let variable = "TotalBytesSent";
+    sim.inject(Injection::counter(
+        "WANCommonInterfaceConfig1",
+        variable,
+        500,
+        None,
+    ));
+    let client = connect(&sim).await;
+
+    let traffic = success(&client, "fritz_traffic", json!({})).await;
+    assert_eq!(traffic["supported"], true, "{traffic}");
+    assert_eq!(
+        traffic["downstream"]["current_bps"],
+        40_712 * 8,
+        "{traffic}"
+    );
+    assert!(traffic.get("sample").is_none(), "{traffic}");
+    let traffic = success(&client, "fritz_traffic", json!({"sample_seconds": 1})).await;
+    let sample = &traffic["sample"];
+    assert!(sample["seconds"].as_f64().unwrap() >= 1.0, "{traffic}");
+    assert_eq!(sample["upstream"]["bytes"], 500, "{traffic}");
+    assert!(sample["upstream"]["average_bps"].as_f64().unwrap() > 0.0);
+    client.cancel().await.unwrap();
+
+    // A device without an internet connection is not sampled.
+    let fixture = fritz_sim::Fixture::bundled("fritz-repeater-2400/8.25").unwrap();
+    let sim = Sim::start(fixture).await.unwrap();
+    let client = connect(&sim).await;
+    let traffic = success(&client, "fritz_traffic", json!({"sample_seconds": 10})).await;
+    assert_eq!(traffic["supported"], false, "{traffic}");
+    assert!(traffic.get("sample").is_none(), "{traffic}");
+    client.cancel().await.unwrap();
+}
+
+#[tokio::test(flavor = "multi_thread")]
 async fn reads_the_state() {
     let sim = sim().await;
     let client = connect(&sim).await;

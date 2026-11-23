@@ -26,6 +26,7 @@ mod status;
 mod system;
 mod tls;
 mod tr64;
+mod traffic;
 mod version;
 mod watch;
 
@@ -143,6 +144,16 @@ enum Command {
     /// The powerline adapters the device knows: name, model, MAC, whether
     /// they are connected and whether an update is offered.
     Powerline,
+    /// The traffic of the internet connection: the current rates, how much
+    /// of the line they use, the byte and packet counters, and where the
+    /// device reports them, the upstream by priority and the multicast
+    /// share. With `--watch`, one row per interval with the averages from
+    /// the counters; JSON prints one line per interval. Ctrl-C stops.
+    #[command(mut_arg("interval", |arg| arg.default_value("2")))]
+    Traffic {
+        #[command(flatten)]
+        watch: watch::Options,
+    },
     /// The LAN interfaces and wireless networks with their counters, and
     /// the LAN ports. The ports need a login to the web interface.
     Interfaces {
@@ -556,6 +567,7 @@ async fn run(
         Command::Internet { dsl: true, watch } => dsl::dsl(&load()?, watch, format, out).await,
         Command::Firmware => status::firmware(&load()?, format, out).await,
         Command::Powerline => status::powerline(&load()?, format, out).await,
+        Command::Traffic { watch } => traffic::traffic(&load()?, watch, format, out).await,
         Command::Interfaces { watch } => interfaces::interfaces(&load()?, watch, format, out).await,
         Command::Smarthome(args) => status::smarthome(&load()?, &args, format, out).await,
         Command::Ports => device::ports(&load()?, format, out).await,

@@ -89,7 +89,7 @@ pub struct Counters {
 impl Counters {
     /// The counters in the answers of statistics actions. The first answer
     /// that has a counter wins.
-    fn from_values(answers: &[Values]) -> Self {
+    pub(crate) fn from_values(answers: &[Values]) -> Self {
         let find = |names: &[&str]| {
             answers
                 .iter()
@@ -178,7 +178,7 @@ impl Rate {
 }
 
 #[expect(clippy::cast_precision_loss, reason = "rates need no exact counts")]
-fn per_second(count: u64, seconds: f64) -> f64 {
+pub(crate) fn per_second(count: u64, seconds: f64) -> f64 {
     if seconds > 0.0 {
         count as f64 / seconds
     } else {

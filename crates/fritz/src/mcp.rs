@@ -20,6 +20,7 @@
 
 use std::collections::BTreeMap;
 use std::sync::Arc;
+use std::time::Duration;
 
 use anyhow::{Context as _, bail};
 use fritz_core::capabilities;
@@ -38,6 +39,7 @@ use fritz_core::settings;
 use fritz_core::smarthome;
 use fritz_core::status::{self, Host};
 use fritz_core::telephony;
+use fritz_core::traffic::{self, Traffic};
 use fritz_core::users;
 use fritz_core::wlan;
 use rmcp::handler::server::router::tool::ToolRouter;
@@ -62,6 +64,9 @@ const MAX_PAGE: usize = 200;
 
 /// The longest value of an action that is returned whole, in characters.
 const MAX_VALUE: usize = 4096;
+
+/// The most seconds `fritz_traffic` samples.
+const MAX_SAMPLE_SECONDS: u64 = 10;
 
 /// What the model learns about the server when it connects.
 const INSTRUCTIONS: &str = "Reads the state of a FRITZ!Box router; never changes it. \
@@ -134,6 +139,23 @@ struct InternetDetails {
     internet: status::Internet,
     #[serde(skip_serializing_if = "Option::is_none")]
     dsl_details: Option<fritz_core::dsl::Report>,
+}
+
+/// The sampling of `fritz_traffic`.
+#[derive(Debug, Default, Deserialize, JsonSchema)]
+pub(crate) struct TrafficQuery {
+    /// Read twice this many seconds apart, at most 10, and add `sample`
+    /// with the averages of the byte counters in between.
+    sample_seconds: Option<u64>,
+}
+
+/// The traffic, and with `sample_seconds` the averages in between.
+#[derive(Debug, Serialize)]
+struct TrafficSample {
+    #[serde(flatten)]
+    traffic: Traffic,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    sample: Option<traffic::Sample>,
 }
 
 /// The form of `fritz_mesh`.
@@ -397,6 +419,32 @@ impl Server {
             Ok(InternetDetails {
                 internet,
                 dsl_details,
+            })
+        })
+        .await
+    }
+
+    #[tool(
+        description = "WAN traffic per direction: current and peak rate and line maximum in bit/s, utilization in percent, byte and packet totals; upstream by priority and multicast where reported. With `sample_seconds`, averages from the counters.",
+        annotations(read_only_hint = true, open_world_hint = false)
+    )]
+    async fn fritz_traffic(&self, Parameters(query): Parameters<TrafficQuery>) -> CallToolResult {
+        self.respond(async {
+            let first = self.traffic().await?;
+            let seconds = query.sample_seconds.unwrap_or_default();
+            if seconds == 0 || !first.supported {
+                return Ok(TrafficSample {
+                    traffic: first,
+                    sample: None,
+                });
+            }
+            let start = tokio::time::Instant::now();
+            tokio::time::sleep(Duration::from_secs(seconds.min(MAX_SAMPLE_SECONDS))).await;
+            let traffic = self.traffic().await?;
+            let sample = traffic.since(&first, start.elapsed().as_secs_f64());
+            Ok(TrafficSample {
+                traffic,
+                sample: Some(sample),
             })
         })
         .await
@@ -865,6 +913,12 @@ impl Server {
             source: "mcp",
         };
         Ok(Changer::new(self.context.client().await?, settings))
+    }
+
+    /// Reads the traffic, and lets other tools read while it waits.
+    async fn traffic(&self) -> anyhow::Result<Traffic> {
+        let mut reader = self.reader().await?;
+        Ok(traffic::traffic(&mut reader).await?)
     }
 
     /// The reader of the device, read when it is first needed.

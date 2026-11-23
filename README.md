@@ -34,6 +34,7 @@ status and settings of a FRITZ!Box router.
   - [Status and internet](#status-and-internet)
   - [Hosts and mesh](#hosts-and-mesh)
   - [Wireless networks](#wireless-networks)
+  - [Internet traffic](#internet-traffic)
   - [Interfaces and counters](#interfaces-and-counters)
   - [Smart Home](#smart-home)
   - [Ports, telephony and capabilities](#ports-telephony-and-capabilities)
@@ -460,6 +461,42 @@ of `--border` modules (4). `--out` is not offered on Windows, where `fritz`
 cannot make the file readable only by you. `--show-password` also prints the
 password below the code, only to a terminal.
 
+### Internet traffic
+
+`fritz traffic` shows the traffic of the internet connection: the current
+rate per direction, how much of the line it uses, the peak of the recent
+minutes, and the bytes and packets since the counters started. Where the
+device reports them, it also shows the upstream by priority class and the
+multicast share of the downstream. The maximum is the line rate the device
+reports. On a device without an internet connection, like a repeater, it
+says so.
+
+```console
+$ fritz traffic
+      NOW           USED                  PEAK         TOTAL     PACKETS
+DOWN  2.9 Mbit/s    1.1% of 268.4 Mbit/s  61.2 Mbit/s  412.7 GB  301947112
+UP    173.0 kbit/s  0.4% of 44.6 Mbit/s   5.2 Mbit/s   48.2 GB   93127730
+
+Upstream   real time 2.5 kbit/s, high 0 bit/s, default 170.5 kbit/s, low 0 bit/s
+Multicast  0 bit/s
+```
+
+`--watch` reads again every `--interval` seconds (default 2) and prints one
+row per interval with the average rates from the byte counters, until
+interrupted or after `--count` intervals. With `--output json`, each
+interval is one line (NDJSON). The device updates its counters about every
+two seconds, so shorter intervals show steps rather than averages. A
+counter that falls is taken as wrapped around at 2^32 if it fit in 32 bits,
+and as reset otherwise; a reset leaves the average of that interval out.
+
+```console
+$ fritz traffic --watch
+↓   3.1 Mbit/s   1.2%  ↑ 181.4 kbit/s   0.4%
+↓  48.7 Mbit/s  18.1%  ↑   1.2 Mbit/s   2.7%
+```
+
+Ctrl-C ends every `--watch` with exit code 0, after the last whole line.
+
 ### Interfaces and counters
 
 `fritz interfaces` shows the LAN interface and the wireless networks with
@@ -855,6 +892,7 @@ claude mcp add fritz -- fritz --host 192.168.178.1 --user agent mcp
 | `fritz_firmware`        | Installed and offered firmware, auto update, last update    |
 | `fritz_wlan`            | Wireless networks, guest network, `clients`, `details`      |
 | `fritz_interfaces`      | LAN and WLAN counters of bytes, packets, errors; LAN ports  |
+| `fritz_traffic`         | WAN rates, utilization, totals; averages: `sample_seconds`  |
 | `fritz_hosts`           | Known hosts, paginated, or one host by `mac` or `ip`        |
 | `fritz_mesh`            | Mesh nodes with IPs and links, or a tree of who is where    |
 | `fritz_powerline`       | Powerline adapters, whether active, updates                 |
