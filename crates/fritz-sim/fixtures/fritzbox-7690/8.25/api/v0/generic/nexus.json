@@ -1,0 +1,8 @@
+{
+  "enhanced_trust_mode": "",
+  "enhanced_trust_mode_allowed": "1",
+  "is_master": "1",
+  "master_ip": "0.0.0.0",
+  "peers": [],
+  "role": "auto"
+}
