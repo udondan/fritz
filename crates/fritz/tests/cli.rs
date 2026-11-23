@@ -207,7 +207,7 @@ fn pins_the_certificate_for_https() {
 }
 
 #[test]
-fn needs_a_user_and_a_directory_to_capture() {
+fn needs_a_directory_and_a_password_to_capture() {
     let output = fritz(&["capture"]);
     assert!(!output.status.success());
     assert!(stderr(&output).contains("--out"), "{}", stderr(&output));
@@ -218,7 +218,7 @@ fn needs_a_user_and_a_directory_to_capture() {
     let output = fritz(&[&args[..], &[out.to_str().unwrap()]].concat());
     assert!(!output.status.success());
     assert!(
-        stderr(&output).contains("no user is set for http://127.0.0.1:9/"),
+        stderr(&output).contains("no password for 127.0.0.1"),
         "{}",
         stderr(&output)
     );
@@ -413,8 +413,14 @@ fn creates_and_shows_profiles() {
         stdout.contains("address      https://lab.example:49443/\n"),
         "{stdout}"
     );
-    assert!(stdout.contains("user         none\n"), "{stdout}");
-    assert!(stdout.contains("password     no user is set"), "{stdout}");
+    assert!(
+        stdout.contains("user         none, for devices with only a password\n"),
+        "{stdout}"
+    );
+    assert!(
+        stdout.contains("password     no password for lab.example,"),
+        "{stdout}"
+    );
 
     // Without a host, the profile names the default one.
     let output = config.run(&["--profile", "bare", "config", "init"]);
@@ -1332,4 +1338,20 @@ mod change {
                 .all(|r| r.action.as_deref() != Some("SetEnable"))
         );
     }
+}
+
+#[tokio::test(flavor = "multi_thread")]
+async fn reads_devices_with_only_a_password() {
+    // Devices with only a password, like FRITZ!Repeaters, take any user
+    // name; without --user, fritz sends the historic default.
+    let options = fritz_sim::Options {
+        username: fritz_core::connection::PASSWORD_ONLY_USERNAME.to_owned(),
+        ..fritz_sim::Options::default()
+    };
+    let fixture = fritz_sim::Fixture::load(FIXTURE).unwrap();
+    let sim = fritz_sim::Sim::start_with(fixture, options).await.unwrap();
+    let args = strings(&["--host", sim.url().as_str(), "overview"]);
+    let env = vec![("FRITZ_PASSWORD", fritz_sim::PASSWORD)];
+    let overview = success(&fritz_async(args, env).await);
+    assert!(overview.contains("FRITZ!Box 7690"), "{overview}");
 }

@@ -9,6 +9,12 @@ use crate::config::Profile;
 /// The host when neither the command line nor a profile names one.
 pub const DEFAULT_HOST: &str = "fritz.box";
 
+/// The user name sent to TR-064 when none is set. Devices with only a
+/// password, like FRITZ!Repeaters or a FRITZ!Box set to log in with the
+/// password alone, use a user of their own instead of the one sent, so any
+/// name works. This one is the historic default of TR-064.
+pub const PASSWORD_ONLY_USERNAME: &str = "dslf-config";
+
 /// The TR-064 port for HTTPS.
 pub const HTTPS_PORT: u16 = 49443;
 
@@ -32,7 +38,8 @@ pub enum Error {
     /// The fingerprint given as an override is not one.
     #[error("{0} is not a SHA-256 fingerprint of 64 hex digits")]
     InvalidFingerprint(String),
-    /// No user is set.
+    /// No user is set. No longer returned: without a user, the device is
+    /// taken to have only a password.
     #[error("no user is set for {0}, pass --user or run `fritz config init --user <name>`")]
     NoUsername(Url),
 }
@@ -131,20 +138,34 @@ impl Target {
         })
     }
 
-    /// The user, or an error if none is set.
+    /// The user for TR-064, or [`PASSWORD_ONLY_USERNAME`] if none is set.
+    ///
+    /// # Errors
+    ///
+    /// None; the result is kept for compatibility.
     pub fn username(&self) -> Result<&str, Error> {
-        self.username
-            .as_deref()
-            .ok_or_else(|| Error::NoUsername(self.url.clone()))
+        Ok(self.username.as_deref().unwrap_or(PASSWORD_ONLY_USERNAME))
     }
 
-    /// The name of the password in the keychain: `user@host`.
+    /// The user for the login to the web interface, empty if none is set,
+    /// as the web interface expects for devices with only a password.
+    #[must_use]
+    pub fn web_username(&self) -> &str {
+        self.username.as_deref().unwrap_or_default()
+    }
+
+    /// The name of the password in the keychain: `user@host`, or the host
+    /// alone if no user is set.
+    ///
+    /// # Errors
+    ///
+    /// None; the result is kept for compatibility.
     pub fn account(&self) -> Result<String, Error> {
-        Ok(format!(
-            "{}@{}",
-            self.username()?,
-            self.url.host_str().unwrap_or_default()
-        ))
+        let host = self.url.host_str().unwrap_or_default();
+        Ok(match &self.username {
+            Some(username) => format!("{username}@{host}"),
+            None => host.to_owned(),
+        })
     }
 
     /// The web interface of the device, which serves the session login and
@@ -223,11 +244,10 @@ mod tests {
         assert_eq!(target.url.as_str(), "https://fritz.box:49443/");
         assert_eq!(target.username, None);
         assert_eq!(target.fingerprint, None);
-        assert_eq!(
-            target.username().unwrap_err().to_string(),
-            "no user is set for https://fritz.box:49443/, pass --user or run `fritz config init --user <name>`"
-        );
-        assert!(target.account().is_err());
+        // Without a user, the device is taken to have only a password.
+        assert_eq!(target.username().unwrap(), PASSWORD_ONLY_USERNAME);
+        assert_eq!(target.web_username(), "");
+        assert_eq!(target.account().unwrap(), "fritz.box");
         assert_eq!(
             target.client().unwrap_err().to_string(),
             "no certificate is trusted for https://fritz.box:49443/, run `fritz tls trust`"
@@ -244,6 +264,8 @@ mod tests {
         let target = Target::resolve(Some(&profile), &Overrides::default()).unwrap();
         assert_eq!(target.url.as_str(), "https://192.168.178.1:49443/");
         assert_eq!(target.account().unwrap(), "agent@192.168.178.1");
+        assert_eq!(target.username().unwrap(), "agent");
+        assert_eq!(target.web_username(), "agent");
         assert_eq!(target.fingerprint, Some(fingerprint(1)));
         assert!(target.client().unwrap().build().is_ok());
 

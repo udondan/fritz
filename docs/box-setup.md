@@ -89,6 +89,23 @@ fritz auth login
 `fritz config show` shows the settings in effect, and `fritz auth status`
 where the password comes from.
 
+### Devices with only a password
+
+FRITZ!Repeaters, and a FRITZ!Box set to log in with the password alone, have
+no users. Leave out `--user` for them; the keychain then keeps the password
+under the host alone:
+
+```sh
+fritz --profile repeater config init --host 192.168.178.4
+fritz --profile repeater tls trust
+fritz --profile repeater auth login
+fritz --profile repeater overview
+```
+
+These devices take any user name over TR-064 and use a user of their own
+instead, so `fritz` sends the historic default `dslf-config`. On a FRITZ!Box,
+a user of its own with only the rights it needs is the safer choice.
+
 ## 5. Without a configuration file
 
 In containers and scripts, the environment can replace the profile and the
@@ -97,7 +114,7 @@ keychain:
 | Variable | Option | Meaning |
 |---|---|---|
 | `FRITZ_HOST` | `--host` | `192.168.178.1` means `https://192.168.178.1:49443`. Use `http://192.168.178.1:49000` for unencrypted access. |
-| `FRITZ_USERNAME` | `--user` | The user on the box. |
+| `FRITZ_USERNAME` | `--user` | The user on the box. Leave it out for devices with only a password. |
 | `FRITZ_PASSWORD` | | The password. It takes precedence over the keychain. |
 | `FRITZ_TLS_FINGERPRINT` | `--fingerprint` | The SHA-256 fingerprint of the certificate, from `fritz tls fingerprint`. |
 | `FRITZ_PROFILE` | `--profile` | The profile to use instead of the default one. |
