@@ -12,6 +12,7 @@ use std::path::{Path, PathBuf};
 
 use anyhow::{Context as _, bail};
 use clap::{Args, ValueEnum};
+use fritz_core::redact;
 use fritz_core::wlan::join::{self, Join};
 use secrecy::ExposeSecret as _;
 
@@ -31,7 +32,8 @@ pub(crate) struct QrArgs {
     #[arg(long, value_enum)]
     format: Option<Kind>,
     /// Write the code to this file, readable only by the user, instead of
-    /// the terminal.
+    /// the terminal. Not on Windows, where `fritz` cannot restrict it to
+    /// the user.
     #[arg(long)]
     out: Option<PathBuf>,
     /// Pixels per module of PNG and SVG.
@@ -73,7 +75,7 @@ pub(crate) async fn run(
     terminal: bool,
     out: &mut impl Write,
 ) -> anyhow::Result<()> {
-    let kind = kind(&args, terminal)?;
+    let kind = kind(&args, terminal, cfg!(unix))?;
     let mut reader = status::reader(context).await?;
     let join = join::join(&mut reader, args.network.as_deref()).await?;
     if join.enabled == Some(false) {
@@ -83,8 +85,15 @@ pub(crate) async fn run(
 }
 
 /// The format of the code, or why it cannot be shown: PNG and SVG need a
-/// file, and the code and the password are only printed to a terminal.
-fn kind(args: &QrArgs, terminal: bool) -> anyhow::Result<Kind> {
+/// file, the code and the password are only printed to a terminal, and a
+/// file is only written where `private` tells that it can be made readable
+/// only by the user, as on Unix.
+fn kind(args: &QrArgs, terminal: bool, private: bool) -> anyhow::Result<Kind> {
+    if args.out.is_some() && !private {
+        bail!(
+            "--out is not supported on this system, which cannot make the file readable only by you"
+        );
+    }
     let kind = match (args.format, &args.out) {
         (Some(kind), _) => kind,
         (None, Some(path)) => by_extension(path)?,
@@ -134,13 +143,13 @@ fn show(join: &Join, args: &QrArgs, kind: Kind, out: &mut impl Write) -> anyhow:
                 Kind::Png => png(&modules, args.scale.into())?,
             };
             save(path, &bytes)?;
-            let ssid = status::clean(&join.ssid);
+            let ssid = status::clean(&redact::value("NewSSID", &join.ssid));
             writeln!(out, "saved the code of {ssid} to {}", path.display())?;
         }
     }
     let pairs = [
         ("Service", Some(join.service.clone())),
-        ("SSID", Some(join.ssid.clone())),
+        ("SSID", Some(redact::value("NewSSID", &join.ssid))),
         ("Security", Some(join.auth.to_string())),
         ("Hidden", Some(status::yes_no(join.hidden))),
         ("Guest", Some(status::yes_no(join.guest))),
@@ -256,7 +265,11 @@ mod tests {
                 Kind::Text,
             ),
         ] {
-            assert_eq!(kind(&args(given), terminal).unwrap(), expected, "{given:?}");
+            assert_eq!(
+                kind(&args(given), terminal, true).unwrap(),
+                expected,
+                "{given:?}"
+            );
         }
         for (given, terminal, message) in [
             (
@@ -291,11 +304,42 @@ mod tests {
                 "cannot tell the format of code.jpg, use --format text|png|svg",
             ),
         ] {
-            let error = kind(&args(given), terminal).unwrap_err();
+            let error = kind(&args(given), terminal, true).unwrap_err();
             assert_eq!(error.to_string(), message, "{given:?}");
         }
         assert!(Cli::try_parse_from(["qr", "--scale", "0"]).is_err());
         assert!(Cli::try_parse_from(["qr", "--border", "17"]).is_err());
+        // Without files only the user can read, only the terminal.
+        let error = kind(&args(&["--out", "code.png"]), true, false).unwrap_err();
+        assert_eq!(
+            error.to_string(),
+            "--out is not supported on this system, which cannot make the file \
+             readable only by you"
+        );
+        assert_eq!(kind(&args(&[]), true, false).unwrap(), Kind::Text);
+    }
+
+    #[test]
+    fn hides_session_ids_in_the_ssid_only_when_shown() {
+        let dir = tempfile::tempdir().unwrap();
+        let mut join = network();
+        join.ssid = "Home?sid=123&sid=456".to_owned();
+        let path = dir.path().join("code.png");
+        let text = shown(&join, &args(&["--out", path.to_str().unwrap()]), Kind::Png);
+        assert!(
+            text.starts_with("saved the code of Home?sid=***&sid=*** to "),
+            "{text}"
+        );
+        assert!(
+            text.contains("\nSSID      Home?sid=***&sid=***\n"),
+            "{text}"
+        );
+        assert!(!text.contains("123"), "{text}");
+        assert!(
+            join.payload()
+                .expose_secret()
+                .contains(r"S:Home?sid=123&sid=456;"),
+        );
     }
 
     #[test]
@@ -421,16 +465,56 @@ mod tests {
         shown(&join, &args(&["--out", path.to_str().unwrap()]), Kind::Text);
         let text = std::fs::read_to_string(&path).unwrap();
         assert!(!text.contains('\x1b'));
-        let mut rows: Vec<Vec<bool>> = Vec::new();
+        assert_eq!(decode_modules(size, &art(&text, size)), payload());
+    }
+
+    /// The modules of half blocks without colors, `size` per side. Lines may
+    /// lack their trailing light modules.
+    fn art(text: &str, size: usize) -> Vec<bool> {
+        let mut dark = Vec::new();
         for line in text.lines() {
-            let (top, bottom) = line
-                .chars()
-                .map(|c| (matches!(c, '█' | '▀'), matches!(c, '█' | '▄')))
-                .unzip();
-            rows.extend([top, bottom]);
+            let cells: Vec<char> = line.chars().collect();
+            for blocks in [['█', '▀'], ['█', '▄']] {
+                for x in 0..size {
+                    dark.push(cells.get(x).is_some_and(|c| blocks.contains(c)));
+                }
+            }
         }
-        rows.truncate(size);
-        assert_eq!(decode_modules(size, &rows.concat()), payload());
+        dark.resize(size * size, false);
+        dark
+    }
+
+    #[test]
+    fn shows_a_code_that_works_in_the_readme() {
+        let readme = concat!(env!("CARGO_MANIFEST_DIR"), "/../../README.md");
+        let readme = std::fs::read_to_string(readme).unwrap();
+        let block = readme.split("$ fritz wlan qr\n").nth(1).unwrap();
+        let block = block.split("Service   ").next().unwrap();
+        let join = Join {
+            service: "WLANConfiguration3".to_owned(),
+            ssid: "Home-Guest".to_owned(),
+            auth: Auth::Wpa,
+            hidden: false,
+            enabled: Some(true),
+            guest: true,
+            passphrase: Some(SecretString::from("example-passphrase")),
+        };
+        let payload = join.payload();
+        let payload = payload.expose_secret();
+        assert_eq!(payload, "WIFI:T:WPA;S:Home-Guest;P:example-passphrase;;");
+        // What the terminal shows, without colors and trailing spaces, dark
+        // on light like a code block.
+        let modules = Modules::new(payload, 4).unwrap();
+        let mut shown = String::new();
+        for line in text(&modules, false).lines() {
+            shown.push_str(line.trim_end());
+            shown.push('\n');
+        }
+        assert_eq!(block, shown);
+        assert_eq!(
+            decode_modules(modules.size, &art(block, modules.size)),
+            payload
+        );
     }
 
     #[test]

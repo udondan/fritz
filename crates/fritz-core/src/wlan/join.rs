@@ -78,6 +78,8 @@ impl fmt::Display for Auth {
 pub struct Join {
     /// The service, like `WLANConfiguration3`.
     pub service: String,
+    /// The SSID verbatim, for the code: redact it with
+    /// [`redact::value`](crate::redact::value) before it is shown.
     pub ssid: String,
     pub auth: Auth,
     /// Whether the SSID is not advertised.
@@ -137,7 +139,14 @@ pub async fn join(reader: &mut Reader, network: Option<&str>) -> Result<Join, Er
             .ok_or(Error::NoGuest)?,
     };
     let service = wlan.service;
-    let Some(ssid) = wlan.ssid else {
+    // The read hides values like `?sid=…`, which an SSID may hold too; the
+    // code needs it verbatim.
+    let ssid = reader
+        .output(&service, "GetInfo", &[])
+        .await?
+        .into_iter()
+        .find(|(name, value)| name == "NewSSID" && !value.is_empty());
+    let Some((_, ssid)) = ssid else {
         return Err(Error::NoSsid { service });
     };
     let beacon_type = info.text("NewBeaconType").unwrap_or_default();

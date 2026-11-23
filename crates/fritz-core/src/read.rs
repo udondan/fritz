@@ -105,8 +105,10 @@ impl Reader {
         Ok(Some(self.client.get(&path).await.map_err(redact::error)?))
     }
 
-    /// Calls an action that only reads, and returns its output as it is.
-    async fn output(
+    /// Calls an action that only reads, and returns its output as it is,
+    /// without redaction: for values that must stay verbatim, like the SSID
+    /// in [`wlan::join`](crate::wlan::join), never to show or log.
+    pub(crate) async fn output(
         &mut self,
         reference: &str,
         name: &str,

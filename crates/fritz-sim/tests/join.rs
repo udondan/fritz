@@ -131,6 +131,14 @@ async fn encodes_every_kind_of_network() {
             "fake-hidden-passphrase",
             "WIFI:T:WPA;S:wlan-hidden;P:fake-hidden-passphrase;H:true;;",
         ),
+        // Verbatim, though the read path hides session IDs in values.
+        (
+            "Home?sid=123&sid=456",
+            "11i",
+            false,
+            "fake-sid-passphrase",
+            "WIFI:T:WPA;S:Home?sid=123&sid=456;P:fake-sid-passphrase;;",
+        ),
         (
             r#"Café;"Gäste",x:y\z"#,
             "11iandWPA3",

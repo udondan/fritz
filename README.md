@@ -326,8 +326,27 @@ SSID; `\`, `;`, `,`, `:` and `"` are escaped. WEP is not supported.
 
 ```console
 $ fritz wlan qr
-█▀▀▀▀▀█ ▄▀▄ ▀ █▀▀▀▀▀█
-...
+
+
+    █▀▀▀▀▀█ ▄  ▀▄▀▀▀█▀█▀▄▀ ▄▄ █▀▀▀▀▀█
+    █ ███ █ █▄▀▄█ █ █ ▄▀█▀▄▀  █ ███ █
+    █ ▀▀▀ █  ▀▄██▄██▀▄▄▄▀█▄█▀ █ ▀▀▀ █
+    ▀▀▀▀▀▀▀ █ █ █▄▀▄█▄▀▄█▄▀▄█ ▀▀▀▀▀▀▀
+    █   ▄ ▀ █  ██▄█ ▀█▀███▀ █▀█▄▄██▀▄
+    ▀▄▄▀ █▀▄▄ ▄▄ █▀▄▄█▄▄█▄▀▀▀█▄▄███▄▄
+    ██▀ ▄█▀▄█▄████ ▀ ▀▄▀ ▀ █▄▀█▀██▄ █
+      ▀▄▀ ▀ ▄██▄▄▀▀▀█   █ ██▄  ██ ▄▄
+    ██▄▀ ▀▀█▀▄   ▄█▀▀ █ █▀█▄█▀ █▀▀▀▄▀
+     ███▀█▀▀▀▄ ▄   ██▀▀██▀█▄▄ ██▀▄  ▄
+    ▄▀▀ ▄▄▀▄█ █ ▄█▄▀  ▀  ▀   ▄▄▀▄█▄▄▄
+    █ ▀▄▄█▀▄█ ▄▄█▄▄▄▄█▀█▄▄ ▄▀▄▄▄▀▀▄█
+    ▀▀▀▀  ▀ █▄  ▀▄  ▀▄█ ▄█▄██▀▀▀█▄▄▄▀
+    █▀▀▀▀▀█  ▄▀ █▀▀▄▀█▄▄▀▄█▀█ ▀ █▄▄▀
+    █ ███ █  ▀▀█  ▄▀▀ ▄ ▀▀▀▄█▀█▀██▄▀
+    █ ▀▀▀ █  ▄▄▄█ ▀▀  ▄▀ ▀ ▄▀▄  ▄ ▄▀█
+    ▀▀▀▀▀▀▀ ▀▀   ▀ ▀▀   ▀ ▀ ▀▀▀ ▀▀
+
+
 Service   WLANConfiguration3
 SSID      Home-Guest
 Security  WPA
@@ -340,8 +359,9 @@ terminal. Without one, like in a pipe, `fritz` refuses before it asks the
 device; write the code to a file instead, which only you can read:
 `--out guest.png` or `--out guest.svg` (the format follows the extension, or
 `--format text|png|svg`), with `--scale` pixels per module (8) and a border
-of `--border` modules (4). `--show-password` also prints the password below
-the code, only to a terminal.
+of `--border` modules (4). `--out` is not offered on Windows, where `fritz`
+cannot make the file readable only by you. `--show-password` also prints the
+password below the code, only to a terminal.
 
 ### Interfaces and counters
 
