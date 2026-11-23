@@ -152,6 +152,13 @@ async fn reads_the_state() {
 
     let mesh = success(&client, "fritz_mesh", json!({})).await;
     assert!(!mesh["nodes"].as_array().unwrap().is_empty(), "{mesh}");
+    let tree = success(&client, "fritz_mesh", json!({"tree": true})).await;
+    assert_eq!(tree[0]["name"], "device-50", "{tree}");
+    assert_eq!(tree[0]["children"][0]["name"], "device-51", "{tree}");
+    assert_eq!(
+        tree[0]["children"][0]["uplinks"][0]["kind"], "WLAN",
+        "{tree}"
+    );
 
     let smarthome = success(&client, "fritz_smarthome", json!({})).await;
     assert!(smarthome.is_array(), "{smarthome}");

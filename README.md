@@ -379,7 +379,7 @@ claude mcp add fritz -- fritz --host 192.168.178.1 --user agent mcp
 | `fritz_internet`        | Internet connection, addresses, DNS, rates, DSL line        |
 | `fritz_wlan`            | Wireless networks                                           |
 | `fritz_hosts`           | Known hosts, filtered by `active` and `search`, paginated   |
-| `fritz_mesh`            | Mesh nodes and links                                        |
+| `fritz_mesh`            | Mesh nodes and links, or a tree of who is connected where   |
 | `fritz_smarthome`       | Smart Home devices (FRITZ!OS 8.20 and later)                |
 | `fritz_ports`           | Port forwardings and whether UPnP is on                     |
 | `fritz_telephony`       | Numbers, accounts, deflections, answering machines, DECT    |
