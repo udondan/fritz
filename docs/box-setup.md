@@ -58,8 +58,8 @@ stops.
 ## 4. Set up fritz
 
 `fritz` keeps the address of your box, the user and the trusted certificate
-in a profile, in `~/.config/fritz/config.toml` on Linux and the usual
-configuration directory on macOS and Windows. Use the IP address rather than
+in a profile, in `~/.config/fritz/config.toml` on Linux and macOS (or below
+`$XDG_CONFIG_HOME`) and in `%APPDATA%\fritz\config` on Windows. Use the IP address rather than
 `fritz.box`: newer FRITZ!OS versions may no longer hand out the name
 `fritz.box` in every setup.
 

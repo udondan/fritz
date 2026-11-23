@@ -10,6 +10,7 @@ pub mod capture;
 pub mod change;
 pub mod config;
 pub mod connection;
+pub mod dirs;
 pub mod fault;
 pub mod generic;
 pub mod identity;

@@ -155,12 +155,11 @@ pub struct Settings {
     pub source: &'static str,
 }
 
-/// The usual state directory, like `~/.local/state/fritz` on Linux, or the
-/// local data directory where there is none. `None` if the home directory
-/// is unknown.
+/// The usual state directory, like `~/.local/state/fritz` on Linux and
+/// macOS, see [`dirs`](crate::dirs). `None` if the home directory is
+/// unknown.
 pub fn default_dir() -> Option<PathBuf> {
-    directories::ProjectDirs::from("", "", "fritz")
-        .map(|dirs| dirs.state_dir().unwrap_or(dirs.data_local_dir()).to_owned())
+    crate::dirs::state()
 }
 
 /// The change of an input.
