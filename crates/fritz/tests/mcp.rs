@@ -29,7 +29,7 @@ async fn sim() -> Sim {
 }
 
 /// Starts `fritz mcp` for `sim`, without the `FRITZ_*` variables of the
-/// caller.
+/// caller and without the cache.
 async fn connect(sim: &Sim) -> Client {
     connect_with(sim, &[]).await
 }
@@ -50,6 +50,7 @@ async fn connect_env(sim: &Sim, extra: &[&str], vars: &[(&str, &str)]) -> Client
         cmd.args(["--host", &url, "--user", fritz_sim::USERNAME, "mcp"])
             .args(extra)
             .env("FRITZ_NO_KEYCHAIN", "1")
+            .env("FRITZ_NO_CACHE", "1")
             .env("FRITZ_CONFIG", &missing)
             .env("FRITZ_PASSWORD", fritz_sim::PASSWORD)
             .envs(vars.iter().copied());
@@ -564,4 +565,41 @@ mod change {
         assert!(message.contains("FRITZ_ALLOW_CRITICAL=1"), "{message}");
         client.cancel().await.unwrap();
     }
+}
+
+#[tokio::test(flavor = "multi_thread")]
+async fn keeps_the_descriptions_in_the_cache() {
+    let sim = sim().await;
+    let dir = tempfile::tempdir().unwrap();
+    let vars = [
+        ("FRITZ_NO_CACHE", "0"),
+        ("FRITZ_CACHE_DIR", dir.path().to_str().unwrap()),
+    ];
+    let scpds = || {
+        sim.requests()
+            .iter()
+            .filter(|r| r.method == "GET" && r.path != "/tr64desc.xml")
+            .count()
+    };
+
+    let client = connect_env(&sim, &[], &vars).await;
+    let first = success(&client, "fritz_overview", json!({})).await;
+    let fetched = scpds();
+    assert!(fetched > 0);
+    // After an error, the descriptions come from memory.
+    failure(
+        &client,
+        "fritz_call_action",
+        json!({"service": "DeviceInfo1", "action": "SetProvisioningCode"}),
+    )
+    .await;
+    success(&client, "fritz_overview", json!({})).await;
+    assert_eq!(scpds(), fetched);
+    client.cancel().await.unwrap();
+
+    // The next server reads them from the cache directory.
+    let client = connect_env(&sim, &[], &vars).await;
+    assert_eq!(success(&client, "fritz_overview", json!({})).await, first);
+    assert_eq!(scpds(), fetched);
+    client.cancel().await.unwrap();
 }

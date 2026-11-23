@@ -166,6 +166,8 @@ keychain:
 | `FRITZ_PROFILE` | `--profile` | The profile to use instead of the default one. |
 | `FRITZ_CONFIG` | `--config` | Another configuration file. |
 | `FRITZ_NO_KEYCHAIN` | | Any value keeps `fritz` away from the keychain. |
+| `FRITZ_NO_CACHE` | `--no-cache` | `1` fetches the service descriptions from the device instead of the cache. |
+| `FRITZ_CACHE_DIR` | | Another directory for the cache of the service descriptions. |
 
 Options and variables take precedence over the profile. The user and the
 certificate of the profile apply only to its own host (the user also over

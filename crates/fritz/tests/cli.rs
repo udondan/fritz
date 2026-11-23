@@ -17,18 +17,21 @@ const ONTEL: &str = include_str!("../../fritz-core/tests/data/ontelSCPD.xml");
 const FINGERPRINT: &str = "00112233445566778899AABBCCDDEEFF00112233445566778899AABBCCDDEEFF";
 
 /// Runs `fritz` with the given arguments, environment and input, without the
-/// `FRITZ_*` variables of the caller. The keychain is off, and the
-/// configuration file does not exist unless `FRITZ_CONFIG` is given.
+/// `FRITZ_*` variables of the caller. The keychain is off, the
+/// configuration file does not exist unless `FRITZ_CONFIG` is given, and the
+/// cache is an empty directory unless `FRITZ_CACHE_DIR` is given.
 fn fritz_input(args: &[&str], env: &[(&str, &str)], input: &str) -> Output {
     let mut command = Command::new(env!("CARGO_BIN_EXE_fritz"));
     for (name, _) in std::env::vars().filter(|(n, _)| n.starts_with("FRITZ_")) {
         command.env_remove(name);
     }
     let missing = Path::new(env!("CARGO_TARGET_TMPDIR")).join("missing/config.toml");
+    let cache = tempfile::tempdir().unwrap();
     let mut child = command
         .args(args)
         .env("FRITZ_NO_KEYCHAIN", "1")
         .env("FRITZ_CONFIG", missing)
+        .env("FRITZ_CACHE_DIR", cache.path())
         .envs(env.iter().copied())
         .stdin(Stdio::piped())
         .stdout(Stdio::piped())
@@ -1694,6 +1697,111 @@ async fn reads_devices_with_only_a_password() {
         assert!(wlan.contains("wlan-1"), "{wlan}");
         let hosts = success(&read("hosts").await);
         assert!(hosts.contains("device-1"), "{hosts}");
+    }
+}
+
+/// Runs `fritz` against `sim` without a password, with the cache in `dir`
+/// and more variables.
+async fn cached(sim: &fritz_sim::Sim, dir: &Path, args: &[&str], env: &[(&str, &str)]) -> Output {
+    let mut all = strings(&["--host", sim.url().as_str(), "--output", "text"]);
+    all.extend(strings(args));
+    let mut vars = vec![(
+        "FRITZ_CACHE_DIR".to_owned(),
+        dir.to_str().unwrap().to_owned(),
+    )];
+    vars.extend(env.iter().map(|(n, v)| ((*n).to_owned(), (*v).to_owned())));
+    fritz_blocking(all, vars, "").await
+}
+
+/// The number of SCPDs the simulator served.
+fn scpd_requests(sim: &fritz_sim::Sim) -> usize {
+    sim.requests()
+        .iter()
+        .filter(|r| r.method == "GET" && r.path != "/tr64desc.xml")
+        .count()
+}
+
+#[tokio::test(flavor = "multi_thread")]
+async fn caches_the_descriptions() {
+    let fixture = fritz_sim::Fixture::load(FIXTURE).unwrap();
+    let sim = fritz_sim::Sim::start(fixture).await.unwrap();
+    let dir = tempfile::tempdir().unwrap();
+    let cache = dir.path().join("cache");
+    let actions = ["tr064", "actions", "DeviceConfig:1"];
+
+    let first = success(&cached(&sim, &cache, &actions, &[]).await);
+    assert_eq!(scpd_requests(&sim), 1);
+    // The second run only fetches the device description, and classifies
+    // the actions the same.
+    let second = success(&cached(&sim, &cache, &actions, &[]).await);
+    assert_eq!(second, first);
+    assert_eq!(scpd_requests(&sim), 1);
+    let describe = ["tr064", "describe", "DeviceConfig1", "Reboot"];
+    let describe = success(&cached(&sim, &cache, &describe, &[]).await);
+    assert!(describe.starts_with("Reboot (critical"), "{describe}");
+    assert_eq!(scpd_requests(&sim), 1);
+
+    // Without the cache, the SCPD is fetched.
+    let mut no_cache = vec!["--no-cache"];
+    no_cache.extend(actions);
+    assert_eq!(success(&cached(&sim, &cache, &no_cache, &[]).await), first);
+    let off = [("FRITZ_NO_CACHE", "1")];
+    assert_eq!(success(&cached(&sim, &cache, &actions, &off).await), first);
+    assert_eq!(scpd_requests(&sim), 3);
+
+    let show = success(&cached(&sim, &cache, &["cache", "show"], &[]).await);
+    assert!(show.starts_with("MODEL "), "{show}");
+    assert!(
+        show.contains(
+            "FRITZ!Box 7690  285.08.25  uuid:00000000-0000-4000-8000-000000000001  1      "
+        ),
+        "{show}"
+    );
+    assert!(
+        show.ends_with(&format!("in {}\n", cache.display())),
+        "{show}"
+    );
+    let args = ["cache", "show", "--output", "json"];
+    let json: serde_json::Value =
+        serde_json::from_str(&success(&cached(&sim, &cache, &args, &[]).await)).unwrap();
+    assert_eq!(json["dir"], cache.to_str().unwrap(), "{json}");
+    assert_eq!(
+        json["devices"][0]["device"]["firmware"], "285.08.25",
+        "{json}"
+    );
+    assert_eq!(json["devices"][0]["scpds"], 1, "{json}");
+    let args = ["cache", "show", "--output", "yaml"];
+    let yaml = success(&cached(&sim, &cache, &args, &[]).await);
+    assert!(yaml.contains("    firmware: \"285.08.25\"\n"), "{yaml}");
+
+    let clear = success(&cached(&sim, &cache, &["cache", "clear"], &[]).await);
+    assert_eq!(
+        clear,
+        format!(
+            "removed the descriptions of 1 device from {}\n",
+            cache.display()
+        )
+    );
+    assert!(!cache.exists());
+    let show = success(&cached(&sim, &cache, &["cache", "show"], &[]).await);
+    assert_eq!(show, format!("the cache in {} is empty\n", cache.display()));
+    let clear = success(&cached(&sim, &cache, &["cache", "clear"], &[]).await);
+    assert!(
+        clear.starts_with("removed the descriptions of 0 devices"),
+        "{clear}"
+    );
+}
+
+#[test]
+fn reports_an_unreadable_cache() {
+    let dir = tempfile::tempdir().unwrap();
+    let file = dir.path().join("file");
+    std::fs::write(&file, "").unwrap();
+    let file = file.to_str().unwrap();
+    for (command, error) in [("show", "cannot read"), ("clear", "cannot clear")] {
+        let output = fritz_with(&["cache", command], &[("FRITZ_CACHE_DIR", file)]);
+        let message = failure(&output);
+        assert!(message.contains(&format!("{error} {file}")), "{message}");
     }
 }
 
