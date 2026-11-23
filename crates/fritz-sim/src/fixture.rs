@@ -53,6 +53,7 @@ pub(crate) struct Recording {
 /// lists/<name>.<xml|json>
 /// api/<path>.json
 /// data/<page>.json
+/// homeauto/<ain>.xml
 /// ```
 ///
 /// A list document `lists/devicehostlist.xml` is served at the path
@@ -60,6 +61,9 @@ pub(crate) struct Recording {
 /// returns. A document `api/v0/smarthome/overview.json` of the REST API is
 /// served at `/api/v0/smarthome/overview`. A page `data/ecoStat.json` of the
 /// web interface answers a form with `page=ecoStat` posted to `/data.lua`.
+/// The statistics `homeauto/116300000001.xml` answer the command
+/// `getbasicdevicestats` of the Smart Home HTTP interface for the device
+/// `11630 0000001`.
 #[derive(Debug, Clone)]
 pub struct Fixture {
     pub(crate) description_xml: String,
@@ -75,6 +79,8 @@ pub struct Fixture {
     pub(crate) api: HashMap<String, String>,
     /// The pages of `/data.lua` by path, like `/ecoStat`.
     pub(crate) pages: HashMap<String, String>,
+    /// The statistics of Smart Home devices by AIN without spaces.
+    pub(crate) stats: HashMap<String, String>,
 }
 
 impl Fixture {
@@ -156,14 +162,8 @@ impl Fixture {
                 }
             }
         }
-        let mut lists = HashMap::new();
-        let lists_dir = dir.join("lists");
-        if source.is_dir(&lists_dir) {
-            for (name, path) in entries(&lists_dir)? {
-                let name = name.split_once('.').map_or(name.as_str(), |(stem, _)| stem);
-                lists.insert(name.to_owned(), read(&path)?);
-            }
-        }
+        let lists = by_stem(source, &dir.join("lists"))?;
+        let stats = by_stem(source, &dir.join("homeauto"))?;
         let api = tree(source, &dir.join("api"), "/api")?;
         let pages = tree(source, &dir.join("data"), "")?;
         Ok(Self {
@@ -174,6 +174,7 @@ impl Fixture {
             lists,
             api,
             pages,
+            stats,
         })
     }
 
@@ -245,6 +246,18 @@ fn answer(json: &str) -> Result<Option<Answer>, String> {
         Some("failed") => Ok(None),
         _ => Err("unknown status".to_owned()),
     }
+}
+
+/// The files in `dir`, if it exists, by their names without the extension.
+fn by_stem(source: Source, dir: &Path) -> Result<HashMap<String, String>, Error> {
+    let mut found = HashMap::new();
+    if source.is_dir(dir) {
+        for (name, path) in source.entries(dir)? {
+            let name = name.split_once('.').map_or(name.as_str(), |(stem, _)| stem);
+            found.insert(name.to_owned(), source.read(&path)?);
+        }
+    }
+    Ok(found)
 }
 
 /// Adds the JSON documents in `dir` and its subdirectories to `found`, by

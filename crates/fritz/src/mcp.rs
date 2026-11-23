@@ -144,6 +144,26 @@ pub(crate) struct MeshQuery {
     tree: bool,
 }
 
+/// The history of `fritz_smarthome`.
+#[derive(Debug, Default, Deserialize, JsonSchema)]
+pub(crate) struct SmarthomeQuery {
+    /// The history of `device` instead of the current values of all
+    /// devices: power (W) and voltage (V) over the last hours, energy (Wh)
+    /// per day and per month, temperature (°C) and humidity (%), each as a
+    /// series with its interval in seconds, the time of the newest value
+    /// (Unix seconds) and a summary (count, gaps, min, avg, max, and the
+    /// sum for energy).
+    #[serde(default)]
+    history: bool,
+    /// The device, by name or AIN. Needs `history`.
+    device: Option<String>,
+    /// Only `hours`, `days` or `months`.
+    range: Option<String>,
+    /// Also all values of each series, the newest first, null for gaps.
+    #[serde(default)]
+    values: bool,
+}
+
 /// The views of `fritz_wlan`.
 #[derive(Debug, Default, Deserialize, JsonSchema)]
 pub(crate) struct WlanQuery {
@@ -539,15 +559,31 @@ impl Server {
         description = "Smart Home devices and their values (FRITZ!OS 8.20 and later).",
         annotations(read_only_hint = true, open_world_hint = false)
     )]
-    async fn fritz_smarthome(&self) -> CallToolResult {
+    async fn fritz_smarthome(
+        &self,
+        Parameters(query): Parameters<SmarthomeQuery>,
+    ) -> CallToolResult {
         self.respond(async {
+            if query.history {
+                let device = query.device.as_deref().context("history needs a device")?;
+                let range = crate::status::history_range(query.range.as_deref())?;
+                let session = self.context.session().await?;
+                let mut history = crate::status::read_history(session, device, range).await?;
+                if !query.values {
+                    history.series.iter_mut().for_each(|s| s.values.clear());
+                }
+                return Ok(serde_json::to_value(history)?);
+            }
+            if query.device.is_some() {
+                bail!("device needs history");
+            }
             let session = self.context.session().await?;
             let devices = smarthome::devices(&session).await;
             // Ends the session even if reading failed.
             let logout = session.logout().await;
             let devices = devices?;
             logout.context("cannot log out of the web interface")?;
-            Ok(devices)
+            Ok(serde_json::to_value(devices)?)
         })
         .await
     }

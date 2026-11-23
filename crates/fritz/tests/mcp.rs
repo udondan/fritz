@@ -172,6 +172,43 @@ async fn reads_the_overview() {
 }
 
 #[tokio::test(flavor = "multi_thread")]
+async fn reads_the_history_of_a_smart_home_device() {
+    let sim = sim().await;
+    let client = connect(&sim).await;
+    let history = json!({"history": true, "device": "device-1"});
+    let summary = success(&client, "fritz_smarthome", history).await;
+    assert_eq!(summary["ain"], "11630 0000001", "{summary}");
+    assert_eq!(summary["series"][0]["kind"], "power", "{summary}");
+    assert_eq!(summary["series"][0]["summary"]["max"], 23.45, "{summary}");
+    assert!(summary["series"][0].get("values").is_none(), "{summary}");
+    let history = json!({"history": true, "device": "device-1", "range": "months", "values": true});
+    let months = success(&client, "fritz_smarthome", history).await;
+    assert_eq!(
+        months["series"][0]["values"],
+        json!([3000.0, 2800.0]),
+        "{months}"
+    );
+    assert_eq!(months["series"][0]["interval"], 2_678_400, "{months}");
+    for (arguments, message) in [
+        (json!({"history": true}), "history needs a device"),
+        (json!({"device": "device-1"}), "device needs history"),
+        (
+            json!({"history": true, "device": "x"}),
+            "no Smart Home device",
+        ),
+        (
+            json!({"history": true, "device": "device-1", "range": "weeks"}),
+            "unknown range",
+        ),
+    ] {
+        let error = failure(&client, "fritz_smarthome", arguments).await;
+        let error = error["error"].as_str().unwrap();
+        assert!(error.contains(message), "{error}");
+    }
+    client.cancel().await.unwrap();
+}
+
+#[tokio::test(flavor = "multi_thread")]
 async fn reads_the_internet_and_the_firmware() {
     let sim = sim().await;
     let client = connect(&sim).await;

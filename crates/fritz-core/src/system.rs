@@ -192,7 +192,7 @@ fn number(value: &Value) -> Option<f64> {
 }
 
 #[expect(clippy::cast_precision_loss, reason = "a few hundred values")]
-fn range(values: &[f64]) -> Option<Range> {
+pub(crate) fn range(values: &[f64]) -> Option<Range> {
     let first = *values.first()?;
     let (min, max) = values
         .iter()

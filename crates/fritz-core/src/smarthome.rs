@@ -11,6 +11,8 @@ use serde::{Deserialize, Serialize};
 
 use crate::session::{Error, Session};
 
+pub mod history;
+
 /// The overview of all devices, units and groups.
 pub const OVERVIEW: &str = "/api/v0/smarthome/overview";
 

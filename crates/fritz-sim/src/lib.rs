@@ -21,8 +21,9 @@
 //!   returns, hold a session ID, and the documents are served for it.
 //! - The web interface has a session login, `/login_sid.lua`, with a
 //!   PBKDF2 challenge, and serves the documents of the REST API, like
-//!   `/api/v0/smarthome/overview`, and the pages of `/data.lua`, like
-//!   `ecoStat`, for the open session.
+//!   `/api/v0/smarthome/overview`, the pages of `/data.lua`, like
+//!   `ecoStat`, and the statistics of Smart Home devices of
+//!   `/webservices/homeautoswitch.lua`, for the open session.
 //! - Tests can [inject](Sim::inject) UPnP errors, delays, discarded writes,
 //!   side effects of writes, counters that grow, a locked login, calls that
 //!   break off and restarts, and read the [requests](Sim::requests) the
@@ -426,6 +427,9 @@ impl Shared {
                 web.api(&device.fixture.api, method, path, headers)
             }
             _ if path == web::DATA => inner.web.page(&inner.device.fixture.pages, method, body),
+            _ if path == web::HOMEAUTO => {
+                inner.web.stats(&inner.device.fixture.stats, method, body)
+            }
             Method::GET => inner.document(path, uri.query()),
             Method::POST if !authorized => (
                 StatusCode::UNAUTHORIZED,

@@ -44,6 +44,7 @@ or paste them.
 | Which repeater is a device connected to?    | `fritz mesh --tree`                  |
 | Which powerline adapters, are they active?  | `fritz powerline`                    |
 | Smart Home devices and their values         | `fritz smarthome`                    |
+| Energy, power, temperature history of one   | `fritz smarthome <name> --history` (`--range hours\|days\|months`) |
 | Which ports are forwarded, is UPnP on?      | `fritz ports`                        |
 | Numbers, deflections, answering machines    | `fritz telephony`                    |
 | What does the box offer, what may I do?     | `fritz capabilities`                 |

@@ -15,6 +15,7 @@ use fritz_core::system::{self, Range, Section};
 use serde::Serialize;
 
 mod firmware;
+mod history;
 mod host;
 mod powerline;
 mod tree;
@@ -22,6 +23,7 @@ mod users;
 mod wlan;
 
 pub(crate) use firmware::firmware;
+pub(crate) use history::{SmarthomeArgs, range as history_range, read as read_history};
 pub(crate) use host::{HostsArgs, hosts};
 pub(crate) use powerline::powerline;
 use tree::mesh_tree;
@@ -358,9 +360,13 @@ fn address(node: &Node) -> String {
 /// and out again.
 pub(crate) async fn smarthome(
     context: &Context,
+    args: &SmarthomeArgs,
     format: Format,
     out: &mut impl Write,
 ) -> anyhow::Result<()> {
+    if let Some((device, range)) = args.history() {
+        return history::history(context, device, range, format, out).await;
+    }
     let session = context
         .session()
         .await

@@ -2,6 +2,7 @@
 //! simulated 7690.
 
 use fritz_core::session::{Error, Session};
+use fritz_core::smarthome::history::{HOMEAUTO, History, Range, history};
 use fritz_core::{settings, smarthome};
 use fritz_sim::{Fixture, Injection, PASSWORD, Sim, USERNAME};
 use tr064::{Client, SecretString};
@@ -60,6 +61,61 @@ async fn reads_the_devices_in_a_session() {
         .collect();
     assert_eq!(posts.len(), 2);
     assert!(posts.iter().all(|r| r.path == "/login_sid.lua"));
+}
+
+#[tokio::test]
+async fn reads_the_history_of_devices() {
+    let sim = sim().await;
+    let session = login(&sim, PASSWORD).await.unwrap();
+    let kinds = |history: &History| {
+        history
+            .series
+            .iter()
+            .map(|s| format!("{} {:?}", s.kind, s.range))
+            .collect::<Vec<_>>()
+    };
+
+    let socket = history(&session, "device-1", None).await.unwrap().unwrap();
+    assert_eq!(socket.ain, "11630 0000001");
+    assert_eq!(
+        kinds(&socket),
+        [
+            "power Hours",
+            "voltage Hours",
+            "energy Days",
+            "energy Months",
+            "temperature Hours"
+        ]
+    );
+    let days = history(&session, "11630 0000001", Some(Range::Days))
+        .await
+        .unwrap()
+        .unwrap();
+    assert_eq!(kinds(&days), ["energy Days"]);
+    assert_eq!(
+        days.series[0].values,
+        [Some(100.0), Some(95.0), None, Some(110.0)]
+    );
+
+    let thermostat = history(&session, "device-2", None).await.unwrap().unwrap();
+    assert_eq!(kinds(&thermostat), ["temperature Hours"]);
+    let sensor = history(&session, "DEVICE-4", None).await.unwrap().unwrap();
+    assert_eq!(kinds(&sensor), ["temperature Hours", "humidity Hours"]);
+    assert_eq!(sensor.series[1].values, [Some(55.0), None, Some(60.0)]);
+    assert_eq!(sensor.series[1].newest, None);
+    // A lamp keeps no history.
+    let lamp = history(&session, "device-3", None).await.unwrap().unwrap();
+    assert_eq!(lamp.series, []);
+    assert_eq!(history(&session, "other", None).await.unwrap(), None);
+
+    // Only the command that reads.
+    let commands: Vec<_> = sim
+        .requests()
+        .into_iter()
+        .filter(|r| r.path == HOMEAUTO)
+        .map(|r| r.method)
+        .collect();
+    assert_eq!(commands, ["POST"; 5]);
 }
 
 #[tokio::test]
