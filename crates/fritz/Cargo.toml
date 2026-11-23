@@ -43,7 +43,7 @@ workspace = true
 [dev-dependencies]
 axum = "=0.8.9"
 fritz-sim.workspace = true
-keyring-core = "=1.0.1"
+keyring-core = "=1.1.0"
 rmcp = { version = "=3.11.0", features = ["client", "transport-child-process"] }
 rqrr = { version = "=0.11.0", default-features = false }
 serde-saphyr = { version = "=2.2.0", default-features = false, features = ["deserialize"] }
