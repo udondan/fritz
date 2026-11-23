@@ -149,8 +149,9 @@ pub fn parse(json: &str) -> Result<System, Error> {
         chart
             .as_ref()
             .and_then(|c| c.series.get(index))
-            .map(|values| values.iter().filter_map(number).collect::<Vec<f64>>())
-            .unwrap_or_default()
+            .map_or_else(Vec::new, |values| {
+                values.iter().filter_map(number).collect::<Vec<f64>>()
+            })
     };
     let (load, temperature) = (series(&cpuutil, 0), series(&cputemp, 0));
     let (used, cache, free) = (
