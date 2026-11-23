@@ -460,6 +460,15 @@ fn lists_the_profiles() {
     assert!(stdout.ends_with(", run `fritz config init`\n"), "{stdout}");
     let output = fritz(&["config", "list", "--output", "json"]);
     assert_eq!(success(&output), "[]\n");
+    // Text in a pipe, set once in the environment.
+    let output = fritz_with(&["config", "list"], &[("FRITZ_OUTPUT", "text")]);
+    assert!(success(&output).starts_with("no profiles in "));
+    // The flag wins over the environment.
+    let output = fritz_with(
+        &["config", "list", "-o", "json"],
+        &[("FRITZ_OUTPUT", "text")],
+    );
+    assert_eq!(success(&output), "[]\n");
 
     let config = Config::new();
     let output = config.run(&["config", "init", "--host", "192.168.178.1"]);

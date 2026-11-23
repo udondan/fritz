@@ -325,8 +325,11 @@ Inputs go after the action, like `fritz tr064 call Hosts1 GetGenericHostEntry Ne
 
 The commands from `overview` to `log` print a table on a terminal and JSON
 otherwise, for scripts and agents, and so does `config list`. `--output`
-picks one. The other `config` commands, `tls`, `auth` and `tr064` always
-print text.
+(`-o`) picks one. The other `config` commands, `tls`, `auth` and `tr064`
+always print text.
+
+To keep text in pipes, like `fritz hosts | grep phone`, set
+`FRITZ_OUTPUT=text` in your shell; `--output` still wins over it.
 
 ```console
 $ fritz wlan --output json | jq '.[0]'
