@@ -44,6 +44,7 @@ or paste them.
 | Who called, which calls were missed?        | `fritz calls --limit 20`             |
 | Whose number is this, what is X's number?   | `fritz phonebook <name or number>`   |
 | What happened on the box lately?            | `fritz log --limit 50`               |
+| Which fritz build, is a newer one out?      | `fritz version --check` (exit 10: newer) |
 
 `fritz settings` reads modules of the web interface, which has no documented
 API: names and fields can change with FRITZ!OS. Without arguments it reads

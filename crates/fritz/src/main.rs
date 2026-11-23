@@ -20,8 +20,9 @@ mod status;
 mod system;
 mod tls;
 mod tr64;
+mod version;
 
-use std::io::{self, IsTerminal as _};
+use std::io::{self, IsTerminal as _, Write as _};
 use std::path::{Path, PathBuf};
 
 use anyhow::{Context as _, bail};
@@ -177,6 +178,14 @@ enum Command {
     /// Turn raw captures into fixtures, and check fixtures for personal data.
     #[command(subcommand)]
     Fixture(FixtureCommand),
+    /// The version, commit, build date, target and features of this build.
+    Version {
+        /// Ask GitHub whether a newer release exists. Exits with 0 when this
+        /// is the latest version, 10 when a newer one exists, and 1 on
+        /// errors. Sends nothing but a generic user agent, downloads nothing.
+        #[arg(long)]
+        check: bool,
+    },
     /// Print the completion script for a shell.
     ///
     /// The script completes the commands, options and the names of the
@@ -422,6 +431,13 @@ async fn run(
         Command::Change(args) => change::run(&load()?, args, format, out).await,
         Command::Capture(args) => capture(&load()?, args).await,
         Command::Fixture(command) => fixture(&command),
+        Command::Version { check } => {
+            if version::run(check, format, out).await? {
+                out.flush()?;
+                std::process::exit(version::NEWER);
+            }
+            Ok(())
+        }
         Command::Completion { shell } => Ok(completion::script(shell, out)?),
     }
 }
