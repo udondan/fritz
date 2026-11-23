@@ -115,12 +115,18 @@ fn list(values: &[String]) -> String {
 /// An answer, like `192.0.2.2 (192.0.2.1 for nas.fritz.box)`.
 fn answer(answer: &Answer) -> String {
     let found = match answer.status {
-        Status::Answered => answer
-            .addresses
-            .iter()
-            .map(ToString::to_string)
-            .collect::<Vec<_>>()
-            .join(", "),
+        Status::Answered => {
+            let addresses = answer
+                .addresses
+                .iter()
+                .map(ToString::to_string)
+                .collect::<Vec<_>>()
+                .join(", ");
+            match &answer.note {
+                Some(note) => format!("{addresses}, {note}"),
+                None => addresses,
+            }
+        }
         _ => answer
             .note
             .clone()
@@ -268,7 +274,7 @@ mod tests {
                 name: "nas.example".to_owned(),
                 status: Status::Answered,
                 addresses: vec!["192.0.2.2".parse().unwrap()],
-                note: None,
+                note: Some("incomplete, a query failed: no answer in time".to_owned()),
             },
             client_config: None,
             expected: Some(Expected {
@@ -290,6 +296,12 @@ mod tests {
         );
         assert!(
             text.contains("Router answer     no address (for nas.example)\n"),
+            "{text}"
+        );
+        assert!(
+            text.contains(
+                "Client answer     192.0.2.2, incomplete, a query failed: no answer in time (for nas.example)\n"
+            ),
             "{text}"
         );
         assert!(text.contains("Client resolvers  unknown\n"), "{text}");
