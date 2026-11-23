@@ -3498,3 +3498,106 @@ async fn stops_watching_on_ctrl_c() {
         assert!(sample["seconds"].as_f64().unwrap() > 0.0, "{sample}");
     }
 }
+
+#[tokio::test(flavor = "multi_thread")]
+async fn diagnoses_hosts_it_cannot_pick() {
+    let fixture = fritz_sim::Fixture::load(FIXTURE).unwrap();
+    let sim = fritz_sim::Sim::start(fixture).await.unwrap();
+    let password = Some(fritz_sim::PASSWORD);
+
+    let output = run(&sim, &["-o", "text", "diagnose", "nobody"], password).await;
+    assert_eq!(failure(&output).trim_end(), "Error: 1 check failed");
+    assert_eq!(
+        stdout(&output),
+        "Diagnose nobody\n  ✗ known to the device\n      the device knows no host \"nobody\"; \
+         check the name, or give its MAC or IP address\n"
+    );
+    let output = run(&sim, &["-o", "json", "diagnose", "device-14"], password).await;
+    failure(&output);
+    let report: serde_json::Value = serde_json::from_str(&stdout(&output)).unwrap();
+    assert_eq!(report["target"], "device-14");
+    assert_eq!(report["checks"][0]["detail"], "2 hosts match");
+    let ports = ["diagnose", "router", "--port", "80"];
+    assert!(failure(&run(&sim, &ports, password).await).contains("not for the device"));
+}
+
+#[tokio::test(flavor = "multi_thread")]
+async fn diagnoses_the_device() {
+    let fixture = || fritz_sim::Fixture::load(FIXTURE).unwrap();
+    let sim = fritz_sim::Sim::start(fixture()).await.unwrap();
+    let text = success(&run(&sim, &["-o", "text", "diagnose", "router"], None).await);
+    let lines: Vec<&str> = text.lines().collect();
+    assert!(
+        lines[1].starts_with("  ✓ private address    127.0.0.1 → 127.0.0.1"),
+        "{text}"
+    );
+    assert!(
+        lines[2].starts_with("  – TR-064 over HTTPS  the device is configured"),
+        "{text}"
+    );
+    assert!(lines[3].starts_with("  ✓ TR-064 over HTTP"), "{text}");
+    assert!(lines[4].starts_with("  ✓ web interface"), "{text}");
+    assert_eq!(
+        lines[5], "  – certificate        no certificate presented",
+        "{text}"
+    );
+
+    let options = fritz_sim::Options {
+        https: true,
+        ..fritz_sim::Options::default()
+    };
+    let sim = fritz_sim::Sim::start_with(fixture(), options)
+        .await
+        .unwrap();
+    let trusted = sim.fingerprint().unwrap().to_string();
+    let json = async |fingerprint: &str| {
+        let args = [
+            "-o",
+            "json",
+            "--fingerprint",
+            fingerprint,
+            "diagnose",
+            "router",
+        ];
+        run(&sim, &args, None).await
+    };
+    let report = success(&json(&trusted).await);
+    let report: serde_json::Value = serde_json::from_str(&report).unwrap();
+    let statuses: Vec<&str> = report["checks"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|c| c["status"].as_str().unwrap())
+        .collect();
+    assert_eq!(
+        statuses,
+        ["pass", "pass", "skip", "pass", "pass"],
+        "{report}"
+    );
+
+    let output = json(FINGERPRINT).await;
+    assert_eq!(failure(&output).trim_end(), "Error: 2 checks failed");
+    let report: serde_json::Value = serde_json::from_str(&stdout(&output)).unwrap();
+    assert_eq!(report["checks"][3]["status"], "fail", "{report}");
+    assert_eq!(report["checks"][4]["status"], "fail", "{report}");
+
+    let unreachable = unreachable_url("https");
+    let args = ["--host", &unreachable, "-o", "json", "diagnose", "router"];
+    let output = fritz_async(strings(&args), Vec::new()).await;
+    failure(&output);
+    let report: serde_json::Value = serde_json::from_str(&stdout(&output)).unwrap();
+    assert_eq!(report["checks"][1]["status"], "fail", "{report}");
+    assert_eq!(report["checks"][3]["status"], "unknown", "{report}");
+
+    let with_password = unreachable_url("http").replacen("://", "://user:secret-pw@", 1);
+    let args = ["--host", &with_password, "-o", "json", "diagnose", "router"];
+    let output = fritz_async(strings(&args), Vec::new()).await;
+    failure(&output);
+    let text = format!(
+        "{}{}",
+        stdout(&output),
+        String::from_utf8_lossy(&output.stderr)
+    );
+    assert!(!text.contains("secret-pw"), "{text}");
+    assert!(!text.contains("user:"), "{text}");
+}

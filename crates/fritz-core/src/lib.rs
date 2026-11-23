@@ -12,6 +12,7 @@ pub mod capture;
 pub mod change;
 pub mod config;
 pub mod connection;
+pub mod diagnose;
 pub mod dirs;
 pub mod dsl;
 pub mod fault;

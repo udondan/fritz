@@ -932,3 +932,40 @@ async fn keeps_the_descriptions_in_the_cache() {
     assert_eq!(scpds(), fetched);
     client.cancel().await.unwrap();
 }
+
+#[tokio::test(flavor = "multi_thread")]
+async fn diagnoses_hosts_and_the_device() {
+    let sim = sim().await;
+    let client = connect(&sim).await;
+    let router = success(&client, "fritz_diagnose", json!({"host": "router"})).await;
+    let checks = router["checks"].as_array().unwrap();
+    assert_eq!(checks[0]["name"], "private address", "{router}");
+    assert_eq!(checks[0]["status"], "pass", "{router}");
+    assert_eq!(checks[2]["status"], "pass", "{router}");
+
+    let unknown = json!({"host": "nobody", "ports": [22]});
+    let unknown = success(&client, "fritz_diagnose", unknown).await;
+    assert_eq!(unknown["checks"][0]["status"], "fail", "{unknown}");
+    assert!(unknown.get("host").is_none(), "{unknown}");
+    let ambiguous = success(&client, "fritz_diagnose", json!({"host": "device-14"})).await;
+    assert_eq!(
+        ambiguous["checks"][0]["detail"], "2 hosts match",
+        "{ambiguous}"
+    );
+
+    for (arguments, message) in [
+        (
+            json!({"host": "nobody", "ports": [1, 2, 3, 4, 5, 6, 7, 8, 9]}),
+            "at most 8",
+        ),
+        (
+            json!({"host": "router", "ports": [80]}),
+            "not for the device",
+        ),
+    ] {
+        let error = failure(&client, "fritz_diagnose", arguments).await;
+        let error = error["error"].as_str().unwrap();
+        assert!(error.contains(message), "{error}");
+    }
+    client.cancel().await.unwrap();
+}

@@ -12,6 +12,7 @@ mod change;
 mod completion;
 mod context;
 mod device;
+mod diagnose;
 mod dsl;
 mod interfaces;
 mod logging;
@@ -118,6 +119,21 @@ enum Command {
     },
     /// The hosts the device knows, or one host with all details.
     Hosts(status::HostsArgs),
+    /// Diagnoses a host end to end: whether the device knows it and sees
+    /// it connected, its address, its link and mesh node, whether its name
+    /// resolves to that address on this machine, and whether TCP ports
+    /// answer. `router` checks the device itself: a private address, TR-064
+    /// over HTTPS and HTTP, the web interface and the certificate. Fails if
+    /// a check fails.
+    Diagnose {
+        /// The host: a name, a MAC or an IPv4 address, or `router`.
+        #[arg(value_name = "HOST")]
+        target: String,
+        /// A TCP port to probe on the host, from this machine. Repeat it for
+        /// more ports.
+        #[arg(long = "port", value_name = "PORT")]
+        ports: Vec<u16>,
+    },
     /// The mesh: its nodes with their IP addresses, and the links between
     /// all devices.
     Mesh {
@@ -539,6 +555,9 @@ async fn run(
         Command::Mcp { .. } => unreachable!("served above"),
         Command::Overview { system } => status::overview(&load()?, system, format, out).await,
         Command::Hosts(args) => status::hosts(&load()?, args, format, out).await,
+        Command::Diagnose { target, ports } => {
+            diagnose::run(&load()?, &target, ports, format, out).await
+        }
         Command::Mesh { tree } => status::mesh(&load()?, tree, format, out).await,
         Command::Wlan(WlanArgs {
             command: Some(WlanCommand::Qr(args)),

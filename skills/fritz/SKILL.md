@@ -43,6 +43,8 @@ or paste them.
 | Which devices match a name or address part? | `fritz hosts --search <text>`        |
 | How are the mesh repeaters connected?       | `fritz mesh` (with IP addresses)     |
 | Which repeater is a device connected to?    | `fritz mesh --tree`                  |
+| Why can't I reach a device (NAS, printer)?  | `fritz diagnose <name> --port 445` (exit 1: a check failed) |
+| Does the box answer, is its certificate OK? | `fritz diagnose router`              |
 | Which powerline adapters, are they active?  | `fritz powerline`                    |
 | Smart Home devices and their values         | `fritz smarthome`                    |
 | Energy, power, temperature history of one   | `fritz smarthome <name> --history` (`--range hours\|days\|months`) |
