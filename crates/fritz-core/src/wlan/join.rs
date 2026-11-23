@@ -26,6 +26,8 @@ const SERVICE: &str = "WLANConfiguration";
 const ACTION: &str = "GetSecurityKeys";
 /// The only output of [`ACTION`] that is kept.
 const OUTPUT: &str = "NewKeyPassphrase";
+/// The name of the guest network, ignoring case, on every model.
+pub const GUEST: &str = "guest";
 
 /// Why the data to join a network could not be read.
 #[derive(Debug, thiserror::Error)]
@@ -34,7 +36,7 @@ pub enum Error {
     Read(#[from] generic::Error),
     #[error("no wireless network is named {0:?}")]
     Unknown(String),
-    #[error("the device has no guest network, name a network")]
+    #[error("the device has no guest network")]
     NoGuest,
     #[error("{service} has no SSID")]
     NoSsid { service: String },
@@ -116,27 +118,25 @@ impl Join {
     }
 }
 
-/// Reads what a device needs to join the network that `network` names, by
-/// service, number or SSID like [`named`](super::named), or the guest
-/// network without it. Of several networks with the name, the first one.
-/// Reads the passphrase only for a network that needs one.
+/// Reads what a device needs to join the network that `network` names: the
+/// guest network by [`GUEST`], ignoring case, also if a network has it as
+/// its SSID, or else by service, number or SSID like
+/// [`named`](super::named). Of several networks with the name, the first
+/// one. Reads the passphrase only for a network that needs one.
 ///
 /// # Errors
 ///
 /// The errors of reading, [`Error::Unknown`] or [`Error::NoGuest`] if no
 /// network fits, [`Error::NoSsid`], [`Error::Unsupported`] for WEP and
 /// unknown beacon types, and [`Error::NoPassphrase`].
-pub async fn join(reader: &mut Reader, network: Option<&str>) -> Result<Join, Error> {
-    let networks = networks(reader).await?;
-    let Read { wlan, info, .. } = match network {
-        Some(name) => networks
-            .into_iter()
-            .find(|n| is_named(&n.wlan, name))
-            .ok_or_else(|| Error::Unknown(name.to_owned()))?,
-        None => networks
-            .into_iter()
-            .find(|n| n.wlan.guest)
-            .ok_or(Error::NoGuest)?,
+pub async fn join(reader: &mut Reader, network: &str) -> Result<Join, Error> {
+    let mut networks = networks(reader).await?.into_iter();
+    let Read { wlan, info, .. } = if network.eq_ignore_ascii_case(GUEST) {
+        networks.find(|n| n.wlan.guest).ok_or(Error::NoGuest)?
+    } else {
+        networks
+            .find(|n| is_named(&n.wlan, network))
+            .ok_or_else(|| Error::Unknown(network.to_owned()))?
     };
     let service = wlan.service;
     // The read hides values like `?sid=…`, which an SSID may hold too; the

@@ -244,7 +244,8 @@ struct WlanArgs {
 enum WlanCommand {
     /// A QR code with the SSID and password of a network, which a phone
     /// scans to join it: on the terminal, or as PNG or SVG file. Reads the
-    /// password, which nothing else does.
+    /// password, which nothing else does. Without a network, lists them,
+    /// like `fritz wlan qr 1` or `fritz wlan qr guest`.
     Qr(qr::QrArgs),
 }
 
@@ -451,7 +452,16 @@ async fn run(
         Command::Wlan(WlanArgs {
             command: Some(WlanCommand::Qr(args)),
             ..
-        }) => qr::run(&load()?, args, io::stdout().is_terminal(), out).await,
+        }) => {
+            qr::run(
+                &load()?,
+                args,
+                io::stdout().is_terminal(),
+                out,
+                &mut io::stderr(),
+            )
+            .await
+        }
         Command::Wlan(WlanArgs {
             command: None,
             network,

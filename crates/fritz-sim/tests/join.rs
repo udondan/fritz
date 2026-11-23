@@ -151,7 +151,7 @@ async fn encodes_every_kind_of_network() {
             .await
             .unwrap();
         let mut reader = reader(&sim).await;
-        let join = join::join(&mut reader, Some("1")).await.unwrap();
+        let join = join::join(&mut reader, "1").await.unwrap();
         assert_eq!(join.payload().expose_secret(), payload, "{ssid}");
         assert_eq!(join.ssid, ssid);
         assert_eq!(join.hidden, hidden, "{ssid}");
@@ -166,8 +166,9 @@ async fn encodes_every_kind_of_network() {
 }
 
 #[tokio::test]
-async fn uses_the_guest_network_by_default() {
-    let fixture = Fixture::load(FIXTURE).unwrap().with_answer(
+async fn names_the_guest_network_guest() {
+    // The first network has the SSID `guest`, the third is the guest network.
+    let fixture = network("guest", "11i", false, "fake-ssid-passphrase").with_answer(
         "WLANConfiguration3",
         "GetSecurityKeys",
         None,
@@ -175,16 +176,22 @@ async fn uses_the_guest_network_by_default() {
     );
     let sim = Sim::start(fixture).await.unwrap();
     let mut reader = reader(&sim).await;
-    let join = join::join(&mut reader, None).await.unwrap();
-    assert_eq!(join.service, "WLANConfiguration3");
-    assert!(join.guest);
-    assert_eq!(join.enabled, Some(false));
-    assert_eq!(
-        join.payload().expose_secret(),
-        "WIFI:T:WPA;S:wlan-2;P:fake-guest-passphrase;;"
-    );
-    // By SSID, the first network with it.
-    let join = join::join(&mut reader, Some("wlan-2")).await.unwrap();
+    for name in [join::GUEST, "Guest", "GUEST"] {
+        let join = join::join(&mut reader, name).await.unwrap();
+        assert_eq!(join.service, "WLANConfiguration3", "{name}");
+        assert!(join.guest);
+        assert_eq!(join.enabled, Some(false));
+        assert_eq!(
+            join.payload().expose_secret(),
+            "WIFI:T:WPA;S:wlan-2;P:fake-guest-passphrase;;"
+        );
+    }
+    // Still by its number or service; by SSID, the first network with it.
+    for name in ["1", "WLANConfiguration1"] {
+        let join = join::join(&mut reader, name).await.unwrap();
+        assert_eq!(join.ssid, "guest");
+    }
+    let join = join::join(&mut reader, "wlan-2").await.unwrap();
     assert_eq!(join.service, "WLANConfiguration3");
 }
 
@@ -217,23 +224,20 @@ async fn fails_without_a_network_or_a_passphrase() {
     let sim = Sim::start(fixture).await.unwrap();
     let mut reader = reader(&sim).await;
     let message = |error: Error| error.to_string();
-    let error = join::join(&mut reader, None).await.unwrap_err();
-    assert_eq!(
-        message(error),
-        "the device has no guest network, name a network"
-    );
-    let error = join::join(&mut reader, Some("nothing")).await.unwrap_err();
+    let error = join::join(&mut reader, "guest").await.unwrap_err();
+    assert_eq!(message(error), "the device has no guest network");
+    let error = join::join(&mut reader, "nothing").await.unwrap_err();
     assert_eq!(message(error), r#"no wireless network is named "nothing""#);
-    let error = join::join(&mut reader, Some("wlan-wep")).await.unwrap_err();
+    let error = join::join(&mut reader, "wlan-wep").await.unwrap_err();
     assert_eq!(
         message(error),
         "WLANConfiguration2 uses the beacon type \"Basic\", which a QR code cannot describe"
     );
-    let error = join::join(&mut reader, Some("3")).await.unwrap_err();
+    let error = join::join(&mut reader, "3").await.unwrap_err();
     assert_eq!(message(error), "WLANConfiguration3 has no SSID");
     assert_eq!(calls(&sim, "GetSecurityKeys"), 0);
     // The simulator answers an empty passphrase without a recorded one.
-    let error = join::join(&mut reader, Some("1")).await.unwrap_err();
+    let error = join::join(&mut reader, "1").await.unwrap_err();
     assert_eq!(
         message(error),
         "the device returned no passphrase for WLANConfiguration1"
@@ -243,7 +247,7 @@ async fn fails_without_a_network_or_a_passphrase() {
         "GetSecurityKeys",
         606,
     ));
-    let error = join::join(&mut reader, Some("1")).await.unwrap_err();
+    let error = join::join(&mut reader, "1").await.unwrap_err();
     assert!(
         matches!(error, Error::Read(generic::Error::Fault { .. })),
         "{error:?}"
@@ -304,7 +308,7 @@ async fn keeps_the_passphrase_from_every_other_path() {
     capture::run(&client, &plan, &options, |_| {}).await;
     assert_eq!(calls(&sim, "GetSecurityKeys"), 0);
     // Only the narrow path asks for it.
-    let join = join::join(&mut reader, Some("wlan-1")).await.unwrap();
+    let join = join::join(&mut reader, "wlan-1").await.unwrap();
     assert_eq!(join.passphrase.unwrap().expose_secret(), "fake-passphrase");
     assert_eq!(calls(&sim, "GetSecurityKeys"), 1);
 }

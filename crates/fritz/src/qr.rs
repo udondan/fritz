@@ -3,7 +3,8 @@
 //! The code holds the passphrase, which only the narrow path of
 //! [`fritz_core::wlan::join`] reads. It is shown only on a terminal or
 //! written to a file that only the user can read, never piped. The MCP
-//! server does not offer it.
+//! server does not offer it. There is no default network: without one, the
+//! networks are listed, and no passphrase is read.
 
 use std::fmt;
 use std::fs::{File, OpenOptions};
@@ -14,6 +15,7 @@ use anyhow::{Context as _, bail};
 use clap::{Args, ValueEnum};
 use fritz_core::redact;
 use fritz_core::wlan::join::{self, Join};
+use fritz_core::wlan::{self, Views, Wlan};
 use secrecy::ExposeSecret as _;
 
 use self::render::{Modules, png, svg, text};
@@ -24,8 +26,9 @@ mod render;
 
 #[derive(Debug, Args)]
 pub(crate) struct QrArgs {
-    /// The network: its service, like `WLANConfiguration2`, its number, like
-    /// `2`, or its SSID. Without it, the guest network.
+    /// The network: `guest` for the guest network, its number, like `1`,
+    /// its service, like `WLANConfiguration1`, or its SSID. Without it, the
+    /// networks are listed.
     network: Option<String>,
     /// The format of the code. Without it, by the extension of `--out`, else
     /// text.
@@ -68,20 +71,79 @@ impl fmt::Display for Kind {
 
 /// Prints or writes the QR code of a network. `terminal` tells whether
 /// stdout is a terminal; without one, the code is only written to a file,
-/// which is checked before the device is asked.
+/// which is checked before the device is asked. Without a network, or if
+/// none fits, lists the networks to `err` and fails, also without a
+/// terminal: the list holds no secret.
 pub(crate) async fn run(
     context: &Context,
     args: QrArgs,
     terminal: bool,
     out: &mut impl Write,
+    err: &mut impl Write,
 ) -> anyhow::Result<()> {
+    let Some(network) = args.network.as_deref() else {
+        let mut reader = status::reader(context).await?;
+        let wlans = wlan::wlans(&mut reader, Views::default()).await?;
+        list(&wlans, err)?;
+        bail!("name the network of the code, {}", hint(&wlans));
+    };
     let kind = kind(&args, terminal, cfg!(unix))?;
     let mut reader = status::reader(context).await?;
-    let join = join::join(&mut reader, args.network.as_deref()).await?;
+    let join = match join::join(&mut reader, network).await {
+        Err(error @ (join::Error::Unknown(_) | join::Error::NoGuest)) => {
+            let wlans = wlan::wlans(&mut reader, Views::default()).await?;
+            list(&wlans, err)?;
+            bail!("{error}, {}", hint(&wlans));
+        }
+        join => join?,
+    };
     if join.enabled == Some(false) {
         eprintln!("note: {} is switched off", join.service);
     }
     show(&join, &args, kind, out)
+}
+
+/// Lists the networks to choose from: number, service, SSID (redacted, as
+/// read), band, whether it is the guest network, and whether it is on.
+fn list(wlans: &[Wlan], err: &mut impl Write) -> anyhow::Result<()> {
+    let rows = wlans.iter().map(|w| {
+        vec![
+            number(&w.service).unwrap_or("-").to_owned(),
+            w.service.clone(),
+            w.ssid.clone().unwrap_or_default(),
+            w.band.clone().unwrap_or_default(),
+            if w.guest { join::GUEST } else { "" }.to_owned(),
+            w.enabled.map_or_else(String::new, status::on_off),
+        ]
+    });
+    let headers = ["NUMBER", "SERVICE", "SSID", "BAND", "GUEST", "STATUS"];
+    status::table(&headers, rows, err)
+}
+
+/// The number of a service, like `1` of `WLANConfiguration1`.
+fn number(service: &str) -> Option<&str> {
+    service
+        .strip_prefix("WLANConfiguration")
+        .filter(|n| !n.is_empty())
+}
+
+/// How to name a network of `wlans`, like `fritz wlan qr 1`, and
+/// `fritz wlan qr guest` if there is a guest network.
+fn hint(wlans: &[Wlan]) -> String {
+    let main = wlans
+        .iter()
+        .filter(|w| !w.guest)
+        .find_map(|w| number(&w.service));
+    let guest = wlans.iter().any(|w| w.guest).then_some(join::GUEST);
+    let examples: Vec<String> = main
+        .into_iter()
+        .chain(guest)
+        .map(|name| format!("fritz wlan qr {name}"))
+        .collect();
+    match examples.as_slice() {
+        [] => "but the device has no wireless network".to_owned(),
+        _ => format!("like: {}", examples.join(" or ")),
+    }
 }
 
 /// The format of the code, or why it cannot be shown: PNG and SVG need a
@@ -488,7 +550,7 @@ mod tests {
     fn shows_a_code_that_works_in_the_readme() {
         let readme = concat!(env!("CARGO_MANIFEST_DIR"), "/../../README.md");
         let readme = std::fs::read_to_string(readme).unwrap();
-        let block = readme.split("$ fritz wlan qr\n").nth(1).unwrap();
+        let block = readme.split("$ fritz wlan qr guest\n").nth(1).unwrap();
         let block = block.split("Service   ").next().unwrap();
         let join = Join {
             service: "WLANConfiguration3".to_owned(),
@@ -542,6 +604,31 @@ mod tests {
             error.to_string(),
             format!("cannot write {}", missing.display())
         );
+    }
+
+    #[test]
+    fn lists_the_networks_to_choose_from() {
+        let wlan = |service: &str, guest: bool, enabled: Option<bool>| Wlan {
+            service: service.to_owned(),
+            ssid: Some("Home".to_owned()),
+            guest,
+            enabled,
+            ..Wlan::default()
+        };
+        let wlans = [
+            wlan("WLANConfiguration", false, None),
+            wlan("WLANConfiguration3", true, Some(true)),
+        ];
+        let mut text = Vec::new();
+        list(&wlans, &mut text).unwrap();
+        assert_eq!(
+            String::from_utf8(text).unwrap(),
+            "NUMBER  SERVICE             SSID  BAND  GUEST  STATUS\n\
+             -       WLANConfiguration   Home\n\
+             3       WLANConfiguration3  Home        guest  on\n"
+        );
+        assert_eq!(hint(&wlans), "like: fritz wlan qr guest");
+        assert_eq!(hint(&[]), "but the device has no wireless network");
     }
 
     #[test]

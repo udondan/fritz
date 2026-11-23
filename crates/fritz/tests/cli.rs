@@ -1449,16 +1449,15 @@ async fn shows_a_qr_code_to_join_a_wireless_network() {
 
     // Without a terminal and a file, nothing is asked.
     for args in [
-        &["wlan", "qr"][..],
         &["wlan", "qr", "1"][..],
-        &["wlan", "qr", "--format", "png"][..],
+        &["wlan", "qr", "guest", "--format", "png"][..],
     ] {
         let error = failure(&run(&sim, args, password).await);
         assert!(error.contains("--out <file>"), "{error}");
     }
     let png = dir.path().join("code.png");
     let png = png.to_str().unwrap();
-    let args = ["wlan", "qr", "--out", png, "--show-password"];
+    let args = ["wlan", "qr", "1", "--out", png, "--show-password"];
     let error = failure(&run(&sim, &args, password).await);
     assert!(
         error.contains("--show-password needs a terminal"),
@@ -1466,8 +1465,17 @@ async fn shows_a_qr_code_to_join_a_wireless_network() {
     );
     assert_eq!(sim.requests().len(), 0);
 
-    // The guest network by default; it is off.
-    let output = run(&sim, &["wlan", "qr", "--out", png], password).await;
+    // No default: without a network, the networks are listed, also without
+    // a terminal, and no passphrase is read.
+    for args in [&["wlan", "qr"][..], &["wlan", "qr", "--out", png][..]] {
+        let error = failure(&run(&sim, args, password).await);
+        assert_eq!(error, QR_NETWORKS, "{args:?}");
+    }
+    assert_eq!(passphrase_calls(&sim), 0);
+    assert!(!Path::new(png).exists());
+
+    // The guest network by `guest`; it is off.
+    let output = run(&sim, &["wlan", "qr", "GUEST", "--out", png], password).await;
     let text = success(&output);
     assert_eq!(
         text,
@@ -1508,12 +1516,15 @@ async fn shows_a_qr_code_to_join_a_wireless_network() {
     assert!(log.contains("GetSecurityKeys"), "{log}");
     assert!(!log.contains("fake-qr"), "{log}");
 
-    // Errors.
+    // Errors, with the networks to choose from.
     let output = run(&sim, &["wlan", "qr", "nothing", "--out", png], password).await;
     let error = failure(&output);
-    assert!(
-        error.contains("no wireless network is named \"nothing\""),
-        "{error}"
+    let (list, error) = error.split_at(error.find("Error: ").unwrap());
+    assert_eq!(list, QR_NETWORKS.split("Error: ").next().unwrap());
+    assert_eq!(
+        error,
+        "Error: no wireless network is named \"nothing\", like: fritz wlan qr 1 or \
+         fritz wlan qr guest\n"
     );
     sim.inject(Injection::fault(
         "WLANConfiguration1",
@@ -1524,8 +1535,42 @@ async fn shows_a_qr_code_to_join_a_wireless_network() {
     assert!(!error.contains("fake-qr"), "{error}");
     let missing = dir.path().join("missing/code.png");
     let missing = missing.to_str().unwrap();
-    let error = failure(&run(&sim, &["wlan", "qr", "--out", missing], password).await);
+    let args = ["wlan", "qr", "guest", "--out", missing];
+    let error = failure(&run(&sim, &args, password).await);
     assert!(error.contains("cannot write"), "{error}");
+}
+
+/// What `fritz wlan qr` prints without a network.
+const QR_NETWORKS: &str = "\
+NUMBER  SERVICE             SSID    BAND     GUEST  STATUS
+1       WLANConfiguration1  wlan-1  2.4 GHz         on
+2       WLANConfiguration2  wlan-1  5 GHz           on
+3       WLANConfiguration3  wlan-2           guest  off
+Error: name the network of the code, like: fritz wlan qr 1 or fritz wlan qr guest
+";
+
+#[tokio::test(flavor = "multi_thread")]
+async fn needs_a_guest_network_for_guest() {
+    let fixture = fritz_sim::Fixture::load(FIXTURE).unwrap().with_answer(
+        "WLANConfiguration3",
+        "X_AVM-DE_GetWLANExtInfo",
+        None,
+        fritz_sim::Answer::Ok(std::collections::BTreeMap::from([(
+            "NewX_AVM-DE_APType".to_owned(),
+            "normal".to_owned(),
+        )])),
+    );
+    let sim = fritz_sim::Sim::start(fixture).await.unwrap();
+    let dir = tempfile::tempdir().unwrap();
+    let png = dir.path().join("code.png");
+    let args = ["wlan", "qr", "guest", "--out", png.to_str().unwrap()];
+    let error = failure(&run(&sim, &args, Some(fritz_sim::PASSWORD)).await);
+    assert!(error.contains("WLANConfiguration3"), "{error}");
+    assert!(
+        error.ends_with("Error: the device has no guest network, like: fritz wlan qr 1\n"),
+        "{error}"
+    );
+    assert_eq!(passphrase_calls(&sim), 0);
 }
 
 #[tokio::test(flavor = "multi_thread")]

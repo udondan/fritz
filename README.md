@@ -315,17 +315,33 @@ WLANConfiguration2  Home  5 GHz  ch 48  be  Up  1 client
 
 #### QR code to join a network
 
-`fritz wlan qr [<network>]` shows a QR code that a phone scans to join a
-network, named like above; without a name, the guest network. It reads the
-password, and is the only command that does: through a narrow path that only
-calls `GetSecurityKeys` of a `WLANConfiguration` service and keeps only the
-passphrase. `fritz tr064 call`, the capture and the MCP server still refuse
-it. WPA2, WPA3 and mixed networks become `WIFI:T:WPA;S:<ssid>;P:<password>;;`,
+`fritz wlan qr <network>` shows a QR code that a phone scans to join a
+network: `fritz wlan qr 1` for the first network, `fritz wlan qr guest` for
+the guest network on any model. `guest`, in any case, always means the guest
+network, also if another network has it as its SSID; that one can still be
+named by its number or service. Other networks are named like above. There
+is no default: without a name, `fritz wlan qr` lists the networks on stderr,
+reads no password and fails, also without a terminal. It does the same if no
+network fits the name, or if there is no guest network.
+
+```console
+$ fritz wlan qr
+NUMBER  SERVICE             SSID        BAND     GUEST  STATUS
+1       WLANConfiguration1  Home        2.4 GHz         on
+2       WLANConfiguration2  Home        5 GHz           on
+3       WLANConfiguration3  Home-Guest           guest  on
+Error: name the network of the code, like: fritz wlan qr 1 or fritz wlan qr guest
+```
+
+With a network, it reads the password, and is the only command that does:
+through a narrow path that only calls `GetSecurityKeys` of a
+`WLANConfiguration` service and keeps only the passphrase. `fritz tr064 call`,
+the capture and the MCP server still refuse it. WPA2, WPA3 and mixed networks become `WIFI:T:WPA;S:<ssid>;P:<password>;;`,
 open and OWE networks `WIFI:T:nopass;S:<ssid>;;`, with `H:true;` for a hidden
 SSID; `\`, `;`, `,`, `:` and `"` are escaped. WEP is not supported.
 
 ```console
-$ fritz wlan qr
+$ fritz wlan qr guest
 
 
     █▀▀▀▀▀█ ▄  ▀▄▀▀▀█▀█▀▄▀ ▄▄ █▀▀▀▀▀█

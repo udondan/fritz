@@ -24,7 +24,8 @@ default:
   [`policy.txt`](crates/fritz-core/tests/data/policy.txt), so that every
   change of the policy shows up in review.
 - **One narrow path to a passphrase.** `fritz wlan qr` reads the passphrase
-  of a wireless network to show it as a QR code. It calls only
+  of the wireless network named on the command line, and of none without a
+  name, to show it as a QR code. It calls only
   `GetSecurityKeys` of a `WLANConfiguration` service, without inputs, keeps
   only `NewKeyPassphrase` in memory that is wiped when dropped, and drops the
   other keys at once. The code goes only to a terminal or to a file only the
