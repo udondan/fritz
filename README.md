@@ -41,6 +41,7 @@ status and settings of a FRITZ!Box router.
   - [Any TR-064 action](#any-tr-064-action)
   - [JSON output](#json-output)
   - [Several devices and the environment](#several-devices-and-the-environment)
+  - [Version and updates](#version-and-updates)
 - [MCP server](#mcp-server)
   - [Docker](#docker)
 - [Changes](#changes)
@@ -324,7 +325,7 @@ Inputs go after the action, like `fritz tr064 call Hosts1 GetGenericHostEntry Ne
 ### JSON output
 
 The commands from `overview` to `log` print a table on a terminal and JSON
-otherwise, for scripts and agents, and so does `config list`. `--output`
+otherwise, for scripts and agents, and so do `config list` and `version`. `--output`
 (`-o`) picks one. The other `config` commands, `tls`, `auth` and `tr064`
 always print text.
 
@@ -369,6 +370,36 @@ In scripts and containers, the environment replaces the profile and the
 keychain: `FRITZ_HOST`, `FRITZ_USERNAME`, `FRITZ_PASSWORD` and
 `FRITZ_TLS_FINGERPRINT`. [docs/box-setup.md](https://github.com/udondan/fritz/blob/main/docs/box-setup.md#5-without-a-configuration-file)
 lists all variables.
+
+### Version and updates
+
+`fritz version` shows the version, the commit, the build date, the target
+and whether the build has the feature `write`. Add `--output json` for bug
+reports and scripts. `fritz --version` prints only the version.
+
+```console
+$ fritz version
+Version   0.1.1
+Commit    0123456789ab
+Built     2026-11-23
+Target    aarch64-apple-darwin
+Features  none
+```
+
+`fritz version --check` asks GitHub for the latest release of `fritz`,
+ignoring pre-releases, and shows whether it is newer, with its URL and the
+first lines of its release notes. The exit code tells scripts the result:
+
+| Exit code | Meaning |
+|---|---|
+| 0 | This is the latest version. |
+| 10 | A newer version is available. |
+| 1 | The check failed, for example offline. |
+
+`fritz` checks only when asked to, never on its own and never in `fritz mcp`,
+and it downloads and installs nothing. The request goes to `api.github.com`
+over HTTPS with the root certificates of the system and the proxy in
+`HTTPS_PROXY`, and sends nothing but a generic user agent.
 
 ## MCP server
 

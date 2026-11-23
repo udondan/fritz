@@ -141,6 +141,89 @@ fn prints_version() {
     );
 }
 
+#[test]
+fn prints_the_build() {
+    let output = fritz(&["version", "--output", "json"]);
+    assert!(output.status.success(), "{}", stderr(&output));
+    let build: serde_json::Value = serde_json::from_str(&stdout(&output)).unwrap();
+    assert_eq!(build["version"], env!("CARGO_PKG_VERSION"));
+    assert_eq!(
+        build["features"],
+        serde_json::json!(if cfg!(feature = "write") {
+            vec!["write"]
+        } else {
+            Vec::<&str>::new()
+        })
+    );
+    assert!(build["target"].as_str().is_some_and(|t| !t.is_empty()));
+    assert!(build.get("latest").is_none());
+    let text = stdout(&fritz(&["version", "--output", "text"]));
+    assert!(
+        text.starts_with(&format!("Version   {}\n", env!("CARGO_PKG_VERSION"))),
+        "{text}"
+    );
+}
+
+/// Runs `fritz version --check` against a fake GitHub API that lists a
+/// release with the given tag.
+async fn check_version(tag: &str) -> Output {
+    let releases = serde_json::json!([{
+        "tag_name": tag,
+        "html_url": format!("https://github.com/udondan/fritz/releases/tag/{tag}"),
+        "body": "## Notes\n\n* a fix",
+        "prerelease": false,
+        "draft": false,
+    }])
+    .to_string();
+    let app = Router::new().route("/releases", get(move || async move { releases }));
+    let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+    let url = format!("http://{}/releases", listener.local_addr().unwrap());
+    tokio::spawn(async move { axum::serve(listener, app).await.unwrap() });
+    let args = strings(&["version", "--check", "--output", "json"]);
+    fritz_blocking(args, vec![("FRITZ_RELEASES_URL".into(), url)], "").await
+}
+
+#[tokio::test(flavor = "multi_thread")]
+async fn checks_for_a_newer_version() {
+    let output = check_version("fritz-v999.0.0").await;
+    assert_eq!(output.status.code(), Some(10), "{}", stderr(&output));
+    let report: serde_json::Value = serde_json::from_str(&stdout(&output)).unwrap();
+    assert_eq!(report["latest"]["version"], "999.0.0");
+    assert_eq!(report["latest"]["newer"], true);
+    assert_eq!(
+        report["latest"]["notes"],
+        serde_json::json!(["## Notes", "* a fix"])
+    );
+
+    let current = format!("fritz-v{}", env!("CARGO_PKG_VERSION"));
+    let output = check_version(&current).await;
+    assert_eq!(output.status.code(), Some(0), "{}", stderr(&output));
+    let report: serde_json::Value = serde_json::from_str(&stdout(&output)).unwrap();
+    assert_eq!(report["latest"]["newer"], false);
+
+    let output = check_version("tr064-v999.0.0").await;
+    assert_eq!(output.status.code(), Some(1));
+    assert!(
+        stderr(&output).contains("no release of fritz"),
+        "{}",
+        stderr(&output)
+    );
+}
+
+#[test]
+fn checks_only_over_https() {
+    let output = fritz_with(
+        &["version", "--check"],
+        &[("FRITZ_RELEASES_URL", "http://example.com/releases")],
+    );
+    assert_eq!(output.status.code(), Some(1));
+    assert!(
+        stderr(&output).contains("must be an https URL"),
+        "{}",
+        stderr(&output)
+    );
+}
+
 #[tokio::test(flavor = "multi_thread")]
 async fn plans_a_capture() {
     let url = device(Control::Missing).await;

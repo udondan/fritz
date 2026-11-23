@@ -29,6 +29,11 @@ default:
   config files or command line arguments.
 - **TLS** to the device is pinned to the certificate fingerprint you confirmed
   on first use. There is no option to turn verification off.
+- **No other hosts on its own.** `fritz` only talks to the device. The one
+  exception is `fritz version --check`, which runs only when asked for (never
+  in `fritz mcp`), asks the GitHub API over HTTPS with the system's root
+  certificates for the latest release, sends nothing but a generic user
+  agent, and downloads nothing else.
 - **Two-factor confirmation** that the device asks for is reported back, never
   bypassed.
 - **Data from the device** (host names, network names, phone book entries) is
