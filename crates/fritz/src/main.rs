@@ -28,6 +28,7 @@ use fritz_core::anonymize;
 use fritz_core::capture::{self, Options, Plan};
 use fritz_core::connection::Overrides;
 use fritz_core::secrets::ENV_PASSWORD;
+use fritz_core::secrets::command::{ENV_PASSWORD_COMMAND, PasswordCommand};
 use tr064::{Client, SecretString, Url};
 
 use crate::context::Context;
@@ -36,8 +37,9 @@ use crate::status::Format;
 /// CLI and MCP server for FRITZ!Box routers (unofficial).
 ///
 /// The password comes from the environment variable `FRITZ_PASSWORD`, else
-/// from the keychain (see `fritz auth login`). `FRITZ_NO_KEYCHAIN=1` turns
-/// the keychain off.
+/// from the command in `FRITZ_PASSWORD_COMMAND` or the profile (see `fritz
+/// config init --password-command`), else from the keychain (see `fritz auth
+/// login`). `FRITZ_NO_KEYCHAIN=1` turns the keychain off.
 #[derive(Debug, Parser)]
 #[command(name = "fritz", version, about)]
 struct Cli {
@@ -181,7 +183,14 @@ enum Command {
 enum ConfigCommand {
     /// Save --host, --user and --fingerprint to the profile, which becomes
     /// the default if there is none.
-    Init,
+    Init {
+        /// A command that prints the password, like a password manager: a
+        /// JSON list like `["op", "read", "op://Private/FRITZ!Box/password"]`,
+        /// or words separated by spaces, like `pass show fritz`. It runs
+        /// without a shell.
+        #[arg(long, value_name = "COMMAND")]
+        password_command: Option<PasswordCommand>,
+    },
     /// Show the settings in effect, without the password.
     Show,
     /// List the profiles, and mark the default one.
@@ -316,12 +325,20 @@ async fn main() -> anyhow::Result<()> {
             fingerprint: global.fingerprint,
         };
         let password = std::env::var(ENV_PASSWORD).ok().map(SecretString::from);
-        Context::load(
-            global.config,
-            global.profile,
-            overrides,
-            password,
-            system::keychains(),
+        let command = std::env::var(ENV_PASSWORD_COMMAND).ok();
+        let command = command
+            .map(|text| text.parse::<PasswordCommand>())
+            .transpose()
+            .with_context(|| format!("{ENV_PASSWORD_COMMAND} is invalid"))?;
+        Ok::<_, anyhow::Error>(
+            Context::load(
+                global.config,
+                global.profile,
+                overrides,
+                password,
+                system::keychains(),
+            )?
+            .with_password_command(command),
         )
     };
     if let Command::Mcp { personal } = cli.command {
@@ -346,7 +363,9 @@ async fn main() -> anyhow::Result<()> {
             personal::phonebook(&load()?, search.as_deref(), format, out).await
         }
         Command::Log { limit } => personal::log(&load()?, limit, format, out).await,
-        Command::Config(ConfigCommand::Init) => settings::init(&mut load()?, out),
+        Command::Config(ConfigCommand::Init { password_command }) => {
+            settings::init(&mut load()?, password_command, out)
+        }
         Command::Config(ConfigCommand::Show) => settings::show(&load()?, out),
         Command::Config(ConfigCommand::List) => settings::list(&load()?, format, out),
         Command::Tls(TlsCommand::Fingerprint) => tls::fingerprint(&load()?, out).await,

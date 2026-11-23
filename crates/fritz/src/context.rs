@@ -3,10 +3,12 @@
 
 use std::io::{self, BufRead};
 use std::path::{Path, PathBuf};
+use std::sync::{Mutex, PoisonError};
 
 use anyhow::{Context as _, bail};
 use fritz_core::config::{Config, Profile};
 use fritz_core::connection::{DEFAULT_HOST, Overrides, Target};
+use fritz_core::secrets::command::{self, PasswordCommand};
 use fritz_core::secrets::{self, Keychain, Source};
 use fritz_core::session::Session;
 use tr064::SecretString;
@@ -35,6 +37,9 @@ pub(crate) struct Context {
     profile: Option<String>,
     overrides: Overrides,
     password: Option<SecretString>,
+    password_command: Option<PasswordCommand>,
+    /// The output of the password command, which runs only once.
+    command_password: Mutex<Option<SecretString>>,
     keychains: Keychains,
 }
 
@@ -57,8 +62,17 @@ impl Context {
             profile,
             overrides,
             password,
+            password_command: None,
+            command_password: Mutex::default(),
             keychains,
         })
+    }
+
+    /// Takes the password command of the environment, ahead of the one of
+    /// the profile.
+    pub(crate) fn with_password_command(mut self, command: Option<PasswordCommand>) -> Self {
+        self.password_command = command;
+        self
     }
 
     /// The configuration file.
@@ -131,10 +145,24 @@ impl Context {
         }
     }
 
-    /// The password for the target and where it came from. Opens the
-    /// keychain only without a password in the environment.
+    /// The password command: the one of the environment, else the one of
+    /// the profile.
+    pub(crate) fn password_command(&self) -> Option<&PasswordCommand> {
+        self.password_command.as_ref().or_else(|| {
+            let (_, profile) = self.config.profile(self.profile.as_deref()).ok()??;
+            profile.password_command.as_ref()
+        })
+    }
+
+    /// The password for the target and where it came from: the one of the
+    /// environment, else the output of the password command, else the one
+    /// in the keychain. Opens the keychain only when it is needed.
     pub(crate) fn password(&self, target: &Target) -> anyhow::Result<(SecretString, Source)> {
         let account = target.account()?;
+        if let (None, Some(command)) = (&self.password, self.password_command()) {
+            let source = Source::Command(command.name().to_owned());
+            return Ok((self.run(command)?, source));
+        }
         let keychain = match (&self.password, &self.keychains) {
             (Some(_), _) | (None, Keychains::Disabled) => None,
             _ => Some(self.keychain()?),
@@ -144,6 +172,28 @@ impl Context {
             keychain.as_ref(),
             &account,
         )?)
+    }
+
+    /// Runs the password command, once per run. Warns if others may change
+    /// the configuration file, and with it the command.
+    fn run(&self, command: &PasswordCommand) -> anyhow::Result<SecretString> {
+        let mut cached = self
+            .command_password
+            .lock()
+            .unwrap_or_else(PoisonError::into_inner);
+        if let Some(password) = &*cached {
+            return Ok(password.clone());
+        }
+        if self.password_command.is_none() && Config::writable_by_others(&self.path) {
+            let path = self.path.display();
+            eprintln!(
+                "warning: others may change {path}, which has the password command, \
+                 run `chmod go-w {path}`"
+            );
+        }
+        let password = command.run(command::TIMEOUT)?;
+        *cached = Some(password.clone());
+        Ok(password)
     }
 
     /// A client for the target with the password, for calls of actions.
@@ -258,5 +308,95 @@ pub(crate) mod tests {
         let (password, source) = context.password(&target).unwrap();
         assert_eq!(password.expose_secret(), "given");
         assert_eq!(source, Source::Environment);
+    }
+
+    #[cfg(unix)]
+    fn printf(text: &str) -> PasswordCommand {
+        vec!["printf".to_owned(), text.to_owned()]
+            .try_into()
+            .unwrap()
+    }
+
+    /// Saves a profile with the password command as the default.
+    #[cfg(unix)]
+    fn with_profile_command(dir: &Path, command: PasswordCommand) -> Context {
+        let mut context = context(dir, agent());
+        context
+            .save_profile(Profile {
+                host: "192.168.178.1".to_owned(),
+                username: Some("agent".to_owned()),
+                password_command: Some(command),
+                ..Profile::default()
+            })
+            .unwrap();
+        context
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn takes_the_environment_then_the_command_then_the_keychain() {
+        let dir = tempfile::tempdir().unwrap();
+        let mut context = with_profile_command(dir.path(), printf("profile\\n"));
+        let target = context.target().unwrap();
+        context
+            .keychain()
+            .unwrap()
+            .set("agent@192.168.178.1", &"stored".into())
+            .unwrap();
+        context.password = Some("given".into());
+        let (password, source) = context.password(&target).unwrap();
+        assert_eq!(password.expose_secret(), "given");
+        assert_eq!(source, Source::Environment);
+
+        context.password = None;
+        let (password, source) = context.password(&target).unwrap();
+        assert_eq!(password.expose_secret(), "profile");
+        assert_eq!(source, Source::Command("printf".to_owned()));
+
+        // The command of the environment wins, but the output of the first
+        // run is kept.
+        let mut context = context.with_password_command(Some(printf("environment")));
+        let (password, _) = context.password(&target).unwrap();
+        assert_eq!(password.expose_secret(), "profile");
+        context.command_password = Mutex::default();
+        let (password, _) = context.password(&target).unwrap();
+        assert_eq!(password.expose_secret(), "environment");
+
+        let context = context.with_password_command(None);
+        let mut profile = context.profile().unwrap().clone();
+        profile.password_command = None;
+        let mut context = context;
+        context.save_profile(profile).unwrap();
+        let (password, source) = context.password(&target).unwrap();
+        assert_eq!(password.expose_secret(), "stored");
+        assert_eq!(source, Source::Keychain);
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn reports_a_failed_command_and_tries_again() {
+        let dir = tempfile::tempdir().unwrap();
+        let context = with_profile_command(dir.path(), printf(""));
+        let target = context.target().unwrap();
+        let error = context.password(&target).unwrap_err();
+        assert_eq!(
+            error.to_string(),
+            "the password command `printf` printed no password"
+        );
+        assert!(context.command_password.lock().unwrap().is_none());
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn warns_about_a_configuration_others_may_change() {
+        use std::os::unix::fs::PermissionsExt as _;
+
+        let dir = tempfile::tempdir().unwrap();
+        let context = with_profile_command(dir.path(), printf("secret"));
+        let mode = std::fs::Permissions::from_mode(0o666);
+        std::fs::set_permissions(context.path(), mode).unwrap();
+        let target = context.target().unwrap();
+        let (password, _) = context.password(&target).unwrap();
+        assert_eq!(password.expose_secret(), "secret");
     }
 }

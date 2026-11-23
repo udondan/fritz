@@ -4,18 +4,27 @@ use std::io::Write;
 
 use fritz_core::config::Profile;
 use fritz_core::connection::Target;
+use fritz_core::secrets::command::PasswordCommand;
 use serde::Serialize;
 
 use crate::context::Context;
 use crate::status::{Format, json, table, yes_no};
 
-/// Creates or updates the profile with the given settings.
-pub(crate) fn init(context: &mut Context, out: &mut impl Write) -> anyhow::Result<()> {
+/// Creates or updates the profile with the given settings. Keeps the
+/// password command of the profile unless a new one is given.
+pub(crate) fn init(
+    context: &mut Context,
+    password_command: Option<PasswordCommand>,
+    out: &mut impl Write,
+) -> anyhow::Result<()> {
     let target = Target::resolve(context.profile(), context.overrides())?;
+    let password_command =
+        password_command.or_else(|| context.profile().and_then(|p| p.password_command.clone()));
     let profile = Profile {
         host: context.host(),
         username: target.username,
         fingerprint: target.fingerprint,
+        password_command,
     };
     context.save_profile(profile)?;
     let (name, path) = (context.profile_name(), context.path().display());
@@ -111,7 +120,7 @@ mod tests {
         let dir = tempfile::tempdir().unwrap();
         let mut context = context(dir.path(), agent());
         let mut out = Vec::new();
-        init(&mut context, &mut out).unwrap();
+        init(&mut context, None, &mut out).unwrap();
         let path = dir.path().join("config.toml");
         assert_eq!(
             String::from_utf8(out).unwrap(),
@@ -151,7 +160,7 @@ mod tests {
         list(&context, Format::Json, &mut out).unwrap();
         assert_eq!(String::from_utf8(out).unwrap(), "[]\n");
 
-        init(&mut context, &mut Vec::new()).unwrap();
+        init(&mut context, None, &mut Vec::new()).unwrap();
         let mut context = crate::context::Context::load(
             Some(dir.path().join("config.toml")),
             Some("repeater".to_owned()),
@@ -164,7 +173,7 @@ mod tests {
             crate::context::Keychains::Disabled,
         )
         .unwrap();
-        init(&mut context, &mut Vec::new()).unwrap();
+        init(&mut context, None, &mut Vec::new()).unwrap();
 
         let mut out = Vec::new();
         list(&context, Format::Text, &mut out).unwrap();
