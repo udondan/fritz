@@ -1,5 +1,6 @@
 //! The wireless networks of a device: their state, whether they are the
-//! guest network, and, when asked for, their clients and details.
+//! guest network, and, when asked for, their clients and details, and what
+//! a device needs to [join](join) one.
 //!
 //! Parts the device lacks, or that the user may not read, are left out
 //! instead of failing the whole read.
@@ -14,6 +15,7 @@ use crate::read::{Reader, Values};
 use crate::status;
 
 mod details;
+pub mod join;
 
 pub use details::{Details, Hint, Night, Radio, Security, Statistics, Wps};
 

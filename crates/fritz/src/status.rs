@@ -482,7 +482,7 @@ pub(crate) fn table(
 
 /// The text with control characters replaced, so that it cannot steer the
 /// terminal.
-fn clean(text: &str) -> String {
+pub(crate) fn clean(text: &str) -> String {
     text.chars()
         .map(|c| if c.is_control() { '\u{FFFD}' } else { c })
         .collect()

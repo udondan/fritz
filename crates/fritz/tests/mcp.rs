@@ -340,6 +340,53 @@ async fn lists_describes_and_calls_actions() {
 }
 
 #[tokio::test(flavor = "multi_thread")]
+async fn never_reads_a_wireless_passphrase() {
+    let answer = fritz_sim::Answer::Ok(
+        [(
+            "NewKeyPassphrase".to_owned(),
+            "fake-mcp-passphrase".to_owned(),
+        )]
+        .into_iter()
+        .collect(),
+    );
+    let fixture = fritz_sim::Fixture::load(FIXTURE).unwrap().with_answer(
+        "WLANConfiguration1",
+        "GetSecurityKeys",
+        None,
+        answer,
+    );
+    let sim = Sim::start(fixture).await.unwrap();
+    // Not even with personal data.
+    let client = connect_with(&sim, &["--personal"]).await;
+    let tools = client.list_all_tools().await.unwrap();
+    for tool in &tools {
+        let name = tool.name.to_lowercase();
+        assert!(!name.contains("qr") && !name.contains("join"), "{name}");
+    }
+    let error = failure(
+        &client,
+        "fritz_call_action",
+        json!({"service": "WLANConfiguration1", "action": "GetSecurityKeys"}),
+    )
+    .await;
+    assert!(
+        error["error"]
+            .as_str()
+            .unwrap()
+            .contains("GetSecurityKeys is secret"),
+        "{error}"
+    );
+    let wlan = success(&client, "fritz_wlan", json!({"details": true})).await;
+    assert!(!wlan.to_string().contains("fake-mcp"), "{wlan}");
+    assert!(
+        sim.requests()
+            .iter()
+            .all(|r| r.action.as_deref() != Some("GetSecurityKeys"))
+    );
+    client.cancel().await.unwrap();
+}
+
+#[tokio::test(flavor = "multi_thread")]
 async fn reads_personal_lists_only_on_request() {
     let sim = sim().await;
     let client = connect(&sim).await;

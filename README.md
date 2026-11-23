@@ -301,7 +301,8 @@ shows one network with its details, named by its service, its number or its
 SSID. The text shows the encryption, channel, BSSID and packets, and the rest
 only where it differs from the defaults; JSON has all fields. Weak settings
 are hints, not errors: `open network`, `WEP`, `TKIP allowed`, `WPS enabled`
-and `hidden SSID`. Keys and passphrases are never read.
+and `hidden SSID`. Keys and passphrases are not read here; only
+`fritz wlan qr` reads a passphrase.
 
 ```console
 $ fritz wlan 2
@@ -311,6 +312,72 @@ WLANConfiguration2  Home  5 GHz  ch 48  be  Up  1 client
   BSSID     AA:BB:CC:00:00:3A
   Packets   1200 sent, 3400 received
 ```
+
+#### QR code to join a network
+
+`fritz wlan qr <network>` shows a QR code that a phone scans to join a
+network: `fritz wlan qr 1` for the first network, `fritz wlan qr guest` for
+the guest network on any model. `guest`, in any case, always means the guest
+network, also if another network has it as its SSID; that one can still be
+named by its number or service. Other networks are named like above. There
+is no default: without a name, `fritz wlan qr` lists the networks on stderr,
+reads no password and fails, also without a terminal. It does the same if no
+network fits the name, or if there is no guest network.
+
+```console
+$ fritz wlan qr
+NUMBER  SERVICE             SSID        BAND     GUEST  STATUS
+1       WLANConfiguration1  Home        2.4 GHz         on
+2       WLANConfiguration2  Home        5 GHz           on
+3       WLANConfiguration3  Home-Guest           guest  on
+Error: name the network of the code, like: fritz wlan qr 1 or fritz wlan qr guest
+```
+
+With a network, it reads the password, and is the only command that does:
+through a narrow path that only calls `GetSecurityKeys` of a
+`WLANConfiguration` service and keeps only the passphrase. `fritz tr064 call`,
+the capture and the MCP server still refuse it. WPA2, WPA3 and mixed networks become `WIFI:T:WPA;S:<ssid>;P:<password>;;`,
+open and OWE networks `WIFI:T:nopass;S:<ssid>;;`, with `H:true;` for a hidden
+SSID; `\`, `;`, `,`, `:` and `"` are escaped. WEP is not supported.
+
+```console
+$ fritz wlan qr guest
+
+
+    █▀▀▀▀▀█ ▄  ▀▄▀▀▀█▀█▀▄▀ ▄▄ █▀▀▀▀▀█
+    █ ███ █ █▄▀▄█ █ █ ▄▀█▀▄▀  █ ███ █
+    █ ▀▀▀ █  ▀▄██▄██▀▄▄▄▀█▄█▀ █ ▀▀▀ █
+    ▀▀▀▀▀▀▀ █ █ █▄▀▄█▄▀▄█▄▀▄█ ▀▀▀▀▀▀▀
+    █   ▄ ▀ █  ██▄█ ▀█▀███▀ █▀█▄▄██▀▄
+    ▀▄▄▀ █▀▄▄ ▄▄ █▀▄▄█▄▄█▄▀▀▀█▄▄███▄▄
+    ██▀ ▄█▀▄█▄████ ▀ ▀▄▀ ▀ █▄▀█▀██▄ █
+      ▀▄▀ ▀ ▄██▄▄▀▀▀█   █ ██▄  ██ ▄▄
+    ██▄▀ ▀▀█▀▄   ▄█▀▀ █ █▀█▄█▀ █▀▀▀▄▀
+     ███▀█▀▀▀▄ ▄   ██▀▀██▀█▄▄ ██▀▄  ▄
+    ▄▀▀ ▄▄▀▄█ █ ▄█▄▀  ▀  ▀   ▄▄▀▄█▄▄▄
+    █ ▀▄▄█▀▄█ ▄▄█▄▄▄▄█▀█▄▄ ▄▀▄▄▄▀▀▄█
+    ▀▀▀▀  ▀ █▄  ▀▄  ▀▄█ ▄█▄██▀▀▀█▄▄▄▀
+    █▀▀▀▀▀█  ▄▀ █▀▀▄▀█▄▄▀▄█▀█ ▀ █▄▄▀
+    █ ███ █  ▀▀█  ▄▀▀ ▄ ▀▀▀▄█▀█▀██▄▀
+    █ ▀▀▀ █  ▄▄▄█ ▀▀  ▄▀ ▀ ▄▀▄  ▄ ▄▀█
+    ▀▀▀▀▀▀▀ ▀▀   ▀ ▀▀   ▀ ▀ ▀▀▀ ▀▀
+
+
+Service   WLANConfiguration3
+SSID      Home-Guest
+Security  WPA
+Hidden    no
+Guest     yes
+```
+
+The code is printed with Unicode half blocks, dark on light, only to a
+terminal. Without one, like in a pipe, `fritz` refuses before it asks the
+device; write the code to a file instead, which only you can read:
+`--out guest.png` or `--out guest.svg` (the format follows the extension, or
+`--format text|png|svg`), with `--scale` pixels per module (8) and a border
+of `--border` modules (4). `--out` is not offered on Windows, where `fritz`
+cannot make the file readable only by you. `--show-password` also prints the
+password below the code, only to a terminal.
 
 ### Interfaces and counters
 
