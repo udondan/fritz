@@ -4,7 +4,7 @@
 
 use std::path::Path;
 
-use fritz_core::change::{Change, Changer, Check, Error, Permit, Settings};
+use fritz_core::change::{Change, Changer, Check, Error, PLAN_NOTE, Permit, Settings, SideEffect};
 use fritz_core::fault::Fault;
 use fritz_core::generic;
 use fritz_core::identity::{Identity, Targets};
@@ -103,6 +103,7 @@ async fn plans_and_applies_a_change() {
     assert_eq!(plan.action, "SetEnable");
     assert_eq!(plan.class, "write");
     assert_eq!(plan.expires_in, 300);
+    assert_eq!(plan.note, PLAN_NOTE);
     assert_eq!(
         plan.changes,
         [Change {
@@ -137,6 +138,7 @@ async fn plans_and_applies_a_change() {
     assert_eq!(outcome.device, identity());
     assert_eq!(outcome.service, "WLANConfiguration1");
     assert_eq!(outcome.action, "SetEnable");
+    assert_eq!(outcome.side_effects, []);
 
     // A token is used once.
     let error = changer
@@ -488,4 +490,100 @@ fn keys() -> Vec<(String, String)> {
     .iter()
     .map(|n| ((*n).to_owned(), format!("geheim-{n}")))
     .collect()
+}
+
+#[tokio::test]
+async fn reports_side_effects() {
+    let setup = Setup::new().await;
+    let mut changer = setup.allowed();
+    setup.sim.inject(Injection::side_effect(
+        "WLANConfiguration1",
+        "SetEnable",
+        "Status",
+        "Disabled",
+    ));
+    let plan = changer
+        .plan("WLANConfiguration1", "SetEnable", &enable("0"))
+        .await
+        .unwrap();
+    // The plan reads nothing it does not change.
+    assert_eq!(
+        setup.sim.state("WLANConfiguration1", "Status").as_deref(),
+        Some("Up")
+    );
+    let outcome = changer
+        .apply("WLANConfiguration1", "SetEnable", &enable("0"), &plan.token)
+        .await
+        .unwrap();
+    assert_eq!(outcome.verified, Some(true));
+    assert_eq!(
+        outcome.side_effects,
+        [SideEffect {
+            getter: "GetInfo".to_owned(),
+            argument: "NewStatus".to_owned(),
+            before: Some("Up".to_owned()),
+            after: Some("Disabled".to_owned()),
+        }]
+    );
+}
+
+#[tokio::test]
+async fn leaves_personal_values_out_of_side_effects() {
+    let setup = Setup::new().await;
+    let all = Permit {
+        write: true,
+        critical: true,
+    };
+    let mut changer = setup.changer(all, allow());
+    let code = vec![(
+        "NewProvisioningCode".to_owned(),
+        "000.000.000.000".to_owned(),
+    )];
+    for (variable, value) in [("DeviceLog", "call from 0301234567"), ("UpTime", "1")] {
+        setup.sim.inject(Injection::side_effect(
+            "DeviceInfo1",
+            "SetProvisioningCode",
+            variable,
+            value,
+        ));
+    }
+    let plan = changer
+        .plan("DeviceInfo1", "SetProvisioningCode", &code)
+        .await
+        .unwrap();
+    let outcome = changer
+        .apply("DeviceInfo1", "SetProvisioningCode", &code, &plan.token)
+        .await
+        .unwrap();
+    let arguments: Vec<_> = outcome
+        .side_effects
+        .iter()
+        .map(|e| e.argument.as_str())
+        .collect();
+    assert_eq!(arguments, ["NewUpTime"]);
+}
+
+#[tokio::test]
+async fn reads_nothing_when_the_snapshot_fails() {
+    let setup = Setup::new().await;
+    let mut changer = setup.allowed();
+    let plan = changer
+        .plan("WLANConfiguration1", "SetEnable", &enable("0"))
+        .await
+        .unwrap();
+    // The descriptions need no login and the identity is known, so only
+    // the getters of the snapshot fail.
+    setup.sim.inject(Injection::LockLogin);
+    let error = changer
+        .apply("WLANConfiguration1", "SetEnable", &enable("0"), &plan.token)
+        .await
+        .unwrap_err();
+    assert!(matches!(error, Error::Call(_)), "{error:?}");
+    setup.sim.clear_injections();
+    assert!(!setup.calls().contains(&"SetEnable".to_owned()));
+    // The token is still valid.
+    changer
+        .apply("WLANConfiguration1", "SetEnable", &enable("0"), &plan.token)
+        .await
+        .unwrap();
 }

@@ -14,13 +14,16 @@
 //! - Every argument refers to a state variable. Calls of other actions, like
 //!   `SetEnable`, write their input arguments into these variables, and the
 //!   getters that read the same variables answer with the new values.
+//!   Nothing else changes: the simulator does not know which settings a
+//!   device changes along with them, like the options of a feature it
+//!   turns off. Tests inject such side effects themselves.
 //! - Paths to list documents, like the one `X_AVM-DE_GetHostListPath`
 //!   returns, hold a session ID, and the documents are served for it.
 //! - The web interface has a session login, `/login_sid.lua`, with a
 //!   PBKDF2 challenge, and serves the documents of the REST API, like
 //!   `/api/v0/smarthome/overview`, for the open session.
-//! - Tests can [inject](Sim::inject) UPnP errors, delays, discarded writes
-//!   and a locked login, and read the [requests](Sim::requests) the server
+//! - Tests can [inject](Sim::inject) UPnP errors, delays, discarded writes,
+//!   side effects of writes and a locked login, and read the [requests](Sim::requests) the server
 //!   got.
 //!
 //! ```no_run
@@ -115,6 +118,15 @@ pub enum Injection {
     Delay(Duration),
     /// Writes succeed, but change nothing.
     DiscardWrites,
+    /// A write of an action also sets a state variable of the same service,
+    /// like a device that resets the settings of a feature when it is
+    /// turned off. Discarded writes set nothing.
+    SideEffect {
+        service: String,
+        action: String,
+        variable: String,
+        value: String,
+    },
     /// The account is locked: every login fails, even with the right
     /// password.
     LockLogin,
@@ -127,6 +139,22 @@ impl Injection {
             service: service.into(),
             action: action.into(),
             code,
+        }
+    }
+
+    /// Writes of `action` of `service` also set the state `variable` of
+    /// that service to `value`.
+    pub fn side_effect(
+        service: impl Into<String>,
+        action: impl Into<String>,
+        variable: impl Into<String>,
+        value: impl Into<String>,
+    ) -> Self {
+        Self::SideEffect {
+            service: service.into(),
+            action: action.into(),
+            variable: variable.into(),
+            value: value.into(),
         }
     }
 }
@@ -430,9 +458,25 @@ impl Inner {
             } if name == action && service.matches(reference) => Some(Fault::new(*code)),
             _ => None,
         });
+        let side_effects = self
+            .injections
+            .iter()
+            .filter_map(|i| match i {
+                Injection::SideEffect {
+                    service: reference,
+                    action: name,
+                    variable,
+                    value,
+                } if name == action && service.matches(reference) => {
+                    Some((variable.clone(), value.clone()))
+                }
+                _ => None,
+            })
+            .collect();
         Hooks {
             fault,
             discard_writes: self.injections.contains(&Injection::DiscardWrites),
+            side_effects,
         }
     }
 }

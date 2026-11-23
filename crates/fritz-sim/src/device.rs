@@ -68,6 +68,8 @@ pub(crate) struct Hooks {
     pub(crate) fault: Option<Fault>,
     /// Writes succeed, but change nothing.
     pub(crate) discard_writes: bool,
+    /// The state variables a write sets as well, with their values.
+    pub(crate) side_effects: Vec<(String, String)>,
 }
 
 #[derive(Debug)]
@@ -163,6 +165,11 @@ impl Device {
                 Some((key, value.clone()))
             });
             self.written.extend(written);
+            let side_effects = hooks
+                .side_effects
+                .iter()
+                .map(|(variable, value)| ((id.to_owned(), variable.clone()), value.clone()));
+            self.written.extend(side_effects);
         }
         Ok(outputs(action)
             .map(|argument| {

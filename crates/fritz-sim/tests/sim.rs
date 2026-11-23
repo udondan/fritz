@@ -125,6 +125,30 @@ async fn discarded_writes_change_nothing() {
 }
 
 #[tokio::test]
+async fn writes_have_injected_side_effects() {
+    let (sim, client, description) = start().await;
+    let wlan = description.service("WLANConfiguration1").unwrap();
+    sim.inject(Injection::side_effect(
+        "WLANConfiguration1",
+        "SetEnable",
+        "Channel",
+        "1",
+    ));
+    client.call(wlan, "GetInfo", &[]).await.unwrap();
+    assert_eq!(
+        sim.state("WLANConfiguration1", "Channel").as_deref(),
+        Some("6")
+    );
+    client
+        .call(wlan, "SetEnable", &[("NewEnable", "0")])
+        .await
+        .unwrap();
+    let info = client.call(wlan, "GetInfo", &[]).await.unwrap();
+    assert_eq!(info.get("NewEnable"), Some("0"));
+    assert_eq!(info.get("NewChannel"), Some("1"));
+}
+
+#[tokio::test]
 async fn injected_faults_fail_valid_calls() {
     let (sim, client, description) = start().await;
     let wlan = description.service("WLANConfiguration1").unwrap();

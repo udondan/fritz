@@ -14,12 +14,14 @@ Unofficial, not affiliated with FRITZ! GmbH.
   with UPnP error 401, missing or unknown arguments with 402, values that
   don't fit the data type with 600
 - Keeps state: a call like `SetEnable` changes the values that the matching
-  getters return afterwards
+  getters return afterwards. Settings a real device changes along with them
+  change only when a test injects that side effect
 - Serves the list documents (hosts, mesh, calls, phonebook), the session
   login of the web interface (`login_sid.lua`, PBKDF2) and the Smart Home
   REST API
 - Injects UPnP errors (like 866, 867 or 868 for the second factor), delays,
-  discarded writes and a locked login, and records every request
+  discarded writes, side effects of writes and a locked login, and records
+  every request
 
 ## Fixtures
 

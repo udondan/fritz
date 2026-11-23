@@ -53,7 +53,19 @@ if all of these hold:
    current values and shows what would change, without changing anything.
 
 After a change, the values are read back and compared to the ones that were
-sent. Every plan, change and refusal is appended to `audit.jsonl` in the state
+sent.
+
+A plan shows only the inputs of the action. A device may change other
+settings along with them, like the options of a feature it turns off, and
+the service descriptions don't say which. So a change reads every getter of
+the service twice before and once after it, and reports the other values
+that changed as side effects. Values that already differ between the two
+reads before, like counters, are left out; slower ones may still show up.
+So are the values of getters that fail in any of the reads, and personal
+values like the event log. Secrets are compared, but shown as `***`.
+Changes in other services are not detected. The simulator that the tests of
+changes run against changes nothing along with a write unless a test
+injects it, so these tests cannot show what a real device does. Every plan, change and refusal is appended to `audit.jsonl` in the state
 directory, with secrets hidden; a change that cannot be logged is not sent.
 The token file holds only hashes of the tokens and of the changes, and is
 locked while it changes, so processes that share it cannot use a token twice.
