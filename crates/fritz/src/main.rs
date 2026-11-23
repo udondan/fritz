@@ -38,6 +38,7 @@ use clap::{ArgAction, Args, CommandFactory as _, Parser, Subcommand};
 use fritz_core::anonymize;
 use fritz_core::capture::{self, Options, Plan};
 use fritz_core::connection::Overrides;
+use fritz_core::personal::{CallFilter, LogFilter, Since, call_kind, category};
 use fritz_core::secrets::ENV_PASSWORD;
 use fritz_core::secrets::command::{ENV_PASSWORD_COMMAND, PasswordCommand};
 use tr064::{Client, SecretString, Url};
@@ -169,11 +170,7 @@ enum Command {
         modules: Vec<String>,
     },
     /// The latest calls, the latest first. Personal data.
-    Calls {
-        /// The most calls to show.
-        #[arg(long, default_value_t = 50)]
-        limit: u32,
-    },
+    Calls(CallsArgs),
     /// The contacts of the phonebooks. Personal data.
     Phonebook {
         /// Only the contacts whose name contains this, ignoring case, or
@@ -182,11 +179,7 @@ enum Command {
     },
     /// The latest entries of the event log, the latest first. Personal
     /// data.
-    Log {
-        /// The most entries to show.
-        #[arg(long, default_value_t = 50)]
-        limit: usize,
-    },
+    Log(LogArgs),
     /// Manage the profiles in the configuration file.
     #[command(subcommand)]
     Config(ConfigCommand),
@@ -458,6 +451,65 @@ async fn main() -> anyhow::Result<()> {
     result
 }
 
+/// The filters of `fritz calls`.
+#[derive(Debug, Args)]
+struct CallsArgs {
+    /// The most calls to show, after the filters.
+    #[arg(long, default_value_t = 50)]
+    limit: u32,
+    /// Only calls of these kinds: incoming, missed, outgoing, rejected,
+    /// active or all. Repeat it or separate them with commas.
+    #[arg(long, value_delimiter = ',', value_parser = call_kind)]
+    kind: Vec<&'static str>,
+    /// Only calls of the last this many days.
+    #[arg(long)]
+    days: Option<u32>,
+    /// Only calls whose name contains this, ignoring case, or whose
+    /// number contains its digits.
+    #[arg(long)]
+    search: Option<String>,
+}
+
+impl CallsArgs {
+    fn filter(&self) -> CallFilter {
+        CallFilter {
+            kinds: self.kind.clone(),
+            days: self.days,
+            search: self.search.clone(),
+        }
+    }
+}
+
+/// The filters of `fritz log`.
+#[derive(Debug, Args)]
+struct LogArgs {
+    /// The most entries to show, after the filters.
+    #[arg(long, default_value_t = 50)]
+    limit: usize,
+    /// Only entries whose message contains this, ignoring case.
+    #[arg(long)]
+    search: Option<String>,
+    /// Only entries since a duration ago, like 30m, 24h, 7d or 2w, or
+    /// since a date like 2026-11-20.
+    #[arg(long)]
+    since: Option<Since>,
+    /// Only entries of this category: system, internet, telephony, wlan
+    /// or usb. Reads the event log of the web interface, which needs a
+    /// login there.
+    #[arg(long, value_parser = category)]
+    category: Option<&'static str>,
+}
+
+impl LogArgs {
+    fn filter(&self) -> LogFilter {
+        LogFilter {
+            search: self.search.clone(),
+            since: self.since,
+            category: self.category,
+        }
+    }
+}
+
 /// Runs a command with the context from `load`, which it loads only when
 /// the command needs it.
 async fn run(
@@ -511,11 +563,15 @@ async fn run(
         Command::Capabilities => device::capabilities(&load()?, format, out).await,
         Command::Users => status::users(&load()?, format, out).await,
         Command::Settings { modules } => device::settings(&load()?, &modules, format, out).await,
-        Command::Calls { limit } => personal::calls(&load()?, limit, format, out).await,
+        Command::Calls(args) => {
+            personal::calls(&load()?, &args.filter(), args.limit, format, out).await
+        }
         Command::Phonebook { search } => {
             personal::phonebook(&load()?, search.as_deref(), format, out).await
         }
-        Command::Log { limit } => personal::log(&load()?, limit, format, out).await,
+        Command::Log(args) => {
+            personal::log(&load()?, &args.filter(), args.limit, format, out).await
+        }
         Command::Config(ConfigCommand::Init { password_command }) => {
             settings::init(&mut load()?, password_command, out)
         }

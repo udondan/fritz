@@ -617,6 +617,31 @@ TIME                 MESSAGE
 2026-11-20 08:02:55  Internet connection established successfully.
 ```
 
+Filters run locally on the lists, and `--limit` applies after them:
+
+- `fritz calls --kind missed --days 7` shows the missed calls of the last
+  week. `--kind` takes `incoming`, `missed`, `outgoing`, `rejected`, `active`
+  or `all`, repeated or separated by commas. `--search` matches part of the
+  name, or the digits of the number.
+- `fritz log --search internet --since 24h` shows the entries of the last
+  day that mention the internet. `--since` takes a duration like `30m`,
+  `24h`, `7d` or `2w`, or a date like `2026-11-20`. Times are compared with
+  the clock of the device.
+- `fritz log --category wlan` shows only the entries of a category:
+  `system`, `internet`, `telephony`, `wlan` or `usb`. The TR-064 event log
+  has no categories, so this reads the event log of the web interface, which
+  needs a login there. Where the device shows no categories, the command
+  fails instead of showing all entries. The web interface shows the
+  category last chosen there, and fritz never chooses one, so the event log
+  in the web interface has to show all categories.
+
+```console
+$ fritz log --category internet --since 2026-11-19
+TIME                 CATEGORY  MESSAGE
+2026-11-20 08:02:55  internet  Internet connection established successfully.
+2026-11-20 08:02:31  internet  Internet connection was interrupted.
+```
+
 ### Any TR-064 action
 
 `fritz tr064` reaches every service and action of the device. Listing and
@@ -850,9 +875,9 @@ that `DeviceInfo:GetInfo` returns as well. The option adds three tools:
 
 | Tool              | Returns                                                     |
 | ----------------- | ----------------------------------------------------------- |
-| `fritz_calls`     | Latest calls, filtered by `kind`                            |
+| `fritz_calls`     | Latest calls, filtered by `kind`, `days` and `search`       |
 | `fritz_phonebook` | Contacts of all phonebooks, filtered by `search`, paginated |
-| `fritz_log`       | Event log, filtered by `search`                             |
+| `fritz_log`       | Event log, filtered by `search`, `since` and `category`     |
 
 Errors from the device come back as JSON with a `status` (`denied`,
 `confirmation_required`, `blocked` or `busy`) and, where it helps,

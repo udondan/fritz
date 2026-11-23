@@ -1,6 +1,7 @@
 //! The session of the web interface and the Smart Home REST API of the
 //! simulated 7690.
 
+use fritz_core::personal::web_log;
 use fritz_core::session::{Error, Session};
 use fritz_core::smarthome::history::{HOMEAUTO, History, Range, history};
 use fritz_core::{settings, smarthome};
@@ -230,4 +231,54 @@ async fn reads_the_settings() {
     let session = login(&sim, PASSWORD).await.unwrap();
     let mesh = settings::settings(&session, &[settings::MESH.to_owned()]).await;
     assert!(mesh.unavailable["mesh"].contains("404"), "{mesh:?}");
+}
+
+/// The number of pages of `/data.lua` the simulator served.
+fn pages(sim: &Sim) -> usize {
+    sim.requests()
+        .iter()
+        .filter(|r| r.path == "/data.lua")
+        .count()
+}
+
+#[tokio::test]
+async fn reads_the_event_log_without_choosing_a_category() {
+    let sim = sim().await;
+    let session = login(&sim, PASSWORD).await.unwrap();
+    assert_eq!(sim.log_filter().as_deref(), Some("all"));
+    let log = web_log(&session, "usb").await.unwrap();
+    assert!(log.iter().any(|e| e.category.as_deref() == Some("usb")));
+    assert!(log.iter().any(|e| e.category.as_deref() == Some("wlan")));
+    assert_eq!(pages(&sim), 1);
+    assert_eq!(sim.log_filter().as_deref(), Some("all"));
+}
+
+#[tokio::test]
+async fn reads_the_category_the_web_interface_shows() {
+    let page = r#"{"data": {"filter": "net", "log": [
+        {"date": "19.11.26", "time": "23:58:40", "msg": "Up.", "group": "net"}
+    ]}}"#;
+    let fixture = Fixture::load(FIXTURE).unwrap().with_page("log", page);
+    let sim = Sim::start(fixture).await.unwrap();
+    let session = login(&sim, PASSWORD).await.unwrap();
+    let internet = web_log(&session, "internet").await.unwrap();
+    assert_eq!(internet[0].message, "Up.");
+    let error = web_log(&session, "system").await.unwrap_err().to_string();
+    assert!(
+        error.contains("it shows only the category internet"),
+        "{error}"
+    );
+    assert_eq!(pages(&sim), 2);
+    assert_eq!(sim.log_filter().as_deref(), Some("net"));
+}
+
+#[tokio::test]
+async fn reads_a_page_that_names_no_category() {
+    let page = r#"{"data": {"log": [{"msg": "Restarted.", "group": "sys"}]}}"#;
+    let fixture = Fixture::load(FIXTURE).unwrap().with_page("log", page);
+    let sim = Sim::start(fixture).await.unwrap();
+    let session = login(&sim, PASSWORD).await.unwrap();
+    let system = web_log(&session, "system").await.unwrap();
+    assert_eq!(system[0].message, "Restarted.");
+    assert_eq!(sim.log_filter(), None);
 }

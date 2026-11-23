@@ -8,6 +8,15 @@ use crate::generic::Error;
 use crate::lists;
 use crate::read::Reader;
 
+mod categories;
+mod filter;
+
+pub use categories::{LOG_PAGE, parse_web_log, web_log};
+pub use filter::{
+    CALL_KINDS, CATEGORIES, CallFilter, FilterError, LogFilter, MAX_CALLS, Since, call_kind,
+    category, filter_log, find_calls, now, timestamp,
+};
+
 /// The most phonebooks read, as a guard against a device that lists
 /// endless ids.
 pub const MAX_PHONEBOOKS: usize = 20;
@@ -59,21 +68,27 @@ impl Contact {
     /// Whether the name contains `search`, ignoring case, or a number
     /// contains its digits, ignoring spaces and dashes.
     pub fn matches(&self, search: &str) -> bool {
-        let text = search.to_lowercase();
-        if self
-            .name
-            .as_deref()
-            .is_some_and(|n| n.to_lowercase().contains(&text))
-        {
-            return true;
-        }
-        let wanted = digits(search);
-        !wanted.is_empty()
-            && self
-                .numbers
-                .iter()
-                .any(|n| digits(&n.number).contains(&wanted))
+        text_matches(
+            self.name.as_deref(),
+            self.numbers.iter().map(|n| &n.number),
+            search,
+        )
     }
+}
+
+/// Whether `name` contains `search`, ignoring case, or one of `numbers`
+/// contains its digits, ignoring spaces and dashes.
+fn text_matches<'a>(
+    name: Option<&str>,
+    mut numbers: impl Iterator<Item = &'a String>,
+    search: &str,
+) -> bool {
+    let text = search.to_lowercase();
+    if name.is_some_and(|n| n.to_lowercase().contains(&text)) {
+        return true;
+    }
+    let wanted = digits(search);
+    !wanted.is_empty() && numbers.any(|n| digits(n).contains(&wanted))
 }
 
 /// The phonebooks with only the contacts that match `search`, see
@@ -94,6 +109,10 @@ pub struct LogEntry {
     /// Like `2026-11-20 18:05:42`, in the time zone of the device.
     pub time: Option<String>,
     pub message: String,
+    /// One of [`CATEGORIES`], or as the device names it. Only the event
+    /// log of the web interface carries categories, see [`web_log`].
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub category: Option<String>,
 }
 
 /// Reads the latest calls, at most `max`, the latest first. Empty if the
@@ -283,10 +302,12 @@ pub fn parse_log(log: &str) -> Vec<LogEntry> {
                 (Some(time), Some(message), true) if time.contains(':') => LogEntry {
                     time: Some(date(&format!("{day} {time}"))),
                     message: message.trim().to_owned(),
+                    category: None,
                 },
                 _ => LogEntry {
                     time: None,
                     message: line.to_owned(),
+                    category: None,
                 },
             }
         })
@@ -304,7 +325,7 @@ fn is_date(text: &str) -> bool {
 
 /// A date of the device, like `20.11.26 18:05`, as `2026-11-20 18:05`.
 /// Other texts stay as they are.
-fn date(text: &str) -> String {
+pub(crate) fn date(text: &str) -> String {
     let (day, time) = text.split_once(' ').unwrap_or((text, ""));
     if !is_date(day) {
         return text.to_owned();
@@ -424,18 +445,22 @@ mod tests {
                 LogEntry {
                     time: Some("2026-11-20 18:05:42".to_owned()),
                     message: "Internet connected.".to_owned(),
+                    category: None,
                 },
                 LogEntry {
                     time: Some("2026-11-19 07:00:01".to_owned()),
                     message: "DSL ready.".to_owned(),
+                    category: None,
                 },
                 LogEntry {
                     time: None,
                     message: "no time here".to_owned(),
+                    category: None,
                 },
                 LogEntry {
                     time: None,
                     message: "1.2.3 4:5 odd".to_owned(),
+                    category: None,
                 },
             ]
         );

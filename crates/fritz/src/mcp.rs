@@ -29,7 +29,7 @@ use fritz_core::change::{self, Changer, Permit, Settings};
 use fritz_core::firmware;
 use fritz_core::generic;
 use fritz_core::host::{self, Lookup};
-use fritz_core::personal::{self, Contact};
+use fritz_core::personal::{self, CallFilter, Contact, LogFilter, call_kind, category};
 use fritz_core::policy::{self, Class};
 use fritz_core::ports;
 use fritz_core::powerline;
@@ -51,6 +51,7 @@ use tokio::sync::{MappedMutexGuard, Mutex, MutexGuard};
 use tr064::Direction;
 
 use crate::context::Context;
+use crate::personal::find_log;
 use crate::tr64::kind;
 
 /// The hosts in one page, unless the call asks for another number.
@@ -211,12 +212,18 @@ pub(crate) struct SettingsQuery {
     modules: Vec<String>,
 }
 
-/// The filter and the number of `fritz_calls`.
+/// The filters and the number of `fritz_calls`.
 #[derive(Debug, Default, Deserialize, JsonSchema)]
 pub(crate) struct CallsQuery {
-    /// Only calls of this kind: `incoming`, `missed`, `outgoing`, `rejected`.
+    /// Only calls of these kinds, separated by commas: `incoming`,
+    /// `missed`, `outgoing`, `rejected`, `active` or `all`.
     kind: Option<String>,
-    /// Calls to return, the latest first, at most 200. Default 50.
+    /// Only calls of the last this many days.
+    days: Option<u32>,
+    /// Part of the name, or digits of the number.
+    search: Option<String>,
+    /// Calls to return after the filters, the latest first, at most 200.
+    /// Default 50.
     limit: Option<usize>,
 }
 
@@ -232,12 +239,20 @@ pub(crate) struct PhonebookQuery {
     limit: Option<usize>,
 }
 
-/// The filter and the number of `fritz_log`.
+/// The filters and the number of `fritz_log`.
 #[derive(Debug, Default, Deserialize, JsonSchema)]
 pub(crate) struct LogQuery {
     /// Part of the message, ignoring case.
     search: Option<String>,
-    /// Entries to return, the latest first, at most 200. Default 50.
+    /// Only entries since a duration ago, like `30m`, `24h`, `7d` or `2w`,
+    /// or since a date like `2026-11-20`.
+    since: Option<String>,
+    /// Only entries of this category: `system`, `internet`, `telephony`,
+    /// `wlan` or `usb`. Reads the event log of the web interface; fails if
+    /// the device shows none with categories.
+    category: Option<String>,
+    /// Entries to return after the filters, the latest first, at most 200.
+    /// Default 50.
     limit: Option<usize>,
 }
 
@@ -698,26 +713,23 @@ impl Server {
 #[tool_router(router = personal_router)]
 impl Server {
     #[tool(
-        description = "Latest calls: kind, date, minutes, number, name, own number, device. Personal data.",
+        description = "Latest calls: kind, date, minutes, number, name, own number, device. Filters by kind, days and name or number. Personal data.",
         annotations(read_only_hint = true, open_world_hint = false)
     )]
     async fn fritz_calls(&self, Parameters(query): Parameters<CallsQuery>) -> CallToolResult {
         self.respond(async {
             let limit = query.limit.unwrap_or(PAGE).min(MAX_PAGE);
-            // A filter needs more calls than it returns.
-            let read = if query.kind.is_some() {
-                MAX_PAGE
-            } else {
-                limit
+            let kinds = query
+                .kind
+                .as_deref()
+                .map_or_else(|| Ok(Vec::new()), |k| k.split(',').map(call_kind).collect())?;
+            let filter = CallFilter {
+                kinds,
+                days: query.days,
+                search: query.search,
             };
             let mut reader = self.reader().await?;
-            let calls = personal::calls(&mut reader, u32::try_from(read)?).await?;
-            let calls: Vec<_> = calls
-                .into_iter()
-                .filter(|c| query.kind.as_deref().is_none_or(|k| c.kind == k))
-                .take(limit)
-                .collect();
-            Ok(calls)
+            Ok(personal::find_calls(&mut reader, &filter, u32::try_from(limit)?).await?)
         })
         .await
     }
@@ -761,25 +773,19 @@ impl Server {
     }
 
     #[tool(
-        description = "Latest entries of the event log: connections, logins, WLAN, telephony. Personal data.",
+        description = "Latest entries of the event log: connections, logins, WLAN, telephony. Filters by text, time and category. Personal data.",
         annotations(read_only_hint = true, open_world_hint = false)
     )]
     async fn fritz_log(&self, Parameters(query): Parameters<LogQuery>) -> CallToolResult {
         self.respond(async {
             let limit = query.limit.unwrap_or(PAGE).min(MAX_PAGE);
-            let search = query.search.as_deref().map(str::to_lowercase);
+            let filter = LogFilter {
+                search: query.search,
+                since: query.since.as_deref().map(str::parse).transpose()?,
+                category: query.category.as_deref().map(category).transpose()?,
+            };
             let mut reader = self.reader().await?;
-            let log = personal::log(&mut reader, usize::MAX).await?;
-            let entries: Vec<_> = log
-                .into_iter()
-                .filter(|e| {
-                    search
-                        .as_deref()
-                        .is_none_or(|s| e.message.to_lowercase().contains(s))
-                })
-                .take(limit)
-                .collect();
-            Ok(entries)
+            find_log(&self.context, &mut reader, &filter, limit).await
         })
         .await
     }

@@ -12,11 +12,9 @@
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
+pub use crate::session::DATA;
 use crate::session::{Error, Session};
 use crate::status::Right;
-
-/// Where the pages of the web interface are.
-pub const DATA: &str = "/data.lua";
 
 /// The page with the charts.
 pub const PAGE: &str = "ecoStat";
@@ -114,15 +112,7 @@ fn note(error: &Error, rights: &[Right]) -> String {
 /// The errors of the request, and [`Error::Invalid`] if the answer holds
 /// none of the charts.
 pub async fn system(session: &Session) -> Result<System, Error> {
-    let form = [
-        ("xhr", "1"),
-        ("lang", "en"),
-        ("page", PAGE),
-        ("xhrId", "all"),
-        ("useajax", "1"),
-        ("no_sidrenew", ""),
-    ];
-    parse(&session.post(DATA, &form).await?)
+    parse(&session.page(PAGE, &[]).await?)
 }
 
 /// The load in the page `ecoStat`.

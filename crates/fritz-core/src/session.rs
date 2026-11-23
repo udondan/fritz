@@ -19,6 +19,9 @@ use crate::status::Right;
 /// The login page, in the version with PBKDF2.
 pub const LOGIN: &str = "/login_sid.lua?version=2";
 
+/// Where the pages of the web interface are.
+pub const DATA: &str = "/data.lua";
+
 /// The session ID of an answer without a session.
 const NO_SESSION: &str = "0000000000000000";
 
@@ -116,6 +119,26 @@ impl Session {
         let mut fields = form.to_vec();
         fields.push(("sid", self.sid.expose_secret()));
         Ok(self.client.post_form(path, &fields).await?)
+    }
+
+    /// Fetches a page of the web interface by name, like `ecoStat`, as
+    /// JSON: posts the form the web interface sends to [`DATA`], with the
+    /// `fields` the page takes.
+    ///
+    /// # Errors
+    ///
+    /// The errors of the request.
+    pub async fn page(&self, name: &str, fields: &[(&str, &str)]) -> Result<String, Error> {
+        let mut form = vec![
+            ("xhr", "1"),
+            ("lang", "en"),
+            ("page", name),
+            ("xhrId", "all"),
+            ("useajax", "1"),
+            ("no_sidrenew", ""),
+        ];
+        form.extend_from_slice(fields);
+        self.post(DATA, &form).await
     }
 
     /// Ends the session. Without it, the device ends the session after a

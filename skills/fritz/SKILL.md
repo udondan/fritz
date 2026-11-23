@@ -53,8 +53,11 @@ or paste them.
 | VPN, WLAN, parental controls, traffic       | `fritz settings vpn wlan user inetstat` |
 | Is mesh steering on, which mesh role?       | `fritz settings mesh`                |
 | Who called, which calls were missed?        | `fritz calls --limit 20`             |
+| Missed calls this week, calls of a person   | `fritz calls --kind missed --days 7`, `fritz calls --search <name or number>` |
 | Whose number is this, what is X's number?   | `fritz phonebook <name or number>`   |
 | What happened on the box lately?            | `fritz log --limit 50`               |
+| When did the internet drop, WLAN last night | `fritz log --category internet --since 7d`, `fritz log --category wlan --since 12h` |
+| Log entries about a topic                   | `fritz log --search <text>`          |
 | Which fritz build, is a newer one out?      | `fritz version --check` (exit 10: newer) |
 
 `fritz settings` reads modules of the web interface, which has no documented
