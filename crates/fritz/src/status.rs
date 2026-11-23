@@ -18,12 +18,14 @@ mod firmware;
 mod host;
 mod powerline;
 mod tree;
+mod users;
 mod wlan;
 
 pub(crate) use firmware::firmware;
 pub(crate) use host::{HostsArgs, hosts};
 pub(crate) use powerline::powerline;
 use tree::mesh_tree;
+pub(crate) use users::users;
 pub(crate) use wlan::wlan;
 
 use crate::context::Context;

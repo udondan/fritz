@@ -156,6 +156,9 @@ enum Command {
     Telephony,
     /// The features the device offers and the rights of the user.
     Capabilities,
+    /// The users of the device, your rights and how the login is
+    /// protected, with hints on weak settings. No passwords are read.
+    Users,
     /// The settings of the device, like DNS and IPv6, read through the web
     /// interface. Secrets are hidden.
     Settings {
@@ -498,6 +501,7 @@ async fn run(
         Command::Ports => device::ports(&load()?, format, out).await,
         Command::Telephony => device::telephony(&load()?, format, out).await,
         Command::Capabilities => device::capabilities(&load()?, format, out).await,
+        Command::Users => status::users(&load()?, format, out).await,
         Command::Settings { modules } => device::settings(&load()?, &modules, format, out).await,
         Command::Calls { limit } => personal::calls(&load()?, limit, format, out).await,
         Command::Phonebook { search } => {

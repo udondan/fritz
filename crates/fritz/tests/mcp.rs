@@ -93,6 +93,30 @@ async fn failure(client: &Client, tool: &'static str, arguments: Value) -> Value
 }
 
 #[tokio::test(flavor = "multi_thread")]
+async fn hides_user_names_without_personal() {
+    let sim = sim().await;
+    let client = connect(&sim).await;
+    let users = success(&client, "fritz_users", json!({})).await;
+    let list = users["users"].as_array().unwrap();
+    assert_eq!(list.len(), 4, "{users}");
+    for user in list {
+        assert_eq!(
+            user["name"], "(personal, needs `fritz mcp --personal`)",
+            "{users}"
+        );
+    }
+    assert_eq!(list[3]["last_login"], true, "{users}");
+    assert_eq!(users["login"]["default_password"], false, "{users}");
+    assert_eq!(users["hints"], json!(["two-factor confirmation off"]));
+    client.cancel().await.unwrap();
+
+    let client = connect_with(&sim, &["--personal"]).await;
+    let users = success(&client, "fritz_users", json!({})).await;
+    assert_eq!(users["users"][0]["name"], "user-1", "{users}");
+    client.cancel().await.unwrap();
+}
+
+#[tokio::test(flavor = "multi_thread")]
 async fn lists_tools_within_the_budget() {
     let sim = sim().await;
     // All tools, the personal ones included.

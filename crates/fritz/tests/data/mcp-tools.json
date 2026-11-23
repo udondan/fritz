@@ -397,6 +397,18 @@
     }
   },
   {
+    "name": "fritz_users",
+    "description": "Users of the device (null if not allowed; names hidden without `--personal`), rights of the current user, login settings: anonymous and button login, default password, two-factor confirmation, and hints on weak settings. No passwords are read.",
+    "inputSchema": {
+      "properties": {},
+      "type": "object"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "openWorldHint": false
+    }
+  },
+  {
     "name": "fritz_wlan",
     "description": "Wireless networks: SSID, band, channel, standard, status, guest network, number of clients, with `clients` the clients of each, and with `details` the security settings, radio, WPS, night time switch-off, statistics and hints on weak settings.",
     "inputSchema": {
