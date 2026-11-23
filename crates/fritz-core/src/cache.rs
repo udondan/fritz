@@ -1,14 +1,17 @@
 //! A cache of the service descriptions (SCPDs) of devices, so that a run
 //! only fetches the device description.
 //!
-//! The cache keeps one directory per device, named after its UDN, or its
-//! serial number if it has no UDN. The file `device.json` in it names the
-//! device, its model and its firmware version, as the device description
-//! states them; the other files are the SCPDs as the device sent them. When
-//! the device description names another model or firmware, the directory is
-//! replaced, so a firmware update never uses old action lists. Devices whose
-//! description has no firmware version, like some FRITZ!Repeaters, are not
-//! cached.
+//! The cache keeps one directory per device and firmware, named after its
+//! UDN (or its serial number if it has no UDN) and a hash of its model and
+//! firmware version. The file `device.json` in it names the device, its
+//! model and its firmware version, as the device description states them;
+//! the other files are the SCPDs as the device sent them. Since every
+//! firmware has its own directory, a process that still runs with the old
+//! firmware never writes into the directory of the new one, and a firmware
+//! update never uses old action lists. The directories of other firmware
+//! versions of the device are removed when a new one is created. Devices
+//! whose description has no firmware version, like some FRITZ!Repeaters, are
+//! not cached.
 //!
 //! A file that cannot be read or parsed counts as missing, and the SCPD is
 //! fetched again. The descriptions need no login and hold no secrets;
@@ -73,12 +76,19 @@ impl Device {
     }
 
     /// The name of its directory: the id with only letters, digits and
-    /// dashes.
+    /// dashes, and a hash of the model and the firmware version, so that
+    /// every firmware has its own directory.
     fn dir_name(&self) -> String {
-        self.id
+        let id: String = self
+            .id
             .chars()
             .map(|c| if c.is_ascii_alphanumeric() { c } else { '-' })
-            .collect()
+            .collect();
+        let mut hash = Sha256::new();
+        hash.update(self.model.as_deref().unwrap_or_default());
+        hash.update([0]);
+        hash.update(&self.firmware);
+        format!("{id}-{}", crate::session::to_hex(&hash.finalize()[..4]))
     }
 }
 
@@ -206,11 +216,19 @@ impl Cache {
         Scpd::parse(&fs::read_to_string(dir.join(file_name(url))).ok()?).ok()
     }
 
-    /// Writes an SCPD to the directory of the device, which is replaced
-    /// first if it was stored for another device or firmware.
+    /// Writes an SCPD to the directory of the device and firmware. A new
+    /// directory replaces the ones of other firmware versions of the device,
+    /// and one that names another device is replaced.
     fn write(&self, device: &Device, url: &str, xml: &str) -> io::Result<()> {
         let dir = self.dir.join(device.dir_name());
         if read_device(&dir).as_ref() != Some(device) {
+            for old in self.device_dirs()? {
+                if old != dir && read_device(&old).is_some_and(|old| old.id == device.id) {
+                    // A process with the old firmware may still write there;
+                    // then its next run removes it.
+                    let _ = fs::remove_dir_all(&old);
+                }
+            }
             match fs::remove_dir_all(&dir) {
                 Err(error) if error.kind() != io::ErrorKind::NotFound => return Err(error),
                 _ => {}
@@ -298,7 +316,7 @@ mod tests {
             (device.id.as_str(), device.model.as_deref()),
             ("AA:BB", None)
         );
-        assert_eq!(device.dir_name(), "AA-BB");
+        assert_eq!(device.dir_name(), "AA-BB-1009c30b");
         for unknown in [
             "not xml",
             "<root/>",
@@ -329,7 +347,8 @@ mod tests {
         let entries = other.list().unwrap();
         assert_eq!(entries.len(), 1);
         assert_eq!(entries[0].device, Some(device()));
-        assert_eq!(entries[0].path, cache.dir().join("uuid-1"));
+        assert_eq!(entries[0].path, cache.dir().join(device().dir_name()));
+        assert!(device().dir_name().starts_with("uuid-1-"));
         assert_eq!(entries[0].scpds, 1);
         assert!(entries[0].bytes > SCPD.len() as u64);
 
@@ -344,16 +363,57 @@ mod tests {
     }
 
     #[test]
+    fn keeps_every_firmware_in_its_own_directory() {
+        let dir = tempfile::tempdir().unwrap();
+        let scpd = Scpd::parse(SCPD).unwrap();
+        let updated = DESCRIPTION.replace("285.08.25", "285.08.30");
+        let old = Device::of(DESCRIPTION).unwrap();
+        let new = Device::of(&updated).unwrap();
+        assert_ne!(old.dir_name(), new.dir_name());
+        let mut other_model = old.clone();
+        other_model.model = None;
+        assert_ne!(old.dir_name(), other_model.dir_name());
+
+        // A process with the old firmware checked its directory, then
+        // another one stored the new firmware. The SCPD the first one writes
+        // afterwards never ends up in the directory of the new firmware.
+        let before = Cache::new(dir.path());
+        before.store(DESCRIPTION, "/a.xml", SCPD, &scpd);
+        let after = Cache::new(dir.path());
+        after.store(&updated, "/b.xml", SCPD, &scpd);
+        assert!(!dir.path().join(old.dir_name()).exists());
+        let late = dir.path().join(old.dir_name()).join(file_name("/c.xml"));
+        write_atomic(&late, SCPD.as_bytes()).unwrap_err();
+        let entries = after.list().unwrap();
+        assert_eq!(entries.len(), 1);
+        assert_eq!(entries[0].device, Some(new.clone()));
+        assert_eq!(entries[0].scpds, 1);
+        assert_eq!(Cache::new(dir.path()).scpd(&updated, "/c.xml"), None);
+
+        // Each firmware replaces the directory of the other one.
+        before.store(DESCRIPTION, "/c.xml", SCPD, &scpd);
+        assert_eq!(after.list().unwrap()[0].device, Some(old));
+        after.store(&updated, "/b.xml", SCPD, &scpd);
+        let entries = after.list().unwrap();
+        assert_eq!(entries.len(), 1);
+        assert_eq!(entries[0].device, Some(new));
+        assert_eq!(Cache::new(dir.path()).scpd(DESCRIPTION, "/c.xml"), None);
+    }
+
+    #[test]
     fn ignores_what_it_cannot_parse() {
         let dir = tempfile::tempdir().unwrap();
         let cache = Cache::new(dir.path());
         let scpd = Scpd::parse(SCPD).unwrap();
         cache.store(DESCRIPTION, "/a.xml", SCPD, &scpd);
-        let file = dir.path().join("uuid-1").join(file_name("/a.xml"));
+        let file = dir
+            .path()
+            .join(device().dir_name())
+            .join(file_name("/a.xml"));
         fs::write(&file, "<scpd><actionList>").unwrap();
         assert_eq!(Cache::new(dir.path()).scpd(DESCRIPTION, "/a.xml"), None);
 
-        fs::write(dir.path().join("uuid-1").join(DEVICE_FILE), "{").unwrap();
+        fs::write(dir.path().join(device().dir_name()).join(DEVICE_FILE), "{").unwrap();
         let entries = cache.list().unwrap();
         assert_eq!(entries[0].device, None);
         assert_eq!(Cache::new(dir.path()).scpd(DESCRIPTION, "/a.xml"), None);
@@ -362,7 +422,7 @@ mod tests {
         let unversioned = "<root><device><UDN>uuid:2</UDN></device></root>";
         cache.store(unversioned, "/a.xml", SCPD, &scpd);
         assert_eq!(cache.scpd(unversioned, "/a.xml"), None);
-        assert!(!dir.path().join("uuid-2").exists());
+        assert_eq!(fs::read_dir(dir.path()).unwrap().count(), 1);
     }
 
     #[test]
@@ -376,7 +436,7 @@ mod tests {
         fs::write(dir.path().join("notes.txt"), "kept").unwrap();
 
         assert_eq!(cache.clear().unwrap(), 1);
-        assert!(!dir.path().join("uuid-1").exists());
+        assert!(!dir.path().join(device().dir_name()).exists());
         assert!(dir.path().join("other").exists());
         assert!(dir.path().join("notes.txt").exists());
         assert_eq!(cache.scpd(DESCRIPTION, "/a.xml"), None);
