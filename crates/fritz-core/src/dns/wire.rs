@@ -38,6 +38,8 @@ pub enum Failure {
     Timeout,
     /// The server answered with an error, like SERVFAIL or REFUSED.
     Refused(u8),
+    /// The answer was too long for UDP and cut off, so it is incomplete.
+    Truncated,
     /// The query could not be sent, or the answer could not be read.
     Network(String),
 }
@@ -51,6 +53,7 @@ impl fmt::Display for Failure {
             Self::Refused(2) => f.write_str("server failure (SERVFAIL)"),
             Self::Refused(5) => f.write_str("refused (REFUSED)"),
             Self::Refused(code) => write!(f, "error code {code}"),
+            Self::Truncated => f.write_str("answer cut off, too long for UDP"),
             Self::Network(error) => f.write_str(error),
         }
     }
@@ -131,9 +134,16 @@ pub(crate) fn encode(id: u16, name: &str, kind: Record) -> Result<Vec<u8>, &'sta
 /// not that answer.
 pub(crate) fn decode(id: u16, kind: Record, packet: &[u8]) -> Option<Result<Vec<IpAddr>, Failure>> {
     let mut reader = Bytes { packet, at: 0 };
-    let is_answer = reader.u16()? == id && reader.u8()? & 0x80 != 0;
-    if !is_answer {
+    if reader.u16()? != id {
         return None;
+    }
+    let flags = reader.u8()?;
+    if flags & 0x80 == 0 {
+        return None;
+    }
+    // TC: the answer was cut off and may lack records.
+    if flags & 0x02 != 0 {
+        return Some(Err(Failure::Truncated));
     }
     let code = reader.u8()? & 0x0f;
     let questions = reader.u16()?;
@@ -281,6 +291,17 @@ mod tests {
             None
         );
         assert_eq!(decode(7, Record::A, &packet[..packet.len() - 2]), None);
+        // An answer cut off for UDP.
+        let mut truncated = packet.clone();
+        truncated[2] |= 0x02;
+        assert_eq!(
+            decode(7, Record::A, &truncated),
+            Some(Err(Failure::Truncated))
+        );
+        assert_eq!(
+            Failure::Truncated.to_string(),
+            "answer cut off, too long for UDP"
+        );
         // A record with an odd length is skipped.
         assert_eq!(
             decode(7, Record::A, &answer(7, 0, &[(1, &[1, 2, 3])])),

@@ -98,20 +98,26 @@ fn resolved(result: Option<std::io::Result<Vec<SocketAddr>>>) -> Result<Vec<IpAd
 )]
 pub struct InvalidName(pub String);
 
-/// Checks a host name, without a dot at the end.
+/// Checks a host name. A dot at the end is kept: it makes the name
+/// absolute, so no search domain is added to it.
 ///
 /// # Errors
 ///
 /// [`InvalidName`] for anything but a host name, also for addresses.
 pub fn check_name(text: &str) -> Result<String, InvalidName> {
-    let name = text.strip_suffix('.').unwrap_or(text);
+    let name = bare(text);
     // An empty name has one empty label.
     let valid = name.len() <= 253 && name.split('.').all(is_label);
     if valid && name.parse::<IpAddr>().is_err() {
-        Ok(name.to_owned())
+        Ok(text.to_owned())
     } else {
         Err(InvalidName(text.to_owned()))
     }
+}
+
+/// The name without the dot at the end of an absolute name.
+fn bare(name: &str) -> &str {
+    name.strip_suffix('.').unwrap_or(name)
 }
 
 /// Whether `label` is 1 to 63 letters, digits, `-` or `_`.
@@ -424,6 +430,7 @@ fn host_entry(hosts: &[status::Host], name: &str, router: &RouterView) -> Option
 
 /// The name of a host in the host table that `name` stands for.
 fn host_label<'a>(name: &'a str, domain: Option<&str>) -> Option<&'a str> {
+    let name = bare(name);
     let Some((label, rest)) = name.split_once('.') else {
         return Some(name);
     };
@@ -433,7 +440,8 @@ fn host_label<'a>(name: &'a str, domain: Option<&str>) -> Option<&'a str> {
 
 /// Whether `name` is resolved by mDNS.
 fn is_mdns(name: &str) -> bool {
-    name.rsplit('.')
+    bare(name)
+        .rsplit('.')
         .next()
         .is_some_and(|label| label.eq_ignore_ascii_case("local"))
 }
@@ -447,10 +455,11 @@ async fn ask(
     server: Option<SocketAddr>,
 ) -> (Answer, Answer, Option<ClientConfig>) {
     // A name without a dot gets the local domain on clients that search
-    // it; the router is asked for that full name.
+    // it; the router is asked for that full name. An absolute name, with a
+    // dot at the end, gets no domain.
     let full = match domain {
         Some(domain) if !name.contains('.') => format!("{name}.{domain}"),
-        _ => name.to_owned(),
+        _ => bare(name).to_owned(),
     };
     let shown = server.map(show_server);
     if is_mdns(name) {
@@ -631,7 +640,9 @@ fn client_fails(report: &Report) -> Verdict {
             .iter()
             .all(|s| s.parse::<IpAddr>().is_ok_and(|ip| ip.is_ipv4()))
         && !servers.iter().any(|s| Some(s.as_str()) == router_address);
-    if identified {
+    // Forwarding the local domain only helps names in it.
+    let local = domain.is_none_or(|domain| in_domain(bare(name), domain));
+    if identified && local {
         let zone = domain.unwrap_or(name);
         let router = router_address.unwrap_or("the router");
         let asks = if servers.iter().all(|s| client::is_local(s)) {
@@ -658,6 +669,13 @@ fn client_fails(report: &Report) -> Verdict {
             report.client_answer.note.as_deref().unwrap_or("no address")
         ),
     )
+}
+
+/// Whether `name` is in `domain`: a name without a dot, the domain itself or
+/// a name below it.
+fn in_domain(name: &str, domain: &str) -> bool {
+    let (name, domain) = (name.to_ascii_lowercase(), domain.to_ascii_lowercase());
+    !name.contains('.') || name == domain || name.ends_with(&format!(".{domain}"))
 }
 
 /// The verdict when neither the router nor this machine answer.

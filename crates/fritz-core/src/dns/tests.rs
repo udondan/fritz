@@ -109,6 +109,12 @@ fn names_missing_forwarding() {
         "the router answers, but this machine asks 192.168.178.5, which does not forward \
          fritz.box to the router; add conditional forwarding of fritz.box to 192.168.178.1 there"
     );
+    // Forwarding the local domain does not help names outside it.
+    let mut outside = report.clone();
+    outside.name = "www.example.com".to_owned();
+    assert_eq!(verdict(&outside).cause, Cause::ClientFails);
+    outside.name = "fritz.box.".to_owned();
+    assert_eq!(verdict(&outside).cause, Cause::NotForwarded);
     // A local resolver, whose upstream servers are unknown.
     report.client_config = Some(config(&["127.0.0.53"], &["fritz.box"]));
     let (_, message) = judge(&report);
@@ -276,7 +282,7 @@ fn names_an_unknown_router() {
 
 #[test]
 fn checks_names() {
-    assert_eq!(check_name("nas.fritz.box.").unwrap(), "nas.fritz.box");
+    assert_eq!(check_name("nas.fritz.box.").unwrap(), "nas.fritz.box.");
     assert_eq!(check_name("my_host-1").unwrap(), "my_host-1");
     for bad in [
         "",
@@ -344,6 +350,8 @@ fn finds_hosts_by_name() {
     assert_eq!(host_label("nas.local", None), Some("nas"));
     assert_eq!(host_label("nas.Fritz.Box", Some("fritz.box")), Some("nas"));
     assert_eq!(host_label("nas.example.org", Some("fritz.box")), None);
+    assert_eq!(host_label("nas.fritz.box.", Some("fritz.box")), Some("nas"));
+    assert!(is_mdns("nas.local."));
     let host = |name: &str, ip: &str, active| status::Host {
         name: Some(name.to_owned()),
         ip: Some(ip.to_owned()),
@@ -402,6 +410,45 @@ async fn gives_up_after_the_total_timeout() {
     );
     assert_eq!(client.note.as_deref(), Some("no answer in time"));
     assert_eq!(config, None);
+}
+
+/// Probes that answer every query with one address and record the names.
+#[derive(Default)]
+struct Recording(std::sync::Mutex<Vec<String>>);
+
+impl Probes for Recording {
+    fn query(
+        &self,
+        _: SocketAddr,
+        name: &str,
+        _: Record,
+    ) -> impl Future<Output = Result<Vec<IpAddr>, Failure>> + Send {
+        self.0.lock().unwrap().push(format!("router {name}"));
+        std::future::ready(Ok(vec![ip("192.0.2.7")]))
+    }
+
+    fn resolve(&self, name: &str) -> impl Future<Output = Result<Vec<IpAddr>, Failure>> + Send {
+        self.0.lock().unwrap().push(format!("client {name}"));
+        std::future::ready(Ok(vec![ip("192.0.2.7")]))
+    }
+
+    fn client_config(&self) -> impl Future<Output = Option<ClientConfig>> + Send {
+        std::future::ready(None)
+    }
+}
+
+#[tokio::test]
+async fn keeps_absolute_names() {
+    let server = "192.0.2.1:53".parse().ok();
+    let probes = Recording::default();
+    let (router, client, _) = ask(&probes, "nas.", Some("fritz.box"), server).await;
+    assert_eq!(
+        (router.name.as_str(), client.name.as_str()),
+        ("nas", "nas.")
+    );
+    let mut asked = probes.0.lock().unwrap().clone();
+    asked.sort();
+    assert_eq!(asked, ["client nas.", "router nas", "router nas"]);
 }
 
 #[tokio::test]
