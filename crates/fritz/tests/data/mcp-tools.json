@@ -208,9 +208,16 @@
   },
   {
     "name": "fritz_mesh",
-    "description": "Mesh topology: nodes and the links between them.",
+    "description": "Mesh topology: nodes and the links between them, or as a tree of which device is connected to which router or repeater.",
     "inputSchema": {
-      "properties": {},
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "tree": {
+          "default": false,
+          "description": "Nest every device below the router or repeater it is connected to,\nwith its links up.",
+          "type": "boolean"
+        }
+      },
       "type": "object"
     },
     "annotations": {
