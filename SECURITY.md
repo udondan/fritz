@@ -91,6 +91,13 @@ if all of these hold:
 After a change, the values are read back and compared to the ones that were
 sent.
 
+`fritz reboot` restarts a device as the critical change `DeviceConfig:Reboot`,
+with the same checks, a token and the audit log. It sends the restart once
+and never again on its own, also not when the connection breaks while it is
+sent. While it waits for the device to come back, it only reads
+`DeviceInfo:GetInfo`, for at most an hour, and fails if a device with
+another serial number answers.
+
 A plan shows only the inputs of the action. A device may change other
 settings along with them, like the options of a feature it turns off, and
 the service descriptions don't say which. So a change reads every getter of

@@ -82,6 +82,12 @@ with `--no-cache`, or run `fritz cache clear`.
   user asks about them, and show no more than the question needs.
 - Do not try to change settings, not even through `tr064 call`. If the user
   wants a change, tell them where to make it in the web interface.
+- A restart is a change too. Builds with the feature `write` have `fritz
+  reboot`, which takes down internet, WLAN and telephony for minutes. Run it
+  only when the user asks for a restart of that device: run `fritz reboot`
+  without `--token` first, show the plan and its warning, and pass the
+  token with `--wait` only after the user confirms. Never repeat it after
+  `timeout` or `unknown`; tell the user instead.
 - Error 866 means the device wants a second factor; `fritz` never gives one.
   867 (blocked, up to an hour) and 868 (busy, up to two minutes) are
   temporary: wait instead of retrying in a loop. 606 means the user lacks

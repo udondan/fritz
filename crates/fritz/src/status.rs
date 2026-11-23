@@ -495,7 +495,7 @@ pub(crate) fn clean(text: &str) -> String {
 }
 
 /// Seconds as days, hours and minutes, like `2d 3h 4m`.
-fn duration(seconds: u64) -> String {
+pub(crate) fn duration(seconds: u64) -> String {
     let (days, rest) = (seconds / 86_400, seconds % 86_400);
     let (hours, minutes) = (rest / 3600, rest % 3600 / 60);
     match (days, hours) {

@@ -2247,6 +2247,179 @@ mod change {
     }
 }
 
+/// `fritz reboot`, in builds with the feature `write`.
+#[cfg(feature = "write")]
+mod reboot {
+    use fritz_core::identity::Identity;
+    use fritz_sim::Injection;
+
+    use super::*;
+
+    /// A repeater with only a password, with the profile `repeater` that
+    /// allows changes to it.
+    struct Setup {
+        sim: fritz_sim::Sim,
+        dir: tempfile::TempDir,
+    }
+
+    impl Setup {
+        async fn new() -> Self {
+            let options = fritz_sim::Options {
+                username: fritz_core::connection::PASSWORD_ONLY_USERNAME.to_owned(),
+                ..fritz_sim::Options::default()
+            };
+            let fixture = fritz_sim::Fixture::bundled("fritz-repeater-2400/8.25").unwrap();
+            let setup = Self {
+                sim: fritz_sim::Sim::start_with(fixture, options).await.unwrap(),
+                dir: tempfile::tempdir().unwrap(),
+            };
+            let identity =
+                Identity::of("uuid:00000000-0000-4000-8000-000000000001", "AABBCC00000A");
+            let config = format!(
+                "[profile.repeater]\nhost = \"{}\"\n\n[write]\nallow = [\"{identity}\"]\n",
+                setup.sim.url()
+            );
+            std::fs::write(setup.dir.path().join("config.toml"), config).unwrap();
+            setup
+        }
+
+        /// Runs `fritz --profile repeater reboot` with the password, the
+        /// configuration, a state directory and `critical` as
+        /// `FRITZ_ALLOW_CRITICAL`.
+        async fn run(&self, args: &[&str], critical: &str) -> Output {
+            let mut all = strings(&["--profile", "repeater", "reboot"]);
+            all.extend(strings(args));
+            let dir = self.dir.path();
+            let env = [
+                ("FRITZ_PASSWORD", fritz_sim::PASSWORD.to_owned()),
+                (
+                    "FRITZ_CONFIG",
+                    dir.join("config.toml").display().to_string(),
+                ),
+                ("FRITZ_STATE_DIR", dir.join("state").display().to_string()),
+                ("FRITZ_ALLOW_WRITE", "1".to_owned()),
+                ("FRITZ_ALLOW_CRITICAL", critical.to_owned()),
+            ];
+            let env = env.into_iter().map(|(n, v)| (n.to_owned(), v)).collect();
+            fritz_blocking(all, env, "").await
+        }
+
+        /// Plans the restart, and returns the token.
+        async fn plan(&self) -> String {
+            let output = self.run(&["--output", "json"], "1").await;
+            let plan: serde_json::Value = serde_json::from_str(&success(&output)).unwrap();
+            plan["token"].as_str().unwrap().to_owned()
+        }
+
+        /// Restarts with a new token and waits at most `budget`.
+        async fn reboot(&self, budget: &str) -> Output {
+            let token = self.plan().await;
+            let args = [
+                "--output",
+                "json",
+                "--token",
+                &token,
+                "--wait",
+                "--interval",
+                "10ms",
+                "--budget",
+                budget,
+            ];
+            self.run(&args, "1").await
+        }
+
+        fn reboots(&self) -> usize {
+            let requests = self.sim.requests();
+            let sent = requests
+                .iter()
+                .filter(|r| r.action.as_deref() == Some("Reboot"));
+            sent.count()
+        }
+    }
+
+    #[tokio::test(flavor = "multi_thread")]
+    async fn plans_a_restart_of_a_repeater() {
+        let setup = Setup::new().await;
+        let plan = success(&setup.run(&["--output", "text"], "1").await);
+        assert!(plan.contains("model    FRITZ!Repeater 2400"), "{plan}");
+        assert!(plan.contains("name     device-3"), "{plan}");
+        assert!(plan.contains("uptime   17d 19h 48m"), "{plan}");
+        assert!(plan.contains("internet, WLAN and telephony"), "{plan}");
+        assert!(plan.contains("(valid for 300 s)"), "{plan}");
+        assert_eq!(setup.reboots(), 0);
+    }
+
+    #[tokio::test(flavor = "multi_thread")]
+    async fn restarts_a_repeater_and_waits_until_it_is_back() {
+        let setup = Setup::new().await;
+        setup.sim.inject(Injection::reboot(2));
+        let output = setup.reboot("5s").await;
+        let report: serde_json::Value = serde_json::from_str(&success(&output)).unwrap();
+        assert_eq!(report["outcome"], "back", "{report}");
+        assert_eq!(report["uptime_before"], 1_540_118, "{report}");
+        assert_eq!(report["uptime"], 0, "{report}");
+        let progress = stderr(&output);
+        assert!(progress.contains("rebooting: "), "{progress}");
+        assert_eq!(setup.reboots(), 1);
+    }
+
+    #[tokio::test(flavor = "multi_thread")]
+    async fn restarts_without_waiting() {
+        let setup = Setup::new().await;
+        let token = setup.plan().await;
+        let text = success(
+            &setup
+                .run(&["--output", "text", "--token", &token], "1")
+                .await,
+        );
+        assert!(text.contains("outcome        accepted: "), "{text}");
+        assert!(text.contains("uptime before  17d 19h 48m"), "{text}");
+        assert_eq!(setup.reboots(), 1);
+    }
+
+    #[tokio::test(flavor = "multi_thread")]
+    async fn fails_when_the_device_is_not_back_in_time() {
+        let setup = Setup::new().await;
+        setup.sim.inject(Injection::reboot(u32::MAX));
+        let output = setup.reboot("100ms").await;
+        let error = failure(&output);
+        assert!(
+            error.contains("not back within the time to wait"),
+            "{error}"
+        );
+        let report: serde_json::Value = serde_json::from_str(&stdout(&output)).unwrap();
+        assert_eq!(report["outcome"], "timeout", "{report}");
+        assert_eq!(setup.reboots(), 1);
+    }
+
+    #[tokio::test(flavor = "multi_thread")]
+    async fn fails_when_it_is_unknown_whether_the_restart_arrived() {
+        let setup = Setup::new().await;
+        setup
+            .sim
+            .inject(Injection::disconnect("DeviceConfig1", "Reboot"));
+        let output = setup.reboot("5s").await;
+        let error = failure(&output);
+        assert!(error.contains("may or may not restart"), "{error}");
+        let report: serde_json::Value = serde_json::from_str(&stdout(&output)).unwrap();
+        assert_eq!(report["outcome"], "unknown", "{report}");
+        assert!(
+            report["error"].as_str().unwrap().contains("HTTP"),
+            "{report}"
+        );
+    }
+
+    #[tokio::test(flavor = "multi_thread")]
+    async fn needs_the_permit_for_critical_changes() {
+        let setup = Setup::new().await;
+        let error = failure(&setup.run(&[], "0").await);
+        assert!(error.contains("FRITZ_ALLOW_CRITICAL=1"), "{error}");
+        let error = failure(&setup.run(&["--wait"], "1").await);
+        assert!(error.contains("--token"), "{error}");
+        assert_eq!(setup.reboots(), 0);
+    }
+}
+
 #[tokio::test(flavor = "multi_thread")]
 async fn shows_the_firmware() {
     let fixture = fritz_sim::Fixture::load(FIXTURE).unwrap();

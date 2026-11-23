@@ -24,8 +24,9 @@
 //!   `/api/v0/smarthome/overview`, and the pages of `/data.lua`, like
 //!   `ecoStat`, for the open session.
 //! - Tests can [inject](Sim::inject) UPnP errors, delays, discarded writes,
-//!   side effects of writes, counters that grow and a locked login, and read the [requests](Sim::requests) the server
-//!   got.
+//!   side effects of writes, counters that grow, a locked login, calls that
+//!   break off and restarts, and read the [requests](Sim::requests) the
+//!   server got.
 //!
 //! ```no_run
 //! # async fn example() -> Result<(), Box<dyn std::error::Error>> {
@@ -47,12 +48,15 @@
 use std::future::IntoFuture as _;
 use std::io;
 use std::net::{Ipv4Addr, SocketAddr};
+use std::pin::Pin;
 use std::sync::{Arc, Mutex, MutexGuard, PoisonError};
+use std::task::{Context, Poll};
 use std::time::Duration;
 
 use axum::Router;
+use axum::body::{Body, Bytes, HttpBody};
 use axum::extract::State;
-use axum::http::header::{AUTHORIZATION, CONTENT_TYPE, WWW_AUTHENTICATE};
+use axum::http::header::{AUTHORIZATION, CONTENT_LENGTH, CONTENT_TYPE, WWW_AUTHENTICATE};
 use axum::http::{HeaderMap, Method, StatusCode, Uri};
 use axum::response::{IntoResponse, Response};
 use tokio::task::JoinHandle;
@@ -140,9 +144,32 @@ pub enum Injection {
         step: u64,
         wrap: Option<u64>,
     },
+    /// Calls of an action break off without an answer, like a connection
+    /// that fails while the call is sent. The call changes nothing.
+    Disconnect { service: String, action: String },
+    /// A call of `Reboot` of `DeviceConfig1` restarts the device: it
+    /// answers the call, breaks off the next `down` requests without an
+    /// answer, and then answers again, with the uptime of `DeviceInfo1`
+    /// `GetInfo` reset to 0. With `serial`, another device comes back: it
+    /// answers this serial number.
+    Reboot { down: u32, serial: Option<String> },
 }
 
 impl Injection {
+    /// Calls of `action` of `service` break off without an answer.
+    pub fn disconnect(service: impl Into<String>, action: impl Into<String>) -> Self {
+        Self::Disconnect {
+            service: service.into(),
+            action: action.into(),
+        }
+    }
+
+    /// A call of `Reboot` restarts the device, which breaks off the next
+    /// `down` requests.
+    pub fn reboot(down: u32) -> Self {
+        Self::Reboot { down, serial: None }
+    }
+
     /// Calls of `action` of `service` fail with the UPnP error `code`.
     pub fn fault(service: impl Into<String>, action: impl Into<String>, code: u16) -> Self {
         Self::Fault {
@@ -236,6 +263,7 @@ impl Sim {
                 web: Web::default(),
                 injections: Vec::new(),
                 requests: Vec::new(),
+                down: 0,
             }),
         });
         let app = Router::new()
@@ -326,6 +354,8 @@ struct Inner {
     web: Web,
     injections: Vec<Injection>,
     requests: Vec<Request>,
+    /// The number of requests to break off while the device restarts.
+    down: u32,
 }
 
 impl Shared {
@@ -374,6 +404,10 @@ impl Shared {
             })
             .sum();
         let response = match *method {
+            _ if inner.down > 0 => {
+                inner.down -= 1;
+                broken()
+            }
             _ if path == web::LOGIN => inner.web.login(method, body, &self.options, locked),
             _ if path.starts_with(web::API) => {
                 let Inner { web, device, .. } = &*inner;
@@ -453,9 +487,17 @@ impl Inner {
             .trim_matches('"');
         let expected = format!("{}#{}", service.service_type, call.action);
         let result = if soap_action == expected && call.service_type == service.service_type {
+            if self.disconnects(&service, &call.action) {
+                return broken();
+            }
             let hooks = self.hooks(&service, &call.action);
-            self.device
-                .call(&service, &call.action, &call.arguments, &hooks)
+            let result = self
+                .device
+                .call(&service, &call.action, &call.arguments, &hooks);
+            if result.is_ok() {
+                self.reboot(&service, &call.action);
+            }
+            result
         } else {
             Err(Fault::new(401))
         };
@@ -474,6 +516,31 @@ impl Inner {
             )
                 .into_response(),
         }
+    }
+
+    /// Whether calls of `action` break off.
+    fn disconnects(&self, service: &Service, action: &str) -> bool {
+        self.injections.iter().any(|i| {
+            matches!(i, Injection::Disconnect { service: reference, action: name }
+                if name == action && service.matches(reference))
+        })
+    }
+
+    /// Restarts the device after a call of `Reboot`, if a test
+    /// [injected](Injection::Reboot) it. `None` if not.
+    fn reboot(&mut self, service: &Service, action: &str) -> Option<()> {
+        (action == "Reboot" && service.matches("DeviceConfig1")).then_some(())?;
+        let reboot = self
+            .injections
+            .iter()
+            .find(|i| matches!(i, Injection::Reboot { .. }));
+        let Some(Injection::Reboot { down, serial }) = reboot.cloned() else {
+            return None;
+        };
+        self.down = down;
+        let device = &mut self.device;
+        device.set_output("DeviceInfo1", "GetInfo", "NewUpTime", "0")?;
+        device.set_output("DeviceInfo1", "GetInfo", "NewSerialNumber", &serial?)
     }
 
     fn hooks(&self, service: &Service, action: &str) -> Hooks {
@@ -522,6 +589,27 @@ impl Inner {
     }
 }
 
+/// A response that breaks off: its body fails before it ends, so the
+/// client gets no answer.
+fn broken() -> Response {
+    (StatusCode::OK, [(CONTENT_LENGTH, "1")], Body::new(Broken)).into_response()
+}
+
+/// A body that fails.
+struct Broken;
+
+impl HttpBody for Broken {
+    type Data = Bytes;
+    type Error = io::Error;
+
+    fn poll_frame(
+        self: Pin<&mut Self>,
+        _: &mut Context<'_>,
+    ) -> Poll<Option<Result<http_body::Frame<Bytes>, io::Error>>> {
+        Poll::Ready(Some(Err(io::ErrorKind::ConnectionReset.into())))
+    }
+}
+
 async fn handle(
     State(shared): State<Arc<Shared>>,
     method: Method,
@@ -548,6 +636,7 @@ mod tests {
             web: Web::default(),
             injections: Vec::new(),
             requests: Vec::new(),
+            down: 0,
         }
     }
 

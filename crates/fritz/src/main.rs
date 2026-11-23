@@ -19,6 +19,8 @@ mod mcp;
 mod output;
 mod personal;
 mod qr;
+#[cfg(feature = "write")]
+mod reboot;
 mod settings;
 mod status;
 mod system;
@@ -205,6 +207,12 @@ enum Command {
     /// of the device on the allow list in the configuration.
     #[cfg(feature = "write")]
     Change(change::ChangeArgs),
+    /// Restart the device, and with `--wait` wait until it is back. Shows
+    /// the plan and a token first; `--token` restarts. Critical: needs
+    /// `FRITZ_ALLOW_WRITE=1`, `FRITZ_ALLOW_CRITICAL=1` and the device on the
+    /// allow list.
+    #[cfg(feature = "write")]
+    Reboot(reboot::RebootArgs),
     /// Serve the state of the device over MCP on stdin and stdout. Only
     /// reads.
     Mcp {
@@ -526,6 +534,8 @@ async fn run(
         Command::Cache(CacheCommand::Clear) => cache::clear(&cache::open()?, out),
         #[cfg(feature = "write")]
         Command::Change(args) => change::run(&load()?, args, format, out).await,
+        #[cfg(feature = "write")]
+        Command::Reboot(args) => reboot::run(&load()?, args, format, out, &mut io::stderr()).await,
         Command::Capture(args) => capture(&load()?, args).await,
         Command::Fixture(command) => fixture(&command),
         Command::Version { check } => {

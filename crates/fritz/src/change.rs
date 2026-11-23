@@ -15,12 +15,19 @@ use crate::tr64::parse_arguments;
 
 #[derive(Debug, Args)]
 pub(crate) struct ChangeArgs {
+    #[command(flatten)]
+    state: StateDir,
+    #[command(subcommand)]
+    command: ChangeCommand,
+}
+
+/// Where the tokens of plans and the audit log are kept.
+#[derive(Debug, Args)]
+pub(crate) struct StateDir {
     /// The directory of the tokens of plans and the audit log, by default
     /// the state directory of the user.
     #[arg(long, env = "FRITZ_STATE_DIR")]
     state_dir: Option<PathBuf>,
-    #[command(subcommand)]
-    command: ChangeCommand,
 }
 
 #[derive(Debug, Subcommand)]
@@ -61,7 +68,7 @@ pub(crate) async fn run(
     format: Format,
     out: &mut impl Write,
 ) -> anyhow::Result<()> {
-    let mut changer = changer(context, args.state_dir).await?;
+    let mut changer = changer(context, args.state).await?;
     match args.command {
         ChangeCommand::Identity => {
             let identity = changer.identity().await?;
@@ -77,8 +84,9 @@ pub(crate) async fn run(
 
 /// A changer of the device of the context, with the password, the
 /// permit of the environment and the lists of the configuration.
-async fn changer(context: &Context, dir: Option<PathBuf>) -> anyhow::Result<Changer> {
-    let dir = dir
+pub(crate) async fn changer(context: &Context, state: StateDir) -> anyhow::Result<Changer> {
+    let dir = state
+        .state_dir
         .or_else(change::default_dir)
         .context("cannot find the home directory, pass --state-dir")?;
     let settings = Settings {
