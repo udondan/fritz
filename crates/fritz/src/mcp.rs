@@ -122,7 +122,7 @@ pub(crate) struct HostsQuery {
 #[derive(Debug, Default, Deserialize, JsonSchema)]
 pub(crate) struct SettingsQuery {
     /// Like `ipv6`. Without, the common modules: DNS, IPv6, internet, LAN
-    /// ports, routes, time. Others: `dect`, `filter_profile`, `inetstat`,
+    /// ports, mesh steering, routes, time. Others: `dect`, `filter_profile`, `inetstat`,
     /// `landevice`, `mobiled`, `plc`, `tam`, `user`, `vpn`, `wlan`.
     #[serde(default)]
     modules: Vec<String>,

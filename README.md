@@ -259,6 +259,10 @@ ipv6.radv_enabled          1
 ipv6.ulamode               ulamode_dynamic
 ```
 
+`fritz settings mesh` shows whether mesh devices choose the best connection
+themselves (`backhaul_steering`, "Mesh devices choose the best connection
+automatically" in the web interface) and the role of the device in the mesh.
+
 ### Calls, phonebook and event log
 
 These name people and numbers. The CLI shows them to you; `fritz mcp` only

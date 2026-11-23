@@ -36,6 +36,7 @@ is not a terminal.
 | What does the box offer, what may I do?     | `fritz capabilities`                 |
 | DNS, IPv6, MTU, DHCP, time, LAN ports       | `fritz settings`                     |
 | VPN, WLAN, parental controls, traffic       | `fritz settings vpn wlan user inetstat` |
+| Is mesh steering on, which mesh role?       | `fritz settings mesh`                |
 | Who called, which calls were missed?        | `fritz calls --limit 20`             |
 | Whose number is this, what is X's number?   | `fritz phonebook <name or number>`   |
 | What happened on the box lately?            | `fritz log --limit 50`               |

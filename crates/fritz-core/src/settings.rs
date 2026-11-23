@@ -9,7 +9,7 @@
 use std::collections::BTreeMap;
 
 use serde::Serialize;
-use serde_json::Value;
+use serde_json::{Map, Value};
 
 use crate::names::{Sensitivity, sensitivity};
 use crate::redact::{self, HIDDEN};
@@ -44,6 +44,11 @@ pub const MODULES: &[(&str, &str, bool)] = &[
     ),
     ("forwardrules", "whether a host is exposed", true),
     ("ipv6", "IPv6 of the home network, MTU and DHCPv6", true),
+    (
+        MESH,
+        "whether mesh devices choose the best connection themselves, and the role in the mesh",
+        true,
+    ),
     ("route", "static IPv4 routes", true),
     (
         "sync_groups",
@@ -71,6 +76,18 @@ pub const MODULES: &[(&str, &str, bool)] = &[
     ("wlan", "wireless networks and their clients", false),
 ];
 
+/// A module that the device does not have: the settings of the mesh, put
+/// together from the [`MESH_FIELDS`].
+pub const MESH: &str = "mesh";
+
+/// The fields of [`MESH`], by the module that holds them:
+/// `backhaul_steering` is the switch "Mesh devices choose the best
+/// connection automatically" of the web interface.
+pub const MESH_FIELDS: &[(&str, &[&str])] = &[
+    ("wlan", &["backhaul_steering"]),
+    ("nexus", &["role", "is_master"]),
+];
+
 /// The settings of several modules.
 #[derive(Debug, Default, Serialize)]
 pub struct Settings {
@@ -96,7 +113,12 @@ pub async fn settings(session: &Session, modules: &[String]) -> Settings {
     };
     let mut settings = Settings::default();
     for name in modules {
-        match module(session, name).await {
+        let value = if name == MESH {
+            mesh(session).await
+        } else {
+            module(session, name).await
+        };
+        match value {
             Ok(value) => {
                 settings.modules.insert(name.clone(), value);
             }
@@ -126,6 +148,46 @@ pub async fn module(session: &Session, name: &str) -> Result<Value, Error> {
         });
     }
     parse(&session.get(&format!("{PREFIX}{name}")).await?)
+}
+
+/// The settings of the mesh: the [`MESH_FIELDS`] of the modules that can
+/// be read.
+///
+/// # Errors
+///
+/// The error of the first module if none can be read.
+pub async fn mesh(session: &Session) -> Result<Value, Error> {
+    let mut modules = Vec::new();
+    let mut first = None;
+    for (name, _) in MESH_FIELDS {
+        match module(session, name).await {
+            Ok(value) => modules.push((*name, value)),
+            Err(e) => {
+                first.get_or_insert(e);
+            }
+        }
+    }
+    match first {
+        Some(e) if modules.is_empty() => Err(e),
+        _ => Ok(mesh_of(&modules)),
+    }
+}
+
+/// The [`MESH_FIELDS`] found in `modules`, by module name.
+fn mesh_of(modules: &[(&str, Value)]) -> Value {
+    let mut mesh = Map::new();
+    for (name, value) in modules {
+        let fields = MESH_FIELDS
+            .iter()
+            .filter(|(module, _)| module == name)
+            .flat_map(|(_, fields)| fields.iter());
+        for field in fields {
+            if let Some(found) = value.get(field) {
+                mesh.insert((*field).to_owned(), found.clone());
+            }
+        }
+    }
+    Value::Object(mesh)
 }
 
 /// The settings in `json`, with secrets hidden.
@@ -219,6 +281,29 @@ mod tests {
                 "dns_domains": "***",
                 "ip4_is_private": "1",
             })
+        );
+    }
+
+    #[test]
+    fn puts_the_mesh_together() {
+        let modules = [
+            (
+                "wlan",
+                json!({"backhaul_steering": "1", "pskvalue": "***", "ssid": "wlan-1"}),
+            ),
+            (
+                "nexus",
+                json!({"role": "auto", "is_master": "1", "peers": []}),
+            ),
+        ];
+        assert_eq!(
+            mesh_of(&modules),
+            json!({"backhaul_steering": "1", "role": "auto", "is_master": "1"})
+        );
+        // Fields the device does not have are left out.
+        assert_eq!(
+            mesh_of(&modules[1..]),
+            json!({"role": "auto", "is_master": "1"})
         );
     }
 

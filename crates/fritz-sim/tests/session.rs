@@ -145,6 +145,10 @@ async fn reads_the_settings() {
     );
     assert_eq!(defaults.modules["dnscfg"]["ipv4_firstdns"], "198.51.100.53");
     assert_eq!(
+        defaults.modules["mesh"],
+        serde_json::json!({"role": "auto", "is_master": "1"})
+    );
+    assert_eq!(
         defaults.modules["connections"]["connection"][0]["username"],
         "***"
     );
@@ -159,4 +163,15 @@ async fn reads_the_settings() {
     // An invalid name is refused before anything is sent.
     assert!(!sim.requests().iter().any(|r| r.path.contains("..")));
     session.logout().await.unwrap();
+
+    // A device without the modules of the mesh, like a repeater.
+    let repeater = Fixture::load(concat!(
+        env!("CARGO_MANIFEST_DIR"),
+        "/fixtures/fritz-repeater-2400/8.25"
+    ))
+    .unwrap();
+    let sim = Sim::start(repeater).await.unwrap();
+    let session = login(&sim, PASSWORD).await.unwrap();
+    let mesh = settings::settings(&session, &[settings::MESH.to_owned()]).await;
+    assert!(mesh.unavailable["mesh"].contains("404"), "{mesh:?}");
 }

@@ -294,7 +294,7 @@
       "properties": {
         "modules": {
           "default": [],
-          "description": "Like `ipv6`. Without, the common modules: DNS, IPv6, internet, LAN\nports, routes, time. Others: `dect`, `filter_profile`, `inetstat`,\n`landevice`, `mobiled`, `plc`, `tam`, `user`, `vpn`, `wlan`.",
+          "description": "Like `ipv6`. Without, the common modules: DNS, IPv6, internet, LAN\nports, mesh steering, routes, time. Others: `dect`, `filter_profile`, `inetstat`,\n`landevice`, `mobiled`, `plc`, `tam`, `user`, `vpn`, `wlan`.",
           "items": {
             "type": "string"
           },
