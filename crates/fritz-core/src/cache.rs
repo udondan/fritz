@@ -398,6 +398,12 @@ mod tests {
         assert_eq!(entries.len(), 1);
         assert_eq!(entries[0].device, Some(new));
         assert_eq!(Cache::new(dir.path()).scpd(DESCRIPTION, "/c.xml"), None);
+
+        // Other devices keep their directories.
+        let second = DESCRIPTION.replace("uuid:1", "uuid:2");
+        after.store(&second, "/a.xml", SCPD, &scpd);
+        assert_eq!(after.list().unwrap().len(), 2);
+        assert_eq!(Cache::new(dir.path()).scpd(&updated, "/b.xml"), Some(scpd));
     }
 
     #[test]

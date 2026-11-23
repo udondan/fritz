@@ -12,9 +12,9 @@ use crate::status::table;
 
 /// The cache in the directory of `FRITZ_CACHE_DIR` or the platform.
 pub(crate) fn open() -> anyhow::Result<Cache> {
-    let dir = cache::default_dir()
-        .with_context(|| format!("cannot find the home directory, set {ENV_CACHE_DIR}"))?;
-    Ok(Cache::new(dir))
+    // Formatted beforehand, so that coverage does not count the closure.
+    let error = format!("cannot find the home directory, set {ENV_CACHE_DIR}");
+    Ok(Cache::new(cache::default_dir().context(error)?))
 }
 
 /// The cache as JSON or YAML.
