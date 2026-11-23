@@ -102,6 +102,18 @@
     }
   },
   {
+    "name": "fritz_firmware",
+    "description": "Firmware: state (available, none, unknown, unsupported), installed and offered version, info URL, auto update, last update. Does not check for updates.",
+    "inputSchema": {
+      "properties": {},
+      "type": "object"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "openWorldHint": false
+    }
+  },
+  {
     "name": "fritz_hosts",
     "description": "Hosts the device knows, with IP, MAC, interface and internet access. Paginated. With mac or ip, the one host with all details: address source, lease, guest network and the mesh node it is connected to.",
     "inputSchema": {

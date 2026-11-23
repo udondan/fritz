@@ -26,6 +26,7 @@ use fritz_core::capabilities;
 use fritz_core::capture::short_id;
 #[cfg(feature = "write")]
 use fritz_core::change::{self, Changer, Permit, Settings};
+use fritz_core::firmware;
 use fritz_core::generic;
 use fritz_core::host::{self, Lookup};
 use fritz_core::personal::{self, Contact};
@@ -328,6 +329,18 @@ impl Server {
         self.respond(async {
             let mut reader = self.reader().await?;
             Ok(status::internet(&mut reader).await?)
+        })
+        .await
+    }
+
+    #[tool(
+        description = "Firmware: state (available, none, unknown, unsupported), installed and offered version, info URL, auto update, last update. Does not check for updates.",
+        annotations(read_only_hint = true, open_world_hint = false)
+    )]
+    async fn fritz_firmware(&self) -> CallToolResult {
+        self.respond(async {
+            let mut reader = self.reader().await?;
+            Ok(firmware::firmware(&mut reader).await?)
         })
         .await
     }

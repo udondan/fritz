@@ -125,6 +125,9 @@ enum Command {
     Wlan(WlanArgs),
     /// The internet connection and, for DSL, the line.
     Internet,
+    /// The installed firmware, the update the device offers, automatic
+    /// updates and the last update. Never checks for a new version.
+    Firmware,
     /// The LAN interfaces and wireless networks with their counters, and
     /// the LAN ports. The ports need a login to the web interface.
     Interfaces {
@@ -475,6 +478,7 @@ async fn run(
             status::wlan(&load()?, network.as_deref(), views, format, out).await
         }
         Command::Internet => status::internet(&load()?, format, out).await,
+        Command::Firmware => status::firmware(&load()?, format, out).await,
         Command::Interfaces { watch } => interfaces::interfaces(&load()?, watch, format, out).await,
         Command::Smarthome => status::smarthome(&load()?, format, out).await,
         Command::Ports => device::ports(&load()?, format, out).await,
