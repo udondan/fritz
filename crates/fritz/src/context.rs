@@ -113,6 +113,16 @@ impl Context {
         &self.overrides
     }
 
+    /// Takes `host` as if it was given with `--host`.
+    pub(crate) fn set_host(&mut self, host: String) {
+        self.overrides.host = Some(host);
+    }
+
+    /// Takes `profile` as if it was given with `--profile`.
+    pub(crate) fn set_profile(&mut self, profile: String) {
+        self.profile = Some(profile);
+    }
+
     /// The contents of the configuration file.
     pub(crate) fn config(&self) -> &Config {
         &self.config
@@ -273,7 +283,7 @@ pub(crate) mod tests {
 
     /// A mock keychain, shared by the contexts of one test.
     #[expect(clippy::unnecessary_wraps, reason = "the signature of Keychains::Open")]
-    fn mock_keychain() -> Result<Keychain, secrets::Error> {
+    pub(crate) fn mock_keychain() -> Result<Keychain, secrets::Error> {
         Ok(KEYCHAIN.with(Keychain::clone))
     }
 

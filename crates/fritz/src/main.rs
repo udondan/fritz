@@ -13,6 +13,7 @@ mod completion;
 mod context;
 mod device;
 mod diagnose;
+mod discover;
 mod doctor;
 mod dsl;
 mod interfaces;
@@ -212,6 +213,11 @@ enum Command {
     /// The latest entries of the event log, the latest first. Personal
     /// data.
     Log(LogArgs),
+    /// Find FRITZ! routers and repeaters on the local network: at the
+    /// configured host, the default gateway, through SSDP and at the
+    /// default addresses. Reads only their public device descriptions,
+    /// without login.
+    Discover(discover::DiscoverArgs),
     /// Manage the profiles in the configuration file.
     #[command(subcommand)]
     Config(ConfigCommand),
@@ -480,6 +486,13 @@ async fn main() -> anyhow::Result<()> {
         output::yaml(&output::failure(error), &mut io::stderr())?;
         std::process::exit(1);
     }
+    if let Err(error) = &result
+        && unreachable(error)
+    {
+        eprintln!("Error: {error:?}");
+        eprintln!("hint: run `fritz discover` to find the device on the local network");
+        std::process::exit(1);
+    }
     result
 }
 
@@ -542,6 +555,14 @@ impl LogArgs {
             category: self.category,
         }
     }
+}
+
+/// Whether the error is that the device could not be reached or did not
+/// answer in time.
+fn unreachable(error: &anyhow::Error) -> bool {
+    error.chain().any(|error| {
+        matches!(error.downcast_ref(), Some(tr064::Error::Http(error)) if error.is_connect() || error.is_timeout())
+    })
 }
 
 /// Runs a command with the context from `load`, which it loads only when
@@ -614,6 +635,7 @@ async fn run(
         Command::Log(args) => {
             personal::log(&load()?, &args.filter(), args.limit, format, out).await
         }
+        Command::Discover(args) => discover::system(&mut load()?, args, format, out).await,
         Command::Config(ConfigCommand::Init { password_command }) => {
             settings::init(&mut load()?, password_command, out)
         }

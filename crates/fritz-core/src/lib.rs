@@ -14,6 +14,7 @@ pub mod config;
 pub mod connection;
 pub mod diagnose;
 pub mod dirs;
+pub mod discover;
 pub mod doctor;
 pub mod dsl;
 pub mod fault;

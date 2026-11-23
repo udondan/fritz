@@ -100,6 +100,10 @@ $ fritz config init --host 192.168.178.1 --user agent
 saved the profile default to /home/me/.config/fritz/config.toml
 ```
 
+If you don't know the address, `fritz discover` looks for routers and
+repeaters on the local network, and `fritz discover --save` saves the one it
+found.
+
 `fritz` talks to the box over HTTPS on port 49443. The box has a self-signed
 certificate, so trust it once; `fritz` then refuses any other certificate.
 Compare the fingerprint with the certificate in the web interface of the box:
@@ -146,6 +150,7 @@ the password manager. Errors name the command, never its output.
 
 | Command | Does |
 | --- | --- |
+| `fritz discover` | Find routers and repeaters on the local network, without a login; `--save` saves one to a profile |
 | `fritz config init` / `show` / `list` | Save `--host`, `--user`, `--fingerprint` and `--password-command` to a profile / show the settings in effect / list the profiles |
 | `fritz tls fingerprint` / `trust` / `forget` | Print / trust / forget the certificate of the device |
 | `fritz auth login` / `logout` / `status` | Store / remove the password in the keychain / tell where it comes from |
