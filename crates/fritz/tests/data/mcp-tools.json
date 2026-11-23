@@ -183,9 +183,16 @@
   },
   {
     "name": "fritz_internet",
-    "description": "Internet connection: status, addresses, provider, DNS, rates, DSL line.",
+    "description": "Internet connection: status, addresses, provider, DNS, rates, DSL line, and with `dsl_details` the error counters and line diagnosis of DSL.",
     "inputSchema": {
-      "properties": {},
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "dsl_details": {
+          "default": false,
+          "description": "Also `dsl_details`: the DSL line with status, sync, standard,\nprofile, rates and maximum rates in kbit/s, noise margins and\nattenuations in dB and power; the error counters (CRC, FEC, HEC,\nerrored seconds, resyncs) in total and since the sync where reported;\nthe line diagnosis with its state, the seconds since the line lost\nits signal and the distance to a cable fault in meters; and hints.\nWithout details and with `note` on connections that are not DSL.",
+          "type": "boolean"
+        }
+      },
       "type": "object"
     },
     "annotations": {

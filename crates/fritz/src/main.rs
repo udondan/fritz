@@ -12,6 +12,7 @@ mod change;
 mod completion;
 mod context;
 mod device;
+mod dsl;
 mod interfaces;
 mod logging;
 mod mcp;
@@ -124,7 +125,15 @@ enum Command {
     /// The wireless networks, and which is the guest network.
     Wlan(WlanArgs),
     /// The internet connection and, for DSL, the line.
-    Internet,
+    Internet {
+        /// Only the DSL line in detail: its values, error counters, the last
+        /// loss of signal and the line diagnosis, with hints. Says so on a
+        /// connection that is not DSL.
+        #[arg(long, required_if_eq("watch", "true"))]
+        dsl: bool,
+        #[command(flatten)]
+        watch: watch::Options,
+    },
     /// The installed firmware, the update the device offers, automatic
     /// updates and the last update. Never checks for a new version.
     Firmware,
@@ -477,7 +486,8 @@ async fn run(
             };
             status::wlan(&load()?, network.as_deref(), views, format, out).await
         }
-        Command::Internet => status::internet(&load()?, format, out).await,
+        Command::Internet { dsl: false, .. } => status::internet(&load()?, format, out).await,
+        Command::Internet { dsl: true, watch } => dsl::dsl(&load()?, watch, format, out).await,
         Command::Firmware => status::firmware(&load()?, format, out).await,
         Command::Interfaces { watch } => interfaces::interfaces(&load()?, watch, format, out).await,
         Command::Smarthome => status::smarthome(&load()?, format, out).await,

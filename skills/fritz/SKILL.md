@@ -31,6 +31,7 @@ or paste them.
 | Which model and firmware, is an update due? | `fritz overview`                     |
 | Is the box busy, hot or low on memory?      | `fritz overview --system` (experimental) |
 | Is the internet up, which IP, which speed?  | `fritz internet`                     |
+| Why is the DSL line unstable? Errors, faults | `fritz internet --dsl`, changes: `--watch --count 1` |
 | Which update is offered, did the last work? | `fritz firmware`                     |
 | Which wireless networks, how many clients?  | `fritz wlan`                         |
 | Which devices use which wireless network?   | `fritz wlan --clients`               |

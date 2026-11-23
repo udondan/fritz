@@ -196,6 +196,54 @@ Noise margin   ↓ 7.0 dB  ↑ 8.0 dB
 Attenuation    ↓ 14.0 dB  ↑ 10.0 dB
 ```
 
+`--dsl` shows the DSL line in detail, for an unstable line or the provider's
+support: standard and profile, rates, noise margin, attenuation and power,
+the error counters in total (and since the last sync, where the device
+reports them), whether and since when the line lost its signal, and the line
+diagnosis the device runs on its own 5 minutes after a loss of signal, with
+the estimated distance to a cable fault. Hints put the numbers into context,
+like a noise margin under 6 dB. On a connection that is not DSL, it says so
+and exits with 0. It only reads; it does not start a diagnosis.
+
+```console
+$ fritz internet --dsl
+Status        Up
+Enabled       yes
+Synchronized  yes
+Standard      VDSL, profile 35b
+Data path     Fast
+Rate          ↓ 274.8 Mbit/s  ↑ 45.9 Mbit/s
+Maximum       ↓ 276.3 Mbit/s  ↑ 45.9 Mbit/s
+Noise margin  ↓ 7.0 dB  ↑ 8.0 dB
+Attenuation   ↓ 14.0 dB  ↑ 10.0 dB
+Power         ↓ 514  ↑ 500
+Link          PPPoE, Up
+Signal lost   no
+Diagnosis     none
+
+ERRORS                    TOTAL
+CRC                       203
+CRC (exchange)            0
+FEC                       36486673
+FEC (exchange)            77148
+...
+Resyncs                   1
+```
+
+With `--watch` it reads again every `--interval` seconds and prints the
+counters that grew, with a hint when CRC errors rise or the line
+resynchronizes; `--output json` prints one line per interval.
+
+```console
+$ fritz internet --dsl --watch --interval 60
+Status   Up
+Changes  FEC +1204 in 60 s
+
+Status   Up
+Changes  CRC +3, FEC +982, Errored seconds +1 in 60 s
+Hint     CRC errors rose by 3 in 60 s: data was lost on the line
+```
+
 `fritz firmware` shows more about updates than the overview: the version the
 device offers, the kind of build, what automatic updates do and how the last
 update went. The state is `available`, `none`, `unknown` (the device does not
@@ -725,7 +773,7 @@ claude mcp add fritz -- fritz --host 192.168.178.1 --user agent mcp
 | Tool                    | Returns                                                     |
 | ----------------------- | ----------------------------------------------------------- |
 | `fritz_overview`        | Model, firmware, uptime, connection, rights, `system` load  |
-| `fritz_internet`        | Internet connection, addresses, DNS, rates, DSL line        |
+| `fritz_internet`        | Internet connection, DNS, rates, DSL line, `dsl_details`    |
 | `fritz_firmware`        | Installed and offered firmware, auto update, last update    |
 | `fritz_wlan`            | Wireless networks, guest network, `clients`, `details`      |
 | `fritz_interfaces`      | LAN and WLAN counters of bytes, packets, errors; LAN ports  |

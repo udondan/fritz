@@ -110,6 +110,29 @@ pub(crate) struct OverviewQuery {
     system: bool,
 }
 
+/// The sections of `fritz_internet`.
+#[derive(Debug, Default, Deserialize, JsonSchema)]
+pub(crate) struct InternetQuery {
+    /// Also `dsl_details`: the DSL line with status, sync, standard,
+    /// profile, rates and maximum rates in kbit/s, noise margins and
+    /// attenuations in dB and power; the error counters (CRC, FEC, HEC,
+    /// errored seconds, resyncs) in total and since the sync where reported;
+    /// the line diagnosis with its state, the seconds since the line lost
+    /// its signal and the distance to a cable fault in meters; and hints.
+    /// Without details and with `note` on connections that are not DSL.
+    #[serde(default)]
+    dsl_details: bool,
+}
+
+/// The internet connection, and with `dsl_details` the DSL line.
+#[derive(Debug, Serialize)]
+struct InternetDetails {
+    #[serde(flatten)]
+    internet: status::Internet,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    dsl_details: Option<fritz_core::dsl::Report>,
+}
+
 /// The form of `fritz_mesh`.
 #[derive(Debug, Default, Deserialize, JsonSchema)]
 pub(crate) struct MeshQuery {
@@ -322,13 +345,22 @@ impl Server {
     }
 
     #[tool(
-        description = "Internet connection: status, addresses, provider, DNS, rates, DSL line.",
+        description = "Internet connection: status, addresses, provider, DNS, rates, DSL line, and with `dsl_details` the error counters and line diagnosis of DSL.",
         annotations(read_only_hint = true, open_world_hint = false)
     )]
-    async fn fritz_internet(&self) -> CallToolResult {
+    async fn fritz_internet(&self, Parameters(query): Parameters<InternetQuery>) -> CallToolResult {
         self.respond(async {
             let mut reader = self.reader().await?;
-            Ok(status::internet(&mut reader).await?)
+            let internet = status::internet(&mut reader).await?;
+            let dsl_details = if query.dsl_details {
+                Some(fritz_core::dsl::report(&mut reader).await?)
+            } else {
+                None
+            };
+            Ok(InternetDetails {
+                internet,
+                dsl_details,
+            })
         })
         .await
     }
