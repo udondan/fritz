@@ -57,6 +57,7 @@ or paste them.
 | What does the box offer, what may I do?     | `fritz capabilities`                 |
 | Why does fritz not work? What is missing?   | `fritz doctor` (exit 1: a check failed) |
 | Which users exist, is the login weak?       | `fritz users`                        |
+| Why does a name not resolve?               | `fritz dns <name>` (`--expected-ip <IP>`) |
 | DNS, IPv6, MTU, DHCP, time, LAN ports       | `fritz settings`                     |
 | VPN, WLAN, parental controls, traffic       | `fritz settings vpn wlan user inetstat` |
 | Is mesh steering on, which mesh role?       | `fritz settings mesh`                |

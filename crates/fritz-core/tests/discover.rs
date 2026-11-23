@@ -104,7 +104,7 @@ async fn lists_verified_devices_once() {
     assert_eq!(report.addresses, [LOOPBACK]);
     assert!(report.local);
     assert_eq!(report.gateway, Some(LOOPBACK));
-    let found: Vec<_> = report
+    let mut found: Vec<_> = report
         .devices
         .iter()
         .map(|d| {
@@ -116,6 +116,9 @@ async fn lists_verified_devices_once() {
             )
         })
         .collect();
+    // Devices of the same role and source are ordered by address, whose
+    // ports differ from run to run.
+    found.sort_by_key(|device| device.0);
     assert_eq!(
         found,
         [
@@ -145,12 +148,17 @@ async fn lists_verified_devices_once() {
         ]
     );
     let box_ = &report.devices[0];
+    let repeater = report
+        .devices
+        .iter()
+        .find(|d| d.model.as_deref() == Some("FRITZ!Repeater 2400"))
+        .unwrap();
     let address = format!("127.0.0.1:{port}");
     assert_eq!(box_.address, address);
     assert_eq!(box_.host, format!("http://{address}"));
     assert_eq!(box_.manufacturer.as_deref(), Some("FRITZ! GmbH"));
 
-    let json = serde_json::to_value(&report.devices[1]).unwrap();
+    let json = serde_json::to_value(repeater).unwrap();
     assert_eq!(json["role"], "repeater");
     assert_eq!(json["found_by"], serde_json::json!(["ssdp"]));
     assert!(json.get("udn").is_none());

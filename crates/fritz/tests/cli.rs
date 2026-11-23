@@ -3862,3 +3862,77 @@ fn doctor_reports_configuration_errors() {
     assert_eq!(status(&found, "Configuration"), "fail", "{found:?}");
     assert_eq!(status(&found, "Host"), "skip", "{found:?}");
 }
+
+#[tokio::test(flavor = "multi_thread")]
+async fn diagnoses_name_resolution() {
+    let fixture = fritz_sim::Fixture::load(FIXTURE).unwrap();
+    let sim = fritz_sim::Sim::start(fixture).await.unwrap();
+    let password = Some(fritz_sim::PASSWORD);
+    // localhost: this machine answers it without the network, and the
+    // DNS server on the loopback interface stands in for the router.
+    let records = [("localhost", "127.0.0.1"), ("localhost", "::1")];
+    let dns = fritz_sim::dns::DnsServer::start(&records).await.unwrap();
+    let server = dns.address().to_string();
+
+    let args = ["-o", "json", "dns", "localhost", "--router-dns", &server];
+    let json = success(&run(&sim, &args, password).await);
+    let report: serde_json::Value = serde_json::from_str(&json).unwrap();
+    assert_eq!(report["router_answer"]["status"], "answered", "{report}");
+    assert_eq!(report["router_answer"]["server"], server.as_str());
+    assert_eq!(report["client_answer"]["status"], "answered", "{report}");
+    assert_eq!(
+        report["router"]["dns_servers"],
+        serde_json::json!(["192.0.2.34"])
+    );
+    assert_eq!(report["router"]["domain"], serde_json::Value::Null);
+    assert_eq!(report["verdict"]["cause"], "ok", "{report}");
+    assert_eq!(dns.queries(), ["localhost", "localhost"]);
+
+    let args = [
+        "-o",
+        "text",
+        "dns",
+        "localhost",
+        "--router-dns",
+        &server,
+        "--expected-ip",
+        "127.0.0.1",
+    ];
+    let text = success(&run(&sim, &args, password).await);
+    assert!(text.starts_with("Name              localhost\n"), "{text}");
+    assert!(
+        text.contains("Expected          127.0.0.1: router yes, this machine yes\n"),
+        "{text}"
+    );
+    assert!(text.contains("Verdict           ok: "), "{text}");
+
+    // .local names are not asked by DNS.
+    let args = ["-o", "json", "dns", "device-2.local"];
+    let json = success(&run(&sim, &args, password).await);
+    let report: serde_json::Value = serde_json::from_str(&json).unwrap();
+    assert_eq!(report["verdict"]["cause"], "mdns", "{report}");
+    assert_eq!(report["router"]["host"]["ip"], "192.0.2.2", "{report}");
+    assert_eq!(report["router_answer"]["server"], "192.0.2.34", "{report}");
+    assert_eq!(dns.queries().len(), 4);
+
+    // Only getters.
+    assert!(
+        sim.requests()
+            .iter()
+            .filter_map(|r| r.action.as_deref())
+            .all(|a| a.starts_with("Get") || a.starts_with("X_AVM-DE_Get")),
+        "{:?}",
+        sim.requests()
+    );
+    let before = sim.requests().len();
+    for args in [
+        &["dns", "a b"][..],
+        &["dns", "192.0.2.1"],
+        &["dns", "nas", "--router-dns", "router"],
+        &["dns", "nas", "--expected-ip", "nas"],
+    ] {
+        let error = failure(&run(&sim, args, password).await);
+        assert!(error.contains("nas") || error.contains("not"), "{error}");
+    }
+    assert_eq!(sim.requests().len(), before);
+}

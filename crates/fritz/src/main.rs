@@ -14,6 +14,7 @@ mod context;
 mod device;
 mod diagnose;
 mod discover;
+mod dns;
 mod doctor;
 mod dsl;
 mod interfaces;
@@ -195,6 +196,11 @@ enum Command {
     /// The users of the device, your rights and how the login is
     /// protected, with hints on weak settings. No passwords are read.
     Users,
+    /// Why a name does or does not resolve: the local domain, the DNS
+    /// servers handed out and the host table of the router, the answers of
+    /// the router and of this machine, the resolvers of this machine and the
+    /// likely cause. Only asks for this name; changes nothing.
+    Dns(dns::DnsArgs),
     /// The settings of the device, like DNS and IPv6, read through the web
     /// interface. Secrets are hidden.
     Settings {
@@ -622,6 +628,7 @@ async fn run(
         Command::Doctor => doctor::run(load(), format, out).await,
         Command::Capabilities => device::capabilities(&load()?, format, out).await,
         Command::Users => status::users(&load()?, format, out).await,
+        Command::Dns(args) => dns::dns(&load()?, args, format, out).await,
         Command::Settings { modules } => device::settings(&load()?, &modules, format, out).await,
         Command::Calls(args) if args.watch.watch => {
             personal::watch_calls(&load()?, args.watch, format, out, &mut io::stderr()).await

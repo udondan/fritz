@@ -670,6 +670,34 @@ Two-factor              off
 Hints                   two-factor confirmation off
 ```
 
+`fritz dns <name>` shows why a name does or does not resolve. It reads the
+local domain, the DNS servers the box hands out by DHCP and the host table of
+the box, asks the DNS server of the box directly for A and AAAA records, asks
+the resolver of this machine, and reads its resolvers (`scutil --dns` on
+macOS, `/etc/resolv.conf` on Linux). From that it names the likely cause:
+`ok`, `mdns` (a `.local` name is answered by mDNS, not by the box),
+`not_forwarded` (this machine asks another DNS server that does not forward
+the local domain to the box), `search_domain_missing`, `stale_record`,
+`unexpected_address`, `client_fails`, `client_only`, `router_no_record`,
+`unknown_name`, `router_unreachable` or `router_unknown`. What cannot be
+told is reported as unknown. Only the given name is asked for; a name without
+a dot is asked at the box together with its local domain. Every query has a
+timeout. `--expected-ip` compares the answers with an address, and
+`--router-dns` asks another server, like `192.168.178.1:53`, instead of the
+box. JSON holds all evidence and the verdict.
+
+```console
+$ fritz dns nas
+Name              nas
+Local domain      fritz.box
+DNS handed out    192.168.178.1
+Host table        nas, 192.168.178.20, active
+Router answer     192.168.178.20 (192.168.178.1 for nas.fritz.box)
+Client answer     no such name (for nas)
+Client resolvers  default: 192.168.178.1, search example.org (from scutil --dns)
+Verdict           search_domain_missing: the router answers nas.fritz.box, but this machine does not add the search domain fritz.box to nas; use the full name, or add fritz.box to the search domains of this machine
+```
+
 ### Settings
 
 `fritz settings` reads settings that TR-064 doesn't offer, like DNS, IPv6,
@@ -986,6 +1014,7 @@ claude mcp add fritz -- fritz --host 192.168.178.1 --user agent mcp
 | `fritz_telephony`       | Numbers, accounts, deflections, answering machines, DECT    |
 | `fritz_capabilities`    | Features of the device, rights of the user, two-factor      |
 | `fritz_users`           | Users (names need `--personal`), login settings, hints      |
+| `fritz_dns`             | Why a name resolves or not: evidence and the likely cause   |
 | `fritz_settings`        | Settings like DNS, IPv6, MTU, DHCP and time, secrets hidden |
 | `fritz_list_services`   | TR-064 services, or the actions of one with their class     |
 | `fritz_describe_action` | The arguments of an action and their types                  |
