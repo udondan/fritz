@@ -535,25 +535,10 @@ async fn reads_nothing_when_the_snapshot_fails() {
         .plan("WLANConfiguration1", "SetEnable", &enable("0"))
         .await
         .unwrap();
-    // A client that gives up soon, with the same tokens.
-    let client = setup
-        .sim
-        .client()
-        .timeout(std::time::Duration::from_millis(200))
-        .build()
-        .unwrap();
-    let settings = Settings {
-        permit: WRITE,
-        targets: allow(),
-        dir: setup.dir.path().to_owned(),
-        source: "test",
-    };
-    let mut impatient = Changer::new(client, settings);
-    impatient.identity().await.unwrap();
-    setup
-        .sim
-        .inject(Injection::Delay(std::time::Duration::from_secs(2)));
-    let error = impatient
+    // The descriptions need no login and the identity is known, so only
+    // the getters of the snapshot fail.
+    setup.sim.inject(Injection::LockLogin);
+    let error = changer
         .apply("WLANConfiguration1", "SetEnable", &enable("0"), &plan.token)
         .await
         .unwrap_err();
