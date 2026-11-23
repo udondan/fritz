@@ -89,6 +89,14 @@ fritz auth login
 `fritz config show` shows the settings in effect, and `fritz auth status`
 where the password comes from.
 
+When something does not work, run `fritz doctor` first. It checks every step
+of this guide, from the configuration to the login and the rights of the user,
+and gives a hint for each check that fails:
+
+```sh
+fritz doctor
+```
+
 ### Password from a password manager
 
 Instead of the keychain, `fritz` can run a command that prints the password,

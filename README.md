@@ -149,8 +149,31 @@ the password manager. Errors name the command, never its output.
 | `fritz config init` / `show` / `list` | Save `--host`, `--user`, `--fingerprint` and `--password-command` to a profile / show the settings in effect / list the profiles |
 | `fritz tls fingerprint` / `trust` / `forget` | Print / trust / forget the certificate of the device |
 | `fritz auth login` / `logout` / `status` | Store / remove the password in the keychain / tell where it comes from |
+| `fritz doctor` | Check the whole setup and say how to fix what fails |
 
 FRITZ!Repeaters have only a password: leave out `--user` for them.
+
+When something does not work, `fritz doctor` checks the setup step by step:
+the configuration, the host, the TR-064 port, the certificate, where the
+password comes from, the login, the rights of the user, the two-factor
+confirmation, the web interface and the Smart Home API. It runs every check,
+also after one failed, logs in at most once, and exits with 1 if a check
+failed. It never shows the password or a session ID.
+
+```console
+$ fritz doctor
+ok    Configuration  profile default in /home/me/.config/fritz/config.toml
+ok    Host           192.168.178.1 is 192.168.178.1
+ok    Reachable      TR-064 answers on port 49443
+ok    TLS            the device presents the trusted certificate
+ok    Password       from the keychain
+ok    Login          logged in as agent
+warn  Rights         HomeAuto missing, needed by smarthome
+                     hint: give the user these rights in System > FRITZ!Box Users, see docs/box-setup.md
+ok    Two-factor     on: some changes need a confirmation on the device; reads are not affected
+ok    Web interface  logged in to the web interface
+skip  Smart Home     the device has no Smart Home API (FRITZ!OS 8.20 and later)
+```
 
 ### Status and internet
 

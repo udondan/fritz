@@ -12,7 +12,8 @@ use crate::context::{Context, read_line};
 
 const TIMEOUT: Duration = Duration::from_secs(10);
 
-async fn fetch(url: &Url) -> anyhow::Result<Fingerprint> {
+/// The fingerprint of the certificate the device at `url` presents.
+pub(crate) async fn fetch(url: &Url) -> anyhow::Result<Fingerprint> {
     if url.scheme() != "https" {
         bail!("{url} is not https, so it has no certificate");
     }

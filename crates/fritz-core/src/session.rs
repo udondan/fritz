@@ -49,6 +49,18 @@ fn blocked(seconds: u64) -> String {
     }
 }
 
+/// The seconds until the device accepts the next login, 0 if it accepts one
+/// now. Reads the login page without logging in, so it never counts as a
+/// failed login. `client` is a client for the web interface.
+///
+/// # Errors
+///
+/// The errors of the request, and [`Error::Invalid`] if the answer is not a
+/// login page.
+pub async fn block_time(client: &Client) -> Result<u64, Error> {
+    Ok(SessionInfo::parse(&client.get(LOGIN).await?)?.block_time)
+}
+
 /// An open session.
 #[derive(Debug)]
 pub struct Session {

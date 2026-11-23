@@ -150,6 +150,18 @@
     }
   },
   {
+    "name": "fritz_doctor",
+    "description": "Checks the setup step by step: configuration, host, port, certificate, password source, login, rights, two-factor, web interface, Smart Home. Each check: status (ok, warn, fail, skip), detail and hint. Call first when other tools fail.",
+    "inputSchema": {
+      "properties": {},
+      "type": "object"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "openWorldHint": false
+    }
+  },
+  {
     "name": "fritz_firmware",
     "description": "Firmware: state (available, none, unknown, unsupported), installed and offered version, info URL, auto update, last update. Does not check for updates.",
     "inputSchema": {

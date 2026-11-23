@@ -13,6 +13,7 @@ mod completion;
 mod context;
 mod device;
 mod diagnose;
+mod doctor;
 mod dsl;
 mod interfaces;
 mod logging;
@@ -184,6 +185,10 @@ enum Command {
     /// The numbers, accounts, call deflections, answering machines and DECT
     /// handsets.
     Telephony,
+    /// Checks the whole setup, from the configuration to the login and the
+    /// rights, and says how to fix what fails. The first step when something
+    /// does not work. Logs in at most once and changes nothing.
+    Doctor,
     /// The features the device offers and the rights of the user.
     Capabilities,
     /// The users of the device, your rights and how the login is
@@ -593,6 +598,7 @@ async fn run(
         Command::Smarthome(args) => status::smarthome(&load()?, &args, format, out).await,
         Command::Ports => device::ports(&load()?, format, out).await,
         Command::Telephony => device::telephony(&load()?, format, out).await,
+        Command::Doctor => doctor::run(load(), format, out).await,
         Command::Capabilities => device::capabilities(&load()?, format, out).await,
         Command::Users => status::users(&load()?, format, out).await,
         Command::Settings { modules } => device::settings(&load()?, &modules, format, out).await,

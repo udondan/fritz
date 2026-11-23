@@ -18,6 +18,10 @@ keychain.
 If a command says there is no password or no trusted certificate, ask the
 user to run `fritz auth login` or `fritz tls trust`. Never ask for the
 password in the chat.
+When commands fail and the reason is unclear, run `fritz doctor --output json`
+first: one entry per check with `status` (`ok`, `warn`, `fail`, `skip`),
+`detail` and `hint`. Pass the hints of failed checks on to the user. It logs
+in at most once, so it is safe to run while the device blocks logins.
 
 ## Commands
 
@@ -51,6 +55,7 @@ or paste them.
 | Which ports are forwarded, is UPnP on?      | `fritz ports`                        |
 | Numbers, deflections, answering machines    | `fritz telephony`                    |
 | What does the box offer, what may I do?     | `fritz capabilities`                 |
+| Why does fritz not work? What is missing?   | `fritz doctor` (exit 1: a check failed) |
 | Which users exist, is the login weak?       | `fritz users`                        |
 | DNS, IPv6, MTU, DHCP, time, LAN ports       | `fritz settings`                     |
 | VPN, WLAN, parental controls, traffic       | `fritz settings vpn wlan user inetstat` |

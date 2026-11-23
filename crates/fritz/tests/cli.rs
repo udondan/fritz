@@ -3601,3 +3601,245 @@ async fn diagnoses_the_device() {
     assert!(!text.contains("secret-pw"), "{text}");
     assert!(!text.contains("user:"), "{text}");
 }
+
+/// The status and the detail of each check of `fritz doctor`.
+type Checks = std::collections::BTreeMap<String, (String, String)>;
+
+/// The checks `fritz doctor` printed, after making sure that no output
+/// shows `password` or the session ID.
+fn checks(output: &Output, password: &str) -> Checks {
+    let all = format!("{}{}", stdout(output), stderr(output));
+    assert!(!all.contains(password), "{all}");
+    assert!(!all.contains(SESSION), "{all}");
+    let checks: serde_json::Value = serde_json::from_str(&stdout(output)).expect(&all);
+    let text = |value: &serde_json::Value| value.as_str().unwrap().to_owned();
+    checks
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|c| (text(&c["check"]), (text(&c["status"]), text(&c["detail"]))))
+        .collect()
+}
+
+/// The status of a check.
+fn status<'a>(checks: &'a Checks, name: &str) -> &'a str {
+    checks[name].0.as_str()
+}
+
+#[tokio::test(flavor = "multi_thread")]
+async fn doctor_checks_the_setup() {
+    let sim = fritz_sim::Sim::start(fritz_sim::Fixture::load(FIXTURE).unwrap())
+        .await
+        .unwrap();
+    let password = fritz_sim::PASSWORD;
+    let output = run(&sim, &["doctor"], Some(password)).await;
+    assert!(output.status.success(), "{}", stderr(&output));
+    let found = checks(&output, password);
+    for name in [
+        "Configuration",
+        "Host",
+        "Reachable",
+        "Password",
+        "Login",
+        "Rights",
+    ] {
+        assert_eq!(status(&found, name), "ok", "{name}: {found:?}");
+    }
+    assert_eq!(status(&found, "TLS"), "warn", "{found:?}");
+    assert_eq!(status(&found, "Web interface"), "ok", "{found:?}");
+    assert_eq!(status(&found, "Smart Home"), "ok", "{found:?}");
+    assert_eq!(
+        found["Password"].1,
+        "from the environment variable FRITZ_PASSWORD"
+    );
+    assert_eq!(
+        found["Login"].1,
+        format!("logged in as {}", fritz_sim::USERNAME)
+    );
+
+    let output = run(&sim, &["--output", "text", "doctor"], Some(password)).await;
+    let text = success(&output);
+    assert!(text.starts_with("ok    Configuration  "), "{text}");
+    assert!(text.contains("\nwarn  TLS            http: "), "{text}");
+    assert!(text.contains("hint: use https"), "{text}");
+    assert!(
+        !text.contains(SESSION) && !text.contains(password),
+        "{text}"
+    );
+}
+
+#[cfg(feature = "write")]
+#[tokio::test(flavor = "multi_thread")]
+async fn doctor_checks_whether_changes_are_allowed() {
+    let sim = fritz_sim::Sim::start(fritz_sim::Fixture::load(FIXTURE).unwrap())
+        .await
+        .unwrap();
+    let password = fritz_sim::PASSWORD;
+    let output = run(&sim, &["doctor"], Some(password)).await;
+    assert_eq!(status(&checks(&output, password), "Changes"), "skip");
+
+    let mut args = strings(&["--host", sim.url().as_str(), "--user", fritz_sim::USERNAME]);
+    args.push("doctor".to_owned());
+    let env = vec![
+        ("FRITZ_PASSWORD".to_owned(), password.to_owned()),
+        ("FRITZ_ALLOW_WRITE".to_owned(), "1".to_owned()),
+    ];
+    let output = fritz_blocking(args, env, "").await;
+    assert!(failure(&output).contains("checks failed: Changes"));
+    let found = checks(&output, password);
+    assert_eq!(found["Changes"].1, "the device is not on the allow list");
+    let actions: Vec<_> = sim
+        .requests()
+        .into_iter()
+        .filter_map(|r| r.action)
+        .collect();
+    assert!(actions.iter().all(|a| a.contains("Get")), "{actions:?}");
+}
+
+#[tokio::test(flavor = "multi_thread")]
+async fn doctor_logs_in_only_once() {
+    let sim = fritz_sim::Sim::start(fritz_sim::Fixture::load(FIXTURE).unwrap())
+        .await
+        .unwrap();
+    let wrong = "not-the-password-4711";
+    let output = run(&sim, &["doctor"], Some(wrong)).await;
+    assert!(failure(&output).contains("checks failed: Login"));
+    let found = checks(&output, wrong);
+    assert_eq!(
+        found["Login"].1,
+        "the device rejected the user or the password"
+    );
+    let skipped = ("skip".to_owned(), "skipped: Login failed".to_owned());
+    assert_eq!(found["Web interface"], skipped);
+    let web = |r: &fritz_sim::Request| r.method == "POST" && r.path == "/login_sid.lua";
+    assert!(!sim.requests().iter().any(web));
+
+    sim.inject(Injection::LockLogin);
+    let before = sim.requests().len();
+    let output = run(&sim, &["doctor"], Some(fritz_sim::PASSWORD)).await;
+    let found = checks(&output, fritz_sim::PASSWORD);
+    assert_eq!(
+        found["Login"].1,
+        "the device blocks logins for 60 more seconds"
+    );
+    let requests = sim.requests();
+    assert!(
+        requests[before..]
+            .iter()
+            .all(|r| r.action.is_none() && !web(r))
+    );
+}
+
+#[tokio::test(flavor = "multi_thread")]
+async fn doctor_checks_the_certificate() {
+    let options = fritz_sim::Options {
+        https: true,
+        ..fritz_sim::Options::default()
+    };
+    let fixture = fritz_sim::Fixture::load(FIXTURE).unwrap();
+    let sim = fritz_sim::Sim::start_with(fixture, options).await.unwrap();
+    let password = Some(fritz_sim::PASSWORD);
+    let pinned = sim.fingerprint().unwrap().to_string();
+
+    let found = checks(&run(&sim, &["doctor"], password).await, fritz_sim::PASSWORD);
+    assert_eq!(found["TLS"].1, "no certificate is trusted for this device");
+    assert_eq!(status(&found, "Login"), "skip");
+    let output = run(&sim, &["--fingerprint", FINGERPRINT, "doctor"], password).await;
+    let found = checks(&output, fritz_sim::PASSWORD);
+    let other = "the device presents another certificate than the trusted one";
+    assert_eq!(found["TLS"].1, other);
+    assert!(!stdout(&output).contains(&pinned) && !stdout(&output).contains(FINGERPRINT));
+    let output = run(&sim, &["--fingerprint", &pinned, "doctor"], password).await;
+    assert_eq!(status(&checks(&output, fritz_sim::PASSWORD), "TLS"), "ok");
+
+    // An address without TLS.
+    let plain = fritz_sim::Sim::start(fritz_sim::Fixture::load(FIXTURE).unwrap())
+        .await
+        .unwrap();
+    let host = plain.url().as_str().replace("http://", "https://");
+    let args = strings(&["--host", &host, "--fingerprint", FINGERPRINT, "doctor"]);
+    let output = fritz_blocking(args, Vec::new(), "").await;
+    let found = checks(&output, fritz_sim::PASSWORD);
+    assert_eq!(status(&found, "TLS"), "fail", "{found:?}");
+    assert_eq!(status(&found, "Password"), "fail", "{found:?}");
+}
+
+#[tokio::test(flavor = "multi_thread")]
+async fn doctor_names_what_is_missing() {
+    let repeater = fritz_sim::Fixture::bundled("fritz-repeater-2400/8.25").unwrap();
+    let sim = fritz_sim::Sim::start(repeater).await.unwrap();
+    let password = fritz_sim::PASSWORD;
+    let found = checks(&run(&sim, &["doctor"], Some(password)).await, password);
+    assert_eq!(status(&found, "Smart Home"), "skip", "{found:?}");
+    assert!(
+        found["Smart Home"].1.contains("no Smart Home API"),
+        "{found:?}"
+    );
+
+    // The web interface wants no user where TR-064 wants the historic one,
+    // which only a simulator does.
+    let options = fritz_sim::Options {
+        username: fritz_core::connection::PASSWORD_ONLY_USERNAME.to_owned(),
+        ..fritz_sim::Options::default()
+    };
+    let repeater = fritz_sim::Fixture::bundled("fritz-repeater-2400/8.25").unwrap();
+    let sim = fritz_sim::Sim::start_with(repeater, options).await.unwrap();
+    let args = strings(&["--host", sim.url().as_str(), "doctor"]);
+    let output = fritz_async(args, vec![("FRITZ_PASSWORD", password)]).await;
+    let found = checks(&output, password);
+    assert_eq!(found["Login"].1, "logged in with the password only");
+    assert_eq!(status(&found, "Web interface"), "fail", "{found:?}");
+    assert_eq!(found["Smart Home"].1, "skipped: Web interface failed");
+
+    let rights = "<rights><path>HomeAuto</path><access>readwrite</access></rights>";
+    let answer = fritz_sim::Answer::Ok(std::collections::BTreeMap::from([(
+        "NewX_AVM-DE_CurrentUserRights".to_owned(),
+        rights.to_owned(),
+    )]));
+    let fixture = fritz_sim::Fixture::load(FIXTURE).unwrap().with_answer(
+        "LANConfigSecurity1",
+        "X_AVM-DE_GetCurrentUser",
+        None,
+        answer,
+    );
+    let sim = fritz_sim::Sim::start(fixture).await.unwrap();
+    let output = run(&sim, &["doctor"], Some(password)).await;
+    assert!(failure(&output).contains("checks failed: Rights"));
+    let found = checks(&output, password);
+    assert!(
+        found["Rights"].1.starts_with("BoxAdmin missing"),
+        "{found:?}"
+    );
+}
+
+#[tokio::test(flavor = "multi_thread")]
+async fn doctor_reports_unreachable_devices_and_failed_logins() {
+    let password = "not-the-password-4711";
+    let env = || vec![("FRITZ_PASSWORD".to_owned(), password.to_owned())];
+    let args = strings(&["--host", &unreachable_url("http"), "doctor"]);
+    let found = checks(&fritz_blocking(args, env(), "").await, password);
+    assert_eq!(status(&found, "Reachable"), "fail", "{found:?}");
+    assert_eq!(found["TLS"].1, "skipped: Reachable failed");
+    assert_eq!(found["Login"].1, "skipped: Reachable failed");
+
+    let args = strings(&["--host", &device(Control::Unauthorized).await, "doctor"]);
+    let found = checks(&fritz_blocking(args, env(), "").await, password);
+    assert_eq!(status(&found, "Login"), "fail", "{found:?}");
+}
+
+#[test]
+fn doctor_reports_configuration_errors() {
+    let config = Config::new();
+    std::fs::create_dir_all(Path::new(&config.path).parent().unwrap()).unwrap();
+    std::fs::write(&config.path, "[profile.home\n").unwrap();
+    let output = config.run(&["doctor"]);
+    assert!(failure(&output).contains("checks failed: Configuration"));
+    let found = checks(&output, fritz_sim::PASSWORD);
+    assert!(found["Configuration"].1.contains("line 1"), "{found:?}");
+    assert_eq!(found["Login"].1, "skipped: Configuration failed");
+
+    let output = fritz(&["--profile", "lab", "doctor"]);
+    let found = checks(&output, fritz_sim::PASSWORD);
+    assert_eq!(status(&found, "Configuration"), "fail", "{found:?}");
+    assert_eq!(status(&found, "Host"), "skip", "{found:?}");
+}
