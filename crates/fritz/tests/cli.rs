@@ -1228,13 +1228,21 @@ mod change {
             .find_map(|l| l.strip_prefix("token   "))
             .and_then(|t| t.strip_suffix(" (valid for 300 s)"))
             .unwrap();
+        assert!(plan.contains("\nnote    shows only the inputs"), "{plan}");
         assert_eq!(setup.enabled().as_deref(), Some("1"));
 
+        // Like a device, which reports a network it turns off as disabled.
+        setup.sim.inject(Injection::side_effect(
+            "WLANConfiguration1",
+            "SetEnable",
+            "Status",
+            "Disabled",
+        ));
         let applied = success(&setup.apply("0", token, "text").await);
         assert_eq!(
             applied,
             format!(
-                "device    {}\napplied   WLANConfiguration1 SetEnable\nnow       NewEnable: 0 (sent 0)\nverified  yes\n",
+                "device        {}\napplied       WLANConfiguration1 SetEnable\nnow           NewEnable: 0 (sent 0)\nverified      yes\nalso changed  GetInfo NewStatus: Up -> Disabled\n",
                 identity()
             )
         );
@@ -1255,6 +1263,7 @@ mod change {
         let outcome: serde_json::Value = serde_json::from_str(&output).unwrap();
         assert_eq!(outcome["verified"], true);
         assert_eq!(outcome["checks"][0]["actual"], "0");
+        assert_eq!(outcome["side_effects"], serde_json::json!([]));
     }
 
     #[tokio::test(flavor = "multi_thread")]
@@ -1276,10 +1285,10 @@ mod change {
         let token = setup.plan("0").await;
         let output = success(&setup.apply("0", &token, "text").await);
         assert!(
-            output.contains("now       NewEnable: ? (sent 0)\n"),
+            output.contains("now           NewEnable: ? (sent 0)\n"),
             "{output}"
         );
-        assert!(output.ends_with("verified  unknown\n"), "{output}");
+        assert!(output.contains("verified      unknown\n"), "{output}");
 
         setup.sim.clear_injections();
         let token = setup.plan("1").await;
@@ -1291,8 +1300,11 @@ mod change {
             "{error}"
         );
         let text = stdout(&output);
-        assert!(text.contains("now       NewEnable: 0 (sent 1)\n"), "{text}");
-        assert!(text.ends_with("verified  no\n"), "{text}");
+        assert!(
+            text.contains("now           NewEnable: 0 (sent 1)\n"),
+            "{text}"
+        );
+        assert!(text.contains("verified      no\n"), "{text}");
     }
 
     #[tokio::test(flavor = "multi_thread")]

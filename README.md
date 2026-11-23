@@ -151,6 +151,10 @@ FRITZ_ALLOW_WRITE=1 fritz change plan WLANConfiguration3 SetEnable NewEnable=0
 FRITZ_ALLOW_WRITE=1 fritz change apply WLANConfiguration3 SetEnable NewEnable=0 --token <token>
 ```
 
+A plan shows only the inputs of the action, but a device may change other
+settings along with them. `apply` reads the service before and after the
+change and lists the other values that changed under `also changed`.
+
 With `FRITZ_ALLOW_WRITE=1`, `fritz mcp` of such a build also offers
 `fritz_plan_change` and `fritz_apply_change`, which work the same way.
 

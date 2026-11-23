@@ -16,6 +16,12 @@
 //!    minutes ago for the same device, action and arguments, and not used
 //!    before.
 //!
+//! A plan shows only the inputs of the action. A device may change other
+//! settings along with them, like the options of a feature it turns off, so
+//! [apply](Changer::apply) reads the getters of the service before and after
+//! the change and reports the other values that changed as
+//! [side effects](SideEffect).
+//!
 //! Every plan, change and refusal is logged in `audit.jsonl` in the state
 //! directory, with secrets hidden. A change is logged before it is sent;
 //! if that fails, it is not sent.
@@ -23,7 +29,7 @@
 mod audit;
 mod tokens;
 
-use std::collections::HashMap;
+use std::collections::{BTreeMap, BTreeSet, HashMap};
 use std::io;
 use std::path::PathBuf;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
@@ -45,6 +51,9 @@ pub const ENV_ALLOW_WRITE: &str = "FRITZ_ALLOW_WRITE";
 /// The environment variable that allows critical changes, together with
 /// [`ENV_ALLOW_WRITE`].
 pub const ENV_ALLOW_CRITICAL: &str = "FRITZ_ALLOW_CRITICAL";
+/// What a [`Plan`] leaves out.
+pub const PLAN_NOTE: &str = "shows only the inputs of the action; the device may \
+change other settings along with them, which apply reports as side effects";
 /// How long the token of a plan is valid.
 pub const TTL: Duration = Duration::from_mins(5);
 
@@ -173,6 +182,8 @@ pub struct Plan {
     /// The class of the action, like `write`.
     pub class: String,
     pub changes: Vec<Change>,
+    /// What the plan leaves out, see [`PLAN_NOTE`].
+    pub note: &'static str,
     /// The token to [apply](Changer::apply) the change with.
     pub token: String,
     /// Seconds the token is valid.
@@ -188,6 +199,20 @@ pub struct Check {
     pub actual: Option<String>,
 }
 
+/// A value of the service that changed along with a change, although the
+/// change did not set it.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+pub struct SideEffect {
+    /// The getter that returns it, like `GetInfo`.
+    pub getter: String,
+    /// The output argument, like `NewChannel`.
+    pub argument: String,
+    /// The value before, if the getter returned it.
+    pub before: Option<String>,
+    /// The value after, if the getter still returns it.
+    pub after: Option<String>,
+}
+
 /// An applied change.
 #[derive(Debug, Clone, Serialize)]
 pub struct Outcome {
@@ -198,7 +223,15 @@ pub struct Outcome {
     /// Whether the device returns the values it was given: `None` if no
     /// getter returns any of them.
     pub verified: Option<bool>,
+    /// Other values of the service that changed. Values that change on
+    /// their own between two reads before the change, like counters, are
+    /// left out; slower ones may still show up.
+    pub side_effects: Vec<SideEffect>,
 }
+
+/// The values the getters of a service return, by getter and output
+/// argument.
+type Snapshot = BTreeMap<(String, String), String>;
 
 /// Plans and applies changes to a device.
 #[derive(Debug)]
@@ -317,6 +350,7 @@ impl Changer {
             action: checked.action.name,
             class: checked.class.to_string(),
             changes,
+            note: PLAN_NOTE,
             token,
             expires_in: TTL.as_secs(),
         })
@@ -338,6 +372,11 @@ impl Changer {
     ) -> Result<Outcome, Error> {
         let checked = match self.check(reference, name, arguments).await {
             Ok(checked) => checked,
+            Err(error) => return Err(self.refuse(subject(reference, name, arguments), error)),
+        };
+        // Read twice, to tell the values that change on their own.
+        let (before, again) = match self.snapshots(&checked, arguments).await {
+            Ok(snapshots) => snapshots,
             Err(error) => return Err(self.refuse(subject(reference, name, arguments), error)),
         };
         if let Err(error) = self
@@ -379,6 +418,8 @@ impl Changer {
             })
             .collect();
         let verified = verify(&checked, arguments, &after);
+        let side_effects =
+            side_effects(&before, &again, &self.snapshot(&checked, arguments).await?);
         // Logged as sending already, so a failed log loses nothing.
         let _ = self.log(Event::Applied, sent, None, verified);
         Ok(Outcome {
@@ -387,6 +428,7 @@ impl Changer {
             action: checked.action.name,
             checks,
             verified,
+            side_effects,
         })
     }
 
@@ -427,16 +469,7 @@ impl Changer {
         checked: &Checked,
         arguments: &[(String, String)],
     ) -> Result<HashMap<String, String>, Error> {
-        let inputs: HashMap<&str, &str> = checked
-            .action
-            .inputs()
-            .filter_map(|a| {
-                Some((
-                    a.related_state_variable.as_str(),
-                    value(arguments, &a.name)?,
-                ))
-            })
-            .collect();
+        let inputs = inputs(checked, arguments);
         let mut values = HashMap::new();
         for getter in &checked.scpd.actions {
             if policy::classify(&checked.service, getter) != Class::Read
@@ -484,6 +517,68 @@ impl Changer {
                     values
                         .entry(argument.related_state_variable.clone())
                         .or_insert(value);
+                }
+            }
+        }
+        Ok(values)
+    }
+
+    /// Two snapshots of the service, one right after the other.
+    async fn snapshots(
+        &self,
+        checked: &Checked,
+        arguments: &[(String, String)],
+    ) -> Result<(Snapshot, Snapshot), Error> {
+        let first = self.snapshot(checked, arguments).await?;
+        let second = self.snapshot(checked, arguments).await?;
+        Ok((first, second))
+    }
+
+    /// The values the getters of the service return, except those of the
+    /// state variables the inputs of the change refer to. A getter is
+    /// called if it only reads and the inputs of the change give all of its
+    /// own, like an index; it may return other entries, but the same ones
+    /// before and after.
+    async fn snapshot(
+        &self,
+        checked: &Checked,
+        arguments: &[(String, String)],
+    ) -> Result<Snapshot, Error> {
+        let inputs = inputs(checked, arguments);
+        let mut values = Snapshot::new();
+        for getter in &checked.scpd.actions {
+            if policy::classify(&checked.service, getter) != Class::Read {
+                continue;
+            }
+            let Some(getter_arguments) = getter
+                .inputs()
+                .map(|i| {
+                    let value = inputs.get(i.related_state_variable.as_str())?;
+                    Some((i.name.clone(), (*value).to_owned()))
+                })
+                .collect::<Option<Vec<_>>>()
+            else {
+                continue;
+            };
+            let output = match generic::call(
+                &self.client,
+                &checked.service,
+                getter,
+                &getter_arguments,
+            )
+            .await
+            {
+                Ok(output) => output,
+                Err(error) if is_answer(&error) => continue,
+                Err(error) => return Err(error.into()),
+            };
+            for (name, value) in output {
+                let planned = getter
+                    .outputs()
+                    .find(|o| o.name == name)
+                    .is_none_or(|o| inputs.contains_key(o.related_state_variable.as_str()));
+                if !planned {
+                    values.insert((getter.name.clone(), name), value);
                 }
             }
         }
@@ -541,6 +636,43 @@ fn subject<'a>(
         action,
         arguments,
     }
+}
+
+/// The values of the inputs of a change, by the state variable they refer
+/// to.
+fn inputs<'a>(
+    checked: &'a Checked,
+    arguments: &'a [(String, String)],
+) -> HashMap<&'a str, &'a str> {
+    checked
+        .action
+        .inputs()
+        .filter_map(|a| {
+            Some((
+                a.related_state_variable.as_str(),
+                value(arguments, &a.name)?,
+            ))
+        })
+        .collect()
+}
+
+/// The values that differ between `before` and `after`, except those that
+/// already differ between `before` and `again`, read right after it.
+fn side_effects(before: &Snapshot, again: &Snapshot, after: &Snapshot) -> Vec<SideEffect> {
+    let keys: BTreeSet<&(String, String)> = before.keys().chain(after.keys()).collect();
+    keys.into_iter()
+        .filter(|key| before.get(*key) != after.get(*key) && before.get(*key) == again.get(*key))
+        .map(|key| {
+            let (getter, argument) = key;
+            let shown = |snapshot: &Snapshot| snapshot.get(key).map(|v| redact::value(argument, v));
+            SideEffect {
+                getter: getter.clone(),
+                argument: argument.clone(),
+                before: shown(before),
+                after: shown(after),
+            }
+        })
+        .collect()
 }
 
 /// The value of the argument `name`.
@@ -701,6 +833,49 @@ mod tests {
                 Err(Error::NotAChange { .. })
             ));
         }
+    }
+
+    #[test]
+    fn finds_side_effects() {
+        let snapshot = |values: &[(&str, &str)]| -> Snapshot {
+            values
+                .iter()
+                .map(|(n, v)| (("GetInfo".to_owned(), (*n).to_owned()), (*v).to_owned()))
+                .collect()
+        };
+        let before = snapshot(&[
+            ("NewChannel", "6"),
+            ("NewCount", "1"),
+            ("NewKeep", "x"),
+            ("NewGone", "y"),
+        ]);
+        let again = snapshot(&[
+            ("NewChannel", "6"),
+            ("NewCount", "2"),
+            ("NewKeep", "x"),
+            ("NewGone", "y"),
+        ]);
+        let after = snapshot(&[
+            ("NewChannel", "1"),
+            ("NewCount", "3"),
+            ("NewKeep", "x"),
+            ("NewPassword", "secret"),
+        ]);
+        let effects = side_effects(&before, &again, &after);
+        let effect = |argument: &str, before: Option<&str>, after: Option<&str>| SideEffect {
+            getter: "GetInfo".to_owned(),
+            argument: argument.to_owned(),
+            before: before.map(str::to_owned),
+            after: after.map(str::to_owned),
+        };
+        assert_eq!(
+            effects,
+            [
+                effect("NewChannel", Some("6"), Some("1")),
+                effect("NewGone", Some("y"), None),
+                effect("NewPassword", None, Some(redact::HIDDEN)),
+            ]
+        );
     }
 
     #[test]

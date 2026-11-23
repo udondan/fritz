@@ -119,6 +119,7 @@ fn plan_pairs(plan: &Plan) -> Vec<(&'static str, Option<String>)> {
         let line = format!("{}: {before} -> {}", change.argument, change.after);
         pairs.push(("change", Some(line)));
     }
+    pairs.push(("note", Some(plan.note.to_owned())));
     let token = format!("{} (valid for {} s)", plan.token, plan.expires_in);
     pairs.push(("token", Some(token)));
     pairs
@@ -166,5 +167,15 @@ fn outcome_pairs(outcome: &Outcome) -> Vec<(&'static str, Option<String>)> {
         None => "unknown",
     };
     pairs.push(("verified", Some(verified.to_owned())));
+    if outcome.side_effects.is_empty() {
+        let line = format!("nothing else in {}", outcome.service);
+        pairs.push(("also changed", Some(line)));
+    }
+    for effect in &outcome.side_effects {
+        let before = effect.before.as_deref().unwrap_or("(none)");
+        let after = effect.after.as_deref().unwrap_or("(none)");
+        let line = format!("{} {}: {before} -> {after}", effect.getter, effect.argument);
+        pairs.push(("also changed", Some(line)));
+    }
     pairs
 }
