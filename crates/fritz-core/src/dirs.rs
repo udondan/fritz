@@ -4,45 +4,58 @@
 //! `$XDG_STATE_HOME`. On Windows they are the usual ones below `%APPDATA%`
 //! and `%LOCALAPPDATA%`.
 
+#[cfg(not(windows))]
 use std::ffi::OsString;
-use std::path::{Path, PathBuf};
+#[cfg(not(windows))]
+use std::path::Path;
+use std::path::PathBuf;
 
 const NAME: &str = "fritz";
 
 /// The directory of the configuration. `None` if the home directory is
 /// unknown.
+#[cfg(not(windows))]
 pub fn config() -> Option<PathBuf> {
-    if cfg!(windows) {
-        directories::ProjectDirs::from("", "", NAME).map(|dirs| dirs.config_dir().to_owned())
-    } else {
-        xdg(
-            std::env::var_os("XDG_CONFIG_HOME"),
-            home().as_deref(),
-            ".config",
-        )
-    }
+    xdg(
+        std::env::var_os("XDG_CONFIG_HOME"),
+        home().as_deref(),
+        ".config",
+    )
+}
+
+/// The directory of the configuration. `None` if the home directory is
+/// unknown.
+#[cfg(windows)]
+pub fn config() -> Option<PathBuf> {
+    directories::ProjectDirs::from("", "", NAME).map(|dirs| dirs.config_dir().to_owned())
 }
 
 /// The directory of the state, like tokens and the audit log. `None` if the
 /// home directory is unknown.
+#[cfg(not(windows))]
 pub fn state() -> Option<PathBuf> {
-    if cfg!(windows) {
-        directories::ProjectDirs::from("", "", NAME).map(|dirs| dirs.data_local_dir().to_owned())
-    } else {
-        xdg(
-            std::env::var_os("XDG_STATE_HOME"),
-            home().as_deref(),
-            ".local/state",
-        )
-    }
+    xdg(
+        std::env::var_os("XDG_STATE_HOME"),
+        home().as_deref(),
+        ".local/state",
+    )
 }
 
+/// The directory of the state, like tokens and the audit log. `None` if the
+/// home directory is unknown.
+#[cfg(windows)]
+pub fn state() -> Option<PathBuf> {
+    directories::ProjectDirs::from("", "", NAME).map(|dirs| dirs.data_local_dir().to_owned())
+}
+
+#[cfg(not(windows))]
 fn home() -> Option<PathBuf> {
     directories::BaseDirs::new().map(|dirs| dirs.home_dir().to_owned())
 }
 
 /// The directory of `fritz` below the XDG variable, or below its default in
 /// the home directory. The specification ignores relative paths.
+#[cfg(not(windows))]
 fn xdg(variable: Option<OsString>, home: Option<&Path>, default: &str) -> Option<PathBuf> {
     let base = variable
         .map(PathBuf::from)
@@ -56,6 +69,7 @@ mod tests {
     use super::*;
 
     #[test]
+    #[cfg(not(windows))]
     fn follows_the_variable() {
         assert_eq!(
             xdg(Some("/xdg".into()), Some(Path::new("/home/me")), ".config"),
@@ -64,6 +78,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(not(windows))]
     fn falls_back_to_the_home_directory() {
         let home = Some(Path::new("/home/me"));
         let expected = Some(PathBuf::from("/home/me/.local/state/fritz"));
@@ -73,13 +88,19 @@ mod tests {
     }
 
     #[test]
+    #[cfg(not(windows))]
     fn needs_a_home_directory() {
         assert_eq!(xdg(None, None, ".config"), None);
     }
 
     #[test]
-    fn ends_in_fritz() {
-        assert!(config().unwrap().ends_with(NAME));
-        assert!(state().unwrap().ends_with(NAME));
+    fn lies_in_a_directory_of_fritz() {
+        for dir in [config().unwrap(), state().unwrap()] {
+            assert!(
+                dir.components().any(|part| part.as_os_str() == NAME),
+                "{}",
+                dir.display()
+            );
+        }
     }
 }
