@@ -19,8 +19,8 @@ password in the chat.
 
 ## Commands
 
-Pass `--output json` for results you parse; JSON is the default when stdout
-is not a terminal.
+Always pass `--output json` for results you parse: JSON is the default when
+stdout is not a terminal, but the user may set `FRITZ_OUTPUT=text`.
 
 | Question                                    | Command                              |
 | ------------------------------------------- | ------------------------------------ |

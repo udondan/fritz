@@ -69,8 +69,9 @@ struct Global {
     #[arg(long, global = true, env = "FRITZ_TLS_FINGERPRINT")]
     fingerprint: Option<String>,
     /// How to print results: text, or JSON, which is the default when the
-    /// output is not a terminal.
-    #[arg(long, global = true, value_enum)]
+    /// output is not a terminal. Set `FRITZ_OUTPUT=text` to keep text in
+    /// pipes, like `fritz hosts | grep phone`.
+    #[arg(short, long, global = true, value_enum, env = "FRITZ_OUTPUT")]
     output: Option<Format>,
 }
 

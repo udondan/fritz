@@ -325,7 +325,8 @@ Inputs go after the action, like `fritz tr64 call Hosts1 GetGenericHostEntry New
 
 The commands from `overview` to `log` print a table on a terminal and JSON
 otherwise, for scripts and agents, and so does `config list`. `--output`
-picks one. The other `config` commands, `tls`, `auth` and `tr64` always
+(`-o`) picks one. To keep text in pipes, like `fritz hosts | grep phone`, set
+`FRITZ_OUTPUT=text` in your shell; `--output` still wins over it. The other `config` commands, `tls`, `auth` and `tr64` always
 print text.
 
 ```console
