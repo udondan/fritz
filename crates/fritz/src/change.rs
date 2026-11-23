@@ -9,7 +9,8 @@ use clap::{Args, Subcommand};
 use fritz_core::change::{self, Changer, Outcome, Permit, Plan, Settings};
 
 use crate::context::Context;
-use crate::status::{Format, json, pairs};
+use crate::output::{Format, show};
+use crate::status::pairs;
 use crate::tr64::parse_arguments;
 
 #[derive(Debug, Args)]
@@ -100,10 +101,7 @@ async fn plan(
     let plan = changer
         .plan(&call.service, &call.action, &arguments)
         .await?;
-    match format {
-        Format::Json => json(&plan, out),
-        Format::Text => pairs(&plan_pairs(&plan), out),
-    }
+    show(&plan, format, out, |p, out| pairs(&plan_pairs(p), out))
 }
 
 fn plan_pairs(plan: &Plan) -> Vec<(&'static str, Option<String>)> {
@@ -138,10 +136,9 @@ async fn apply(
     let outcome = changer
         .apply(&call.service, &call.action, &arguments, token)
         .await?;
-    match format {
-        Format::Json => json(&outcome, out)?,
-        Format::Text => pairs(&outcome_pairs(&outcome), out)?,
-    }
+    show(&outcome, format, out, |o, out| {
+        pairs(&outcome_pairs(o), out)
+    })?;
     if outcome.verified == Some(false) {
         bail!("the device does not return the values it was given");
     }

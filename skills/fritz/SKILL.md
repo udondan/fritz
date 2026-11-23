@@ -21,6 +21,8 @@ password in the chat.
 
 Always pass `--output json` for results you parse: JSON is the default when
 stdout is not a terminal, but the user may set `FRITZ_OUTPUT=text`.
+`--output yaml` prints the same fields as YAML, for a user who wants to read
+or paste them.
 
 | Question                                    | Command                              |
 | ------------------------------------------- | ------------------------------------ |

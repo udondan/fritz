@@ -11,6 +11,7 @@ mod change;
 mod context;
 mod device;
 mod mcp;
+mod output;
 mod personal;
 mod settings;
 mod status;
@@ -30,7 +31,7 @@ use fritz_core::secrets::ENV_PASSWORD;
 use tr064::{Client, SecretString, Url};
 
 use crate::context::Context;
-use crate::status::Format;
+use crate::output::Format;
 
 /// CLI and MCP server for FRITZ!Box routers (unofficial).
 ///
@@ -68,9 +69,10 @@ struct Global {
     /// one of the profile.
     #[arg(long, global = true, env = "FRITZ_TLS_FINGERPRINT")]
     fingerprint: Option<String>,
-    /// How to print results: text, or JSON, which is the default when the
-    /// output is not a terminal. Set `FRITZ_OUTPUT=text` to keep text in
-    /// pipes, like `fritz hosts | grep phone`.
+    /// How to print results: text, JSON, which is the default when the
+    /// output is not a terminal, or YAML. Set `FRITZ_OUTPUT=text` to keep
+    /// text in pipes, like `fritz hosts | grep phone`. With YAML, errors are
+    /// YAML on stderr as well.
     #[arg(short, long, global = true, value_enum, env = "FRITZ_OUTPUT")]
     output: Option<Format>,
 }
@@ -315,7 +317,7 @@ async fn main() -> anyhow::Result<()> {
         return mcp::serve(load()?, personal).await;
     }
     let out = &mut io::stdout().lock();
-    match cli.command {
+    let result = match cli.command {
         Command::Mcp { .. } => unreachable!("served above"),
         Command::Overview => status::overview(&load()?, format, out).await,
         Command::Hosts { active } => status::hosts(&load()?, active, format, out).await,
@@ -348,7 +350,13 @@ async fn main() -> anyhow::Result<()> {
         Command::Change(args) => change::run(&load()?, args, format, out).await,
         Command::Capture(args) => capture(&load()?, args).await,
         Command::Fixture(command) => fixture(&command),
+    };
+    if let (Format::Yaml, Err(error)) = (format, &result) {
+        io::Write::flush(out)?;
+        output::yaml(&output::failure(error), &mut io::stderr())?;
+        std::process::exit(1);
     }
+    result
 }
 
 async fn tr64(

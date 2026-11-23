@@ -7,7 +7,8 @@ use fritz_core::connection::Target;
 use serde::Serialize;
 
 use crate::context::Context;
-use crate::status::{Format, json, table, yes_no};
+use crate::output::{self, Format};
+use crate::status::{table, yes_no};
 
 /// Creates or updates the profile with the given settings.
 pub(crate) fn init(context: &mut Context, out: &mut impl Write) -> anyhow::Result<()> {
@@ -76,14 +77,13 @@ pub(crate) fn list(context: &Context, format: Format, out: &mut impl Write) -> a
             fingerprint: profile.fingerprint.map(|f| f.to_string()),
         })
         .collect();
-    match format {
-        Format::Json => json(&entries, out),
-        Format::Text if entries.is_empty() => {
+    output::show(entries.as_slice(), format, out, |entries, out| {
+        if entries.is_empty() {
             let path = context.path().display();
             writeln!(out, "no profiles in {path}, run `fritz config init`")?;
-            Ok(())
+            return Ok(());
         }
-        Format::Text => table(
+        table(
             &["DEFAULT", "PROFILE", "HOST", "USER", "TRUSTED"],
             entries.iter().map(|entry| {
                 vec![
@@ -95,8 +95,8 @@ pub(crate) fn list(context: &Context, format: Format, out: &mut impl Write) -> a
                 ]
             }),
             out,
-        ),
-    }
+        )
+    })
 }
 
 #[cfg(test)]

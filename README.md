@@ -39,7 +39,7 @@ status and settings of a FRITZ!Box router.
   - [Settings](#settings)
   - [Calls, phonebook and event log](#calls-phonebook-and-event-log)
   - [Any TR-064 action](#any-tr-064-action)
-  - [JSON output](#json-output)
+  - [JSON and YAML output](#json-and-yaml-output)
   - [Several devices and the environment](#several-devices-and-the-environment)
 - [MCP server](#mcp-server)
   - [Docker](#docker)
@@ -78,7 +78,8 @@ cosign verify udondan/fritz \
 ## Usage
 
 The examples show made-up data. Every command takes `--help`; the commands
-that read the device also print JSON (see [JSON output](#json-output)).
+that read the device also print JSON and YAML (see
+[JSON and YAML output](#json-and-yaml-output)).
 
 ### Set up
 
@@ -321,12 +322,12 @@ Error: GetSecurityKeys is secret: the name points to a secret; only actions that
 
 Inputs go after the action, like `fritz tr064 call Hosts1 GetGenericHostEntry NewIndex=0`.
 
-### JSON output
+### JSON and YAML output
 
 The commands from `overview` to `log` print a table on a terminal and JSON
 otherwise, for scripts and agents, and so does `config list`. `--output`
-(`-o`) picks one. The other `config` commands, `tls`, `auth` and `tr064`
-always print text.
+(`-o`) picks `text`, `json` or `yaml`. The other `config` commands, `tls`,
+`auth` and `tr064` always print text.
 
 To keep text in pipes, like `fritz hosts | grep phone`, set
 `FRITZ_OUTPUT=text` in your shell; `--output` still wins over it.
@@ -343,6 +344,23 @@ $ fritz wlan --output json | jq '.[0]'
   "status": "Up",
   "clients": 4
 }
+```
+
+YAML has the same fields as JSON. Strings from the device are quoted where
+needed, so a host name like `a: b` stays a string. With `--output yaml`,
+errors are YAML on stderr as well, with the fields of the errors of the MCP
+server: `error`, and for faults of the device `status` and `retry_after`.
+
+```console
+$ fritz capabilities --output yaml
+features:
+- dsl
+- wlan
+rights:
+- area: BoxAdmin
+  access: readwrite
+two_factor: true
+services: 37
 ```
 
 ### Several devices and the environment
