@@ -40,6 +40,7 @@ const INVALID_ACTION: u16 = 401;
 const INVALID_ARGS: u16 = 402;
 const INVALID_VALUE: u16 = 600;
 const INVALID_INDEX: u16 = 713;
+const NO_SUCH_ENTRY: u16 = 714;
 
 /// The usual description of a UPnP error code, as FRITZ!Box devices send
 /// it.
@@ -52,7 +53,7 @@ fn description(code: u16) -> &'static str {
         601 => "Argument Value Out of Range",
         606 => "Action not authorized",
         INVALID_INDEX => "SpecifiedArrayIndexInvalid",
-        714 => "NoSuchEntryInArray",
+        NO_SUCH_ENTRY => "NoSuchEntryInArray",
         820 => "Internal Error",
         866 => "second factor authentication required",
         867 => "second factor authentication blocked",
@@ -148,6 +149,11 @@ impl Device {
         if let Some(recording) = recording.filter(|r| !r.indexed.is_empty()) {
             return indexed(action, recording, arguments);
         }
+        if recording.is_none()
+            && let Some(answer) = self.host_entry(id, action, arguments)
+        {
+            return answer;
+        }
         let out = match recording.and_then(|r| r.once.as_ref()) {
             Some(Answer::Fault { code, description }) if is_getter(&action.name) => {
                 return Err(Fault {
@@ -184,6 +190,49 @@ impl Device {
                 (argument.name.clone(), value.cloned().unwrap_or_default())
             })
             .collect())
+    }
+
+    /// Answers the lookup of one host by MAC address,
+    /// `GetSpecificHostEntry`, or by IP address,
+    /// `X_AVM-DE_GetSpecificHostEntryByIP`, from the recorded entries of
+    /// `GetGenericHostEntry`: the entry whose address matches, ignoring
+    /// case, with the values written since, or the error 714. `None` for
+    /// other actions, and without recorded entries.
+    fn host_entry(
+        &self,
+        id: &str,
+        action: &Action,
+        arguments: &[(String, String)],
+    ) -> Option<Result<Vec<(String, String)>, Fault>> {
+        let key = match action.name.as_str() {
+            "GetSpecificHostEntry" => "NewMACAddress",
+            "X_AVM-DE_GetSpecificHostEntryByIP" => "NewIPAddress",
+            _ => return None,
+        };
+        let entries = self
+            .fixture
+            .recordings
+            .get(&(id.to_owned(), "GetGenericHostEntry".to_owned()))?;
+        let (_, wanted) = arguments.iter().find(|(name, _)| name == key)?;
+        let found = entries.indexed.values().find_map(|answer| {
+            let Answer::Ok(out) = answer else { return None };
+            let matches = out.get(key).is_some_and(|v| v.eq_ignore_ascii_case(wanted));
+            matches.then_some(out)
+        });
+        let Some(out) = found else {
+            return Some(Err(Fault::new(NO_SUCH_ENTRY)));
+        };
+        let outputs = outputs(action).map(|argument| {
+            let key = (id.to_owned(), argument.related_state_variable.clone());
+            let value = self
+                .written
+                .get(&key)
+                .or_else(|| out.get(&argument.name))
+                .cloned()
+                .unwrap_or_default();
+            (argument.name.clone(), value)
+        });
+        Some(Ok(outputs.collect()))
     }
 }
 

@@ -192,6 +192,25 @@ nas     192.168.178.10  02:00:5E:10:00:03  yes     Ethernet
 tv      192.168.178.30  02:00:5E:10:00:04  yes     Ethernet
 ```
 
+`--search` keeps the hosts whose name, IP or MAC address contains a text. A
+name, `--mac` or `--ip` shows one host with all the box knows about it. A name
+matches exactly first, ignoring case, then as part of a name; several matches
+show the table. If nothing matches, `fritz` exits with code 1:
+
+```console
+$ fritz hosts --mac 02:00:5e:10:00:01
+Name             laptop
+IP               192.168.178.20
+MAC              02:00:5E:10:00:01
+Active           yes
+Address source   DHCP
+Interface        802.11
+Speed            866 Mbit/s
+Guest            no
+Internet         granted
+Attached to      fritzbox, WLAN 5 GHz ↓ 866.7 Mbit/s  ↑ 433.3 Mbit/s
+```
+
 ```console
 $ fritz mesh
 NODE      ROLE    MODEL                   MAC
@@ -518,7 +537,7 @@ claude mcp add fritz -- fritz --host 192.168.178.1 --user agent mcp
 | `fritz_overview`        | Model, firmware, uptime, update, connection, rights         |
 | `fritz_internet`        | Internet connection, addresses, DNS, rates, DSL line        |
 | `fritz_wlan`            | Wireless networks                                           |
-| `fritz_hosts`           | Known hosts, filtered by `active` and `search`, paginated   |
+| `fritz_hosts`           | Known hosts, paginated, or one host by `mac` or `ip`        |
 | `fritz_mesh`            | Mesh nodes and links, or a tree of who is connected where   |
 | `fritz_smarthome`       | Smart Home devices (FRITZ!OS 8.20 and later)                |
 | `fritz_ports`           | Port forwardings and whether UPnP is on                     |

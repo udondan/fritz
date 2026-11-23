@@ -32,6 +32,8 @@ or paste them.
 | Is the internet up, which IP, which speed?  | `fritz internet`                     |
 | Which wireless networks, how many clients?  | `fritz wlan`                         |
 | Which devices are (or were) on the network? | `fritz hosts`, `fritz hosts --active`|
+| Everything about one device                 | `fritz hosts <name>`, `--mac <MAC>`, `--ip <IP>` (exit 1: not found) |
+| Which devices match a name or address part? | `fritz hosts --search <text>`        |
 | How are the mesh repeaters connected?       | `fritz mesh`                         |
 | Which repeater is a device connected to?    | `fritz mesh --tree`                  |
 | Smart Home devices and their values         | `fritz smarthome`                    |

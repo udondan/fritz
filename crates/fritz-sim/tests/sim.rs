@@ -217,6 +217,41 @@ async fn answers_indexed_getters_as_recorded() {
 }
 
 #[tokio::test]
+async fn looks_up_hosts_in_the_recorded_entries() {
+    let (_sim, client, description) = start().await;
+    let hosts = description.service("Hosts1").unwrap();
+    let entry = client
+        .call(
+            hosts,
+            "GetSpecificHostEntry",
+            &[("NewMACAddress", "aa:bb:cc:00:00:03")],
+        )
+        .await
+        .unwrap();
+    assert_eq!(entry.get("NewHostName"), Some("device-2"));
+    assert_eq!(entry.get("NewIPAddress"), Some("192.0.2.2"));
+    let entry = client
+        .call(
+            hosts,
+            "X_AVM-DE_GetSpecificHostEntryByIP",
+            &[("NewIPAddress", "192.0.2.2")],
+        )
+        .await
+        .unwrap();
+    assert_eq!(entry.get("NewMACAddress"), Some("AA:BB:CC:00:00:03"));
+    assert_eq!(entry.get("NewX_AVM-DE_Guest"), Some(""));
+    let error = client
+        .call(
+            hosts,
+            "GetSpecificHostEntry",
+            &[("NewMACAddress", "AA:BB:CC:00:00:FF")],
+        )
+        .await
+        .unwrap_err();
+    assert_eq!(upnp_code(error), 714);
+}
+
+#[tokio::test]
 async fn replays_recorded_faults() {
     let (_sim, client, description) = start().await;
     let wlan = description.service("WLANConfiguration1").unwrap();

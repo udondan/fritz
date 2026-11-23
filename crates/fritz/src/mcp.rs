@@ -27,6 +27,7 @@ use fritz_core::capture::short_id;
 #[cfg(feature = "write")]
 use fritz_core::change::{self, Changer, Permit, Settings};
 use fritz_core::generic;
+use fritz_core::host::{self, Lookup};
 use fritz_core::personal::{self, Contact};
 use fritz_core::policy::{self, Class};
 use fritz_core::ports;
@@ -113,6 +114,12 @@ pub(crate) struct HostsQuery {
     active: bool,
     /// Part of the name, IP or MAC, ignoring case.
     search: Option<String>,
+    /// The host with this MAC address, like `AA:BB:CC:DD:EE:FF`, with all
+    /// details instead of a page. Combines only with `active`.
+    mac: Option<String>,
+    /// The host with this IPv4 address, with all details instead of a page.
+    /// Combines only with `active`.
+    ip: Option<String>,
     /// Hosts to skip.
     #[serde(default)]
     offset: usize,
@@ -355,14 +362,22 @@ impl Server {
     }
 
     #[tool(
-        description = "Hosts the device knows, with IP, MAC, interface and internet access. Paginated.",
+        description = "Hosts the device knows, with IP, MAC, interface and internet access. Paginated. With mac or ip, the one host with all details: address source, lease, guest network and the mesh node it is connected to.",
         annotations(read_only_hint = true, open_world_hint = false)
     )]
     async fn fritz_hosts(&self, Parameters(query): Parameters<HostsQuery>) -> CallToolResult {
         self.respond(async {
+            let lookup = lookup(&query)?;
             let mut reader = self.reader().await?;
+            if let Some(lookup) = lookup {
+                let detail = host::lookup(&mut reader, &lookup)
+                    .await?
+                    .filter(|d| !query.active || d.host.active)
+                    .with_context(|| format!("no host has {lookup}"))?;
+                return Ok(serde_json::to_value(detail)?);
+            }
             let hosts = status::hosts(&mut reader).await?;
-            Ok(page(hosts, &query))
+            Ok(serde_json::to_value(page(hosts, &query))?)
         })
         .await
     }
@@ -726,18 +741,22 @@ fn failure(error: &anyhow::Error) -> CallToolResult {
     CallToolResult::error(vec![ContentBlock::text(body.to_string())])
 }
 
+/// The address of `fritz_hosts` to look up one host by, checked before
+/// anything is sent.
+fn lookup(query: &HostsQuery) -> anyhow::Result<Option<Lookup>> {
+    match (&query.mac, &query.ip) {
+        (Some(_), Some(_)) => bail!("give mac or ip, not both"),
+        (Some(mac), None) => Ok(Some(Lookup::mac(mac)?)),
+        (None, Some(ip)) => Ok(Some(Lookup::ip(ip)?)),
+        (None, None) => Ok(None),
+    }
+}
+
 /// The page of the hosts that match the query.
 fn page(hosts: status::Hosts, query: &HostsQuery) -> HostsPage {
     let read = hosts.hosts.len();
     let reported = (read < hosts.reported as usize).then_some(hosts.reported);
-    let search = query.search.as_deref().map(str::to_lowercase);
-    let matches = |host: &Host| {
-        let Some(search) = &search else { return true };
-        [&host.name, &host.ip, &host.mac]
-            .into_iter()
-            .flatten()
-            .any(|v| v.to_lowercase().contains(search))
-    };
+    let matches = |h: &Host| query.search.as_deref().is_none_or(|s| host::contains(h, s));
     let selected: Vec<Host> = hosts
         .hosts
         .into_iter()
