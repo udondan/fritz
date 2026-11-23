@@ -5,12 +5,20 @@
 ```sh
 make lint   # cargo fmt --check and clippy with warnings as errors
 make test   # all workspace tests
-make hooks  # install a pre-commit hook that runs the qlty checks of CI
+make coverage  # check that the tests cover every changed line
+make hooks  # install the hooks that run the checks of CI
 ```
 
-The hook needs [qlty](https://docs.qlty.sh/cli/quickstart) and `jq`. Like CI,
-it blocks a commit on lint findings and on code smells that are new compared to
-`origin/main`.
+The pre-commit hook needs [qlty](https://docs.qlty.sh/cli/quickstart) and
+`jq`. Like CI, it blocks a commit on lint findings and on code smells that are
+new compared to `origin/main`.
+
+The pre-push hook runs `make coverage`, which needs
+[cargo-llvm-cov](https://github.com/taiki-e/cargo-llvm-cov) and Python 3. Like
+the patch status of Codecov, it blocks a push if a line under `crates/` that
+changed against `origin/main` is executable but no test runs it. It measures
+the working tree and only runs when Rust files changed; `git push --no-verify`
+skips it.
 
 All tests run against recorded fixtures and the simulator in `fritz-sim`. CI
 never talks to a real device.

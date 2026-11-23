@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+# Checks before a push that the tests cover every changed line, like the patch
+# status of Codecov on the pull request. Install with `make hooks`, skip once
+# with `git push --no-verify`.
+set -euo pipefail
+
+base=origin/main
+merge_base=$(git merge-base "$base" HEAD)
+if git diff --quiet "$merge_base" -- 'crates/*.rs'; then
+    exit 0
+fi
+
+if ! cargo llvm-cov --version >/dev/null 2>&1; then
+    echo "cargo-llvm-cov is not installed, see https://github.com/taiki-e/cargo-llvm-cov" >&2
+    exit 1
+fi
+
+# Coverage needs the component llvm-tools, which rustup provides and some
+# packaged toolchains lack.
+cargo=(cargo)
+if command -v rustup >/dev/null; then
+    cargo=(rustup run stable cargo)
+fi
+
+echo "measuring the coverage of the changes against $base" >&2
+# Test binaries of earlier builds would add their stale line counts to the
+# report, so measure from a clean build directory.
+rm -rf target/llvm-cov-target
+"${cargo[@]}" llvm-cov --workspace --all-features --lcov --output-path target/lcov.info --quiet
+python3 scripts/patch-coverage.py target/lcov.info "$base"
