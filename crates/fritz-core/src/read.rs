@@ -246,6 +246,17 @@ pub(crate) fn is_missing(error: &Error) -> bool {
     }
 }
 
+/// Values from pairs of names and values, for tests.
+#[cfg(test)]
+pub(crate) fn values(pairs: &[(&str, &str)]) -> Values {
+    Values(
+        pairs
+            .iter()
+            .map(|(n, v)| ((*n).to_owned(), (*v).to_owned()))
+            .collect(),
+    )
+}
+
 /// The output arguments of a call.
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub struct Values(pub Vec<(String, String)>);

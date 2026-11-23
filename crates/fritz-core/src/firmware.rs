@@ -127,15 +127,7 @@ fn state(interface: &Values) -> State {
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    fn values(pairs: &[(&str, &str)]) -> Values {
-        Values(
-            pairs
-                .iter()
-                .map(|(n, v)| ((*n).to_owned(), (*v).to_owned()))
-                .collect(),
-        )
-    }
+    use crate::read::values;
 
     #[test]
     fn tells_the_state() {
