@@ -1,0 +1,17 @@
+{
+  "out": {
+    "NewDescription": "FRITZ!Repeater 2400 Release 169.08.25",
+    "NewDeviceLog": "",
+    "NewHardwareVersion": "FRITZ!Repeater 2400",
+    "NewManufacturerName": "AVM",
+    "NewManufacturerOUI": "00040E",
+    "NewModelName": "FRITZ!Repeater 2400",
+    "NewProductClass": "FRITZ!Repeater",
+    "NewProvisioningCode": "",
+    "NewSerialNumber": "AABBCC00000A",
+    "NewSoftwareVersion": "169.08.25",
+    "NewSpecVersion": "1.0",
+    "NewUpTime": "1540118"
+  },
+  "status": "ok"
+}

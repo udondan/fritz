@@ -27,10 +27,11 @@ The fixtures come with the crate:
 
 | Fixture                         | Device                    | FRITZ!OS |
 | ------------------------------- | ------------------------- | -------- |
+| `fritz-repeater-2400/8.25`      | FRITZ!Repeater 2400       | 8.25     |
 | `fritzbox-7690/8.25`            | FRITZ!Box 7690            | 8.25     |
 | `fritzwlan-repeater-1750e/7.32` | FRITZ!WLAN Repeater 1750E | 7.32     |
 
-The repeater has only a password and takes any user name; start the
+The repeaters have only a password and take any user name; start the
 simulator with `--username dslf-config` to log in without `--user`.
 
 `fritz-sim --list` prints them. Every fixture is a directory with the files

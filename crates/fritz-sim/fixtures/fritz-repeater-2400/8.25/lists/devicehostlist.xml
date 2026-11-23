@@ -1,0 +1,4145 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+<List>
+<!-- devicehosts :138 -->
+<!-- users :0 -->
+<Item>
+<Index>1</Index>
+<IPAddress>192.0.2.1</IPAddress>
+<MACAddress>AA:BB:CC:00:00:01</MACAddress>
+<Active>0</Active>
+<HostName>device-1</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:01</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>2</Index>
+<IPAddress>192.0.2.2</IPAddress>
+<MACAddress>AA:BB:CC:00:00:02</MACAddress>
+<Active>1</Active>
+<HostName>device-2</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>262</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:02,AA:BB:CC:00:00:03,AA:BB:CC:00:00:04,AA:BB:CC:00:00:05,AA:BB:CC:00:00:06,AA:BB:CC:00:00:07,AA:BB:CC:00:00:08,AA:BB:CC:00:00:09</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model>FRITZ!Box</X_AVM-DE_Model>
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>1</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>3</Index>
+<IPAddress>192.0.2.3</IPAddress>
+<MACAddress>AA:BB:CC:00:00:0A</MACAddress>
+<Active>1</Active>
+<HostName>device-3</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:0A,AA:BB:CC:00:00:0B,AA:BB:CC:00:00:0C,AA:BB:CC:00:00:0D,AA:BB:CC:00:00:0E,AA:BB:CC:00:00:0F</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>1</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>4</Index>
+<IPAddress>192.0.2.4</IPAddress>
+<MACAddress>AA:BB:CC:00:00:10</MACAddress>
+<Active>0</Active>
+<HostName>device-4</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:10</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>1</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>5</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:11</MACAddress>
+<Active>0</Active>
+<HostName>device-5</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:11</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>6</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:12</MACAddress>
+<Active>0</Active>
+<HostName>device-6</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:12</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>7</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:13</MACAddress>
+<Active>0</Active>
+<HostName>device-7</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:13</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>8</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:14</MACAddress>
+<Active>0</Active>
+<HostName>device-8</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:14</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>9</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:15</MACAddress>
+<Active>0</Active>
+<HostName>device-9</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:15</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>10</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:16</MACAddress>
+<Active>0</Active>
+<HostName>device-10</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:16</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>11</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:17</MACAddress>
+<Active>0</Active>
+<HostName>device-11</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:17</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>12</Index>
+<IPAddress>192.0.2.5</IPAddress>
+<MACAddress>AA:BB:CC:00:00:18</MACAddress>
+<Active>0</Active>
+<HostName>device-12</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:18</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>13</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:19</MACAddress>
+<Active>0</Active>
+<HostName>device-13</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:19</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>14</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:1A</MACAddress>
+<Active>0</Active>
+<HostName>device-14</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:1A</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>15</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:1B</MACAddress>
+<Active>0</Active>
+<HostName>device-15</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:1B</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>16</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:1C</MACAddress>
+<Active>0</Active>
+<HostName>device-16</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:1C</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>17</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:1D</MACAddress>
+<Active>0</Active>
+<HostName>device-17</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:1D</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>18</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:1E</MACAddress>
+<Active>0</Active>
+<HostName>device-18</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:1E</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>19</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:1F</MACAddress>
+<Active>0</Active>
+<HostName>device-19</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:1F</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>20</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:20</MACAddress>
+<Active>0</Active>
+<HostName>device-20</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:20</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>21</Index>
+<IPAddress>192.0.2.6</IPAddress>
+<MACAddress>AA:BB:CC:00:00:21</MACAddress>
+<Active>0</Active>
+<HostName>device-21</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:21</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>22</Index>
+<IPAddress>192.0.2.7</IPAddress>
+<MACAddress>AA:BB:CC:00:00:22</MACAddress>
+<Active>0</Active>
+<HostName>device-22</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:22</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>23</Index>
+<IPAddress>192.0.2.8</IPAddress>
+<MACAddress>AA:BB:CC:00:00:23</MACAddress>
+<Active>0</Active>
+<HostName>device-23</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:23</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>24</Index>
+<IPAddress>192.0.2.9</IPAddress>
+<MACAddress>AA:BB:CC:00:00:24</MACAddress>
+<Active>0</Active>
+<HostName>device-24</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:24</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>25</Index>
+<IPAddress>192.0.2.10</IPAddress>
+<MACAddress>AA:BB:CC:00:00:25</MACAddress>
+<Active>0</Active>
+<HostName>device-25</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:25</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>26</Index>
+<IPAddress>192.0.2.11</IPAddress>
+<MACAddress>AA:BB:CC:00:00:26</MACAddress>
+<Active>0</Active>
+<HostName>device-26</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:26</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>27</Index>
+<IPAddress>192.0.2.12</IPAddress>
+<MACAddress>AA:BB:CC:00:00:27</MACAddress>
+<Active>0</Active>
+<HostName>device-27</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:27</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>28</Index>
+<IPAddress>192.0.2.13</IPAddress>
+<MACAddress>AA:BB:CC:00:00:28</MACAddress>
+<Active>0</Active>
+<HostName>device-28</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:28</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>29</Index>
+<IPAddress>192.0.2.5</IPAddress>
+<MACAddress>AA:BB:CC:00:00:29</MACAddress>
+<Active>0</Active>
+<HostName>device-29</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:29</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>30</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:2A</MACAddress>
+<Active>0</Active>
+<HostName>device-30</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:2A</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>31</Index>
+<IPAddress>192.0.2.14</IPAddress>
+<MACAddress>AA:BB:CC:00:00:2B</MACAddress>
+<Active>0</Active>
+<HostName>device-31</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:2B</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>32</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:2C</MACAddress>
+<Active>0</Active>
+<HostName>device-32</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:2C</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>33</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:2D</MACAddress>
+<Active>0</Active>
+<HostName>device-33</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:2D</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>34</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:2E</MACAddress>
+<Active>0</Active>
+<HostName>device-34</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:2E</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>35</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:2F</MACAddress>
+<Active>0</Active>
+<HostName>device-35</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:2F</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>36</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:30</MACAddress>
+<Active>0</Active>
+<HostName>device-36</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:30</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>37</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:31</MACAddress>
+<Active>0</Active>
+<HostName>device-37</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:31</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>38</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:32</MACAddress>
+<Active>0</Active>
+<HostName>device-38</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:32</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>39</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:33</MACAddress>
+<Active>0</Active>
+<HostName>device-39</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:33</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>40</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:34</MACAddress>
+<Active>0</Active>
+<HostName>device-40</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:34</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>41</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:35</MACAddress>
+<Active>0</Active>
+<HostName>device-41</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:35</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>42</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:36</MACAddress>
+<Active>0</Active>
+<HostName>device-42</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:36</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>43</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:37</MACAddress>
+<Active>0</Active>
+<HostName>device-43</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:37</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>44</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:38</MACAddress>
+<Active>0</Active>
+<HostName>device-44</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:38</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>45</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:39</MACAddress>
+<Active>0</Active>
+<HostName>device-45</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:39</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>46</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:3A</MACAddress>
+<Active>0</Active>
+<HostName>device-46</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:3A</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>47</Index>
+<IPAddress>192.0.2.15</IPAddress>
+<MACAddress>AA:BB:CC:00:00:3B</MACAddress>
+<Active>0</Active>
+<HostName>device-47</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:3B</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>48</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:3C</MACAddress>
+<Active>0</Active>
+<HostName>device-48</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:3C</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>49</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:3D</MACAddress>
+<Active>0</Active>
+<HostName>device-49</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:3D</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>50</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:3E</MACAddress>
+<Active>0</Active>
+<HostName>device-50</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:3E</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>51</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:3F</MACAddress>
+<Active>0</Active>
+<HostName>device-51</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:3F</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>52</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:40</MACAddress>
+<Active>0</Active>
+<HostName>device-52</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:40</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>53</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:41</MACAddress>
+<Active>0</Active>
+<HostName>device-53</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:41</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>54</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:42</MACAddress>
+<Active>0</Active>
+<HostName>device-54</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:42</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>55</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:43</MACAddress>
+<Active>0</Active>
+<HostName>device-55</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:43</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>56</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:44</MACAddress>
+<Active>0</Active>
+<HostName>device-56</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:44</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>57</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:45</MACAddress>
+<Active>0</Active>
+<HostName>device-57</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:45</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>58</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:46</MACAddress>
+<Active>0</Active>
+<HostName>device-58</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:46</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>59</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:47</MACAddress>
+<Active>0</Active>
+<HostName>device-59</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:47</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>60</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:48</MACAddress>
+<Active>0</Active>
+<HostName>device-60</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:48</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>61</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:49</MACAddress>
+<Active>0</Active>
+<HostName>device-61</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:49</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>62</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:4A</MACAddress>
+<Active>0</Active>
+<HostName>device-62</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:4A</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>63</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:4B</MACAddress>
+<Active>0</Active>
+<HostName>device-63</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:4B</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>64</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:4C</MACAddress>
+<Active>0</Active>
+<HostName>device-64</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:4C</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>65</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:4D</MACAddress>
+<Active>0</Active>
+<HostName>device-65</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:4D</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>66</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:4E</MACAddress>
+<Active>0</Active>
+<HostName>device-66</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:4E</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>67</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:4F</MACAddress>
+<Active>0</Active>
+<HostName>device-67</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:4F</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>68</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:50</MACAddress>
+<Active>0</Active>
+<HostName>device-68</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:50</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>69</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:51</MACAddress>
+<Active>0</Active>
+<HostName>device-69</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:51</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>70</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:52</MACAddress>
+<Active>0</Active>
+<HostName>device-70</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:52</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>71</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:53</MACAddress>
+<Active>0</Active>
+<HostName>device-71</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:53</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>72</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:54</MACAddress>
+<Active>0</Active>
+<HostName>device-72</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:54</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>73</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:55</MACAddress>
+<Active>0</Active>
+<HostName>device-73</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:55</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>74</Index>
+<IPAddress>192.0.2.16</IPAddress>
+<MACAddress>AA:BB:CC:00:00:56</MACAddress>
+<Active>0</Active>
+<HostName>device-74</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:56</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>75</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:57</MACAddress>
+<Active>0</Active>
+<HostName>device-75</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:57</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>76</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:58</MACAddress>
+<Active>0</Active>
+<HostName>device-76</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:58</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>77</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:59</MACAddress>
+<Active>0</Active>
+<HostName>device-77</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:59</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>78</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:5A</MACAddress>
+<Active>0</Active>
+<HostName>device-78</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:5A</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>79</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:5B</MACAddress>
+<Active>0</Active>
+<HostName>device-79</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:5B</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>80</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:5C</MACAddress>
+<Active>0</Active>
+<HostName>device-80</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:5C</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>81</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:5D</MACAddress>
+<Active>0</Active>
+<HostName>device-81</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:5D</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>82</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:5E</MACAddress>
+<Active>0</Active>
+<HostName>device-82</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:5E</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>83</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:5F</MACAddress>
+<Active>0</Active>
+<HostName>device-83</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:5F</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>84</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:60</MACAddress>
+<Active>0</Active>
+<HostName>device-84</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:60</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>85</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:61</MACAddress>
+<Active>0</Active>
+<HostName>device-85</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:61</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>86</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:62</MACAddress>
+<Active>0</Active>
+<HostName>device-86</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:62</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>87</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:63</MACAddress>
+<Active>0</Active>
+<HostName>device-87</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:63</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>88</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:64</MACAddress>
+<Active>0</Active>
+<HostName>device-88</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:64</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>89</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:65</MACAddress>
+<Active>0</Active>
+<HostName>device-89</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:65</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>90</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:66</MACAddress>
+<Active>0</Active>
+<HostName>device-90</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:66</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>91</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:67</MACAddress>
+<Active>0</Active>
+<HostName>device-91</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:67</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>92</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:68</MACAddress>
+<Active>0</Active>
+<HostName>device-92</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:68</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>93</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:69</MACAddress>
+<Active>0</Active>
+<HostName>device-93</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:69</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>94</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:6A</MACAddress>
+<Active>0</Active>
+<HostName>device-94</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:6A</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>95</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:6B</MACAddress>
+<Active>0</Active>
+<HostName>device-95</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:6B</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>96</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:6C</MACAddress>
+<Active>0</Active>
+<HostName>device-96</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:6C</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>97</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:6D</MACAddress>
+<Active>0</Active>
+<HostName>device-97</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:6D</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>98</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:6E</MACAddress>
+<Active>0</Active>
+<HostName>device-98</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:6E</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>99</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:6F</MACAddress>
+<Active>0</Active>
+<HostName>device-99</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:6F</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>100</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:70</MACAddress>
+<Active>0</Active>
+<HostName>device-100</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:70</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>101</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:71</MACAddress>
+<Active>0</Active>
+<HostName>device-101</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:71</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>102</Index>
+<IPAddress>192.0.2.17</IPAddress>
+<MACAddress>AA:BB:CC:00:00:72</MACAddress>
+<Active>1</Active>
+<HostName>device-102</HostName>
+<InterfaceType>802.11</InterfaceType>
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>68</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:72</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>103</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:73</MACAddress>
+<Active>0</Active>
+<HostName>device-103</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:73</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>104</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:74</MACAddress>
+<Active>0</Active>
+<HostName>device-104</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:74</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>105</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:75</MACAddress>
+<Active>0</Active>
+<HostName>device-105</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:75</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>106</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:76</MACAddress>
+<Active>0</Active>
+<HostName>device-106</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:76</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>107</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:77</MACAddress>
+<Active>0</Active>
+<HostName>device-107</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:77</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>108</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:78</MACAddress>
+<Active>0</Active>
+<HostName>device-108</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:78</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>109</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:79</MACAddress>
+<Active>0</Active>
+<HostName>device-109</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:79</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>110</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:7A</MACAddress>
+<Active>0</Active>
+<HostName>device-110</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:7A</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>111</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:7B</MACAddress>
+<Active>0</Active>
+<HostName>device-111</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:7B</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>112</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:7C</MACAddress>
+<Active>0</Active>
+<HostName>device-112</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:7C</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>113</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:7D</MACAddress>
+<Active>0</Active>
+<HostName>device-113</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:7D</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>114</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:7E</MACAddress>
+<Active>0</Active>
+<HostName>device-114</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:7E</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>115</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:7F</MACAddress>
+<Active>0</Active>
+<HostName>device-115</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:7F</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>116</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:80</MACAddress>
+<Active>0</Active>
+<HostName>device-116</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:80</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>117</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:81</MACAddress>
+<Active>0</Active>
+<HostName>device-117</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:81</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>118</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:82</MACAddress>
+<Active>0</Active>
+<HostName>device-118</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:82</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>119</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:83</MACAddress>
+<Active>0</Active>
+<HostName>device-119</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:83</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>120</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:84</MACAddress>
+<Active>0</Active>
+<HostName>device-120</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:84</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>121</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:85</MACAddress>
+<Active>0</Active>
+<HostName>device-121</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:85</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>122</Index>
+<IPAddress>192.0.2.18</IPAddress>
+<MACAddress>AA:BB:CC:00:00:86</MACAddress>
+<Active>0</Active>
+<HostName>device-122</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:86</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>123</Index>
+<IPAddress>192.0.2.19</IPAddress>
+<MACAddress>AA:BB:CC:00:00:87</MACAddress>
+<Active>0</Active>
+<HostName>device-123</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:87</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>124</Index>
+<IPAddress>192.0.2.20</IPAddress>
+<MACAddress>AA:BB:CC:00:00:88</MACAddress>
+<Active>1</Active>
+<HostName>device-123</HostName>
+<InterfaceType>802.11</InterfaceType>
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>24</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:88</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>125</Index>
+<IPAddress>192.0.2.21</IPAddress>
+<MACAddress>AA:BB:CC:00:00:89</MACAddress>
+<Active>0</Active>
+<HostName>device-123</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:89</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>126</Index>
+<IPAddress>192.0.2.22</IPAddress>
+<MACAddress>AA:BB:CC:00:00:8A</MACAddress>
+<Active>0</Active>
+<HostName>device-123</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:8A</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>127</Index>
+<IPAddress>192.0.2.23</IPAddress>
+<MACAddress>AA:BB:CC:00:00:8B</MACAddress>
+<Active>0</Active>
+<HostName>device-123</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:8B</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>128</Index>
+<IPAddress>192.0.2.24</IPAddress>
+<MACAddress>AA:BB:CC:00:00:8C</MACAddress>
+<Active>0</Active>
+<HostName>device-124</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:8C</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>129</Index>
+<IPAddress>192.0.2.25</IPAddress>
+<MACAddress>AA:BB:CC:00:00:8D</MACAddress>
+<Active>0</Active>
+<HostName>device-125</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:8D</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>130</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:8E</MACAddress>
+<Active>0</Active>
+<HostName>device-126</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:8E</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>131</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:8F</MACAddress>
+<Active>0</Active>
+<HostName>device-127</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:8F</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>132</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:90</MACAddress>
+<Active>0</Active>
+<HostName>device-127</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:90</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>133</Index>
+<IPAddress>192.0.2.26</IPAddress>
+<MACAddress>AA:BB:CC:00:00:91</MACAddress>
+<Active>0</Active>
+<HostName>device-127</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:91</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>134</Index>
+<IPAddress>192.0.2.27</IPAddress>
+<MACAddress>AA:BB:CC:00:00:92</MACAddress>
+<Active>1</Active>
+<HostName>device-127</HostName>
+<InterfaceType>802.11</InterfaceType>
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>6</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:92</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>135</Index>
+<IPAddress>192.0.2.28</IPAddress>
+<MACAddress>AA:BB:CC:00:00:93</MACAddress>
+<Active>0</Active>
+<HostName>device-127</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:93</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>136</Index>
+<IPAddress>192.0.2.29</IPAddress>
+<MACAddress>AA:BB:CC:00:00:94</MACAddress>
+<Active>0</Active>
+<HostName>device-127</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:94</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>137</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:95</MACAddress>
+<Active>0</Active>
+<HostName>device-128</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:95</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+<Item>
+<Index>138</Index>
+<IPAddress>192.0.2.30</IPAddress>
+<MACAddress>AA:BB:CC:00:00:96</MACAddress>
+<Active>0</Active>
+<HostName>device-129</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_MACAddressList>AA:BB:CC:00:00:96</X_AVM-DE_MACAddressList>
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_RequestClient>0</X_AVM-DE_RequestClient>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess>unknown</X_AVM-DE_WANAccess>
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+<X_AVM-DE_IsMeshable>0</X_AVM-DE_IsMeshable>
+<X_AVM-DE_Priority>0</X_AVM-DE_Priority>
+<X_AVM-DE_DeviceClass />
+<X_AVM-DE_DeviceClassUser />
+<X_AVM-DE_FriendlyName />
+<X_AVM-DE_FriendlyNameIsWriteable>0</X_AVM-DE_FriendlyNameIsWriteable>
+<X_AVM-DE_FilterProfileID>filtprof1</X_AVM-DE_FilterProfileID>
+<X_AVM-DE_HostFilterEditHide>0</X_AVM-DE_HostFilterEditHide>
+<X_AVM-DE_AddTicketAvailable />
+</Item>
+</List>

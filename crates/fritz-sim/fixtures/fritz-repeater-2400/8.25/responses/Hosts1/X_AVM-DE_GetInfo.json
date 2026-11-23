@@ -1,0 +1,11 @@
+{
+  "out": {
+    "NewX_AVM-DE_DeviceClassUserPossibleValues": "",
+    "NewX_AVM-DE_FriendlynameMaxChars": "64",
+    "NewX_AVM-DE_FriendlynameMinChars": "1",
+    "NewX_AVM-DE_HostnameAllowedChars": "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-",
+    "NewX_AVM-DE_HostnameMaxChars": "63",
+    "NewX_AVM-DE_HostnameMinChars": "0"
+  },
+  "status": "ok"
+}
