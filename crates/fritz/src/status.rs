@@ -247,13 +247,13 @@ fn kbits_to_mbits(kbits: u64) -> f64 {
     kbits as f64 / 1000.0
 }
 
-fn decibels(down: Option<f64>, up: Option<f64>) -> Option<String> {
+pub(crate) fn decibels(down: Option<f64>, up: Option<f64>) -> Option<String> {
     let decibel = |value: f64| format!("{value:.1} dB");
     both(down.map(decibel), up.map(decibel))
 }
 
 /// A downstream and an upstream value, like `↓ 7.0 dB ↑ 8.0 dB`.
-fn both(down: Option<String>, up: Option<String>) -> Option<String> {
+pub(crate) fn both(down: Option<String>, up: Option<String>) -> Option<String> {
     match (down, up) {
         (Some(down), Some(up)) => Some(format!("↓ {down}  ↑ {up}")),
         (Some(down), None) => Some(format!("↓ {down}")),

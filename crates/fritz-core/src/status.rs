@@ -249,7 +249,7 @@ fn dsl_line(values: &Values) -> Dsl {
 
 /// A value in tenths as a decimal, like 70 as 7.0.
 #[expect(clippy::cast_precision_loss, reason = "tenths of a dB are small")]
-fn tenths(value: i64) -> f64 {
+pub(crate) fn tenths(value: i64) -> f64 {
     value as f64 / 10.0
 }
 

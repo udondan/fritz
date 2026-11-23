@@ -12,6 +12,7 @@ pub mod change;
 pub mod config;
 pub mod connection;
 pub mod dirs;
+pub mod dsl;
 pub mod fault;
 pub mod firmware;
 pub mod generic;

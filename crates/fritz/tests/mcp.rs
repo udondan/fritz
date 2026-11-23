@@ -148,17 +148,31 @@ async fn reads_the_overview() {
 }
 
 #[tokio::test(flavor = "multi_thread")]
-async fn reads_the_state() {
+async fn reads_the_internet_and_the_firmware() {
     let sim = sim().await;
     let client = connect(&sim).await;
 
     let internet = success(&client, "fritz_internet", json!({})).await;
     assert_eq!(internet["status"], "Connected", "{internet}");
+    assert!(internet.get("dsl_details").is_none(), "{internet}");
+    let internet = success(&client, "fritz_internet", json!({"dsl_details": true})).await;
+    assert_eq!(internet["status"], "Connected", "{internet}");
+    let dsl = &internet["dsl_details"];
+    assert_eq!(dsl["errors_total"]["crc"], 203, "{internet}");
+    assert_eq!(dsl["line"]["upstream_noise_margin"], 8.0, "{internet}");
+    assert_eq!(dsl["diagnosis"]["state"], "NONE", "{internet}");
 
     let firmware = success(&client, "fritz_firmware", json!({})).await;
     assert_eq!(firmware["state"], "none", "{firmware}");
     assert_eq!(firmware["installed"], "285.08.25", "{firmware}");
     assert!(firmware["offered"].is_null(), "{firmware}");
+    client.cancel().await.unwrap();
+}
+
+#[tokio::test(flavor = "multi_thread")]
+async fn reads_the_state() {
+    let sim = sim().await;
+    let client = connect(&sim).await;
 
     let wlan = success(&client, "fritz_wlan", json!({})).await;
     assert!(!wlan.as_array().unwrap().is_empty(), "{wlan}");

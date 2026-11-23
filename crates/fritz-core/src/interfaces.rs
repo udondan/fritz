@@ -305,6 +305,7 @@ mod tests {
     use serde_json::json;
 
     use super::*;
+    use crate::read::values;
 
     #[test]
     fn counts_growth_across_wrap_arounds() {
@@ -314,15 +315,6 @@ mod tests {
         assert_eq!(grown(u64::from(u32::MAX) - 1, 3), Some(5));
         // A 64-bit counter fell: the device restarted.
         assert_eq!(grown(1 << 40, 3), None);
-    }
-
-    fn values(pairs: &[(&str, &str)]) -> Values {
-        Values(
-            pairs
-                .iter()
-                .map(|(n, v)| ((*n).to_owned(), (*v).to_owned()))
-                .collect(),
-        )
     }
 
     #[test]

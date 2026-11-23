@@ -1259,9 +1259,10 @@ async fn prints_the_same_values_as_yaml() {
     );
     let sim = fritz_sim::Sim::start(fixture).await.unwrap();
     let password = Some(fritz_sim::PASSWORD);
-    let commands: [&[&str]; 16] = [
+    let commands: [&[&str]; 17] = [
         &["overview"],
         &["internet"],
+        &["internet", "--dsl"],
         &["wlan"],
         &["ports"],
         &["telephony"],
@@ -1638,6 +1639,107 @@ async fn prints_the_interfaces() {
 
     let error = failure(&run(&sim, &["interfaces", "--watch"], Some("wrong")).await);
     assert!(error.contains("cannot read the interfaces"), "{error}");
+}
+
+#[tokio::test(flavor = "multi_thread")]
+async fn prints_the_dsl_line() {
+    let fixture = fritz_sim::Fixture::load(FIXTURE).unwrap();
+    let sim = fritz_sim::Sim::start(fixture).await.unwrap();
+    let password = Some(fritz_sim::PASSWORD);
+
+    let json = success(&run(&sim, &["--output", "json", "internet", "--dsl"], password).await);
+    let json: serde_json::Value = serde_json::from_str(&json).unwrap();
+    assert_eq!(json["access_type"], "DSL", "{json}");
+    assert_eq!(json["line"]["profile"], "35b", "{json}");
+    assert_eq!(json["line"]["downstream_noise_margin"], 7.0, "{json}");
+    assert_eq!(json["errors_total"]["crc"], 203, "{json}");
+    assert_eq!(json["errors_since_sync"], serde_json::Value::Null, "{json}");
+    assert_eq!(json["diagnosis"]["state"], "NONE", "{json}");
+    assert_eq!(json["link"]["link_type"], "PPPoE", "{json}");
+    assert!(json.get("note").is_none(), "{json}");
+
+    let text = success(&run(&sim, &["--output", "text", "internet", "--dsl"], password).await);
+    assert!(text.starts_with("Status        Up\n"), "{text}");
+    assert!(text.contains("Standard      VDSL, profile 35b\n"), "{text}");
+    assert!(text.contains("Diagnosis     none\n"), "{text}");
+    assert!(
+        text.contains("\nERRORS                    TOTAL\n"),
+        "{text}"
+    );
+    assert!(text.contains("\nCRC                       203\n"), "{text}");
+
+    let dsl = "WANDSLInterfaceConfig1";
+    sim.inject(Injection::counter(dsl, "Stats.Total.CRCErrors", 1, None));
+    let watch = |output: &str| {
+        let args = [
+            "--output",
+            output,
+            "internet",
+            "--dsl",
+            "--watch",
+            "--interval",
+            "1",
+            "--count",
+            "2",
+        ];
+        strings(&args)
+    };
+    let args = watch("json");
+    let args: Vec<&str> = args.iter().map(String::as_str).collect();
+    let lines = success(&run(&sim, &args, password).await);
+    let samples: Vec<serde_json::Value> = lines
+        .lines()
+        .map(|line| serde_json::from_str(line).unwrap())
+        .collect();
+    assert_eq!(samples.len(), 2, "{lines}");
+    for sample in &samples {
+        // X_AVM-DE_GetDSLInfo and GetStatisticsTotal both read it.
+        assert_eq!(sample["changes"]["crc"], 2, "{sample}");
+        assert_eq!(sample["changes"]["fec"], 0, "{sample}");
+        assert_eq!(sample["status"], "Up", "{sample}");
+    }
+    let args = watch("text");
+    let args: Vec<&str> = args.iter().map(String::as_str).collect();
+    let text = success(&run(&sim, &args, password).await);
+    assert!(
+        text.starts_with("Status   Up\nChanges  CRC +2 in "),
+        "{text}"
+    );
+    assert!(text.contains("\n\nStatus   Up\n"), "{text}");
+    assert!(text.contains("Hint     CRC errors rose by 2 in "), "{text}");
+
+    let error = failure(&run(&sim, &["internet", "--dsl"], Some("wrong")).await);
+    assert!(error.contains("cannot read the DSL line"), "{error}");
+}
+
+#[tokio::test(flavor = "multi_thread")]
+async fn says_when_the_connection_is_not_dsl() {
+    let cable =
+        fritz_sim::Answer::Ok([("NewWANAccessType".to_owned(), "Ethernet".to_owned())].into());
+    let fixture = fritz_sim::Fixture::load(FIXTURE).unwrap().with_answer(
+        "WANCommonInterfaceConfig1",
+        "GetCommonLinkProperties",
+        None,
+        cable,
+    );
+    let sim = fritz_sim::Sim::start(fixture).await.unwrap();
+    let password = Some(fritz_sim::PASSWORD);
+    let watch = [
+        "--output", "text", "internet", "--dsl", "--watch", "--count", "1",
+    ];
+    let text = success(&run(&sim, &watch, password).await);
+    assert_eq!(
+        text,
+        "DSL  not available: the connection is not DSL but Ethernet\n"
+    );
+    let json = success(&run(&sim, &["--output", "json", "internet", "--dsl"], password).await);
+    let json: serde_json::Value = serde_json::from_str(&json).unwrap();
+    assert_eq!(json["access_type"], "Ethernet", "{json}");
+    assert_eq!(
+        json["note"], "the connection is not DSL but Ethernet",
+        "{json}"
+    );
+    assert!(json.get("line").is_none(), "{json}");
 }
 
 #[tokio::test(flavor = "multi_thread")]
