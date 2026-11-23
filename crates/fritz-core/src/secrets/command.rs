@@ -104,22 +104,32 @@ impl PasswordCommand {
     /// line break. Stops it after `timeout`. Its standard input is the
     /// terminal, if there is one, and else empty, so that it cannot read
     /// what is meant for `fritz`, like the messages of an MCP client.
-    #[expect(
-        clippy::missing_panics_doc,
-        reason = "the output is piped, so it is there"
-    )]
+    ///
+    /// Without a terminal, the command gets a process group of its own on
+    /// Unix, so that a timeout also stops the processes it started. With a
+    /// terminal it stays in the group of `fritz`: a process group in the
+    /// background may not read from the terminal, so a password manager
+    /// could not ask to be unlocked.
     pub fn run(&self, timeout: Duration) -> Result<SecretString, Error> {
+        self.run_with(timeout, io::stdin().is_terminal())
+    }
+
+    fn run_with(&self, timeout: Duration, terminal: bool) -> Result<SecretString, Error> {
         let name = || self.name().to_owned();
         let deadline = Instant::now() + timeout;
-        let terminal = io::stdin().is_terminal();
         let stdin = terminal.then(Stdio::inherit).unwrap_or_else(Stdio::null);
-        let mut child = Command::new(&self.0[0])
+        let mut command = Command::new(&self.0[0]);
+        command
             .args(&self.0[1..])
             .stdin(stdin)
             .stdout(Stdio::piped())
-            .stderr(Stdio::inherit())
-            .spawn()
-            .map_err(|error| Error::Run(name(), error))?;
+            .stderr(Stdio::inherit());
+        #[cfg(unix)]
+        if !terminal {
+            use std::os::unix::process::CommandExt as _;
+            command.process_group(0);
+        }
+        let mut child = command.spawn().map_err(|error| Error::Run(name(), error))?;
         let mut stdout = child.stdout.take().expect("the output is piped");
         let (sender, receiver) = mpsc::channel();
         // A thread, so that a command which prints a lot does not block.
@@ -130,6 +140,14 @@ impl PasswordCommand {
             let _ = sender.send(result);
         });
         let timed_out = |mut child: Child| {
+            // The group ends the processes the command started, which also
+            // closes the output, so that the thread ends. The group is gone
+            // if they all exited in the meantime.
+            #[cfg(unix)]
+            if !terminal {
+                use rustix::process::{Pid, Signal, kill_process_group};
+                let _ = kill_process_group(Pid::from_child(&child), Signal::KILL);
+            }
             // It may have exited in the meantime.
             let _ = child.kill();
             let _ = child.wait();
@@ -284,22 +302,56 @@ mod tests {
 
         #[test]
         fn stops_slow_commands() {
-            let started = Instant::now();
-            let error = command(&["sleep", "5"]).run(SHORT).unwrap_err();
-            assert_eq!(
-                error.to_string(),
-                "the password command `sleep` did not finish within 300ms"
-            );
-            assert!(started.elapsed() < Duration::from_secs(4));
+            for terminal in [false, true] {
+                let started = Instant::now();
+                let error = command(&["sleep", "5"])
+                    .run_with(SHORT, terminal)
+                    .unwrap_err();
+                assert_eq!(
+                    error.to_string(),
+                    "the password command `sleep` did not finish within 300ms"
+                );
+                assert!(started.elapsed() < Duration::from_secs(4));
+            }
+        }
 
+        /// Whether the process is still there, waiting up to 5 seconds for
+        /// it to go away.
+        fn alive(pid: &str) -> bool {
+            (0..100).all(|_| {
+                thread::sleep(Duration::from_millis(50));
+                let status = Command::new("kill")
+                    .args(["-0", pid])
+                    .stderr(Stdio::null())
+                    .status()
+                    .unwrap();
+                status.success()
+            })
+        }
+
+        #[test]
+        fn stops_the_processes_the_command_started() {
             // The command exits, but a process it started keeps the output
             // open.
+            let dir = tempfile::tempdir().unwrap();
+            let file = dir.path().join("pid");
+            let script = format!("sleep 30 & echo $! > '{}'; echo secret", file.display());
             let started = Instant::now();
-            let error = command(&["sh", "-c", "sleep 5 & echo secret"])
-                .run(SHORT)
+            let error = command(&["sh", "-c", &script])
+                .run_with(SHORT, false)
                 .unwrap_err();
             assert!(matches!(error, Error::Timeout(..)), "{error}");
             assert!(started.elapsed() < Duration::from_secs(4));
+            let pid = std::fs::read_to_string(&file).unwrap();
+            assert!(!alive(pid.trim()), "sleep {pid} still runs");
+        }
+
+        #[test]
+        fn uses_the_terminal_of_fritz() {
+            let password = command(&["printf", "secret"])
+                .run_with(TIMEOUT, true)
+                .unwrap();
+            assert_eq!(password.expose_secret(), "secret");
         }
     }
 }
