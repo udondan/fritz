@@ -182,6 +182,16 @@ fritzbox  laptop    WLAN  AP:5G:0    CONNECTED  ↓ 866.7 Mbit/s  ↑ 433.3 Mbit
 repeater  tv        LAN   LAN:1      CONNECTED  ↓ 0 kbit/s  ↑ 0 kbit/s
 ```
 
+`--tree` shows which device is connected to which router or repeater:
+
+```console
+$ fritz mesh --tree
+fritzbox (master, FRITZ!Box 7690)
+├── repeater (slave, FRITZ!Repeater 1200 AX)  WLAN 5 GHz ↓ 1201.0 Mbit/s  ↑ 1201.0 Mbit/s
+│   └── tv  LAN
+└── laptop  WLAN 5 GHz ↓ 866.7 Mbit/s  ↑ 433.3 Mbit/s
+```
+
 ### Wireless networks
 
 ```console

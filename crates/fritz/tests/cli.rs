@@ -880,6 +880,11 @@ async fn prints_the_state_as_json() {
     let mesh = json(&run(&sim, &["mesh"], password).await);
     assert_eq!(mesh["nodes"][0]["name"], "device-50");
     assert_eq!(mesh["links"].as_array().unwrap().len(), 3);
+    let tree = json(&run(&sim, &["mesh", "--tree"], password).await);
+    assert_eq!(tree[0]["name"], "device-50");
+    assert_eq!(tree[0]["children"][0]["name"], "device-51");
+    assert_eq!(tree[0]["children"][0]["children"][0]["name"], "device-47");
+    assert_eq!(tree[0]["children"][1]["uplinks"][0]["kind"], "WLAN");
     let output = run(&sim, &["smarthome"], password).await;
     let devices = json(&output);
     assert_eq!(devices.as_array().unwrap().len(), 4);
@@ -1004,6 +1009,15 @@ async fn prints_the_state_as_text() {
     assert!(mesh.starts_with("NODE "), "{mesh}");
     assert!(mesh.contains("\nFROM "), "{mesh}");
     assert!(mesh.contains("device-50  device-51"), "{mesh}");
+    let output = run(&sim, &["--output", "text", "mesh", "--tree"], password).await;
+    assert_eq!(
+        success(&output),
+        "device-50 (master, FRITZ!Box 7690)\n\
+         ├── device-51 (slave, FRITZ!Repeater 1200 AX)  \
+         WLAN 5 GHz ↓ 1201.0 Mbit/s  ↑ 1201.0 Mbit/s\n\
+         │   └── device-47  LAN\n\
+         └── device-2  WLAN 5 GHz ↓ 866.7 Mbit/s  ↑ 433.3 Mbit/s\n"
+    );
     let smarthome = text("smarthome").await;
     assert!(smarthome.starts_with("NAME "), "{smarthome}");
     assert!(smarthome.contains("23.4 W"), "{smarthome}");

@@ -11,6 +11,10 @@ use serde_json::Value;
 use crate::generic::Error;
 use crate::status::Host;
 
+mod tree;
+
+pub use tree::{Branch, Uplink};
+
 /// The mesh: the devices and how they are connected.
 #[derive(Debug, Clone, Default, PartialEq, Eq, Serialize)]
 pub struct Mesh {
@@ -21,6 +25,9 @@ pub struct Mesh {
 /// A device in the mesh: a FRITZ! device or a host.
 #[derive(Debug, Clone, Default, PartialEq, Eq, Serialize)]
 pub struct Node {
+    /// The id of the node in the mesh list, which links refer to.
+    #[serde(skip)]
+    pub uid: String,
     pub name: Option<String>,
     pub model: Option<String>,
     pub mac: Option<String>,
@@ -37,6 +44,11 @@ pub struct Link {
     /// The name of a node, or its id if it has no name.
     pub from: String,
     pub to: String,
+    /// The ids of the nodes `from` and `to`.
+    #[serde(skip)]
+    pub from_uid: String,
+    #[serde(skip)]
+    pub to_uid: String,
     /// Like `LAN` or `WLAN`.
     pub kind: Option<String>,
     /// The interface of `from`, like `AP:5G:0`.
@@ -183,6 +195,8 @@ pub fn mesh(json: &str) -> Result<Mesh, Error> {
                 links.push(Link {
                     from: name(&link["node_1_uid"]),
                     to: name(&link["node_2_uid"]),
+                    from_uid: link["node_1_uid"].as_str().unwrap_or_default().to_owned(),
+                    to_uid: link["node_2_uid"].as_str().unwrap_or_default().to_owned(),
                     kind: text(&link["type"]),
                     interface: link["node_interface_1_uid"]
                         .as_str()
@@ -200,6 +214,7 @@ pub fn mesh(json: &str) -> Result<Mesh, Error> {
         nodes: nodes
             .iter()
             .map(|node| Node {
+                uid: node["uid"].as_str().unwrap_or_default().to_owned(),
                 name: text(&node["device_name"]),
                 model: text(&node["device_model"]),
                 mac: text(&node["device_mac_address"]),
@@ -275,13 +290,21 @@ mod tests {
         assert_eq!(mesh.nodes[0].name.as_deref(), Some("fritz.box"));
         assert_eq!(mesh.nodes[0].role.as_deref(), Some("master"));
         assert!(mesh.nodes[0].meshed);
-        assert_eq!(mesh.nodes[1], Node::default());
+        assert_eq!(
+            mesh.nodes[1],
+            Node {
+                uid: "n-2".to_owned(),
+                ..Node::default()
+            }
+        );
         assert_eq!(
             mesh.links,
             [
                 Link {
                     from: "fritz.box".to_owned(),
                     to: "n-2".to_owned(),
+                    from_uid: "n-1".to_owned(),
+                    to_uid: "n-2".to_owned(),
                     kind: Some("WLAN".to_owned()),
                     interface: Some("AP:5G:0".to_owned()),
                     state: Some("CONNECTED".to_owned()),
@@ -293,6 +316,8 @@ mod tests {
                 Link {
                     from: "n-2".to_owned(),
                     to: "n-9".to_owned(),
+                    from_uid: "n-2".to_owned(),
+                    to_uid: "n-9".to_owned(),
                     ..Link::default()
                 }
             ]
