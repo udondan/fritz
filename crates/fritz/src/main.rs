@@ -137,6 +137,9 @@ enum Command {
     /// The installed firmware, the update the device offers, automatic
     /// updates and the last update. Never checks for a new version.
     Firmware,
+    /// The powerline adapters the device knows: name, model, MAC, whether
+    /// they are connected and whether an update is offered.
+    Powerline,
     /// The LAN interfaces and wireless networks with their counters, and
     /// the LAN ports. The ports need a login to the web interface.
     Interfaces {
@@ -489,6 +492,7 @@ async fn run(
         Command::Internet { dsl: false, .. } => status::internet(&load()?, format, out).await,
         Command::Internet { dsl: true, watch } => dsl::dsl(&load()?, watch, format, out).await,
         Command::Firmware => status::firmware(&load()?, format, out).await,
+        Command::Powerline => status::powerline(&load()?, format, out).await,
         Command::Interfaces { watch } => interfaces::interfaces(&load()?, watch, format, out).await,
         Command::Smarthome => status::smarthome(&load()?, format, out).await,
         Command::Ports => device::ports(&load()?, format, out).await,

@@ -2291,6 +2291,75 @@ async fn shows_the_firmware() {
 }
 
 #[tokio::test(flavor = "multi_thread")]
+async fn lists_the_powerline_adapters() {
+    let service = "X_AVM-DE_Homeplug1";
+    let ok = |out: &[(&str, &str)]| {
+        fritz_sim::Answer::Ok(
+            out.iter()
+                .map(|(n, v)| ((*n).to_owned(), (*v).to_owned()))
+                .collect(),
+        )
+    };
+    let entry = ok(&[
+        ("NewMACAddress", "02:00:00:00:00:01"),
+        ("NewActive", "0"),
+        ("NewName", "Cellar"),
+        ("NewModel", "FRITZ!Powerline 1260"),
+        ("NewUpdateAvailable", "0"),
+        ("NewUpdateSuccessful", "unknown"),
+    ]);
+    let fixture = fritz_sim::Fixture::load(FIXTURE)
+        .unwrap()
+        .with_answer(
+            service,
+            "GetNumberOfDeviceEntries",
+            None,
+            ok(&[("NewNumberOfEntries", "1")]),
+        )
+        .with_answer(service, "GetGenericDeviceEntry", Some(0), entry);
+    let sim = fritz_sim::Sim::start(fixture).await.unwrap();
+    let password = Some(fritz_sim::PASSWORD);
+
+    let text = success(&run(&sim, &["-o", "text", "powerline"], password).await);
+    assert_eq!(
+        text,
+        "NAME    MODEL                 MAC                ACTIVE  UPDATE\n\
+         Cellar  FRITZ!Powerline 1260  02:00:00:00:00:01  no      none\n"
+    );
+    let json = success(&run(&sim, &["-o", "json", "powerline"], password).await);
+    let powerline: serde_json::Value = serde_json::from_str(&json).unwrap();
+    assert_eq!(
+        powerline,
+        serde_json::json!({
+            "supported": true,
+            "adapters": [{
+                "name": "Cellar",
+                "model": "FRITZ!Powerline 1260",
+                "mac": "02:00:00:00:00:01",
+                "active": false,
+                "update_available": false,
+                "update_result": null,
+            }],
+        })
+    );
+    // Only getters.
+    assert!(
+        sim.requests()
+            .iter()
+            .filter_map(|r| r.action.as_deref())
+            .all(|a| a.starts_with("Get")),
+        "{:?}",
+        sim.requests()
+    );
+
+    // A device without powerline support.
+    let fixture = fritz_sim::Fixture::bundled("fritz-repeater-2400/8.25").unwrap();
+    let sim = fritz_sim::Sim::start(fixture).await.unwrap();
+    let text = success(&run(&sim, &["-o", "text", "powerline"], password).await);
+    assert_eq!(text, "The device does not support powerline adapters.\n");
+}
+
+#[tokio::test(flavor = "multi_thread")]
 async fn shows_the_load_of_the_device() {
     let fixture = fritz_sim::Fixture::load(FIXTURE).unwrap();
     let sim = fritz_sim::Sim::start(fixture).await.unwrap();

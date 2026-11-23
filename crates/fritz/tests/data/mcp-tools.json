@@ -339,6 +339,18 @@
     }
   },
   {
+    "name": "fritz_powerline",
+    "description": "Powerline adapters: name, model, MAC, active, update available and the result of the last update. `supported` is false on devices without powerline support.",
+    "inputSchema": {
+      "properties": {},
+      "type": "object"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "openWorldHint": false
+    }
+  },
+  {
     "name": "fritz_settings",
     "description": "Settings like DNS, IPv6, MTU, DHCP and time, by module, from the web interface. Secrets hidden.",
     "inputSchema": {

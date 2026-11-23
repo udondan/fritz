@@ -24,6 +24,7 @@ mod names;
 pub mod personal;
 pub mod policy;
 pub mod ports;
+pub mod powerline;
 pub mod read;
 pub mod redact;
 pub mod secrets;

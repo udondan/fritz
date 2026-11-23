@@ -42,6 +42,7 @@ or paste them.
 | Which devices match a name or address part? | `fritz hosts --search <text>`        |
 | How are the mesh repeaters connected?       | `fritz mesh` (with IP addresses)     |
 | Which repeater is a device connected to?    | `fritz mesh --tree`                  |
+| Which powerline adapters, are they active?  | `fritz powerline`                    |
 | Smart Home devices and their values         | `fritz smarthome`                    |
 | Which ports are forwarded, is UPnP on?      | `fritz ports`                        |
 | Numbers, deflections, answering machines    | `fritz telephony`                    |

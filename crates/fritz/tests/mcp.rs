@@ -174,6 +174,9 @@ async fn reads_the_state() {
     let sim = sim().await;
     let client = connect(&sim).await;
 
+    let powerline = success(&client, "fritz_powerline", json!({})).await;
+    assert_eq!(powerline, json!({"supported": true, "adapters": []}));
+
     let wlan = success(&client, "fritz_wlan", json!({})).await;
     assert!(!wlan.as_array().unwrap().is_empty(), "{wlan}");
     assert!(wlan[0].get("clients").is_none(), "{wlan}");
