@@ -105,9 +105,6 @@ mod tests {
             }],
             children: Vec::new(),
         };
-        assert_eq!(
-            tree_row(&branch, ""),
-            ["?", "-", "", "", "WLAN 2.4 GHz"]
-        );
+        assert_eq!(tree_row(&branch, ""), ["?", "-", "", "", "WLAN 2.4 GHz"]);
     }
 }
