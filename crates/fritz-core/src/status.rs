@@ -1,6 +1,6 @@
 //! The state of a device, read through actions that only read: an
-//! overview, the hosts, the mesh, the wireless networks and the internet
-//! connection.
+//! overview, the hosts, the mesh and the internet connection. The wireless
+//! networks are in [`crate::wlan`].
 //!
 //! Parts the device lacks, or that the user may not read, are left out
 //! instead of failing the whole read.
@@ -109,24 +109,6 @@ pub struct Hosts {
     /// stopped answering before.
     pub reported: u32,
     pub hosts: Vec<Host>,
-}
-
-/// A wireless network.
-#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize)]
-pub struct Wlan {
-    /// The service, like `WLANConfiguration1`.
-    pub service: String,
-    pub ssid: Option<String>,
-    /// Like `2.4 GHz`.
-    pub band: Option<String>,
-    pub channel: Option<u32>,
-    /// Like `ax` or `be`.
-    pub standard: Option<String>,
-    pub enabled: Option<bool>,
-    /// Like `Up` or `Disabled`.
-    pub status: Option<String>,
-    /// The number of connected clients.
-    pub clients: Option<u32>,
 }
 
 /// Reads the overview.
@@ -369,46 +351,6 @@ pub async fn add_addresses(reader: &mut Reader, mesh: &mut Mesh) -> Option<Strin
     note.map(|note| format!("{note}, so the mesh shows no addresses of hosts"))
 }
 
-/// Reads the wireless networks.
-///
-/// # Errors
-///
-/// The errors of reading other than missing parts, see
-/// [`Reader::try_read`].
-pub async fn wlans(reader: &mut Reader) -> Result<Vec<Wlan>, Error> {
-    let mut wlans = Vec::new();
-    for service in reader.services("WLANConfiguration") {
-        let Some(info) = reader.try_read(&service, "GetInfo", &[]).await? else {
-            continue;
-        };
-        let clients = reader
-            .try_read(&service, "GetTotalAssociations", &[])
-            .await?
-            .and_then(|v| v.number("NewTotalAssociations"));
-        wlans.push(Wlan {
-            band: info.get("NewX_AVM-DE_FrequencyBand").and_then(band),
-            ssid: info.text("NewSSID"),
-            channel: info.number("NewChannel"),
-            standard: info.text("NewStandard"),
-            enabled: info.flag("NewEnable"),
-            status: info.text("NewStatus"),
-            clients,
-            service,
-        });
-    }
-    Ok(wlans)
-}
-
-/// The frequency band in MHz as text, like `2400` as `2.4 GHz`.
-fn band(megahertz: &str) -> Option<String> {
-    match megahertz {
-        "2400" => Some("2.4 GHz".to_owned()),
-        "5000" => Some("5 GHz".to_owned()),
-        "6000" => Some("6 GHz".to_owned()),
-        _ => None,
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -431,13 +373,5 @@ mod tests {
             ]
         );
         assert_eq!(rights("<rights"), []);
-    }
-
-    #[test]
-    fn names_bands() {
-        assert_eq!(band("2400").as_deref(), Some("2.4 GHz"));
-        assert_eq!(band("5000").as_deref(), Some("5 GHz"));
-        assert_eq!(band("6000").as_deref(), Some("6 GHz"));
-        assert_eq!(band("unknown"), None);
     }
 }

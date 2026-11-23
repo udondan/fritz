@@ -103,7 +103,7 @@ impl Mesh {
 }
 
 /// A MAC address in upper case, without separators.
-fn normal_mac(mac: &str) -> String {
+pub(crate) fn normal_mac(mac: &str) -> String {
     mac.chars()
         .filter(char::is_ascii_hexdigit)
         .map(|c| c.to_ascii_uppercase())

@@ -29,6 +29,7 @@ pub mod settings;
 pub mod smarthome;
 pub mod status;
 pub mod telephony;
+pub mod wlan;
 
 // Compiles the example of the README.
 #[cfg(doctest)]

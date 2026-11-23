@@ -2,6 +2,7 @@
 
 use fritz_core::read::Reader;
 use fritz_core::status::{self, Right};
+use fritz_core::wlan::{self, Views};
 use fritz_sim::{Fixture, Injection, Sim};
 use tr064::SecretString;
 
@@ -84,7 +85,7 @@ async fn leaves_out_what_cannot_be_read() {
     let hosts = status::hosts(&mut reader).await.unwrap();
     assert_eq!((hosts.reported, hosts.hosts.len()), (0, 0));
     assert_eq!(status::mesh(&mut reader).await.unwrap(), None);
-    let wlans = status::wlans(&mut reader).await.unwrap();
+    let wlans = wlan::wlans(&mut reader, Views::default()).await.unwrap();
     let services: Vec<&str> = wlans.iter().map(|w| w.service.as_str()).collect();
     assert_eq!(services, ["WLANConfiguration2", "WLANConfiguration3"]);
 }
@@ -295,25 +296,6 @@ fn copy(from: &std::path::Path, to: &std::path::Path) {
 }
 
 #[tokio::test]
-async fn reads_wireless_networks() {
-    let sim = sim().await;
-    let wlans = status::wlans(&mut reader(&sim).await).await.unwrap();
-    assert_eq!(wlans.len(), 3);
-    let first = &wlans[0];
-    assert_eq!(first.service, "WLANConfiguration1");
-    assert_eq!(first.ssid.as_deref(), Some("wlan-1"));
-    assert_eq!(first.band.as_deref(), Some("2.4 GHz"));
-    assert_eq!(first.channel, Some(6));
-    assert_eq!(first.standard.as_deref(), Some("be"));
-    assert_eq!(first.enabled, Some(true));
-    assert_eq!(first.status.as_deref(), Some("Up"));
-    assert_eq!(first.clients, Some(4));
-    assert_eq!(wlans[1].band.as_deref(), Some("5 GHz"));
-    assert_eq!(wlans[2].band, None);
-    assert_eq!(wlans[2].enabled, Some(false));
-}
-
-#[tokio::test]
 async fn fails_without_a_login() {
     let sim = sim().await;
     let client = sim
@@ -326,5 +308,5 @@ async fn fails_without_a_login() {
     assert!(status::internet(&mut reader).await.is_err());
     assert!(status::hosts(&mut reader).await.is_err());
     assert!(status::mesh(&mut reader).await.is_err());
-    assert!(status::wlans(&mut reader).await.is_err());
+    assert!(wlan::wlans(&mut reader, Views::default()).await.is_err());
 }
