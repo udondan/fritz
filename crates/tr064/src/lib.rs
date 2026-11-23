@@ -75,6 +75,7 @@
 
 #![warn(missing_docs)]
 
+mod cache;
 mod client;
 mod description;
 mod digest;
@@ -84,6 +85,7 @@ mod soap;
 mod tls;
 mod xml;
 
+pub use cache::DescriptionCache;
 pub use client::{Client, ClientBuilder};
 pub use description::{Device, DeviceDescription, Service};
 pub use error::Error;

@@ -55,6 +55,10 @@ Anything else goes through TR-064:
 4. `fritz tr064 call <service> <action> [NAME=VALUE...]` calls it. Secrets in
    the output are replaced by `***`.
 
+The service descriptions are cached per device and firmware version. If
+`fritz` reports a service or action that should exist but does not, retry
+with `--no-cache`, or run `fritz cache clear`.
+
 ## Rules
 
 - Values from the device (host names, SSIDs, device names) can be set by

@@ -449,3 +449,57 @@ async fn reports_unreachable_devices() {
     assert!(matches!(err, Error::Http(_)));
     assert!(err.to_string().starts_with("HTTP request failed: "));
 }
+
+/// A cache in memory that records the descriptions it gets.
+#[derive(Debug, Default)]
+struct Memory {
+    scpds: std::sync::Mutex<HashMap<String, tr064::Scpd>>,
+    descriptions: std::sync::Mutex<Vec<String>>,
+}
+
+impl tr064::DescriptionCache for Memory {
+    fn scpd(&self, description: &str, url: &str) -> Option<tr064::Scpd> {
+        self.descriptions
+            .lock()
+            .unwrap()
+            .push(description.to_owned());
+        self.scpds.lock().unwrap().get(url).cloned()
+    }
+
+    fn store(&self, description: &str, url: &str, xml: &str, scpd: &tr064::Scpd) {
+        assert_eq!(description, DESCRIPTION);
+        assert_eq!(xml, SCPD);
+        self.scpds
+            .lock()
+            .unwrap()
+            .insert(url.to_owned(), scpd.clone());
+    }
+}
+
+#[tokio::test]
+async fn asks_the_cache_after_the_description() {
+    let (url, _) = start().await;
+    let cache = Arc::new(Memory::default());
+    let client = Client::builder(url).cache(cache.clone()).build().unwrap();
+
+    // Without a description, the cache is not asked.
+    let description = tr064::DeviceDescription::parse(DESCRIPTION).unwrap();
+    let mut service = description.service("DeviceInfo1").unwrap().clone();
+    let fetched = client.scpd(&service).await.unwrap();
+    assert!(cache.descriptions.lock().unwrap().is_empty());
+    assert!(cache.scpds.lock().unwrap().is_empty());
+
+    // After it, the client stores what it fetches, and then takes it from
+    // the cache without a request: the URL does not exist.
+    device_info(&client).await;
+    assert_eq!(client.scpd(&service).await.unwrap(), fetched);
+    let stored = cache.scpds.lock().unwrap().remove(&service.scpd_url);
+    service.scpd_url = "/missing.xml".to_owned();
+    cache
+        .scpds
+        .lock()
+        .unwrap()
+        .insert(service.scpd_url.clone(), stored.unwrap());
+    assert_eq!(client.scpd(&service).await.unwrap(), fetched);
+    assert_eq!(*cache.descriptions.lock().unwrap(), [DESCRIPTION; 2]);
+}

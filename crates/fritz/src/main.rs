@@ -6,6 +6,7 @@
 //! installation section of the README.
 
 mod auth;
+mod cache;
 #[cfg(feature = "write")]
 mod change;
 mod context;
@@ -22,6 +23,7 @@ use std::io::{self, IsTerminal as _};
 use std::path::{Path, PathBuf};
 
 use anyhow::{Context as _, bail};
+use clap::builder::BoolishValueParser;
 use clap::{Args, Parser, Subcommand};
 use fritz_core::anonymize;
 use fritz_core::capture::{self, Options, Plan};
@@ -73,6 +75,10 @@ struct Global {
     /// pipes, like `fritz hosts | grep phone`.
     #[arg(short, long, global = true, value_enum, env = "FRITZ_OUTPUT")]
     output: Option<Format>,
+    /// Fetch the service descriptions from the device instead of the cache,
+    /// and do not store them.
+    #[arg(long, global = true, env = "FRITZ_NO_CACHE", value_parser = BoolishValueParser::new())]
+    no_cache: bool,
 }
 
 #[derive(Debug, Subcommand)]
@@ -145,6 +151,10 @@ enum Command {
     /// The services and actions of the device. Calls only actions that read.
     #[command(subcommand, name = "tr064", alias = "tr64")]
     Tr064(Tr064Command),
+    /// The cached service descriptions of devices. `FRITZ_CACHE_DIR` sets
+    /// another directory.
+    #[command(subcommand)]
+    Cache(CacheCommand),
     /// Plan and apply changes. Needs `FRITZ_ALLOW_WRITE=1`, and the identity
     /// of the device on the allow list in the configuration.
     #[cfg(feature = "write")]
@@ -225,6 +235,14 @@ enum Tr064Command {
         #[arg(value_name = "NAME=VALUE")]
         arguments: Vec<String>,
     },
+}
+
+#[derive(Debug, Subcommand)]
+enum CacheCommand {
+    /// List the cached devices and the size of their files.
+    Show,
+    /// Remove the cached descriptions.
+    Clear,
 }
 
 #[derive(Debug, Subcommand)]
@@ -309,6 +327,9 @@ async fn main() -> anyhow::Result<()> {
             password,
             system::keychains(),
         )
+        .map(|context| {
+            context.with_cache((!global.no_cache).then(cache::open).and_then(Result::ok))
+        })
     };
     if let Command::Mcp { personal } = cli.command {
         // Before stdout is locked: the transport writes to it.
@@ -344,6 +365,8 @@ async fn main() -> anyhow::Result<()> {
         Command::Auth(AuthCommand::Logout) => auth::logout(&load()?, out),
         Command::Auth(AuthCommand::Status) => auth::status(&load()?, out),
         Command::Tr064(command) => tr64(&load()?, command, out).await,
+        Command::Cache(CacheCommand::Show) => cache::show(&cache::open()?, format, out),
+        Command::Cache(CacheCommand::Clear) => cache::clear(&cache::open()?, out),
         #[cfg(feature = "write")]
         Command::Change(args) => change::run(&load()?, args, format, out).await,
         Command::Capture(args) => capture(&load()?, args).await,

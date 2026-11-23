@@ -3,13 +3,15 @@
 
 use std::io::{self, BufRead};
 use std::path::{Path, PathBuf};
+use std::sync::Arc;
 
 use anyhow::{Context as _, bail};
+use fritz_core::cache::Cache;
 use fritz_core::config::{Config, Profile};
 use fritz_core::connection::{DEFAULT_HOST, Overrides, Target};
 use fritz_core::secrets::{self, Keychain, Source};
 use fritz_core::session::Session;
-use tr064::SecretString;
+use tr064::{ClientBuilder, SecretString};
 
 /// The environment variable that turns the keychain off, for containers and
 /// tests.
@@ -36,6 +38,7 @@ pub(crate) struct Context {
     overrides: Overrides,
     password: Option<SecretString>,
     keychains: Keychains,
+    cache: Option<Arc<Cache>>,
 }
 
 impl Context {
@@ -58,6 +61,25 @@ impl Context {
             overrides,
             password,
             keychains,
+            cache: None,
+        })
+    }
+
+    /// Keeps the service descriptions in `cache`, if one is given.
+    pub(crate) fn with_cache(self, cache: Option<Cache>) -> Self {
+        Self {
+            cache: cache.map(Arc::new),
+            ..self
+        }
+    }
+
+    /// A client builder for the target, with the cache of the descriptions
+    /// and without credentials.
+    pub(crate) fn builder(&self, target: &Target) -> anyhow::Result<ClientBuilder> {
+        let builder = target.client()?;
+        Ok(match &self.cache {
+            Some(cache) => builder.cache(cache.clone()),
+            None => builder,
         })
     }
 
@@ -150,7 +172,9 @@ impl Context {
     pub(crate) fn client(&self) -> anyhow::Result<tr064::Client> {
         let target = self.target()?;
         let (password, _) = self.password(&target)?;
-        let builder = target.client()?.credentials(target.username()?, password);
+        let builder = self
+            .builder(&target)?
+            .credentials(target.username()?, password);
         Ok(builder.build()?)
     }
 

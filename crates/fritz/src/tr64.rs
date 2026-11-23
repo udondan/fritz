@@ -13,7 +13,7 @@ use crate::context::Context;
 
 /// A client without credentials, for the descriptions, which need no login.
 fn anonymous(context: &Context) -> anyhow::Result<Client> {
-    Ok(context.target()?.client()?.build()?)
+    Ok(context.builder(&context.target()?)?.build()?)
 }
 
 async fn service(client: &Client, reference: &str) -> anyhow::Result<(Service, Scpd)> {
@@ -125,7 +125,7 @@ pub(crate) async fn call(
 ) -> anyhow::Result<()> {
     let arguments = parse_arguments(arguments)?;
     let target = context.target()?;
-    let (service, scpd) = service(&target.client()?.build()?, reference).await?;
+    let (service, scpd) = service(&context.builder(&target)?.build()?, reference).await?;
     let action = generic::action(&service, &scpd, name)?;
     generic::check(&service, action, &arguments)?;
     let client = context.client()?;

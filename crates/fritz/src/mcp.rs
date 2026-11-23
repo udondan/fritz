@@ -10,7 +10,9 @@
 //! `fritz_call_action` refuses the actions that read them.
 //!
 //! The server reads the device description and the service descriptions
-//! once, and again only after a tool failed.
+//! once, and again only after a tool failed. The service descriptions come
+//! from the cache, if the device description names the same firmware, and
+//! stay in memory for the lifetime of the server.
 //!
 //! In builds with the feature `write` and with `FRITZ_ALLOW_WRITE=1`, it
 //! also offers `fritz_plan_change` and `fritz_apply_change`, which pass the
