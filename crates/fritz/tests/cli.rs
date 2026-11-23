@@ -16,22 +16,27 @@ const ONTEL: &str = include_str!("../../fritz-core/tests/data/ontelSCPD.xml");
 
 const FINGERPRINT: &str = "00112233445566778899AABBCCDDEEFF00112233445566778899AABBCCDDEEFF";
 
-/// Runs `fritz` with the given arguments, environment and input, without the
-/// `FRITZ_*` variables of the caller. The keychain is off, the
-/// configuration file does not exist unless `FRITZ_CONFIG` is given, and the
-/// cache is an empty directory unless `FRITZ_CACHE_DIR` is given.
-fn fritz_input(args: &[&str], env: &[(&str, &str)], input: &str) -> Output {
+/// `fritz` without the `FRITZ_*` variables of the caller. The keychain is
+/// off, the configuration file does not exist, and the cache is `cache`.
+fn fritz_command(cache: &Path) -> Command {
     let mut command = Command::new(env!("CARGO_BIN_EXE_fritz"));
     for (name, _) in std::env::vars().filter(|(n, _)| n.starts_with("FRITZ_")) {
         command.env_remove(name);
     }
     let missing = Path::new(env!("CARGO_TARGET_TMPDIR")).join("missing/config.toml");
-    let cache = tempfile::tempdir().unwrap();
-    let mut child = command
-        .args(args)
+    command
         .env("FRITZ_NO_KEYCHAIN", "1")
         .env("FRITZ_CONFIG", missing)
-        .env("FRITZ_CACHE_DIR", cache.path())
+        .env("FRITZ_CACHE_DIR", cache);
+    command
+}
+
+/// Runs `fritz` with the given arguments, environment and input, see
+/// [`fritz_command`]. `env` can set `FRITZ_CONFIG` and `FRITZ_CACHE_DIR`.
+fn fritz_input(args: &[&str], env: &[(&str, &str)], input: &str) -> Output {
+    let cache = tempfile::tempdir().unwrap();
+    let mut child = fritz_command(cache.path())
+        .args(args)
         .envs(env.iter().copied())
         .stdin(Stdio::piped())
         .stdout(Stdio::piped())
@@ -3246,4 +3251,193 @@ async fn logs_in_with_a_password_command() {
     let log = stderr(&output);
     assert!(!log.contains(fritz_sim::PASSWORD), "{log}");
     assert!(log.contains("password found"), "{log}");
+}
+
+/// Watches the traffic of `sim` twice a second apart, and returns the
+/// samples.
+async fn watch_traffic(sim: &fritz_sim::Sim) -> Vec<serde_json::Value> {
+    let args = [
+        "-o",
+        "json",
+        "traffic",
+        "--watch",
+        "--interval",
+        "1",
+        "--count",
+        "2",
+    ];
+    let lines = success(&run(sim, &args, Some(fritz_sim::PASSWORD)).await);
+    assert!(lines.ends_with('\n'), "{lines}");
+    lines
+        .lines()
+        .map(|line| serde_json::from_str(line).unwrap())
+        .collect()
+}
+
+#[tokio::test(flavor = "multi_thread")]
+async fn shows_the_traffic() {
+    let fixture = fritz_sim::Fixture::load(FIXTURE).unwrap();
+    let sim = fritz_sim::Sim::start(fixture).await.unwrap();
+    let password = Some(fritz_sim::PASSWORD);
+
+    let json = success(&run(&sim, &["-o", "json", "traffic"], password).await);
+    let json: serde_json::Value = serde_json::from_str(&json).unwrap();
+    assert_eq!(json["supported"], true, "{json}");
+    let down = &json["downstream"];
+    assert_eq!(down["current_bps"], 40_712 * 8, "{json}");
+    assert_eq!(down["max_bps"], 33_547_250_u64 * 8, "{json}");
+    assert_eq!(down["peak_bps"], 278_487 * 8, "{json}");
+    assert_eq!(down["utilization_percent"], 0.1, "{json}");
+    assert_eq!(down["total_bytes"], 412_704_614_674_u64, "{json}");
+    assert_eq!(down["multicast_bps"], 0, "{json}");
+    let up = &json["upstream"];
+    assert_eq!(up["current_bps"], 51_470 * 8, "{json}");
+    assert_eq!(up["priorities"]["realtime_bps"], 315 * 8, "{json}");
+    assert!(up.get("multicast_bps").is_none(), "{json}");
+
+    let text = success(&run(&sim, &["-o", "text", "traffic"], password).await);
+    assert!(text.starts_with("      NOW "), "{text}");
+    assert!(text.contains("\nDOWN  325.7 kbit/s"), "{text}");
+    assert!(
+        text.contains("\nUpstream   real time 2.5 kbit/s, high 0 bit/s"),
+        "{text}"
+    );
+    assert!(text.ends_with("\nMulticast  0 bit/s\n"), "{text}");
+
+    sim.inject(Injection::counter(
+        "WANCommonInterfaceConfig1",
+        "TotalBytesReceived",
+        1000,
+        None,
+    ));
+    for sample in watch_traffic(&sim).await {
+        assert_eq!(sample["downstream"]["bytes"], 1000, "{sample}");
+        assert!(sample["downstream"]["average_bps"].as_f64().unwrap() > 0.0);
+        assert_eq!(sample["upstream"]["bytes"], 0, "{sample}");
+    }
+    let args = [
+        "-o",
+        "text",
+        "traffic",
+        "--watch",
+        "--interval",
+        "1",
+        "--count",
+        "2",
+    ];
+    let text = success(&run(&sim, &args, password).await);
+    assert_eq!(text.lines().count(), 2, "{text}");
+    assert!(text.lines().all(|row| row.starts_with("↓ ")), "{text}");
+    // Only getters.
+    let requests = sim.requests();
+    let mut actions = requests.iter().filter_map(|r| r.action.as_deref());
+    assert!(actions.all(|a| a.starts_with("Get") || a.starts_with("X_AVM-DE_Get")));
+
+    let error = failure(&run(&sim, &["traffic"], Some("wrong")).await);
+    assert!(error.contains("cannot read the traffic"), "{error}");
+}
+
+#[tokio::test(flavor = "multi_thread")]
+async fn watches_the_traffic_across_wraps_and_resets() {
+    // A counter of 32 bits that wraps between the first and second sample.
+    let wrapping = fritz_sim::Answer::Ok(
+        [("NewTotalBytesReceived".to_owned(), "4294966000".to_owned())].into(),
+    );
+    let fixture = fritz_sim::Fixture::load(FIXTURE).unwrap().with_answer(
+        "WANCommonInterfaceConfig1",
+        "GetTotalBytesReceived",
+        None,
+        wrapping,
+    );
+    let sim = fritz_sim::Sim::start(fixture).await.unwrap();
+    let variable = "TotalBytesReceived";
+    let wrap = Some(1 << 32);
+    sim.inject(Injection::counter(
+        "WANCommonInterfaceConfig1",
+        variable,
+        1000,
+        wrap,
+    ));
+    let samples = watch_traffic(&sim).await;
+    assert_eq!(samples.len(), 2);
+    for sample in &samples {
+        assert_eq!(sample["downstream"]["bytes"], 1000, "{sample}");
+        assert!(sample["downstream"]["average_bps"].as_f64().unwrap() > 0.0);
+    }
+
+    // A counter of 64 bits that falls, like after a restart: no average
+    // and no negative rate for that sample.
+    let fixture = fritz_sim::Fixture::load(FIXTURE).unwrap();
+    let sim = fritz_sim::Sim::start(fixture).await.unwrap();
+    let wrap = Some(412_704_616_000);
+    sim.inject(Injection::counter(
+        "WANCommonInterfaceConfig1",
+        variable,
+        1000,
+        wrap,
+    ));
+    let samples = watch_traffic(&sim).await;
+    let downstream: Vec<_> = samples.iter().map(|s| &s["downstream"]).collect();
+    assert_eq!(
+        downstream[0]["bytes"],
+        serde_json::Value::Null,
+        "{samples:?}"
+    );
+    assert_eq!(downstream[0]["average_bps"], serde_json::Value::Null);
+    assert_eq!(downstream[1]["bytes"], 1000, "{samples:?}");
+}
+
+#[tokio::test(flavor = "multi_thread")]
+async fn tells_when_the_device_has_no_traffic() {
+    let fixture = fritz_sim::Fixture::bundled("fritz-repeater-2400/8.25").unwrap();
+    let sim = fritz_sim::Sim::start(fixture).await.unwrap();
+    let password = Some(fritz_sim::PASSWORD);
+
+    let message = "The device does not report the traffic of an internet connection.\n";
+    let text = success(&run(&sim, &["-o", "text", "traffic"], password).await);
+    assert_eq!(text, message);
+    let text = success(&run(&sim, &["-o", "text", "traffic", "--watch"], password).await);
+    assert_eq!(text, message);
+    let json = success(&run(&sim, &["-o", "json", "traffic"], password).await);
+    let json: serde_json::Value = serde_json::from_str(&json).unwrap();
+    assert_eq!(json["supported"], false, "{json}");
+    assert_eq!(json["downstream"]["current_bps"], serde_json::Value::Null);
+}
+
+#[cfg(unix)]
+#[tokio::test(flavor = "multi_thread")]
+async fn stops_watching_on_ctrl_c() {
+    use std::io::{BufRead as _, BufReader, Read as _};
+
+    let fixture = fritz_sim::Fixture::load(FIXTURE).unwrap();
+    let sim = fritz_sim::Sim::start(fixture).await.unwrap();
+    let url = sim.url().to_string();
+    let watch = move || {
+        let cache = tempfile::tempdir().unwrap();
+        let args = ["--host", &url, "--user", fritz_sim::USERNAME, "-o", "json"];
+        let mut child = fritz_command(cache.path())
+            .args(args)
+            .args(["traffic", "--watch", "--interval", "1"])
+            .env("FRITZ_PASSWORD", fritz_sim::PASSWORD)
+            .stdout(Stdio::piped())
+            .stderr(Stdio::piped())
+            .spawn()
+            .unwrap();
+        let mut stdout = BufReader::new(child.stdout.take().unwrap());
+        let mut lines = String::new();
+        stdout.read_line(&mut lines).unwrap();
+        let pid = child.id().to_string();
+        let kill = Command::new("kill").args(["-INT", &pid]).status().unwrap();
+        assert!(kill.success());
+        stdout.read_to_string(&mut lines).unwrap();
+        (lines, child.wait_with_output().unwrap())
+    };
+    let (lines, output) = tokio::task::spawn_blocking(watch).await.unwrap();
+    assert!(output.status.success(), "{}", stderr(&output));
+    assert_eq!(stderr(&output), "");
+    assert!(lines.ends_with('\n'), "{lines}");
+    for line in lines.lines() {
+        let sample: serde_json::Value = serde_json::from_str(line).unwrap();
+        assert!(sample["seconds"].as_f64().unwrap() > 0.0, "{sample}");
+    }
 }

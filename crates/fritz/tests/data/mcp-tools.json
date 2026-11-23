@@ -453,6 +453,29 @@
     }
   },
   {
+    "name": "fritz_traffic",
+    "description": "WAN traffic per direction: current and peak rate and line maximum in bit/s, utilization in percent, byte and packet totals; upstream by priority and multicast where reported. With `sample_seconds`, averages from the counters.",
+    "inputSchema": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "sample_seconds": {
+          "description": "Read twice this many seconds apart, at most 10, and add `sample`\nwith the averages of the byte counters in between.",
+          "format": "uint64",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        }
+      },
+      "type": "object"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "openWorldHint": false
+    }
+  },
+  {
     "name": "fritz_users",
     "description": "Users of the device (null if not allowed; names hidden without `--personal`), rights of the current user, login settings: anonymous and button login, default password, two-factor confirmation, and hints on weak settings. No passwords are read.",
     "inputSchema": {

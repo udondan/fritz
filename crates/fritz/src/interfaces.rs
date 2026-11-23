@@ -211,12 +211,12 @@ fn both(received: Option<u64>, sent: Option<u64>, show: impl Fn(u64) -> String) 
 
 /// Bytes with a unit, like `876.4 GB`.
 #[expect(clippy::cast_precision_loss, reason = "one decimal is enough")]
-fn bytes(count: u64) -> String {
+pub(crate) fn bytes(count: u64) -> String {
     scaled(count as f64, "B")
 }
 
 /// Bits per second with a unit, like `1.2 Mbit/s`.
-fn bit_rate(bits: f64) -> String {
+pub(crate) fn bit_rate(bits: f64) -> String {
     scaled(bits, "bit/s")
 }
 
