@@ -316,6 +316,22 @@ fn combines_answers() {
         ],
     );
     assert_eq!((both.status, both.addresses.len()), (Status::Answered, 1));
+    assert_eq!(both.note, None);
+    assert_eq!(both.has(ip("192.0.2.1")), Some(true));
+    assert_eq!(both.has(ip("fd00::1")), Some(false));
+    // AAAA failed: the answer may lack the IPv6 address.
+    let partial = Answer::from_results(
+        "nas",
+        None,
+        vec![Ok(vec![ip("192.0.2.1")]), Err(Failure::Timeout)],
+    );
+    assert_eq!(partial.status, Status::Answered);
+    assert_eq!(
+        partial.note.as_deref(),
+        Some("incomplete, a query failed: no answer in time")
+    );
+    assert_eq!(partial.has(ip("192.0.2.1")), Some(true));
+    assert_eq!(partial.has(ip("fd00::1")), None);
     let failed = Answer::from_results(
         "nas",
         None,
@@ -323,6 +339,7 @@ fn combines_answers() {
     );
     assert_eq!(failed.status, Status::Failed);
     assert_eq!(failed.note.as_deref(), Some("no answer in time"));
+    assert_eq!(failed.has(ip("192.0.2.1")), None);
     let unknown = Answer::from_results(
         "nas",
         None,

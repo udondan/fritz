@@ -213,7 +213,8 @@ pub struct Answer {
     pub name: String,
     pub status: Status,
     pub addresses: Vec<IpAddr>,
-    /// Why there are no addresses.
+    /// Why there are no addresses, or, with addresses, why the answer is
+    /// incomplete: a query of the other family failed.
     pub note: Option<String>,
 }
 
@@ -245,12 +246,19 @@ impl Answer {
         }
         let mut seen = BTreeSet::new();
         addresses.retain(|a| seen.insert(*a));
-        let (status, failure) = if !addresses.is_empty() {
-            (Status::Answered, None)
-        } else if let Some(failure) = failures
+        let failed = failures
             .iter()
-            .find(|f| !matches!(f, Failure::NoSuchName | Failure::NoRecord))
-        {
+            .find(|f| !matches!(f, Failure::NoSuchName | Failure::NoRecord));
+        let (status, failure) = if !addresses.is_empty() {
+            let note = failed.map(|f| format!("incomplete, a query failed: {f}"));
+            return Self {
+                server,
+                name: name.to_owned(),
+                status: Status::Answered,
+                addresses,
+                note,
+            };
+        } else if let Some(failure) = failed {
             (Status::Failed, Some(failure))
         } else if let Some(failure) = failures.iter().find(|f| **f == Failure::NoSuchName) {
             (Status::NoSuchName, Some(failure))
@@ -270,6 +278,16 @@ impl Answer {
         self.status == Status::Answered
     }
 
+    /// Whether the answer has `address`: `None` if it has no addresses, or
+    /// lacks it but a query failed, so it might have it.
+    fn has(&self, address: IpAddr) -> Option<bool> {
+        if !self.answered() {
+            return None;
+        }
+        let has = self.addresses.contains(&address);
+        (has || self.note.is_none()).then_some(has)
+    }
+
     /// The addresses, separated by commas.
     fn list(&self) -> String {
         join(&self.addresses)
@@ -277,7 +295,7 @@ impl Answer {
 }
 
 /// Whether the answers have the expected address; `None` for an answer
-/// without addresses.
+/// without addresses, or an incomplete one without the address.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct Expected {
     pub address: IpAddr,
@@ -360,12 +378,8 @@ pub async fn diagnose(
         ask(probes, name, router.domain.as_deref(), server).await;
     let expected = request.expected.map(|address| Expected {
         address,
-        router: router_answer
-            .answered()
-            .then(|| router_answer.addresses.contains(&address)),
-        client: client_answer
-            .answered()
-            .then(|| client_answer.addresses.contains(&address)),
+        router: router_answer.has(address),
+        client: client_answer.has(address),
     });
     let mut report = Report {
         name: name.to_owned(),
