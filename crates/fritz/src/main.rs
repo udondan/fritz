@@ -8,6 +8,7 @@
 mod auth;
 #[cfg(feature = "write")]
 mod change;
+mod completion;
 mod context;
 mod device;
 mod mcp;
@@ -22,7 +23,7 @@ use std::io::{self, IsTerminal as _};
 use std::path::{Path, PathBuf};
 
 use anyhow::{Context as _, bail};
-use clap::{Args, Parser, Subcommand};
+use clap::{Args, CommandFactory as _, Parser, Subcommand};
 use fritz_core::anonymize;
 use fritz_core::capture::{self, Options, Plan};
 use fritz_core::connection::Overrides;
@@ -53,7 +54,7 @@ struct Global {
     #[arg(long, global = true, env = "FRITZ_CONFIG")]
     config: Option<PathBuf>,
     /// The profile in the configuration file, else the default one.
-    #[arg(long, global = true, env = "FRITZ_PROFILE")]
+    #[arg(long, global = true, env = "FRITZ_PROFILE", add = completion::profiles())]
     profile: Option<String>,
     /// The device: a host name or address, optionally with a port, for HTTPS
     /// on port 49443, or a full address like `http://192.168.178.1:49000`.
@@ -162,6 +163,18 @@ enum Command {
     /// Turn raw captures into fixtures, and check fixtures for personal data.
     #[command(subcommand)]
     Fixture(FixtureCommand),
+    /// Print the completion script for a shell.
+    ///
+    /// The script completes the commands, options and the names of the
+    /// profiles. It calls `fritz` from the `PATH` on every completion, which
+    /// reads the configuration file but never contacts the device. Write the
+    /// script again after an update of fritz.
+    #[command(after_help = completion::INSTALL)]
+    Completion {
+        /// The shell.
+        #[arg(value_enum)]
+        shell: completion::Shell,
+    },
 }
 
 #[derive(Debug, Subcommand)]
@@ -290,6 +303,7 @@ struct CaptureArgs {
 
 #[tokio::main(flavor = "current_thread")]
 async fn main() -> anyhow::Result<()> {
+    completion::complete(Cli::command);
     let cli = Cli::parse();
     let global = cli.global;
     let format = global
@@ -348,6 +362,7 @@ async fn main() -> anyhow::Result<()> {
         Command::Change(args) => change::run(&load()?, args, format, out).await,
         Command::Capture(args) => capture(&load()?, args).await,
         Command::Fixture(command) => fixture(&command),
+        Command::Completion { shell } => Ok(completion::script(shell, out)?),
     }
 }
 
