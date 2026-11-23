@@ -156,7 +156,7 @@ impl Context {
         let (password, _) = self.password(&target)?;
         let web = target.web();
         let client = web.client()?.build()?;
-        Ok(Session::login(client, web.username()?, &password).await?)
+        Ok(Session::login(client, web.web_username(), &password).await?)
     }
 }
 

@@ -40,7 +40,10 @@ pub(crate) fn show(context: &Context, out: &mut impl Write) -> anyhow::Result<()
     writeln!(out, "config       {}", context.path().display())?;
     writeln!(out, "profile      {profile}")?;
     writeln!(out, "address      {}", target.url)?;
-    let user = target.username.clone().unwrap_or_else(none);
+    let user = target
+        .username
+        .clone()
+        .unwrap_or_else(|| "none, for devices with only a password".to_owned());
     writeln!(out, "user         {user}")?;
     writeln!(out, "certificate  {certificate}")?;
     writeln!(out, "password     {password}")?;

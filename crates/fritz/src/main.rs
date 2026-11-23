@@ -60,7 +60,8 @@ struct Global {
     /// Defaults to fritz.box.
     #[arg(long, global = true, env = "FRITZ_HOST")]
     host: Option<String>,
-    /// The user on the device.
+    /// The user on the device. Leave it out for devices with only a
+    /// password, like FRITZ!Repeaters.
     #[arg(long, global = true, env = "FRITZ_USERNAME")]
     user: Option<String>,
     /// The SHA-256 fingerprint of the certificate to trust, instead of the
