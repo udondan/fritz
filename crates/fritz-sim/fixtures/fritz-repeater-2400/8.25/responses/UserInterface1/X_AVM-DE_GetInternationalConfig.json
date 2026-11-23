@@ -1,0 +1,11 @@
+{
+  "out": {
+    "NewX_AVM-DE_Annex": "",
+    "NewX_AVM-DE_AnnexList": "",
+    "NewX_AVM-DE_Country": "049",
+    "NewX_AVM-DE_CountryList": "Nigeria,Tansania,Uganda,Namibia,Botswana,Südafrika,Griechenland,Niederlande,Belgien,Frankreich,Spanien,Portugal,Luxemburg,Irland,Zypern,Finnland,Ungarn,Lettland,Estland,Andorra,Montenegro,Kroatien,Slowenien,Bosnien Herzegovina,Nordmazedonien,Italien,Schweiz,Tschechien,Slowakei,Österreich,Grossbritannien,Dänemark,Schweden,Norwegen,Polen,Deutschland,Argentinien,Australien,Neuseeland,Thailand,Israel,Anderes Land",
+    "NewX_AVM-DE_Language": "de",
+    "NewX_AVM-DE_LanguageList": "de,en,es,fr,it,nl,pl"
+  },
+  "status": "ok"
+}

@@ -1,0 +1,11 @@
+{
+  "out": {
+    "NewX_AVM-DE_AutoUpdateMode": "all",
+    "NewX_AVM-DE_CurrentFwVersion": "169.08.25",
+    "NewX_AVM-DE_LastFwVersion": "169.07.58,111615",
+    "NewX_AVM-DE_LastInfoUrl": "http://download.avm.de/fritzwlan/fritzrepeater-2400/deutschland/fritz.os/info_de.txt",
+    "NewX_AVM-DE_UpdateSuccessful": "succeeded",
+    "NewX_AVM-DE_UpdateTime": "2026-06-01T07:05:41+02:00"
+  },
+  "status": "ok"
+}

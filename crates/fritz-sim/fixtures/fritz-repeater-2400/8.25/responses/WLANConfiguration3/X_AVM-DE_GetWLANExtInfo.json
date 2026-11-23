@@ -1,0 +1,15 @@
+{
+  "out": {
+    "NewX_AVM-DE_APEnabled": "0",
+    "NewX_AVM-DE_APType": "guest",
+    "NewX_AVM-DE_EncryptionMode": "3",
+    "NewX_AVM-DE_FrequencyBand": "unknown",
+    "NewX_AVM-DE_LastChangedStamp": "0",
+    "NewX_AVM-DE_NoForcedOff": "1",
+    "NewX_AVM-DE_TimeRemain": "0",
+    "NewX_AVM-DE_Timeout": "30",
+    "NewX_AVM-DE_TimeoutActive": "1",
+    "NewX_AVM-DE_UserIsolation": "1"
+  },
+  "status": "ok"
+}

@@ -1344,25 +1344,26 @@ mod change {
 async fn reads_devices_with_only_a_password() {
     // Devices with only a password, like FRITZ!Repeaters, take any user
     // name; without --user, fritz sends the historic default.
-    let options = fritz_sim::Options {
-        username: fritz_core::connection::PASSWORD_ONLY_USERNAME.to_owned(),
-        ..fritz_sim::Options::default()
-    };
-    let fixture = concat!(
-        env!("CARGO_MANIFEST_DIR"),
-        "/../fritz-sim/fixtures/fritzwlan-repeater-1750e/7.32"
-    );
-    let fixture = fritz_sim::Fixture::load(fixture).unwrap();
-    let sim = fritz_sim::Sim::start_with(fixture, options).await.unwrap();
-    let read = |command: &str| {
-        let args = strings(&["--host", sim.url().as_str(), "--output", "text", command]);
-        fritz_async(args, vec![("FRITZ_PASSWORD", fritz_sim::PASSWORD)])
-    };
+    for (fixture, model) in [
+        ("fritzwlan-repeater-1750e/7.32", "FRITZ!WLAN Repeater 1750E"),
+        ("fritz-repeater-2400/8.25", "FRITZ!Repeater 2400"),
+    ] {
+        let options = fritz_sim::Options {
+            username: fritz_core::connection::PASSWORD_ONLY_USERNAME.to_owned(),
+            ..fritz_sim::Options::default()
+        };
+        let fixture = fritz_sim::Fixture::bundled(fixture).unwrap();
+        let sim = fritz_sim::Sim::start_with(fixture, options).await.unwrap();
+        let read = |command: &str| {
+            let args = strings(&["--host", sim.url().as_str(), "--output", "text", command]);
+            fritz_async(args, vec![("FRITZ_PASSWORD", fritz_sim::PASSWORD)])
+        };
 
-    let overview = success(&read("overview").await);
-    assert!(overview.contains("FRITZ!WLAN Repeater 1750E"), "{overview}");
-    let wlan = success(&read("wlan").await);
-    assert!(wlan.contains("wlan-1"), "{wlan}");
-    let hosts = success(&read("hosts").await);
-    assert!(hosts.contains("device-1"), "{hosts}");
+        let overview = success(&read("overview").await);
+        assert!(overview.contains(model), "{overview}");
+        let wlan = success(&read("wlan").await);
+        assert!(wlan.contains("wlan-1"), "{wlan}");
+        let hosts = success(&read("hosts").await);
+        assert!(hosts.contains("device-1"), "{hosts}");
+    }
 }
