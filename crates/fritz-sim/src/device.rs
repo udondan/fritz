@@ -71,6 +71,9 @@ pub(crate) struct Hooks {
     pub(crate) discard_writes: bool,
     /// The state variables a write sets as well, with their values.
     pub(crate) side_effects: Vec<(String, String)>,
+    /// The state variables that grow before a getter answers them: the
+    /// variable, the step and where it wraps around.
+    pub(crate) counters: Vec<(String, u64, Option<u64>)>,
 }
 
 #[derive(Debug)]
@@ -141,6 +144,16 @@ impl Device {
         validate(scpd, action, arguments)?;
         if let Some(fault) = &hooks.fault {
             return Err(fault.clone());
+        }
+        if is_getter(&action.name) {
+            for (variable, step, wrap) in &hooks.counters {
+                if outputs(action).any(|a| &a.related_state_variable == variable) {
+                    let key = (id.to_owned(), variable.clone());
+                    let now = self.written.get(&key).or_else(|| self.recorded.get(&key));
+                    let next = count(now.map(String::as_str), *step, *wrap);
+                    self.written.insert(key, next);
+                }
+            }
         }
         let recording = self
             .fixture
@@ -234,6 +247,15 @@ impl Device {
         });
         Some(Ok(outputs.collect()))
     }
+}
+
+/// A counter with the value `now`, or 0 if it is none, after adding
+/// `step`, wrapped around at `wrap`, else at 2^64.
+fn count(now: Option<&str>, step: u64, wrap: Option<u64>) -> String {
+    let now: u64 = now.and_then(|v| v.parse().ok()).unwrap_or_default();
+    let next = u128::from(now) + u128::from(step);
+    let next = next % wrap.map_or(1 << 64, u128::from);
+    next.to_string()
 }
 
 impl Fixture {
@@ -388,6 +410,15 @@ mod tests {
             step: None,
         });
         assert_eq!(check(&index, "5"), Ok(()));
+    }
+
+    #[test]
+    fn counts_and_wraps_around() {
+        assert_eq!(count(Some("5"), 2, None), "7");
+        assert_eq!(count(None, 2, None), "2");
+        assert_eq!(count(Some("x"), 2, Some(10)), "2");
+        assert_eq!(count(Some("9"), 3, Some(10)), "2");
+        assert_eq!(count(Some(&u64::MAX.to_string()), 1, None), "0");
     }
 
     #[test]

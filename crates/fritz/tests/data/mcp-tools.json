@@ -158,6 +158,18 @@
     }
   },
   {
+    "name": "fritz_interfaces",
+    "description": "LAN interfaces and wireless networks with byte, packet and error counters; LAN ports.",
+    "inputSchema": {
+      "properties": {},
+      "type": "object"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "openWorldHint": false
+    }
+  },
+  {
     "name": "fritz_internet",
     "description": "Internet connection: status, addresses, provider, DNS, rates, DSL line.",
     "inputSchema": {

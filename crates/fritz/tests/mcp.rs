@@ -147,6 +147,11 @@ async fn reads_the_state() {
     assert_eq!(wlan[1]["clients"][0]["name"], "device-14", "{wlan}");
     assert_eq!(wlan[2]["guest"], true, "{wlan}");
 
+    let interfaces = success(&client, "fritz_interfaces", json!({})).await;
+    assert_eq!(interfaces["lan"][0]["status"], "Up", "{interfaces}");
+    assert_eq!(interfaces["wlan"].as_array().unwrap().len(), 3);
+    assert_eq!(interfaces["ports"][0]["name"], "LAN 1", "{interfaces}");
+
     let ports = success(&client, "fritz_ports", json!({})).await;
     assert_eq!(ports["upnp"], true, "{ports}");
 

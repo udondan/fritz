@@ -23,7 +23,7 @@
 //!   PBKDF2 challenge, and serves the documents of the REST API, like
 //!   `/api/v0/smarthome/overview`, for the open session.
 //! - Tests can [inject](Sim::inject) UPnP errors, delays, discarded writes,
-//!   side effects of writes and a locked login, and read the [requests](Sim::requests) the server
+//!   side effects of writes, counters that grow and a locked login, and read the [requests](Sim::requests) the server
 //!   got.
 //!
 //! ```no_run
@@ -130,6 +130,15 @@ pub enum Injection {
     /// The account is locked: every login fails, even with the right
     /// password.
     LockLogin,
+    /// Every call of a getter that answers a state variable of a service
+    /// first adds `step` to it, like a counter of bytes, and wraps around
+    /// at `wrap`, or at 2^64 without it.
+    Counter {
+        service: String,
+        variable: String,
+        step: u64,
+        wrap: Option<u64>,
+    },
 }
 
 impl Injection {
@@ -155,6 +164,22 @@ impl Injection {
             action: action.into(),
             variable: variable.into(),
             value: value.into(),
+        }
+    }
+
+    /// Every read of the state `variable` of `service` adds `step` to it
+    /// first, wrapping around at `wrap`.
+    pub fn counter(
+        service: impl Into<String>,
+        variable: impl Into<String>,
+        step: u64,
+        wrap: Option<u64>,
+    ) -> Self {
+        Self::Counter {
+            service: service.into(),
+            variable: variable.into(),
+            step,
+            wrap,
         }
     }
 }
@@ -473,10 +498,24 @@ impl Inner {
                 _ => None,
             })
             .collect();
+        let counters = self
+            .injections
+            .iter()
+            .filter_map(|i| match i {
+                Injection::Counter {
+                    service: reference,
+                    variable,
+                    step,
+                    wrap,
+                } if service.matches(reference) => Some((variable.clone(), *step, *wrap)),
+                _ => None,
+            })
+            .collect();
         Hooks {
             fault,
             discard_writes: self.injections.contains(&Injection::DiscardWrites),
             side_effects,
+            counters,
         }
     }
 }
