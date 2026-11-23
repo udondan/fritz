@@ -2741,7 +2741,7 @@ async fn shows_what_is_reachable_from_the_internet() {
          Dynamic DNS      off      info\n\
          Port forwarding  none     info\n\
          Exposed host     off      info\n\
-         UPnP             on       notice\n\
+         UPnP             off      info\n\
          Storage via FTP  off      info\n\
          Shared links     none     info\n\
          VPN              unknown  info\n\
@@ -2751,7 +2751,6 @@ async fn shows_what_is_reachable_from_the_internet() {
          \n\
          notice   Remote access: web interface reachable from the internet, \
          certificate signed by the device itself\n\
-         notice   UPnP: hosts may open ports themselves\n\
          info     TR-069: the provider may manage the device\n"
     );
     let json = success(&run(&sim, &["-o", "json", "exposure"], password).await);
@@ -2772,6 +2771,52 @@ async fn shows_what_is_reachable_from_the_internet() {
             assert_eq!(request.method, "GET", "{request:?}");
         }
     }
+}
+
+#[tokio::test(flavor = "multi_thread")]
+async fn hides_the_urls_of_shared_links() {
+    let entry = [
+        ("NewValid", "1"),
+        ("NewPath", "/photos"),
+        ("NewUrl", "https://link.example/token"),
+    ];
+    let fixture = fritz_sim::Fixture::load(FIXTURE)
+        .unwrap()
+        .with_answer(
+            "X_AVM-DE_Filelinks1",
+            "GetNumberOfFilelinkEntries",
+            None,
+            fritz_sim::Answer::Ok([("NewNumberOfEntries".to_owned(), "1".to_owned())].into()),
+        )
+        .with_answer(
+            "X_AVM-DE_Filelinks1",
+            "GetGenericFilelinkEntry",
+            Some(0),
+            fritz_sim::Answer::Ok(
+                entry
+                    .iter()
+                    .map(|(n, v)| ((*n).to_owned(), (*v).to_owned()))
+                    .collect(),
+            ),
+        );
+    let sim = fritz_sim::Sim::start(fixture).await.unwrap();
+    let password = fritz_sim::PASSWORD;
+    let log = logged(&sim, &["exposure"], password, "trace").await;
+    assert!(log.contains("GetGenericFilelinkEntry"), "{log}");
+    assert!(log.contains(r#"NewUrl="***""#), "{log}");
+    assert!(!log.contains("link.example"), "{log}");
+    let call = [
+        "-o",
+        "json",
+        "tr064",
+        "call",
+        "X_AVM-DE_Filelinks1",
+        "GetGenericFilelinkEntry",
+        "NewIndex=0",
+    ];
+    let output = success(&run(&sim, &call, Some(password)).await);
+    assert!(output.contains("/photos"), "{output}");
+    assert!(!output.contains("link.example"), "{output}");
 }
 
 #[tokio::test(flavor = "multi_thread")]

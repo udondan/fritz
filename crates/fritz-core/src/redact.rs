@@ -32,8 +32,23 @@ pub fn value(name: &str, value: &str) -> String {
     redacted
 }
 
+/// Outputs that grant access by themselves, by service and argument: the
+/// URL of a shared link opens it for anyone who has it.
+const ACCESS_OUTPUTS: [(&str, &str); 1] = [("X_AVM-DE_Filelinks", "NewUrl")];
+
+/// The value of an output argument of `service` as it may be shown: like
+/// [`value`], and [`HIDDEN`] for outputs that grant access, like the URL of
+/// a shared link.
+pub fn output(service: &Service, name: &str, value: &str) -> String {
+    if ACCESS_OUTPUTS.contains(&(service.name(), name)) {
+        HIDDEN.to_owned()
+    } else {
+        self::value(name, value)
+    }
+}
+
 /// The [`tr064::Redact`] hook for the log: values of arguments and query
-/// parameters as [`value`] shows them, and of personal lists like calls and
+/// parameters as [`output`] shows them, and of personal lists like calls and
 /// contacts only their size.
 #[derive(Debug, Clone, Copy, Default)]
 pub struct Log;
@@ -43,7 +58,7 @@ impl tr064::Redact for Log {
         if policy::is_personal(service, action) || policy::is_personal_output(name) {
             format!("({} bytes of personal data)", value.len())
         } else {
-            self::value(name, value)
+            output(service, name, value)
         }
     }
 
@@ -131,6 +146,24 @@ mod tests {
         assert_eq!(
             Log.argument(&info, "GetInfo", "NewDeviceLog", "log"),
             "(3 bytes of personal data)"
+        );
+        let links = service("X_AVM-DE_Filelinks");
+        assert_eq!(
+            Log.argument(
+                &links,
+                "GetGenericFilelinkEntry",
+                "NewUrl",
+                "https://link/a"
+            ),
+            "***"
+        );
+        assert_eq!(
+            Log.argument(&links, "GetGenericFilelinkEntry", "NewPath", "/photos"),
+            "/photos"
+        );
+        assert_eq!(
+            Log.argument(&info, "GetInfo", "NewUrl", "https://box/"),
+            "https://box/"
         );
         assert_eq!(Log.parameter("sid", "0123abcd"), "***");
         assert_eq!(Log.parameter("version", "2"), "2");

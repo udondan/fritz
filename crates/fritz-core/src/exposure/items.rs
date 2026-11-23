@@ -150,7 +150,7 @@ pub(super) fn items(exposure: &Exposure, web: bool) -> Vec<Item> {
             .when_on(Severity::Notice, "ports open to hosts of the home network"),
         without_web(Item::switch(Kind::ExposedHost, exposure.exposed_host))
             .when_on(Severity::Warning, "all ports of one host are open"),
-        Item::switch(Kind::Upnp, exposure.upnp)
+        without_web(Item::switch(Kind::Upnp, exposure.upnp))
             .when_on(Severity::Notice, "hosts may open ports themselves"),
         ftp(exposure.ftp.as_ref()),
         shared_links(exposure),
@@ -272,7 +272,7 @@ mod tests {
             .filter(|i| !i.hints.is_empty())
             .map(|i| i.kind)
             .collect();
-        assert_eq!(web, [Kind::ExposedHost, Kind::Vpn]);
+        assert_eq!(web, [Kind::ExposedHost, Kind::Upnp, Kind::Vpn]);
         assert_eq!(items[4].hints, ["needs a login to the web interface"]);
     }
 

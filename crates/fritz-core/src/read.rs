@@ -46,11 +46,12 @@ impl Reader {
         arguments: &[(&str, &str)],
     ) -> Result<Values, Error> {
         let output = self.output(reference, name, arguments).await?;
+        let (service, _) = self.service(reference).await?;
         Ok(Values(
             output
                 .into_iter()
                 .map(|(name, value)| {
-                    let value = redact::value(&name, &value);
+                    let value = redact::output(&service, &name, &value);
                     (name, value)
                 })
                 .collect(),

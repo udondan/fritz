@@ -705,9 +705,11 @@ Verdict           search_domain_missing: the router answers nas.fritz.box, but t
 outside: remote access, MyFRITZ, dynamic DNS, port forwardings, the exposed
 host, UPnP, FTP, shared links, VPN, TR-069 and USP. Each item has a state
 (`on`, `off` or `unknown` when the device doesn't offer it) and a severity
-(`info`, `notice` or `warning`), with hints below the table. The exposed host
-and VPN connections are read through the web interface; without a login there
-they are `unknown`. Passwords and link URLs are never read.
+(`info`, `notice` or `warning`), with hints below the table. The exposed host,
+VPN connections and whether UPnP may change settings are read through the web
+interface; without a login there they are `unknown`. UPnP is `on` only when
+hosts may open ports through it. Passwords and link URLs are never shown or
+logged.
 
 ```console
 $ fritz exposure

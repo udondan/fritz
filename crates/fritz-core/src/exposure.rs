@@ -200,26 +200,33 @@ impl Exposure {
 /// [`Reader::try_read`].
 pub async fn exposure(reader: &mut Reader, session: Option<Session>) -> Result<Exposure, Error> {
     let web = session.is_some();
-    let (exposed_host, vpn) = match session {
+    let (exposed_host, vpn, upnp_control) = match session {
         Some(session) => {
-            let read = (exposed_host(&session).await, vpn(&session).await);
+            let read = (
+                exposed_host(&session).await,
+                vpn(&session).await,
+                upnp_control(&session).await,
+            );
             // The device ends the session itself after a while.
             let _ = session.logout().await;
             read
         }
-        None => (None, None),
+        None => (None, None, None),
     };
     let ports = ports::ports(reader).await?;
-    let has_ports = !reader.services("WANPPPConnection").is_empty()
-        || !reader.services("WANIPConnection").is_empty();
+    // Hosts open ports only if UPnP is on and may change settings.
+    let upnp = match ports.upnp {
+        Some(true) => upnp_control,
+        other => other,
+    };
     let mut exposure = Exposure {
         items: Vec::new(),
         remote_access: remote_access(reader).await?,
         myfritz: myfritz(reader).await?,
         dynamic_dns: dynamic_dns(reader).await?,
-        port_forwardings: has_ports.then_some(ports.forwardings),
+        port_forwardings: ports.listed.then_some(ports.forwardings),
         exposed_host,
-        upnp: ports.upnp,
+        upnp,
         ftp: ftp(reader).await?,
         shared_links: shared_links(reader).await?,
         vpn,
@@ -375,6 +382,13 @@ fn port(values: &Values, name: &str) -> Option<u16> {
 async fn exposed_host(session: &Session) -> Option<bool> {
     let module = settings::module(session, "forwardrules").await.ok()?;
     flag(module.get("use_exposed_host")?)
+}
+
+/// Whether hosts may change settings of the device through UPnP, like
+/// opening ports, from the settings module `box`.
+async fn upnp_control(session: &Session) -> Option<bool> {
+    let module = settings::module(session, "box").await.ok()?;
+    flag(module.get("upnp_control_activated")?)
 }
 
 /// A flag of the web interface, `"1"` or `true`.

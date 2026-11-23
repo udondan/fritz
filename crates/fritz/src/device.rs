@@ -251,6 +251,7 @@ mod tests {
                 description: Some("ssh".to_owned()),
                 ..Forwarding::default()
             }],
+            listed: true,
         };
         assert_eq!(
             text(|out| ports_text(&ports, out)),

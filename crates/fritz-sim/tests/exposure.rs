@@ -55,7 +55,8 @@ async fn reads_the_recorded_device() {
             (Kind::DynamicDns, Off, None, Info),
             (Kind::PortForwarding, Off, Some(0), Info),
             (Kind::ExposedHost, Off, None, Info),
-            (Kind::Upnp, On, None, Notice),
+            // UPnP is on, but may not change settings.
+            (Kind::Upnp, Off, None, Info),
             (Kind::Ftp, Off, None, Info),
             (Kind::SharedLinks, Off, Some(0), Info),
             // The fixture has no module `vpn`.
@@ -188,6 +189,10 @@ fn everything_on() -> Fixture {
             r#"{"use_exposed_host": "1"}"#,
         )
         .with_api(
+            "/api/v0/generic/box",
+            r#"{"upnp_activated": "1", "upnp_control_activated": "1"}"#,
+        )
+        .with_api(
             "/api/v0/generic/vpn",
             r#"{"wireguard": [{"name": "phone"}, {"name": "laptop"}]}"#,
         )
@@ -230,6 +235,34 @@ async fn warns_about_everything_on() {
     for value in ["home.example", "/photos", "phone", "server-3", "device-49"] {
         assert!(!json.contains(value), "{value} in {json}");
     }
+}
+
+#[tokio::test]
+async fn keeps_what_cannot_be_read_unknown() {
+    // Without the web interface, whether UPnP may open ports is unknown.
+    let (exposure, _) = read(everything_on(), false).await;
+    let upnp = &exposure.items[5];
+    assert_eq!((upnp.kind, upnp.state), (Kind::Upnp, State::Unknown));
+    assert_eq!(upnp.hints, ["needs a login to the web interface"]);
+    // Without the rights to read the forwardings, they are unknown, not
+    // none.
+    let fault = Answer::Fault {
+        code: 606,
+        description: "Action not authorized".to_owned(),
+    };
+    let fixture = Fixture::load(FIXTURE).unwrap().with_answer(
+        "WANPPPConnection1",
+        "GetPortMappingNumberOfEntries",
+        None,
+        fault,
+    );
+    let (exposure, _) = read(fixture, true).await;
+    assert_eq!(exposure.port_forwardings, None);
+    let forwardings = &exposure.items[3];
+    assert_eq!(
+        (forwardings.kind, forwardings.state),
+        (Kind::PortForwarding, State::Unknown)
+    );
 }
 
 #[tokio::test]
