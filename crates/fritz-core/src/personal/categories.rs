@@ -9,6 +9,7 @@
 
 use serde_json::Value;
 
+use crate::redact;
 use crate::session::{Error, Session};
 
 use super::{LogEntry, date};
@@ -25,41 +26,42 @@ const GROUPS: &[(&str, &str, u64)] = &[
     ("usb", "usb", 5),
 ];
 
-/// Reads the entries of `category`, one of
-/// [`CATEGORIES`](super::CATEGORIES), the latest first.
+/// Reads the entries of the event log of the web interface that it shows
+/// now, the latest first, so that [`filter_log`](super::filter_log) can
+/// keep those of `category`, one of [`CATEGORIES`](super::CATEGORIES).
 ///
-/// The page shows the category of its field `filter`, or else the one last
-/// chosen, and the device remembers that field for the web interface. So
-/// this leaves the device as it was: it first reads the page without the
-/// field, which names the chosen category in `data.filter`. If that is
-/// `category`, this answer serves. Otherwise it reads `category` and then
-/// chooses the previous category again, also if that read failed. A page
-/// without `data.filter` gives nothing to restore, so the web interface then
-/// keeps showing `category`.
+/// The page shows the category last chosen in the web interface, which the
+/// device remembers when a request names one in the field `filter`. To leave
+/// the device as it is, this never sends that field: it reads the page as
+/// it is and fails if the page shows only another category.
 ///
 /// # Errors
 ///
-/// The errors of the requests, and those of [`parse_web_log`]. If the read
-/// of `category` fails, its error, after the previous category was chosen
-/// again.
+/// The errors of the request, those of [`parse_web_log`], and
+/// [`Error::Invalid`] if the page shows only a category other than
+/// `category`.
 pub async fn web_log(session: &Session, category: &str) -> Result<Vec<LogEntry>, Error> {
     let group = GROUPS
         .iter()
         .find(|(_, c, _)| *c == category)
         .map_or("all", |(group, ..)| group);
-    let current = session.page(LOG_PAGE, &[]).await?;
-    let chosen = chosen_filter(&current);
-    if chosen.as_deref() == Some(group) {
-        return parse_web_log(&current);
+    let page = session.page(LOG_PAGE, &[]).await?;
+    match chosen_filter(&page) {
+        Some(shown) if shown != "all" && shown != group => {
+            let shown = GROUPS
+                .iter()
+                .find(|(g, ..)| *g == shown)
+                .map_or(shown.as_str(), |(_, c, _)| c);
+            Err(Error::Invalid {
+                what: "the event log page",
+                reason: format!(
+                    "it shows only the category {shown}; choose all categories in the event \
+                     log of the web interface"
+                ),
+            })
+        }
+        _ => parse_web_log(&page),
     }
-    let read = session.page(LOG_PAGE, &[("filter", group)]).await;
-    let restored = match &chosen {
-        Some(previous) => session.page(LOG_PAGE, &[("filter", previous)]).await,
-        None => Ok(String::new()),
-    };
-    let json = read?;
-    restored?;
-    parse_web_log(&json)
 }
 
 /// The filter the page `log` names in `data.filter`, like `net`.
@@ -104,7 +106,7 @@ fn entry(item: &Value) -> Option<LogEntry> {
             .map(str::trim)
             .filter(|t| !t.is_empty())
     };
-    let message = text("msg", 2)?.to_owned();
+    let message = redact::value("msg", text("msg", 2)?);
     let time = match (text("date", 0), text("time", 1)) {
         (Some(day), Some(time)) => Some(date(&format!("{day} {time}"))),
         (Some(day), None) => Some(date(day)),
@@ -140,6 +142,7 @@ mod tests {
     fn reads_entries_with_categories() {
         let json = r#"{"pid": "log", "data": {"log": [
             {"date": "20.11.26", "time": "18:05:42", "msg": "WLAN on.", "group": "wlan", "id": 1},
+            {"msg": "Opened /home.lua?sid=0123abcd&x=1.", "group": "sys"},
             {"date": "20.11.26", "msg": "Internet up.", "group": "net"},
             {"msg": "Odd.", "group": "aha"},
             ["19.11.26", "07:00:01", "Phone ready.", 2, 3],
@@ -159,6 +162,7 @@ mod tests {
             summary,
             [
                 (Some("2026-11-20 18:05:42"), "WLAN on.", Some("wlan")),
+                (None, "Opened /home.lua?sid=***&x=1.", Some("system")),
                 (Some("2026-11-20"), "Internet up.", Some("internet")),
                 (None, "Odd.", Some("aha")),
                 (

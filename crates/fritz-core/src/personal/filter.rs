@@ -133,7 +133,10 @@ impl FromStr for Since {
         if count < 0 {
             return Err(invalid());
         }
-        Ok(Self::Ago(count * seconds))
+        count
+            .checked_mul(seconds)
+            .map(Self::Ago)
+            .ok_or_else(invalid)
     }
 }
 
@@ -333,7 +336,7 @@ mod tests {
             "2026-11-20".parse(),
             Ok(Since::At(timestamp("2026-11-20").unwrap()))
         );
-        for odd in ["", "7", "d", "7y", "-1d", "xd"] {
+        for odd in ["", "7", "d", "7y", "-1d", "xd", "9223372036854775807w"] {
             assert_eq!(
                 odd.parse::<Since>(),
                 Err(FilterError::Since(odd.to_owned()))

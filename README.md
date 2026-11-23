@@ -631,9 +631,9 @@ Filters run locally on the lists, and `--limit` applies after them:
   `system`, `internet`, `telephony`, `wlan` or `usb`. The TR-064 event log
   has no categories, so this reads the event log of the web interface, which
   needs a login there. Where the device shows no categories, the command
-  fails instead of showing all entries. The device remembers the category
-  for its web interface, so fritz chooses the one the web interface had
-  again afterwards.
+  fails instead of showing all entries. The web interface shows the
+  category last chosen there, and fritz never chooses one, so the event log
+  in the web interface has to show all categories.
 
 ```console
 $ fritz log --category internet --since 2026-11-19
