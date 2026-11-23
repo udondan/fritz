@@ -1,4 +1,4 @@
-//! `fritz tr64`: the services and actions of the device, and calls of the
+//! `fritz tr064`: the services and actions of the device, and calls of the
 //! actions that only read.
 
 use std::io::Write;

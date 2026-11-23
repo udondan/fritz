@@ -288,19 +288,19 @@ TIME                 MESSAGE
 
 ### Any TR-064 action
 
-`fritz tr64` reaches every service and action of the device. Listing and
+`fritz tr064` reaches every service and action of the device. Listing and
 describing them needs no login. `call` only runs actions that read and
 refuses all others before anything is sent:
 
 ```console
-$ fritz tr64 actions WLANConfiguration1
+$ fritz tr064 actions WLANConfiguration1
 write     SetEnable
 read      GetInfo
 critical  SetSecurityKeys
 secret    GetSecurityKeys
 …
 
-$ fritz tr64 describe WLANConfiguration1 GetInfo
+$ fritz tr064 describe WLANConfiguration1 GetInfo
 GetInfo (read)
   out  NewEnable    boolean
   out  NewStatus    string (Up, Disabled)
@@ -308,24 +308,24 @@ GetInfo (read)
   out  NewSSID      string
   …
 
-$ fritz tr64 call WLANConfiguration1 GetInfo
+$ fritz tr064 call WLANConfiguration1 GetInfo
 NewEnable   1
 NewStatus   Up
 NewChannel  6
 NewSSID     Home
 …
 
-$ fritz tr64 call WLANConfiguration1 GetSecurityKeys
+$ fritz tr064 call WLANConfiguration1 GetSecurityKeys
 Error: GetSecurityKeys is secret: the name points to a secret; only actions that read are called
 ```
 
-Inputs go after the action, like `fritz tr64 call Hosts1 GetGenericHostEntry NewIndex=0`.
+Inputs go after the action, like `fritz tr064 call Hosts1 GetGenericHostEntry NewIndex=0`.
 
 ### JSON output
 
 The commands from `overview` to `log` print a table on a terminal and JSON
 otherwise, for scripts and agents, and so does `config list`. `--output`
-picks one. The other `config` commands, `tls`, `auth` and `tr64` always
+picks one. The other `config` commands, `tls`, `auth` and `tr064` always
 print text.
 
 ```console
