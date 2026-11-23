@@ -303,9 +303,32 @@ jobs:
 
       # The image of a release is built from its binaries in publish.yml. This
       # job only checks that the image starts and lists its tools, so an
-      # unoptimized build is enough, in a fraction of the time.
+      # unoptimized musl build on the runner is enough. Built here and not in
+      # the Docker build, the dependencies come from the cache. ring needs
+      # musl-gcc.
+      - name: Install the toolchain
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y --no-install-recommends musl-tools
+          rustup update stable
+          rustup default stable
+          rustup target add x86_64-unknown-linux-musl
+
+      - name: Rust dependency cache
+        uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
+        with:
+          key: docker-musl
+          # Only main writes the cache, as in the build job.
+          save-if: ${{ github.ref == 'refs/heads/main' }}
+
+      - name: Build the binary
+        run: |
+          cargo build --locked -p fritz --target x86_64-unknown-linux-musl
+          mkdir -p dist/amd64
+          cp target/x86_64-unknown-linux-musl/debug/fritz dist/amd64/fritz
+
       - name: Build the image
-        run: docker build --build-arg PROFILE=dev -t udondan/fritz .
+        run: docker build --build-arg BINARY=prebuilt -t udondan/fritz .
 
       - name: Run the CLI in the image
         run: |
