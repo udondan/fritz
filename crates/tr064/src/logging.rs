@@ -83,12 +83,10 @@ pub(crate) fn arguments<'a>(
 /// their query, and without the challenge of the device.
 pub(crate) fn error(error: &Error) -> String {
     match error {
-        Error::Http(error) => {
-            let cause = std::error::Error::source(error)
-                .map(|cause| format!(": {cause}"))
-                .unwrap_or_default();
-            format!("HTTP request failed{cause}")
-        }
+        Error::Http(error) => match std::error::Error::source(error) {
+            Some(cause) => format!("HTTP request failed: {cause}"),
+            None => "HTTP request failed".to_owned(),
+        },
         Error::Status { status, .. } => format!("HTTP status {status}"),
         Error::UnsupportedAuth(_) => "unsupported authentication challenge".to_owned(),
         other => other.to_string(),
