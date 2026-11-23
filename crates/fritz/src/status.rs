@@ -11,6 +11,8 @@ use fritz_core::lists::{Mesh, Node};
 use fritz_core::read::Reader;
 use fritz_core::smarthome::{self, Device, Target, Unit};
 use fritz_core::status::{self, Connection, Host, Hosts, Internet, Overview};
+use fritz_core::system::{self, Range, Section};
+use serde::Serialize;
 
 mod host;
 mod tree;
@@ -30,9 +32,19 @@ pub(crate) async fn reader(context: &Context) -> anyhow::Result<Reader> {
         .context("cannot read the device description")
 }
 
-/// Prints the overview.
+/// The overview, and with `--system` the load of the device.
+#[derive(Debug, Serialize)]
+pub(crate) struct Full {
+    #[serde(flatten)]
+    pub(crate) overview: Overview,
+    #[serde(flatten)]
+    pub(crate) system: Option<Section>,
+}
+
+/// Prints the overview, and with `system` the load of the device.
 pub(crate) async fn overview(
     context: &Context,
+    system: bool,
     format: Format,
     out: &mut impl Write,
 ) -> anyhow::Result<()> {
@@ -40,9 +52,89 @@ pub(crate) async fn overview(
     let overview = status::overview(&mut reader)
         .await
         .context("cannot read the overview")?;
-    show(&overview, format, out, |o, out| {
-        pairs(&overview_pairs(o), out)
+    let system = if system {
+        Some(system_section(context).await)
+    } else {
+        None
+    };
+    let full = Full { overview, system };
+    show(&full, format, out, |full, out| {
+        let mut all = overview_pairs(&full.overview);
+        all.extend(full.system.as_ref().map_or_default(system_pairs));
+        pairs(&all, out)
     })
+}
+
+/// Reads the load of the device through the web interface. Never fails:
+/// without a login or the page, the section tells why.
+pub(crate) async fn system_section(context: &Context) -> Section {
+    let session = match context.session().await {
+        Ok(session) => session,
+        Err(e) => return Section::missing(format!("cannot log in to the web interface: {e:#}")),
+    };
+    let section = system::section(&session).await;
+    // The device ends the session itself after a while.
+    let _ = session.logout().await;
+    section
+}
+
+/// The load of the device, like `CPU load  8% (24 h: min 6%, avg 8.3%,
+/// max 15%)`, or why it is missing.
+fn system_pairs(section: &Section) -> Vec<(&'static str, Option<String>)> {
+    let Some(system) = &section.system else {
+        return vec![("System", section.system_note.clone())];
+    };
+    let history = &system.history;
+    let span = history
+        .hours
+        .map_or_else(|| "history".to_owned(), |hours| format!("{hours} h"));
+    let range = |range: Option<&Range>, unit: &str| {
+        range.map_or_default(|r| {
+            format!(
+                " ({span}: min {}{unit}, avg {}{unit}, max {}{unit})",
+                r.min, r.avg, r.max
+            )
+        })
+    };
+    let value = |now: Option<f64>, history: Option<&Range>, unit: &str| {
+        now.map(|now| format!("{now}{unit}{}", range(history, unit)))
+    };
+    let memory = &system.memory;
+    let shares: Vec<String> = [
+        (memory.used_percent, "used"),
+        (memory.cache_percent, "cache"),
+        (memory.free_percent, "free"),
+    ]
+    .iter()
+    .filter_map(|(share, name)| share.map(|share| format!("{share}% {name}")))
+    .collect();
+    let used = range(history.memory_used_percent.as_ref(), "%");
+    let memory = Some(shares.join(", "))
+        .filter(|shares| !shares.is_empty())
+        .map(|shares| format!("{shares}{used}"));
+    vec![
+        (
+            "System",
+            Some("experimental, read from the web interface".to_owned()),
+        ),
+        (
+            "CPU load",
+            value(
+                system.cpu_load_percent,
+                history.cpu_load_percent.as_ref(),
+                "%",
+            ),
+        ),
+        (
+            "CPU temperature",
+            value(
+                system.cpu_temperature_celsius,
+                history.cpu_temperature_celsius.as_ref(),
+                " °C",
+            ),
+        ),
+        ("Memory", memory),
+    ]
 }
 
 fn overview_pairs(overview: &Overview) -> Vec<(&'static str, Option<String>)> {
@@ -560,6 +652,20 @@ pub(crate) mod tests {
             "{output}"
         );
         assert!(!output.contains("Rights"), "{output}");
+    }
+
+    #[tokio::test]
+    async fn leaves_out_the_load_without_a_login() {
+        let dir = tempfile::tempdir().unwrap();
+        // Without a password, nothing is sent.
+        let context = crate::context::tests::context(dir.path(), crate::context::tests::agent());
+        let section = system_section(&context).await;
+        assert_eq!(section.system, None);
+        let note = section.system_note.unwrap();
+        assert!(
+            note.starts_with("cannot log in to the web interface: no password for agent@"),
+            "{note}"
+        );
     }
 
     #[test]

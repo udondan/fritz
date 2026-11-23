@@ -253,9 +253,16 @@
   },
   {
     "name": "fritz_overview",
-    "description": "Model, firmware, uptime, update, internet connection, rights of the user.",
+    "description": "Model, firmware, uptime, update, internet connection, rights of the user, and with `system` CPU load, temperature and memory.",
     "inputSchema": {
-      "properties": {},
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "system": {
+          "default": false,
+          "description": "Also `system`: CPU load in percent, CPU temperature in °C and memory\nshares in percent, now and as min/avg/max over the history the device\nkeeps (24 hours). Experimental, read from the web interface; null with\n`system_note` if the device does not show it.",
+          "type": "boolean"
+        }
+      },
       "type": "object"
     },
     "annotations": {

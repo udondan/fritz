@@ -130,12 +130,27 @@ async fn lists_tools_within_the_budget() {
 }
 
 #[tokio::test(flavor = "multi_thread")]
-async fn reads_the_state() {
+async fn reads_the_overview() {
     let sim = sim().await;
     let client = connect(&sim).await;
 
     let overview = success(&client, "fritz_overview", json!({})).await;
     assert_eq!(overview["model"], "FRITZ!Box 7690", "{overview}");
+    assert!(overview.get("system").is_none(), "{overview}");
+    let overview = success(&client, "fritz_overview", json!({"system": true})).await;
+    assert_eq!(overview["model"], "FRITZ!Box 7690", "{overview}");
+    assert_eq!(overview["system"]["cpu_load_percent"], 8.0, "{overview}");
+    assert_eq!(
+        overview["system"]["history"]["cpu_temperature_celsius"]["max"], 69.0,
+        "{overview}"
+    );
+    client.cancel().await.unwrap();
+}
+
+#[tokio::test(flavor = "multi_thread")]
+async fn reads_the_state() {
+    let sim = sim().await;
+    let client = connect(&sim).await;
 
     let internet = success(&client, "fritz_internet", json!({})).await;
     assert_eq!(internet["status"], "Connected", "{internet}");

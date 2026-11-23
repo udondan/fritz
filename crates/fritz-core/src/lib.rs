@@ -29,6 +29,7 @@ pub mod session;
 pub mod settings;
 pub mod smarthome;
 pub mod status;
+pub mod system;
 pub mod telephony;
 pub mod wlan;
 

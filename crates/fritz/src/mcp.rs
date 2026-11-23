@@ -98,6 +98,17 @@ pub(crate) struct Server {
     tool_router: ToolRouter<Self>,
 }
 
+/// The sections of `fritz_overview`.
+#[derive(Debug, Default, Deserialize, JsonSchema)]
+pub(crate) struct OverviewQuery {
+    /// Also `system`: CPU load in percent, CPU temperature in °C and memory
+    /// shares in percent, now and as min/avg/max over the history the device
+    /// keeps (24 hours). Experimental, read from the web interface; null with
+    /// `system_note` if the device does not show it.
+    #[serde(default)]
+    system: bool,
+}
+
 /// The form of `fritz_mesh`.
 #[derive(Debug, Default, Deserialize, JsonSchema)]
 pub(crate) struct MeshQuery {
@@ -290,13 +301,21 @@ impl Server {
     }
 
     #[tool(
-        description = "Model, firmware, uptime, update, internet connection, rights of the user.",
+        description = "Model, firmware, uptime, update, internet connection, rights of the user, and with `system` CPU load, temperature and memory.",
         annotations(read_only_hint = true, open_world_hint = false)
     )]
-    async fn fritz_overview(&self) -> CallToolResult {
+    async fn fritz_overview(&self, Parameters(query): Parameters<OverviewQuery>) -> CallToolResult {
         self.respond(async {
-            let mut reader = self.reader().await?;
-            Ok(status::overview(&mut reader).await?)
+            let overview = {
+                let mut reader = self.reader().await?;
+                status::overview(&mut reader).await?
+            };
+            let system = if query.system {
+                Some(crate::status::system_section(&self.context).await)
+            } else {
+                None
+            };
+            Ok(crate::status::Full { overview, system })
         })
         .await
     }

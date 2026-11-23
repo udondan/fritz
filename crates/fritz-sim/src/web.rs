@@ -22,6 +22,8 @@ use crate::{Options, SESSION, XML};
 pub(crate) const LOGIN: &str = "/login_sid.lua";
 /// The prefix of the REST API.
 pub(crate) const API: &str = "/api/";
+/// The pages of the web interface, like `ecoStat`.
+pub(crate) const DATA: &str = "/data.lua";
 
 /// The challenge of every login: 10 iterations with the salt `5e55104d`,
 /// then 10 with `c0ffee55`.
@@ -98,6 +100,32 @@ impl Web {
             None => StatusCode::NOT_FOUND.into_response(),
         }
     }
+
+    /// Answers a form posted to `/data.lua` with the page it names in the
+    /// field `page`, if the field `sid` carries the open session.
+    pub(crate) fn page(
+        &self,
+        pages: &HashMap<String, String>,
+        method: &Method,
+        body: &str,
+    ) -> Response {
+        if *method != Method::POST {
+            return StatusCode::METHOD_NOT_ALLOWED.into_response();
+        }
+        let form: HashMap<String, String> = form_urlencoded::parse(body.as_bytes())
+            .into_owned()
+            .collect();
+        if !self.open || form.get("sid").map(String::as_str) != Some(SESSION) {
+            return StatusCode::FORBIDDEN.into_response();
+        }
+        match form
+            .get("page")
+            .and_then(|page| pages.get(&format!("/{page}")))
+        {
+            Some(json) => ([(CONTENT_TYPE, "application/json")], json.clone()).into_response(),
+            None => StatusCode::NOT_FOUND.into_response(),
+        }
+    }
 }
 
 /// The answer of the login page. An open session comes with its rights.
@@ -151,5 +179,23 @@ mod tests {
         assert_eq!(response.status(), StatusCode::METHOD_NOT_ALLOWED);
         let response = web.api(&HashMap::new(), &Method::POST, "/api/v0", &HeaderMap::new());
         assert_eq!(response.status(), StatusCode::METHOD_NOT_ALLOWED);
+        let response = web.page(&HashMap::new(), &Method::GET, "");
+        assert_eq!(response.status(), StatusCode::METHOD_NOT_ALLOWED);
+    }
+
+    #[test]
+    fn serves_pages_only_in_the_session() {
+        let mut web = Web::default();
+        let pages = HashMap::from([("/ecoStat".to_owned(), "{}".to_owned())]);
+        let form = format!("page=ecoStat&sid={SESSION}");
+        let response = web.page(&pages, &Method::POST, &form);
+        assert_eq!(response.status(), StatusCode::FORBIDDEN);
+        web.open = true;
+        let response = web.page(&pages, &Method::POST, "page=ecoStat&sid=0");
+        assert_eq!(response.status(), StatusCode::FORBIDDEN);
+        let response = web.page(&pages, &Method::POST, &form);
+        assert_eq!(response.status(), StatusCode::OK);
+        let response = web.page(&pages, &Method::POST, &format!("page=other&sid={SESSION}"));
+        assert_eq!(response.status(), StatusCode::NOT_FOUND);
     }
 }

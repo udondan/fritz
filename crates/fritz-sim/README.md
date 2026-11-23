@@ -18,8 +18,8 @@ Unofficial, not affiliated with FRITZ! GmbH.
   change only when a test injects that side effect
 - Looks up one host by MAC or IP address in the recorded host entries
 - Serves the list documents (hosts, mesh, calls, phonebook), the session
-  login of the web interface (`login_sid.lua`, PBKDF2) and the Smart Home
-  REST API
+  login of the web interface (`login_sid.lua`, PBKDF2), the Smart Home REST
+  API and pages of `data.lua`, like the system load of `ecoStat`
 - Injects UPnP errors (like 866, 867 or 868 for the second factor), delays,
   discarded writes, side effects of writes and a locked login, and records
   every request

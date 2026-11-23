@@ -1962,6 +1962,83 @@ mod change {
 }
 
 #[tokio::test(flavor = "multi_thread")]
+async fn shows_the_load_of_the_device() {
+    let fixture = fritz_sim::Fixture::load(FIXTURE).unwrap();
+    let sim = fritz_sim::Sim::start(fixture).await.unwrap();
+    let password = Some(fritz_sim::PASSWORD);
+
+    // Only with --system.
+    let overview: serde_json::Value =
+        serde_json::from_str(&success(&run(&sim, &["overview"], password).await)).unwrap();
+    assert!(overview.get("system").is_none(), "{overview}");
+
+    let output = run(&sim, &["overview", "--system"], password).await;
+    let overview: serde_json::Value = serde_json::from_str(&success(&output)).unwrap();
+    assert_eq!(overview["model"], "FRITZ!Box 7690");
+    assert_eq!(
+        overview["system"],
+        serde_json::json!({
+            "cpu_load_percent": 8.0,
+            "cpu_temperature_celsius": 67.0,
+            "memory": {"used_percent": 49.0, "cache_percent": 11.0, "free_percent": 40.0},
+            "history": {
+                "hours": 24,
+                "cpu_load_percent": {"min": 6.0, "avg": 8.2, "max": 15.0},
+                "cpu_temperature_celsius": {"min": 62.0, "avg": 65.7, "max": 69.0},
+                "memory_used_percent": {"min": 48.9, "avg": 49.0, "max": 49.0},
+            },
+        })
+    );
+    assert!(overview.get("system_note").is_none(), "{overview}");
+    // The session ID goes in the form, never into the output, and the
+    // session is closed again.
+    assert!(!stdout(&output).contains(SESSION) && !stderr(&output).contains(SESSION));
+    let pages: Vec<_> = sim
+        .requests()
+        .into_iter()
+        .filter(|r| r.method == "POST" && (r.path == "/data.lua" || r.path == "/login_sid.lua"))
+        .map(|r| r.path)
+        .collect();
+    assert_eq!(pages, ["/login_sid.lua", "/data.lua", "/login_sid.lua"]);
+
+    let text = success(&run(&sim, &["-o", "text", "overview", "--system"], password).await);
+    assert!(
+        text.contains(
+            "System           experimental, read from the web interface\n\
+             CPU load         8% (24 h: min 6%, avg 8.2%, max 15%)\n\
+             CPU temperature  67 °C (24 h: min 62 °C, avg 65.7 °C, max 69 °C)\n\
+             Memory           49% used, 11% cache, 40% free (24 h: min 48.9%, avg 49%, max 49%)\n"
+        ),
+        "{text}"
+    );
+}
+
+#[tokio::test(flavor = "multi_thread")]
+async fn leaves_out_the_load_of_devices_without_it() {
+    // A device without the page.
+    let fixture = fritz_sim::Fixture::bundled("fritz-repeater-2400/8.25").unwrap();
+    let sim = fritz_sim::Sim::start(fixture).await.unwrap();
+    let password = Some(fritz_sim::PASSWORD);
+    let read = async |format: &str| {
+        let args = ["--output", format, "overview", "--system"];
+        success(&run(&sim, &args, password).await)
+    };
+    let overview: serde_json::Value = serde_json::from_str(&read("json").await).unwrap();
+    assert_eq!(overview["model"], "FRITZ!Repeater 2400");
+    assert_eq!(overview.get("system"), Some(&serde_json::Value::Null));
+    let note = overview["system_note"].as_str().unwrap();
+    assert!(
+        note.starts_with("the device shows no system load: "),
+        "{note}"
+    );
+    let text = read("text").await;
+    assert!(
+        text.contains("\nSystem      the device shows no system load: "),
+        "{text}"
+    );
+}
+
+#[tokio::test(flavor = "multi_thread")]
 async fn reads_devices_with_only_a_password() {
     // Devices with only a password, like FRITZ!Repeaters, take any user
     // name; without --user, fritz sends the historic default.
