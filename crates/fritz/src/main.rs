@@ -113,10 +113,17 @@ enum Command {
     },
     /// The wireless networks, and which is the guest network.
     Wlan {
+        /// Only this network, with its details: its service, like
+        /// `WLANConfiguration2`, its number, like `2`, or its SSID.
+        network: Option<String>,
         /// Also the clients of each network: name, IP, MAC, signal and
         /// rate.
         #[arg(long)]
         clients: bool,
+        /// Also the security settings, radio, WPS, night time switch-off and
+        /// statistics of each network, with hints on weak settings.
+        #[arg(long)]
+        details: bool,
     },
     /// The internet connection and, for DSL, the line.
     Internet,
@@ -417,9 +424,16 @@ async fn run(
         Command::Overview => status::overview(&load()?, format, out).await,
         Command::Hosts(args) => status::hosts(&load()?, args, format, out).await,
         Command::Mesh { tree } => status::mesh(&load()?, tree, format, out).await,
-        Command::Wlan { clients } => {
-            let views = fritz_core::wlan::Views { clients };
-            status::wlan(&load()?, views, format, out).await
+        Command::Wlan {
+            network,
+            clients,
+            details,
+        } => {
+            let views = fritz_core::wlan::Views {
+                clients,
+                details: details || network.is_some(),
+            };
+            status::wlan(&load()?, network.as_deref(), views, format, out).await
         }
         Command::Internet => status::internet(&load()?, format, out).await,
         Command::Interfaces { watch } => interfaces::interfaces(&load()?, watch, format, out).await,

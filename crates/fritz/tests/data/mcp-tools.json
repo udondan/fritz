@@ -360,13 +360,18 @@
   },
   {
     "name": "fritz_wlan",
-    "description": "Wireless networks: SSID, band, channel, standard, status, guest network, number of clients, and with `clients` the clients of each.",
+    "description": "Wireless networks: SSID, band, channel, standard, status, guest network, number of clients, with `clients` the clients of each, and with `details` the security settings, radio, WPS, night time switch-off, statistics and hints on weak settings.",
     "inputSchema": {
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "properties": {
         "clients": {
           "default": false,
           "description": "Also the clients of each network: name, IP, MAC, signal in percent\nand rate in Mbit/s.",
+          "type": "boolean"
+        },
+        "details": {
+          "default": false,
+          "description": "Also the details of each network: security (beacon type, encryption,\nhidden SSID, MAC filter, user isolation), radio (channel, automatic\nchannel, possible channels, BSSID), WPS, night time switch-off,\npacket statistics, and hints on weak settings like `wps_enabled`,\n`tkip_allowed` or `open_network`. Keys are never read.",
           "type": "boolean"
         }
       },
