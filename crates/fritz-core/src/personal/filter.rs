@@ -242,7 +242,8 @@ fn after(time: Option<&str>, from: i64) -> bool {
 
 /// The seconds since 1970-01-01 of a time like `2026-11-20`,
 /// `2026-11-20 18:05`, `2026-11-20 18:05:42` or
-/// `2026-11-20T18:05:42+01:00`, without regard to its time zone.
+/// `2026-11-20T18:05:42+01:00`, without regard to its time zone. Years
+/// run from 1 to 9999.
 pub fn timestamp(text: &str) -> Option<i64> {
     let text = text.trim();
     let (day, time) = match text.split_once([' ', 'T']) {
@@ -251,7 +252,11 @@ pub fn timestamp(text: &str) -> Option<i64> {
     };
     let mut parts = day.split('-').map(|p| p.parse::<i64>().ok());
     let (year, month, date) = (parts.next()??, parts.next()??, parts.next()??);
-    if parts.next().is_some() || !(1..=12).contains(&month) || !(1..=31).contains(&date) {
+    if parts.next().is_some()
+        || !(1..=9999).contains(&year)
+        || !(1..=12).contains(&month)
+        || !(1..=31).contains(&date)
+    {
         return None;
     }
     let seconds = match time {
@@ -321,6 +326,8 @@ mod tests {
             "2026-11-20 18:00:99",
             "2026-11-20 18",
             "2026-11-20 x",
+            "1000000000000-01-01",
+            "0-01-01",
         ] {
             assert_eq!(timestamp(odd), None, "{odd}");
         }
