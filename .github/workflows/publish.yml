@@ -150,6 +150,28 @@ jobs:
           "$bin" --version
           "$bin" --help >/dev/null
 
+      # The scripts are the same for every target. Binaries that cannot run
+      # here leave them to a build for the runner.
+      - name: Generate the completion scripts
+        env:
+          RUNS: ${{ matrix.runs }}
+        run: |
+          bin=target/$TARGET/release/fritz
+          [[ -f $bin.exe ]] && bin=$bin.exe
+          if [[ $RUNS != true ]]; then
+            cargo build --release --locked -p fritz
+            bin=target/release/fritz
+          fi
+          dir=target/$TARGET/release/completions
+          mkdir -p "$dir"
+          "$bin" completion bash >"$dir/fritz.bash"
+          "$bin" completion zsh >"$dir/_fritz"
+          "$bin" completion fish >"$dir/fritz.fish"
+          "$bin" completion elvish >"$dir/fritz.elv"
+          "$bin" completion powershell >"$dir/_fritz.ps1"
+          grep -q 'COMPLETE="bash"' "$dir/fritz.bash"
+          ls -l "$dir"
+
       - name: Pack
         id: pack
         run: |
@@ -160,10 +182,10 @@ jobs:
           cp LICENSE README.md "target/$TARGET/release/"
           cd "target/$TARGET/release"
           if [[ $TARGET == *windows* ]]; then
-            7z a "../../../dist/$name.zip" fritz.exe LICENSE README.md
+            7z a "../../../dist/$name.zip" fritz.exe LICENSE README.md completions
             echo "archive=dist/$name.zip" >>"$GITHUB_OUTPUT"
           else
-            tar -czf "../../../dist/$name.tar.gz" fritz LICENSE README.md
+            tar -czf "../../../dist/$name.tar.gz" fritz LICENSE README.md completions
             echo "archive=dist/$name.tar.gz" >>"$GITHUB_OUTPUT"
           fi
 

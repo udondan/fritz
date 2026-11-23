@@ -265,6 +265,7 @@ mod tests {
             host: "192.168.178.1".to_owned(),
             username: Some("agent".to_owned()),
             fingerprint: Some(fingerprint(1)),
+            password_command: None,
         };
         let target = Target::resolve(Some(&profile), &Overrides::default()).unwrap();
         assert_eq!(target.url.as_str(), "https://192.168.178.1:49443/");
@@ -310,6 +311,7 @@ mod tests {
             host: "192.168.178.1".to_owned(),
             username: Some("agent".to_owned()),
             fingerprint: Some(fingerprint(1)),
+            password_command: None,
         };
         let overrides = Overrides {
             host: Some("lab.example:8443".to_owned()),

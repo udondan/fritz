@@ -1,7 +1,9 @@
-//! Passwords: from the environment, or from the keychain of the operating
-//! system (macOS Keychain, Windows Credential Manager, Secret Service on
-//! Linux). Never from files or the command line.
+//! Passwords: from the environment, from a command like the one of a
+//! password manager, or from the keychain of the operating system (macOS
+//! Keychain, Windows Credential Manager, Secret Service on Linux). Never from
+//! files or the command line.
 
+pub mod command;
 mod platform;
 
 use std::fmt;
@@ -23,6 +25,9 @@ pub enum Error {
     /// The keychain failed.
     #[error("the keychain failed")]
     Keychain(#[source] keyring_core::Error),
+    /// The password command is invalid or failed.
+    #[error(transparent)]
+    Command(#[from] command::Error),
     /// Neither the environment nor the keychain has the password.
     #[error("no password for {0}, run `fritz auth login` or set {ENV_PASSWORD}")]
     Missing(String),
@@ -81,10 +86,12 @@ impl Keychain {
 }
 
 /// Where a password came from.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Source {
     /// The environment variable [`ENV_PASSWORD`].
     Environment,
+    /// The password command with the given program.
+    Command(String),
     /// The keychain.
     Keychain,
 }
@@ -93,6 +100,7 @@ impl fmt::Display for Source {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::Environment => write!(f, "the environment variable {ENV_PASSWORD}"),
+            Self::Command(name) => write!(f, "the command `{name}`"),
             Self::Keychain => f.write_str("the keychain"),
         }
     }
@@ -184,6 +192,10 @@ mod tests {
         let (found, source) = password(None, Some(&keychain), ACCOUNT).unwrap();
         assert_eq!(found.expose_secret(), "stored");
         assert_eq!(source.to_string(), "the keychain");
+        assert_eq!(
+            Source::Command("op".to_owned()).to_string(),
+            "the command `op`"
+        );
     }
 
     #[test]

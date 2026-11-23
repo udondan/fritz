@@ -12,7 +12,9 @@ that is not a plain getter is refused before anything is sent.
 
 The device, the user and the trusted certificate come from the profile in
 the configuration file (`fritz config show`), or from `--host`, `--user` and
-`--fingerprint`. The password comes from `FRITZ_PASSWORD` or the keychain.
+`--fingerprint`. The password comes from `FRITZ_PASSWORD`, a password command
+(`FRITZ_PASSWORD_COMMAND` or `password_command` in the profile), or the
+keychain.
 If a command says there is no password or no trusted certificate, ask the
 user to run `fritz auth login` or `fritz tls trust`. Never ask for the
 password in the chat.
@@ -21,6 +23,8 @@ password in the chat.
 
 Always pass `--output json` for results you parse: JSON is the default when
 stdout is not a terminal, but the user may set `FRITZ_OUTPUT=text`.
+`--output yaml` prints the same fields as YAML, for a user who wants to read
+or paste them.
 
 | Question                                    | Command                              |
 | ------------------------------------------- | ------------------------------------ |

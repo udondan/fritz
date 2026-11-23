@@ -9,7 +9,8 @@ use clap::{Args, Subcommand};
 use fritz_core::change::{self, Changer, Outcome, Permit, Plan, Settings};
 
 use crate::context::Context;
-use crate::status::{Format, json, pairs};
+use crate::output::{Format, show};
+use crate::status::pairs;
 use crate::tr64::parse_arguments;
 
 #[derive(Debug, Args)]
@@ -60,7 +61,7 @@ pub(crate) async fn run(
     format: Format,
     out: &mut impl Write,
 ) -> anyhow::Result<()> {
-    let mut changer = changer(context, args.state_dir)?;
+    let mut changer = changer(context, args.state_dir).await?;
     match args.command {
         ChangeCommand::Identity => {
             let identity = changer.identity().await?;
@@ -76,7 +77,7 @@ pub(crate) async fn run(
 
 /// A changer of the device of the context, with the password, the
 /// permit of the environment and the lists of the configuration.
-fn changer(context: &Context, dir: Option<PathBuf>) -> anyhow::Result<Changer> {
+async fn changer(context: &Context, dir: Option<PathBuf>) -> anyhow::Result<Changer> {
     let dir = dir
         .or_else(change::default_dir)
         .context("cannot find the home directory, pass --state-dir")?;
@@ -86,7 +87,7 @@ fn changer(context: &Context, dir: Option<PathBuf>) -> anyhow::Result<Changer> {
         dir,
         source: "cli",
     };
-    Ok(Changer::new(context.client()?, settings))
+    Ok(Changer::new(context.client().await?, settings))
 }
 
 /// Plans a change and prints it with its token.
@@ -100,10 +101,7 @@ async fn plan(
     let plan = changer
         .plan(&call.service, &call.action, &arguments)
         .await?;
-    match format {
-        Format::Json => json(&plan, out),
-        Format::Text => pairs(&plan_pairs(&plan), out),
-    }
+    show(&plan, format, out, |p, out| pairs(&plan_pairs(p), out))
 }
 
 fn plan_pairs(plan: &Plan) -> Vec<(&'static str, Option<String>)> {
@@ -138,10 +136,9 @@ async fn apply(
     let outcome = changer
         .apply(&call.service, &call.action, &arguments, token)
         .await?;
-    match format {
-        Format::Json => json(&outcome, out)?,
-        Format::Text => pairs(&outcome_pairs(&outcome), out)?,
-    }
+    show(&outcome, format, out, |o, out| {
+        pairs(&outcome_pairs(o), out)
+    })?;
     if outcome.verified == Some(false) {
         bail!("the device does not return the values it was given");
     }

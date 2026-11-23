@@ -19,7 +19,8 @@ use rustls_platform_verifier::BuilderVerifierExt;
 use semver::Version;
 use serde::{Deserialize, Serialize};
 
-use crate::status::{self, Format};
+use crate::output::{self, Format};
+use crate::status;
 
 /// The exit code of `fritz version --check` when a newer version exists.
 pub(crate) const NEWER: i32 = 10;
@@ -110,10 +111,7 @@ pub(crate) async fn run(check: bool, format: Format, out: &mut impl Write) -> an
         build: Build::current(),
         latest,
     };
-    match format {
-        Format::Json => status::json(&report, out)?,
-        Format::Text => status::pairs(&pairs(&report), out)?,
-    }
+    output::show(&report, format, out, |r, out| status::pairs(&pairs(r), out))?;
     Ok(report.latest.is_some_and(|l| l.newer))
 }
 

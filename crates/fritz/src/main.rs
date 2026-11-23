@@ -8,9 +8,11 @@
 mod auth;
 #[cfg(feature = "write")]
 mod change;
+mod completion;
 mod context;
 mod device;
 mod mcp;
+mod output;
 mod personal;
 mod settings;
 mod status;
@@ -23,21 +25,23 @@ use std::io::{self, IsTerminal as _, Write as _};
 use std::path::{Path, PathBuf};
 
 use anyhow::{Context as _, bail};
-use clap::{Args, Parser, Subcommand};
+use clap::{Args, CommandFactory as _, Parser, Subcommand};
 use fritz_core::anonymize;
 use fritz_core::capture::{self, Options, Plan};
 use fritz_core::connection::Overrides;
 use fritz_core::secrets::ENV_PASSWORD;
+use fritz_core::secrets::command::{ENV_PASSWORD_COMMAND, PasswordCommand};
 use tr064::{Client, SecretString, Url};
 
 use crate::context::Context;
-use crate::status::Format;
+use crate::output::Format;
 
 /// CLI and MCP server for FRITZ!Box routers (unofficial).
 ///
 /// The password comes from the environment variable `FRITZ_PASSWORD`, else
-/// from the keychain (see `fritz auth login`). `FRITZ_NO_KEYCHAIN=1` turns
-/// the keychain off.
+/// from the command in `FRITZ_PASSWORD_COMMAND` or the profile (see `fritz
+/// config init --password-command`), else from the keychain (see `fritz auth
+/// login`). `FRITZ_NO_KEYCHAIN=1` turns the keychain off.
 #[derive(Debug, Parser)]
 #[command(name = "fritz", version, about)]
 struct Cli {
@@ -54,7 +58,7 @@ struct Global {
     #[arg(long, global = true, env = "FRITZ_CONFIG")]
     config: Option<PathBuf>,
     /// The profile in the configuration file, else the default one.
-    #[arg(long, global = true, env = "FRITZ_PROFILE")]
+    #[arg(long, global = true, env = "FRITZ_PROFILE", add = completion::profiles())]
     profile: Option<String>,
     /// The device: a host name or address, optionally with a port, for HTTPS
     /// on port 49443, or a full address like `http://192.168.178.1:49000`.
@@ -69,9 +73,10 @@ struct Global {
     /// one of the profile.
     #[arg(long, global = true, env = "FRITZ_TLS_FINGERPRINT")]
     fingerprint: Option<String>,
-    /// How to print results: text, or JSON, which is the default when the
-    /// output is not a terminal. Set `FRITZ_OUTPUT=text` to keep text in
-    /// pipes, like `fritz hosts | grep phone`.
+    /// How to print results: text, JSON, which is the default when the
+    /// output is not a terminal, or YAML. Set `FRITZ_OUTPUT=text` to keep
+    /// text in pipes, like `fritz hosts | grep phone`. With YAML, errors are
+    /// YAML on stderr as well.
     #[arg(short, long, global = true, value_enum, env = "FRITZ_OUTPUT")]
     output: Option<Format>,
 }
@@ -171,13 +176,32 @@ enum Command {
         #[arg(long)]
         check: bool,
     },
+    /// Print the completion script for a shell.
+    ///
+    /// The script completes the commands, options and the names of the
+    /// profiles. It calls `fritz` from the `PATH` on every completion, which
+    /// reads the configuration file but never contacts the device. Write the
+    /// script again after an update of fritz.
+    #[command(after_help = completion::INSTALL)]
+    Completion {
+        /// The shell.
+        #[arg(value_enum)]
+        shell: completion::Shell,
+    },
 }
 
 #[derive(Debug, Subcommand)]
 enum ConfigCommand {
     /// Save --host, --user and --fingerprint to the profile, which becomes
     /// the default if there is none.
-    Init,
+    Init {
+        /// A command that prints the password, like a password manager: a
+        /// JSON list like `["op", "read", "op://Private/FRITZ!Box/password"]`,
+        /// or words separated by spaces, like `pass show fritz`. It runs
+        /// without a shell.
+        #[arg(long, value_name = "COMMAND")]
+        password_command: Option<PasswordCommand>,
+    },
     /// Show the settings in effect, without the password.
     Show,
     /// List the profiles, and mark the default one.
@@ -299,6 +323,7 @@ struct CaptureArgs {
 
 #[tokio::main(flavor = "current_thread")]
 async fn main() -> anyhow::Result<()> {
+    completion::complete(Cli::command);
     let cli = Cli::parse();
     let global = cli.global;
     let format = global
@@ -311,20 +336,44 @@ async fn main() -> anyhow::Result<()> {
             fingerprint: global.fingerprint,
         };
         let password = std::env::var(ENV_PASSWORD).ok().map(SecretString::from);
-        Context::load(
-            global.config,
-            global.profile,
-            overrides,
-            password,
-            system::keychains(),
+        let command = std::env::var(ENV_PASSWORD_COMMAND).ok();
+        let command = command
+            .map(|text| text.parse::<PasswordCommand>())
+            .transpose()
+            .with_context(|| format!("{ENV_PASSWORD_COMMAND} is invalid"))?;
+        Ok::<_, anyhow::Error>(
+            Context::load(
+                global.config,
+                global.profile,
+                overrides,
+                password,
+                system::keychains(),
+            )?
+            .with_password_command(command),
         )
     };
-    if let Command::Mcp { personal } = cli.command {
+    let result = run(cli.command, format, load).await;
+    if let (Format::Yaml, Err(error)) = (format, &result) {
+        io::Write::flush(&mut io::stdout())?;
+        output::yaml(&output::failure(error), &mut io::stderr())?;
+        std::process::exit(1);
+    }
+    result
+}
+
+/// Runs a command with the context from `load`, which it loads only when
+/// the command needs it.
+async fn run(
+    command: Command,
+    format: Format,
+    load: impl FnOnce() -> anyhow::Result<Context>,
+) -> anyhow::Result<()> {
+    if let Command::Mcp { personal } = command {
         // Before stdout is locked: the transport writes to it.
         return mcp::serve(load()?, personal).await;
     }
     let out = &mut io::stdout().lock();
-    match cli.command {
+    match command {
         Command::Mcp { .. } => unreachable!("served above"),
         Command::Overview => status::overview(&load()?, format, out).await,
         Command::Hosts { active } => status::hosts(&load()?, active, format, out).await,
@@ -341,8 +390,10 @@ async fn main() -> anyhow::Result<()> {
             personal::phonebook(&load()?, search.as_deref(), format, out).await
         }
         Command::Log { limit } => personal::log(&load()?, limit, format, out).await,
-        Command::Config(ConfigCommand::Init) => settings::init(&mut load()?, out),
-        Command::Config(ConfigCommand::Show) => settings::show(&load()?, out),
+        Command::Config(ConfigCommand::Init { password_command }) => {
+            settings::init(&mut load()?, password_command, out)
+        }
+        Command::Config(ConfigCommand::Show) => settings::show(&load()?, out).await,
         Command::Config(ConfigCommand::List) => settings::list(&load()?, format, out),
         Command::Tls(TlsCommand::Fingerprint) => tls::fingerprint(&load()?, out).await,
         Command::Tls(TlsCommand::Trust) => {
@@ -351,7 +402,7 @@ async fn main() -> anyhow::Result<()> {
         Command::Tls(TlsCommand::Forget) => tls::forget(&mut load()?, out),
         Command::Auth(AuthCommand::Login) => auth::login(&load()?, system::read_password, out),
         Command::Auth(AuthCommand::Logout) => auth::logout(&load()?, out),
-        Command::Auth(AuthCommand::Status) => auth::status(&load()?, out),
+        Command::Auth(AuthCommand::Status) => auth::status(&load()?, out).await,
         Command::Tr064(command) => tr64(&load()?, command, out).await,
         #[cfg(feature = "write")]
         Command::Change(args) => change::run(&load()?, args, format, out).await,
@@ -364,6 +415,7 @@ async fn main() -> anyhow::Result<()> {
             }
             Ok(())
         }
+        Command::Completion { shell } => Ok(completion::script(shell, out)?),
     }
 }
 
@@ -434,7 +486,7 @@ async fn capture(context: &Context, args: CaptureArgs) -> anyhow::Result<()> {
     }
     let out = args.out.expect("clap requires --out without --plan");
     check_outside_git(&out)?;
-    let (password, _) = context.password(&target)?;
+    let (password, _) = context.password(&target).await?;
     if url.scheme() == "http" {
         eprintln!("warning: the answers travel unencrypted, use https and run `fritz tls trust`");
     }
