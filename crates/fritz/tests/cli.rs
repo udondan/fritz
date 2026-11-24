@@ -672,10 +672,14 @@ fn prints_completion_scripts() {
     }
     let zsh = success(&fritz(&["completion", "zsh"]));
     assert!(zsh.starts_with("#compdef fritz\n"), "{zsh}");
-    let output = fritz(&["completion", "sh"]);
+    // The shell by its path, and from `$SHELL`.
+    assert_eq!(success(&fritz(&["completion", "/bin/zsh"])), zsh);
+    let fish = success(&fritz_with(&["completion"], &[("SHELL", "/usr/bin/fish")]));
+    assert!(fish.starts_with("complete "), "{fish}");
+    let output = fritz(&["completion", "/bin/sh"]);
     assert!(!output.status.success());
     let output = fritz(&["completion", "--help"]);
-    assert!(success(&output).contains("fritz completion zsh > \"${fpath[1]}/_fritz\""));
+    assert!(success(&output).contains(r#"'eval "$(fritz completion zsh)"'"#));
 }
 
 #[test]

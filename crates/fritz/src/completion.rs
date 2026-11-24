@@ -6,11 +6,12 @@
 //! commands, and complete the names of the profiles from the configuration
 //! file. Nothing contacts the device.
 
-use std::ffi::OsString;
+use std::ffi::{OsStr, OsString};
 use std::io;
 use std::path::PathBuf;
 
 use clap::ValueEnum;
+use clap::builder::{EnumValueParser, PossibleValue, TypedValueParser};
 use clap_complete::engine::{ArgValueCandidates, CompletionCandidate};
 use clap_complete::env::{CompleteEnv, Shells};
 use fritz_core::config::Config;
@@ -19,30 +20,83 @@ use fritz_core::config::Config;
 /// running a command.
 const VAR: &str = "COMPLETE";
 
-/// How to install the scripts, for the help.
-pub(crate) const INSTALL: &str = r#"Install:
-  bash:       fritz completion bash > ~/.local/share/bash-completion/completions/fritz
-  zsh:        fritz completion zsh > "${fpath[1]}/_fritz"
-  fish:       fritz completion fish > ~/.config/fish/completions/fritz.fish
-  elvish:     fritz completion elvish >> ~/.config/elvish/rc.elv
-  PowerShell: fritz completion powershell >> $PROFILE"#;
+/// How to install the scripts, for the help. Each shell loads the script
+/// from `fritz` when it starts, so it follows updates of fritz.
+pub(crate) const INSTALL: &str = r#"Install, so that the script follows updates of fritz:
+
+bash:
+  echo 'eval "$(fritz completion bash)"' \
+    > ~/.local/share/bash-completion/completions/fritz
+
+zsh:
+  printf '%s\n' '#compdef fritz' 'eval "$(fritz completion zsh)"' \
+    > "${fpath[1]}/_fritz"
+
+fish:
+  echo 'fritz completion fish | source' \
+    > ~/.config/fish/completions/fritz.fish
+
+elvish:
+  echo 'eval (fritz completion elvish | slurp)' >> ~/.config/elvish/rc.elv
+
+PowerShell:
+  Add-Content $PROFILE 'fritz completion powershell | Out-String | Invoke-Expression'"#;
 
 /// The program that the scripts complete and call, found on the `PATH`.
 const BIN: &str = "fritz";
 
-/// Loaded from `$fpath`, the zsh script is the body of the function `_fritz`,
-/// which only registers the completer. This also completes on the first tab.
+/// Loaded from `$fpath`, the zsh script runs in the function `_fritz`, which
+/// only registers the completer. This also completes on the first tab, also
+/// when `_fritz` loads the script with `eval` or `source`.
 const ZSH_AUTOLOAD: &str =
-    r#"if [[ ${funcstack[1]} == _fritz ]]; then _clap_dynamic_completer_fritz "$@"; fi"#;
+    r#"if (( ${funcstack[(Ie)_fritz]} )); then _clap_dynamic_completer_fritz "$@"; fi"#;
 
 /// The shells with completion scripts.
-#[derive(Debug, Clone, Copy, ValueEnum)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, ValueEnum)]
 pub(crate) enum Shell {
     Bash,
     Elvish,
     Fish,
+    #[value(alias = "pwsh")]
     Powershell,
     Zsh,
+}
+
+/// Parses a shell by its name or the path of its program, like `$SHELL`:
+/// `/bin/zsh`, `-zsh` of a login shell or `pwsh.exe` work as well.
+#[derive(Debug, Clone, Copy)]
+pub(crate) struct ShellParser;
+
+impl TypedValueParser for ShellParser {
+    type Value = Shell;
+
+    fn parse_ref(
+        &self,
+        command: &clap::Command,
+        arg: Option<&clap::Arg>,
+        value: &OsStr,
+    ) -> Result<Shell, clap::Error> {
+        let name = value.to_str().map_or(value, |v| OsStr::new(shell_name(v)));
+        EnumValueParser::<Shell>::new().parse_ref(command, arg, name)
+    }
+
+    fn possible_values(&self) -> Option<Box<dyn Iterator<Item = PossibleValue> + '_>> {
+        Some(Box::new(
+            Shell::value_variants()
+                .iter()
+                .filter_map(ValueEnum::to_possible_value),
+        ))
+    }
+}
+
+/// The name of a shell in its program path, without the dash of a login
+/// shell and without `.exe`.
+fn shell_name(value: &str) -> &str {
+    let name = value.rsplit(['/', '\\']).next().unwrap_or(value);
+    let name = name.trim_start_matches('-');
+    name.strip_suffix(".exe")
+        .or_else(|| name.strip_suffix(".EXE"))
+        .unwrap_or(name)
 }
 
 impl Shell {
@@ -129,6 +183,29 @@ mod tests {
 
     fn path(args: &[&str], env: Option<&str>) -> Option<PathBuf> {
         config_path(args.iter().map(OsString::from), env.map(OsString::from))
+    }
+
+    #[test]
+    fn parses_shells_by_their_path() {
+        let command = clap::Command::new("test");
+        let parse = |value: &str| ShellParser.parse_ref(&command, None, OsStr::new(value));
+        for (value, shell) in [
+            ("zsh", Shell::Zsh),
+            ("/bin/zsh", Shell::Zsh),
+            ("/opt/homebrew/bin/bash", Shell::Bash),
+            ("-zsh", Shell::Zsh),
+            ("/usr/local/bin/fish", Shell::Fish),
+            ("pwsh", Shell::Powershell),
+            (
+                "C:\\Program Files\\PowerShell\\7\\pwsh.exe",
+                Shell::Powershell,
+            ),
+            ("elvish", Shell::Elvish),
+        ] {
+            assert_eq!(parse(value).unwrap(), shell, "{value}");
+        }
+        assert!(parse("/bin/sh").is_err());
+        assert!(parse("").is_err());
     }
 
     #[test]

@@ -307,12 +307,13 @@ enum Command {
     ///
     /// The script completes the commands, options and the names of the
     /// profiles. It calls `fritz` from the `PATH` on every completion, which
-    /// reads the configuration file but never contacts the device. Write the
-    /// script again after an update of fritz.
+    /// reads the configuration file but never contacts the device. Load the
+    /// script from fritz when the shell starts, as shown below, so that it
+    /// follows updates of fritz.
     #[command(after_help = completion::INSTALL)]
     Completion {
-        /// The shell.
-        #[arg(value_enum)]
+        /// The shell, by name or by path like `$SHELL`.
+        #[arg(value_parser = completion::ShellParser, env = "SHELL", hide_env_values = true)]
         shell: completion::Shell,
     },
 }

@@ -984,16 +984,28 @@ removed the descriptions of 1 device from /home/me/.cache/fritz
 `fritz completion <shell>` prints the completion script for bash, zsh, fish,
 elvish or PowerShell. It completes the commands, the options and the names
 of the profiles from the configuration file. On every completion the script
-calls `fritz` from the `PATH`, which never contacts the device. Write the
-script again after an update of fritz:
+calls `fritz` from the `PATH`, which never contacts the device. The shell
+can also be given by its path, and defaults to `$SHELL`, so
+`fritz completion "$SHELL"` and `fritz completion` print the script for the
+login shell.
+
+Install a file that loads the script from `fritz` when the shell starts, so
+that the completion follows updates of fritz:
 
 ```sh
-fritz completion bash > ~/.local/share/bash-completion/completions/fritz
-fritz completion zsh > "${fpath[1]}/_fritz"
-fritz completion fish > ~/.config/fish/completions/fritz.fish
+# bash
+echo 'eval "$(fritz completion bash)"' \
+  > ~/.local/share/bash-completion/completions/fritz
+# zsh
+printf '%s\n' '#compdef fritz' 'eval "$(fritz completion zsh)"' \
+  > "${fpath[1]}/_fritz"
+# fish
+echo 'fritz completion fish | source' > ~/.config/fish/completions/fritz.fish
 ```
 
 `fritz completion --help` shows the commands for elvish and PowerShell.
+Homebrew installs the scripts of the installed version and replaces them on
+every upgrade.
 
 ### Version and updates
 
