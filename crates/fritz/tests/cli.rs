@@ -674,6 +674,8 @@ fn prints_completion_scripts() {
     assert!(zsh.starts_with("#compdef fritz\n"), "{zsh}");
     // The shell by its path, and from `$SHELL`.
     assert_eq!(success(&fritz(&["completion", "/bin/zsh"])), zsh);
+    // The name of a login shell, with a dash.
+    assert_eq!(success(&fritz(&["completion", "-zsh"])), zsh);
     let fish = success(&fritz_with(&["completion"], &[("SHELL", "/usr/bin/fish")]));
     assert!(fish.starts_with("complete "), "{fish}");
     let output = fritz(&["completion", "/bin/sh"]);

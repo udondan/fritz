@@ -313,7 +313,7 @@ enum Command {
     #[command(after_help = completion::INSTALL)]
     Completion {
         /// The shell, by name or by path like `$SHELL`.
-        #[arg(value_parser = completion::ShellParser, env = "SHELL", hide_env_values = true)]
+        #[arg(value_parser = completion::ShellParser, env = "SHELL", hide_env_values = true, allow_hyphen_values = true)]
         shell: completion::Shell,
     },
 }
