@@ -1,6 +1,6 @@
 [package]
 name = "fritz-core"
-version = "0.1.1"
+version = "0.2.0"
 description = "FRITZ!Box specific logic for the fritz CLI and MCP server (unofficial, not affiliated with FRITZ! GmbH)"
 readme = "README.md"
 keywords = ["fritzbox", "tr-064", "router"]
