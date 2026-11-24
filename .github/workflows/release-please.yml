@@ -29,11 +29,11 @@ jobs:
 
       # Release Please bumps the versions in the crate manifests only. The
       # requirements in the root [workspace.dependencies] and Cargo.lock
-      # follow in a commit on the release pull request.
-      - if: steps.release.outputs.pr
-        uses: actions/checkout@v7
+      # follow in a commit on the release pull request. Without a changed
+      # release pull request, the checkout of main provides the scripts.
+      - uses: actions/checkout@v7
         with: # zizmor: ignore[artipacked] pushes to the release pull request
-          ref: ${{ fromJSON(steps.release.outputs.pr).headBranchName }}
+          ref: ${{ fromJSON(steps.release.outputs.pr || '{}').headBranchName || github.ref_name }}
           token: ${{ secrets.OVERRIDE_TOKEN }}
 
       - if: steps.release.outputs.pr
@@ -51,13 +51,17 @@ jobs:
           git push
 
       # With several components, Release Please titles the pull request
-      # "chore: release main". Name the planned versions instead.
-      - if: steps.release.outputs.pr
-        name: Name the versions in the title
+      # "chore: release main". Name the planned versions instead. The pull
+      # request is found by its label, because Release Please reports it in
+      # its outputs only when it changed it.
+      - name: Name the versions in the title
         env:
           GH_TOKEN: ${{ secrets.OVERRIDE_TOKEN }}
-          PR: ${{ fromJSON(steps.release.outputs.pr).number }}
         run: |
-          title=$(gh pr view "$PR" -R "$GITHUB_REPOSITORY" --json body --jq .body |
-            bash .github/scripts/release-title.sh)
-          gh pr edit "$PR" -R "$GITHUB_REPOSITORY" --title "$title"
+          prs=$(gh pr list -R "$GITHUB_REPOSITORY" --state open \
+            --label "autorelease: pending" --json number --jq '.[].number')
+          for pr in $prs; do
+            title=$(gh pr view "$pr" -R "$GITHUB_REPOSITORY" --json body --jq .body |
+              bash .github/scripts/release-title.sh)
+            gh pr edit "$pr" -R "$GITHUB_REPOSITORY" --title "$title"
+          done
