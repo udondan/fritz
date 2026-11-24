@@ -49,3 +49,15 @@ jobs:
           git -c user.name=udondan -c user.email=6443408+udondan@users.noreply.github.com \
             commit -m "chore: sync the workspace versions"
           git push
+
+      # With several components, Release Please titles the pull request
+      # "chore: release main". Name the planned versions instead.
+      - if: steps.release.outputs.pr
+        name: Name the versions in the title
+        env:
+          GH_TOKEN: ${{ secrets.OVERRIDE_TOKEN }}
+          PR: ${{ fromJSON(steps.release.outputs.pr).number }}
+        run: |
+          title=$(gh pr view "$PR" -R "$GITHUB_REPOSITORY" --json body --jq .body |
+            bash .github/scripts/release-title.sh)
+          gh pr edit "$PR" -R "$GITHUB_REPOSITORY" --title "$title"
