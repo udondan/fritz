@@ -50,18 +50,40 @@ jobs:
             commit -m "chore: sync the workspace versions"
           git push
 
-      # With several components, Release Please titles the pull request
-      # "chore: release main". Name the planned versions instead. The pull
-      # request is found by its label, because Release Please reports it in
-      # its outputs only when it changed it.
-      - name: Name the versions in the title
+      # Release Please lists a commit under every crate whose files it
+      # changes. A commit with a crate as scope, like "feat(fritz-sim): …",
+      # belongs to the notes of that crate only.
+      - if: steps.release.outputs.pr
+        name: Keep scoped entries in the changelog of their crate
+        run: |
+          jq -r '.packages | to_entries[] | "\(.key) \(.value.component)"' release-please-config.json |
+            while read -r path component; do
+              if [[ -f $path/CHANGELOG.md ]]; then
+                python3 .github/scripts/release-notes-scope.py changelog "$component" "$path/CHANGELOG.md"
+              fi
+            done
+          if git diff --quiet; then
+            exit 0
+          fi
+          git add crates/*/CHANGELOG.md
+          git -c user.name=udondan -c user.email=6443408+udondan@users.noreply.github.com \
+            commit -m "chore: keep scoped entries in the changelog of their crate"
+          git push
+
+      # The same for the body of the release pull request, which becomes the
+      # notes of the releases. With several components, Release Please also
+      # titles the pull request "chore: release main"; name the planned
+      # versions instead. The pull request is found by its label, because
+      # Release Please reports it in its outputs only when it changed it.
+      - name: Name the versions in the title and scope the notes
         env:
           GH_TOKEN: ${{ secrets.OVERRIDE_TOKEN }}
         run: |
           prs=$(gh pr list -R "$GITHUB_REPOSITORY" --state open \
             --label "autorelease: pending" --json number --jq '.[].number')
           for pr in $prs; do
-            title=$(gh pr view "$pr" -R "$GITHUB_REPOSITORY" --json body --jq .body |
-              bash .github/scripts/release-title.sh)
-            gh pr edit "$pr" -R "$GITHUB_REPOSITORY" --title "$title"
+            gh pr view "$pr" -R "$GITHUB_REPOSITORY" --json body --jq .body |
+              python3 .github/scripts/release-notes-scope.py body > "$RUNNER_TEMP/body.md"
+            title=$(bash .github/scripts/release-title.sh < "$RUNNER_TEMP/body.md")
+            gh pr edit "$pr" -R "$GITHUB_REPOSITORY" --title "$title" --body-file "$RUNNER_TEMP/body.md"
           done
