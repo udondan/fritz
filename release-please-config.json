@@ -32,8 +32,8 @@
   ],
   "packages": {
     "crates/tr064": { "component": "tr064" },
-    "crates/fritz-core": { "component": "fritz-core" },
-    "crates/fritz-sim": { "component": "fritz-sim" },
-    "crates/fritz": { "component": "fritz" }
+    "crates/fritz-core": { "component": "fritz-core", "release-as": "0.2.0" },
+    "crates/fritz-sim": { "component": "fritz-sim", "release-as": "0.2.0" },
+    "crates/fritz": { "component": "fritz", "release-as": "0.2.0" }
   }
 }
