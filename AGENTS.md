@@ -23,6 +23,10 @@ Cargo workspace:
   (`=x.y.z`).
 - Conventional commits: `feat:`/`fix:` only for changes to shipped code,
   `chore:` for tooling and CI, `build(deps):` for runtime dependency updates.
+  A change that belongs to one crate names it as scope, like
+  `feat(fritz-sim): add a fixture`: it then appears in the release notes of
+  that crate only, even when it touches others. Without a scope, a change is
+  listed under every crate whose files outside `tests/` it changes.
 
 ## Commands
 

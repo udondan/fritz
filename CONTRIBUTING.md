@@ -54,6 +54,11 @@ post it.
 
 Pull request titles follow [Conventional Commits](https://www.conventionalcommits.org/).
 Pull requests are squash-merged, and the title becomes the commit message.
+The release notes of each crate list the changes to its files. When a change
+belongs to one crate but also touches others, name that crate as scope:
+`tr064`, `fritz-core`, `fritz-sim` or `fritz`, for example
+`feat(fritz-sim): add a fixture of the FRITZ!Box 7590`. It then appears in
+the notes of that crate only.
 
 ## Fixtures from other models
 
