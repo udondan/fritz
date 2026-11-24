@@ -75,9 +75,10 @@ struct Global {
     /// The profile in the configuration file, else the default one.
     #[arg(long, global = true, env = "FRITZ_PROFILE", add = completion::profiles())]
     profile: Option<String>,
-    /// The device: a host name or address, optionally with a port, for HTTPS
-    /// on port 49443, or a full address like `http://192.168.178.1:49000`.
-    /// Defaults to fritz.box.
+    /// The device, like `192.168.178.1`. Defaults to fritz.box.
+    ///
+    /// A host name or address, optionally with a port, for HTTPS on port
+    /// 49443, or a full address like `http://192.168.178.1:49000`.
     #[arg(long, global = true, env = "FRITZ_HOST")]
     host: Option<String>,
     /// The user on the device. Leave it out for devices with only a
@@ -88,16 +89,18 @@ struct Global {
     /// one of the profile.
     #[arg(long, global = true, env = "FRITZ_TLS_FINGERPRINT")]
     fingerprint: Option<String>,
-    /// How to print results: text, JSON, which is the default when the
-    /// output is not a terminal, or YAML. Set `FRITZ_OUTPUT=text` to keep
-    /// text in pipes, like `fritz hosts | grep phone`. With YAML, errors are
-    /// YAML on stderr as well.
+    /// How to print results: text, JSON or YAML.
+    ///
+    /// JSON is the default when the output is not a terminal. Set
+    /// `FRITZ_OUTPUT=text` to keep text in pipes, like `fritz hosts | grep
+    /// phone`. With YAML, errors are YAML on stderr as well.
     #[arg(short, long, global = true, value_enum, env = "FRITZ_OUTPUT")]
     output: Option<Format>,
-    /// Log the requests to stderr, with secrets hidden: -v one line per
-    /// request, -vv also the details. `FRITZ_LOG` sets the level instead,
-    /// like `debug` or `trace`, also per crate like `tr064=debug`, and
-    /// `FRITZ_LOG_FILE` writes the log to a file too.
+    /// Log the requests to stderr, with secrets hidden: -v, -vv.
+    ///
+    /// -v logs one line per request, -vv also the details. `FRITZ_LOG` sets
+    /// the level instead, like `debug` or `trace`, also per crate like
+    /// `tr064=debug`, and `FRITZ_LOG_FILE` writes the log to a file too.
     #[arg(short, long, global = true, action = ArgAction::Count)]
     verbose: u8,
     /// Fetch the service descriptions from the device instead of the cache,
@@ -122,12 +125,13 @@ enum Command {
     },
     /// The hosts the device knows, or one host with all details.
     Hosts(status::HostsArgs),
-    /// Diagnoses a host end to end: whether the device knows it and sees
-    /// it connected, its address, its link and mesh node, whether its name
-    /// resolves to that address on this machine, and whether TCP ports
-    /// answer. `router` checks the device itself: a private address, TR-064
-    /// over HTTPS and HTTP, the web interface and the certificate. Fails if
-    /// a check fails.
+    /// Diagnoses a host end to end, or the device itself with `router`.
+    ///
+    /// For a host: whether the device knows it and sees it connected, its
+    /// address, its link and mesh node, whether its name resolves to that
+    /// address on this machine, and whether TCP ports answer. `router` checks a
+    /// private address, TR-064 over HTTPS and HTTP, the web interface and the
+    /// certificate. Fails if a check fails.
     Diagnose {
         /// The host: a name, a MAC or an IPv4 address, or `router`.
         #[arg(value_name = "HOST")]
@@ -157,61 +161,76 @@ enum Command {
         #[command(flatten)]
         watch: watch::Options,
     },
-    /// The installed firmware, the update the device offers, automatic
-    /// updates and the last update. Never checks for a new version.
+    /// The installed firmware and the update the device offers.
+    ///
+    /// Also automatic updates and the last update. Never checks for a new
+    /// version.
     Firmware,
-    /// The powerline adapters the device knows: name, model, MAC, whether
-    /// they are connected and whether an update is offered.
+    /// The powerline adapters the device knows.
+    ///
+    /// Their name, model and MAC, whether they are connected and whether an
+    /// update is offered.
     Powerline,
-    /// The traffic of the internet connection: the current rates, how much
-    /// of the line they use, the byte and packet counters, and where the
-    /// device reports them, the upstream by priority and the multicast
-    /// share. With `--watch`, one row per interval with the averages from
-    /// the counters; JSON prints one line per interval. Ctrl-C stops.
+    /// The traffic of the internet connection.
+    ///
+    /// The current rates, how much of the line they use, the byte and packet
+    /// counters, and where the device reports them, the upstream by priority
+    /// and the multicast share. With `--watch`, one row per interval with the
+    /// averages from the counters; JSON prints one line per interval. Ctrl-C
+    /// stops.
     #[command(mut_arg("interval", |arg| arg.default_value("2")))]
     Traffic {
         #[command(flatten)]
         watch: watch::Options,
     },
-    /// The LAN interfaces and wireless networks with their counters, and
-    /// the LAN ports. The ports need a login to the web interface.
+    /// The LAN interfaces, wireless networks and LAN ports.
+    ///
+    /// The interfaces and networks with their counters. The ports need a login
+    /// to the web interface.
     Interfaces {
         #[command(flatten)]
         watch: watch::Options,
     },
-    /// The Smart Home devices and their values, read through the web
-    /// interface (FRITZ!OS 8.20 and later), or the history of one device.
+    /// The Smart Home devices and their values, or the history of one device.
+    ///
+    /// Read through the web interface (FRITZ!OS 8.20 and later).
     Smarthome(status::SmarthomeArgs),
     /// The port forwardings, and whether hosts may open ports through UPnP.
     Ports,
     /// The numbers, accounts, call deflections, answering machines and DECT
     /// handsets.
     Telephony,
-    /// Checks the whole setup, from the configuration to the login and the
-    /// rights, and says how to fix what fails. The first step when something
-    /// does not work. Logs in at most once and changes nothing.
+    /// Checks the whole setup and says how to fix what fails.
+    ///
+    /// From the configuration to the login and the rights. The first step when
+    /// something does not work. Logs in at most once and changes nothing.
     Doctor,
     /// The features the device offers and the rights of the user.
     Capabilities,
-    /// The users of the device, your rights and how the login is
-    /// protected, with hints on weak settings. No passwords are read.
+    /// The users of the device, your rights and how the login is protected.
+    ///
+    /// With hints on weak settings. No passwords are read.
     Users,
-    /// Why a name does or does not resolve: the local domain, the DNS
-    /// servers handed out and the host table of the router, the answers of
-    /// the router and of this machine, the resolvers of this machine and the
-    /// likely cause. Only asks for this name; changes nothing.
+    /// Why a name does or does not resolve.
+    ///
+    /// Shows the local domain, the DNS servers handed out and the host table of
+    /// the router, the answers of the router and of this machine, the resolvers
+    /// of this machine and the likely cause. Only asks for this name; changes
+    /// nothing.
     Dns(dns::DnsArgs),
-    /// What can be reached from the internet or managed from outside:
-    /// remote access, MyFRITZ, dynamic DNS, port forwardings, exposed host,
-    /// UPnP, FTP, shared links, VPN, TR-069 and USP, each with a severity
-    /// hint. The exposed host and VPN need a login to the web interface.
+    /// What can be reached from the internet or managed from outside.
+    ///
+    /// Remote access, MyFRITZ, dynamic DNS, port forwardings, exposed host,
+    /// UPnP, FTP, shared links, VPN, TR-069 and USP, each with a severity hint.
+    /// The exposed host and VPN need a login to the web interface.
     Exposure {
         /// Exit with code 3 if an item has the severity warning.
         #[arg(long)]
         strict: bool,
     },
-    /// The settings of the device, like DNS and IPv6, read through the web
-    /// interface. Secrets are hidden.
+    /// The settings of the device, like DNS and IPv6.
+    ///
+    /// Read through the web interface. Secrets are hidden.
     Settings {
         /// The modules to read, like ipv6 or dnscfg. Without, the common
         /// ones.
@@ -228,9 +247,10 @@ enum Command {
     /// The latest entries of the event log, the latest first. Personal
     /// data.
     Log(LogArgs),
-    /// Find FRITZ! routers and repeaters on the local network: at the
-    /// configured host, the default gateway, through SSDP and at the
-    /// default addresses. Reads only their public device descriptions,
+    /// Find FRITZ! routers and repeaters on the local network.
+    ///
+    /// Looks at the configured host, the default gateway, through SSDP and at
+    /// the default addresses. Reads only their public device descriptions,
     /// without login.
     Discover(discover::DiscoverArgs),
     /// Manage the profiles in the configuration file.
@@ -249,12 +269,15 @@ enum Command {
     /// another directory.
     #[command(subcommand)]
     Cache(CacheCommand),
-    /// Plan and apply changes. Needs `FRITZ_ALLOW_WRITE=1`, and the identity
-    /// of the device on the allow list in the configuration.
+    /// Plan and apply changes.
+    ///
+    /// Needs `FRITZ_ALLOW_WRITE=1`, and the identity of the device on the allow
+    /// list in the configuration.
     #[cfg(feature = "write")]
     Change(change::ChangeArgs),
-    /// Restart the device, and with `--wait` wait until it is back. Shows
-    /// the plan and a token first; `--token` restarts. Critical: needs
+    /// Restart the device, and with `--wait` wait until it is back.
+    ///
+    /// Shows the plan and a token first; `--token` restarts. Critical: needs
     /// `FRITZ_ALLOW_WRITE=1`, `FRITZ_ALLOW_CRITICAL=1` and the device on the
     /// allow list.
     #[cfg(feature = "write")]
@@ -314,10 +337,11 @@ struct WlanArgs {
 
 #[derive(Debug, Subcommand)]
 enum WlanCommand {
-    /// A QR code with the SSID and password of a network, which a phone
-    /// scans to join it: on the terminal, or as PNG or SVG file. Reads the
-    /// password, which nothing else does. Without a network, lists them,
-    /// like `fritz wlan qr 1` or `fritz wlan qr guest`.
+    /// A QR code a phone scans to join a network.
+    ///
+    /// It holds the SSID and password of the network: on the terminal, or as
+    /// PNG or SVG file. Reads the password, which nothing else does. Without a
+    /// network, lists them, like `fritz wlan qr 1` or `fritz wlan qr guest`.
     Qr(qr::QrArgs),
 }
 
