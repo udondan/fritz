@@ -31,9 +31,21 @@
     }
   ],
   "packages": {
-    "crates/tr064": { "component": "tr064" },
-    "crates/fritz-core": { "component": "fritz-core" },
-    "crates/fritz-sim": { "component": "fritz-sim" },
-    "crates/fritz": { "component": "fritz" }
+    "crates/tr064": {
+      "component": "tr064",
+      "exclude-paths": ["crates/tr064/tests", "crates/tr064/examples"]
+    },
+    "crates/fritz-core": {
+      "component": "fritz-core",
+      "exclude-paths": ["crates/fritz-core/tests"]
+    },
+    "crates/fritz-sim": {
+      "component": "fritz-sim",
+      "exclude-paths": ["crates/fritz-sim/tests"]
+    },
+    "crates/fritz": {
+      "component": "fritz",
+      "exclude-paths": ["crates/fritz/tests"]
+    }
   }
 }
