@@ -5,7 +5,7 @@
 
 ### Features
 
-* **fritz:** show when hosts were last seen ([#167](https://github.com/udondan/fritz/issues/167)) ([8119748](https://github.com/udondan/fritz/commit/8119748cd0a3fe3809b7da07d46d033c50cd7649))
+* show when hosts were last seen ([#167](https://github.com/udondan/fritz/issues/167)) ([8119748](https://github.com/udondan/fritz/commit/8119748cd0a3fe3809b7da07d46d033c50cd7649))
 
 ## [0.2.1](https://github.com/udondan/fritz/compare/fritz-v0.2.0...fritz-v0.2.1) (2026-11-25)
 
