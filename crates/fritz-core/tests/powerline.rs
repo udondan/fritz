@@ -6,7 +6,10 @@ use fritz_core::powerline::{self, Adapter, Powerline};
 use fritz_core::read::Reader;
 use fritz_sim::{Answer, Fixture, Sim};
 
-const FIXTURE: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/../fritz-sim/fixtures/fritzbox-7690/8.25");
+const FIXTURE: &str = concat!(
+    env!("CARGO_MANIFEST_DIR"),
+    "/../fritz-sim/fixtures/fritzbox-7690/8.25"
+);
 const REPEATER: &str = concat!(
     env!("CARGO_MANIFEST_DIR"),
     "/../fritz-sim/fixtures/fritz-repeater-2400/8.25"

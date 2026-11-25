@@ -7,7 +7,10 @@ use fritz_core::read::Reader;
 use fritz_core::users::{self, Login, User, Users};
 use fritz_sim::{Answer, Fixture, Injection, Sim};
 
-const FIXTURE: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/../fritz-sim/fixtures/fritzbox-7690/8.25");
+const FIXTURE: &str = concat!(
+    env!("CARGO_MANIFEST_DIR"),
+    "/../fritz-sim/fixtures/fritzbox-7690/8.25"
+);
 
 async fn read(sim: &Sim) -> (Users, Vec<String>) {
     let client = sim.client().build().unwrap();
