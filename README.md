@@ -313,17 +313,24 @@ show the table. If nothing matches, `fritz` exits with code 1:
 
 ```console
 $ fritz hosts --mac 02:00:5e:10:00:01
-Name             laptop
-IP               192.168.178.20
-MAC              02:00:5E:10:00:01
-Active           yes
-Address source   DHCP
-Interface        802.11
-Speed            866 Mbit/s
-Guest            no
-Internet         granted
-Attached to      fritzbox, WLAN 5 GHz ↓ 866.7 Mbit/s  ↑ 433.3 Mbit/s
+Name               laptop
+IP                 192.168.178.20
+MAC                02:00:5E:10:00:01
+Active             yes
+Address source     DHCP
+Permanent address  yes
+Interface          802.11
+Speed              866 Mbit/s
+Guest              no
+Internet           granted
+Attached to        fritzbox, WLAN 5 GHz ↓ 866.7 Mbit/s  ↑ 433.3 Mbit/s
 ```
+
+The address source (`DHCP` or `Static`) and whether the box always gives a
+host the same IPv4 address (`permanent_address`, "Always assign this network
+device the same IPv4 address") come from the web interface, for all hosts in
+one request. TR-064 has no way to read the permanent assignment. If the user
+cannot log in to the web interface, both stay empty.
 
 ```console
 $ fritz mesh

@@ -1,0 +1,445 @@
+{
+  "landevice": [
+    {
+      "UID": "landevice7000",
+      "active": "0",
+      "dhcp": "1",
+      "ip": "192.0.2.1",
+      "mac": "AA:BB:CC:00:00:02",
+      "name": "device-1",
+      "static_dhcp": "1"
+    },
+    {
+      "UID": "landevice7001",
+      "active": "1",
+      "dhcp": "1",
+      "ip": "192.0.2.2",
+      "mac": "AA:BB:CC:00:00:03",
+      "name": "device-2",
+      "static_dhcp": "0"
+    },
+    {
+      "UID": "landevice7002",
+      "active": "0",
+      "dhcp": "0",
+      "ip": "192.0.2.13",
+      "mac": "AA:BB:CC:00:00:0E",
+      "name": "device-12",
+      "static_dhcp": "0"
+    },
+    {
+      "UID": "landevice7003",
+      "active": "0",
+      "dhcp": "1",
+      "ip": "192.0.2.22",
+      "mac": "AA:BB:CC:00:00:19",
+      "name": "device-22",
+      "static_dhcp": "0"
+    },
+    {
+      "UID": "landevice7004",
+      "active": "0",
+      "dhcp": "1",
+      "ip": "192.0.2.26",
+      "mac": "AA:BB:CC:00:00:24",
+      "name": "device-33",
+      "static_dhcp": "1"
+    },
+    {
+      "UID": "landevice7005",
+      "active": "0",
+      "dhcp": "1",
+      "ip": "192.0.2.27",
+      "mac": "AA:BB:CC:00:00:2F",
+      "name": "device-44",
+      "static_dhcp": "0"
+    },
+    {
+      "UID": "landevice7006",
+      "active": "0",
+      "dhcp": "1",
+      "ip": "192.0.2.28",
+      "mac": "AA:BB:CC:00:00:30",
+      "name": "device-45",
+      "static_dhcp": "0"
+    },
+    {
+      "UID": "landevice7007",
+      "active": "0",
+      "dhcp": "1",
+      "ip": "192.0.2.29",
+      "mac": "AA:BB:CC:00:00:31",
+      "name": "device-46",
+      "static_dhcp": "1"
+    },
+    {
+      "UID": "landevice7008",
+      "active": "1",
+      "dhcp": "1",
+      "ip": "192.0.2.30",
+      "mac": "AA:BB:CC:00:00:32",
+      "name": "device-47",
+      "static_dhcp": "0"
+    },
+    {
+      "UID": "landevice7009",
+      "active": "0",
+      "dhcp": "1",
+      "ip": "192.0.2.31",
+      "mac": "AA:BB:CC:00:00:33",
+      "name": "device-48",
+      "static_dhcp": "0"
+    },
+    {
+      "UID": "landevice7010",
+      "active": "0",
+      "dhcp": "1",
+      "ip": "192.0.2.3",
+      "mac": "AA:BB:CC:00:00:04",
+      "name": "device-3",
+      "static_dhcp": "1"
+    },
+    {
+      "UID": "landevice7011",
+      "active": "0",
+      "dhcp": "1",
+      "ip": "192.0.2.4",
+      "mac": "AA:BB:CC:00:00:05",
+      "name": "device-4",
+      "static_dhcp": "0"
+    },
+    {
+      "UID": "landevice7012",
+      "active": "0",
+      "dhcp": "1",
+      "ip": "192.0.2.5",
+      "mac": "AA:BB:CC:00:00:06",
+      "name": "device-5",
+      "static_dhcp": "0"
+    },
+    {
+      "UID": "landevice7013",
+      "active": "0",
+      "dhcp": "1",
+      "ip": "192.0.2.6",
+      "mac": "AA:BB:CC:00:00:07",
+      "name": "device-6",
+      "static_dhcp": "1"
+    },
+    {
+      "UID": "landevice7014",
+      "active": "0",
+      "dhcp": "1",
+      "ip": "192.0.2.7",
+      "mac": "AA:BB:CC:00:00:08",
+      "name": "device-7",
+      "static_dhcp": "0"
+    },
+    {
+      "UID": "landevice7015",
+      "active": "0",
+      "dhcp": "1",
+      "ip": "192.0.2.8",
+      "mac": "AA:BB:CC:00:00:09",
+      "name": "device-8",
+      "static_dhcp": "0"
+    },
+    {
+      "UID": "landevice7016",
+      "active": "0",
+      "dhcp": "1",
+      "ip": "192.0.2.9",
+      "mac": "AA:BB:CC:00:00:0A",
+      "name": "device-9",
+      "static_dhcp": "1"
+    },
+    {
+      "UID": "landevice7017",
+      "active": "0",
+      "dhcp": "1",
+      "ip": "192.0.2.10",
+      "mac": "AA:BB:CC:00:00:0B",
+      "name": "device-10",
+      "static_dhcp": "0"
+    },
+    {
+      "UID": "landevice7018",
+      "active": "0",
+      "dhcp": "1",
+      "ip": "192.0.2.11",
+      "mac": "AA:BB:CC:00:00:0C",
+      "name": "device-11",
+      "static_dhcp": "0"
+    },
+    {
+      "UID": "landevice7019",
+      "active": "0",
+      "dhcp": "1",
+      "ip": "192.0.2.12",
+      "mac": "AA:BB:CC:00:00:0D",
+      "name": "device-11",
+      "static_dhcp": "1"
+    },
+    {
+      "UID": "landevice7020",
+      "active": "1",
+      "dhcp": "1",
+      "ip": "192.0.2.14",
+      "mac": "AA:BB:CC:00:00:0F",
+      "name": "device-13",
+      "static_dhcp": "0"
+    },
+    {
+      "UID": "landevice7021",
+      "active": "1",
+      "dhcp": "1",
+      "ip": "192.0.2.15",
+      "mac": "AA:BB:CC:00:00:10",
+      "name": "device-14",
+      "static_dhcp": "0"
+    },
+    {
+      "UID": "landevice7022",
+      "active": "0",
+      "dhcp": "1",
+      "ip": "192.0.2.16",
+      "mac": "AA:BB:CC:00:00:11",
+      "name": "device-14",
+      "static_dhcp": "1"
+    },
+    {
+      "UID": "landevice7023",
+      "active": "0",
+      "dhcp": "1",
+      "ip": "192.0.2.17",
+      "mac": "AA:BB:CC:00:00:12",
+      "name": "device-15",
+      "static_dhcp": "0"
+    },
+    {
+      "UID": "landevice7024",
+      "active": "1",
+      "dhcp": "1",
+      "ip": "192.0.2.18",
+      "mac": "AA:BB:CC:00:00:13",
+      "name": "device-16",
+      "static_dhcp": "0"
+    },
+    {
+      "UID": "landevice7025",
+      "active": "1",
+      "dhcp": "1",
+      "ip": "192.0.2.19",
+      "mac": "AA:BB:CC:00:00:14",
+      "name": "device-17",
+      "static_dhcp": "1"
+    },
+    {
+      "UID": "landevice7026",
+      "active": "1",
+      "dhcp": "1",
+      "ip": "192.0.2.20",
+      "mac": "AA:BB:CC:00:00:15",
+      "name": "device-18",
+      "static_dhcp": "0"
+    },
+    {
+      "UID": "landevice7027",
+      "active": "0",
+      "dhcp": "1",
+      "ip": "192.0.2.21",
+      "mac": "AA:BB:CC:00:00:16",
+      "name": "device-19",
+      "static_dhcp": "0"
+    },
+    {
+      "UID": "landevice7028",
+      "active": "0",
+      "dhcp": "0",
+      "ip": "",
+      "mac": "AA:BB:CC:00:00:17",
+      "name": "device-20",
+      "static_dhcp": "0"
+    },
+    {
+      "UID": "landevice7029",
+      "active": "0",
+      "dhcp": "0",
+      "ip": "",
+      "mac": "AA:BB:CC:00:00:18",
+      "name": "device-21",
+      "static_dhcp": "0"
+    },
+    {
+      "UID": "landevice7030",
+      "active": "0",
+      "dhcp": "0",
+      "ip": "",
+      "mac": "AA:BB:CC:00:00:1A",
+      "name": "device-23",
+      "static_dhcp": "0"
+    },
+    {
+      "UID": "landevice7031",
+      "active": "0",
+      "dhcp": "1",
+      "ip": "192.0.2.23",
+      "mac": "AA:BB:CC:00:00:1B",
+      "name": "device-24",
+      "static_dhcp": "1"
+    },
+    {
+      "UID": "landevice7032",
+      "active": "0",
+      "dhcp": "1",
+      "ip": "192.0.2.24",
+      "mac": "AA:BB:CC:00:00:1C",
+      "name": "device-25",
+      "static_dhcp": "0"
+    },
+    {
+      "UID": "landevice7033",
+      "active": "0",
+      "dhcp": "0",
+      "ip": "",
+      "mac": "AA:BB:CC:00:00:1D",
+      "name": "device-26",
+      "static_dhcp": "0"
+    },
+    {
+      "UID": "landevice7034",
+      "active": "0",
+      "dhcp": "0",
+      "ip": "",
+      "mac": "AA:BB:CC:00:00:1E",
+      "name": "device-27",
+      "static_dhcp": "0"
+    },
+    {
+      "UID": "landevice7035",
+      "active": "0",
+      "dhcp": "0",
+      "ip": "",
+      "mac": "AA:BB:CC:00:00:1F",
+      "name": "device-28",
+      "static_dhcp": "0"
+    },
+    {
+      "UID": "landevice7036",
+      "active": "0",
+      "dhcp": "0",
+      "ip": "",
+      "mac": "AA:BB:CC:00:00:20",
+      "name": "device-29",
+      "static_dhcp": "0"
+    },
+    {
+      "UID": "landevice7037",
+      "active": "0",
+      "dhcp": "0",
+      "ip": "",
+      "mac": "AA:BB:CC:00:00:21",
+      "name": "device-30",
+      "static_dhcp": "0"
+    },
+    {
+      "UID": "landevice7038",
+      "active": "0",
+      "dhcp": "0",
+      "ip": "",
+      "mac": "AA:BB:CC:00:00:22",
+      "name": "device-31",
+      "static_dhcp": "0"
+    },
+    {
+      "UID": "landevice7039",
+      "active": "0",
+      "dhcp": "1",
+      "ip": "192.0.2.25",
+      "mac": "AA:BB:CC:00:00:23",
+      "name": "device-32",
+      "static_dhcp": "0"
+    },
+    {
+      "UID": "landevice7040",
+      "active": "0",
+      "dhcp": "0",
+      "ip": "",
+      "mac": "AA:BB:CC:00:00:25",
+      "name": "device-34",
+      "static_dhcp": "0"
+    },
+    {
+      "UID": "landevice7041",
+      "active": "0",
+      "dhcp": "0",
+      "ip": "",
+      "mac": "AA:BB:CC:00:00:26",
+      "name": "device-35",
+      "static_dhcp": "0"
+    },
+    {
+      "UID": "landevice7042",
+      "active": "0",
+      "dhcp": "0",
+      "ip": "",
+      "mac": "AA:BB:CC:00:00:27",
+      "name": "device-36",
+      "static_dhcp": "0"
+    },
+    {
+      "UID": "landevice7043",
+      "active": "0",
+      "dhcp": "0",
+      "ip": "",
+      "mac": "AA:BB:CC:00:00:28",
+      "name": "device-37",
+      "static_dhcp": "0"
+    },
+    {
+      "UID": "landevice7044",
+      "active": "0",
+      "dhcp": "0",
+      "ip": "",
+      "mac": "AA:BB:CC:00:00:29",
+      "name": "device-38",
+      "static_dhcp": "0"
+    },
+    {
+      "UID": "landevice7045",
+      "active": "0",
+      "dhcp": "0",
+      "ip": "",
+      "mac": "AA:BB:CC:00:00:2A",
+      "name": "device-39",
+      "static_dhcp": "0"
+    },
+    {
+      "UID": "landevice7046",
+      "active": "0",
+      "dhcp": "0",
+      "ip": "",
+      "mac": "AA:BB:CC:00:00:2B",
+      "name": "device-40",
+      "static_dhcp": "0"
+    },
+    {
+      "UID": "landevice7047",
+      "active": "0",
+      "dhcp": "0",
+      "ip": "",
+      "mac": "AA:BB:CC:00:00:2C",
+      "name": "device-41",
+      "static_dhcp": "0"
+    },
+    {
+      "UID": "landevice7048",
+      "active": "0",
+      "dhcp": "0",
+      "ip": "",
+      "mac": "AA:BB:CC:00:00:2D",
+      "name": "device-42",
+      "static_dhcp": "0"
+    }
+  ]
+}

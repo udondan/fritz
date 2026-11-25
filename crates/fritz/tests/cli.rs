@@ -1197,13 +1197,64 @@ async fn prints_the_state_as_json() {
         .iter()
         .filter(|r| r.method == "POST" && r.path == "/login_sid.lua")
         .count();
-    assert_eq!(logouts, 10, "a login and a logout per command");
+    assert_eq!(logouts, 14, "a login and a logout per command");
 
     // Without the host list, the hosts are read one by one.
     sim.inject(Injection::fault("Hosts1", "X_AVM-DE_GetHostListPath", 606));
     let output = run(&sim, &["hosts"], password).await;
     assert_eq!(json(&output)["hosts"].as_array().unwrap().len(), 50);
     assert!(stderr(&output).contains("the device reported 161 hosts, read 50"));
+}
+
+#[tokio::test(flavor = "multi_thread")]
+async fn adds_the_addressing_to_the_hosts() {
+    let fixture = fritz_sim::Fixture::load(FIXTURE).unwrap();
+    let sim = fritz_sim::Sim::start(fixture).await.unwrap();
+    let output = run(
+        &sim,
+        &["--output", "json", "hosts"],
+        Some(fritz_sim::PASSWORD),
+    )
+    .await;
+    let json: serde_json::Value = serde_json::from_str(&success(&output)).unwrap();
+    let hosts = &json["hosts"];
+    // The addressing comes from the LAN devices of the web interface.
+    let host = |mac: &str| {
+        hosts
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|h| h["mac"] == mac)
+            .unwrap()
+            .clone()
+    };
+    for (mac, source, permanent) in [
+        (
+            "AA:BB:CC:00:00:02",
+            serde_json::json!("DHCP"),
+            serde_json::json!(true),
+        ),
+        (
+            "AA:BB:CC:00:00:03",
+            serde_json::json!("DHCP"),
+            serde_json::json!(false),
+        ),
+        (
+            "AA:BB:CC:00:00:0E",
+            serde_json::json!("Static"),
+            serde_json::json!(false),
+        ),
+        // Not among the LAN devices.
+        (
+            "AA:BB:CC:00:00:2E",
+            serde_json::json!(null),
+            serde_json::json!(null),
+        ),
+    ] {
+        let host = host(mac);
+        assert_eq!(host["address_source"], source, "{host}");
+        assert_eq!(host["permanent_address"], permanent, "{host}");
+    }
 }
 
 #[tokio::test(flavor = "multi_thread")]
@@ -1218,6 +1269,7 @@ async fn looks_up_one_host() {
     let host = json(&run(&sim, &["hosts", "DEVICE-1"], password).await);
     assert_eq!(host["mac"], "AA:BB:CC:00:00:02", "{host}");
     assert_eq!(host["address_source"], "DHCP", "{host}");
+    assert_eq!(host["permanent_address"], true, "{host}");
     // Without an exact name, the names that contain it.
     let host = json(&run(&sim, &["hosts", "ice-47"], password).await);
     assert_eq!(host["name"], "device-47", "{host}");
@@ -1234,9 +1286,10 @@ async fn looks_up_one_host() {
     )
     .await;
     let text = success(&output);
-    assert!(text.starts_with("Name             device-2\n"), "{text}");
+    assert!(text.starts_with("Name               device-2\n"), "{text}");
+    assert!(text.contains("Permanent address  no\n"), "{text}");
     assert!(
-        text.contains("Attached to      device-50, WLAN 5 GHz ↓ 866.7 Mbit/s"),
+        text.contains("Attached to        device-50, WLAN 5 GHz ↓ 866.7 Mbit/s"),
         "{text}"
     );
     let host = json(&run(&sim, &["hosts", "--ip", "192.0.2.30"], password).await);
@@ -1988,6 +2041,34 @@ async fn says_when_the_connection_is_not_dsl() {
         "{json}"
     );
     assert!(json.get("line").is_none(), "{json}");
+}
+
+#[tokio::test(flavor = "multi_thread")]
+async fn reads_the_hosts_without_lan_devices() {
+    // The repeater has no LAN devices in its web interface: the hosts are
+    // read, only without their addressing.
+    let fixture = fritz_sim::Fixture::bundled("fritz-repeater-2400/8.25").unwrap();
+    let sim = fritz_sim::Sim::start(fixture).await.unwrap();
+    let output = run(
+        &sim,
+        &["--output", "json", "hosts"],
+        Some(fritz_sim::PASSWORD),
+    )
+    .await;
+    let json: serde_json::Value = serde_json::from_str(&success(&output)).unwrap();
+    let hosts = json["hosts"].as_array().unwrap();
+    assert!(!hosts.is_empty(), "{json}");
+    assert!(
+        hosts.iter().all(|h| h["permanent_address"].is_null()),
+        "{json}"
+    );
+    assert!(
+        sim.requests()
+            .iter()
+            .any(|r| r.path == "/api/v0/generic/landevice"),
+        "{:?}",
+        sim.requests()
+    );
 }
 
 #[tokio::test(flavor = "multi_thread")]

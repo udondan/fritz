@@ -26,7 +26,7 @@ mod wlan;
 pub(crate) use exposure::{WARNING as EXPOSURE_WARNING, exposure};
 pub(crate) use firmware::firmware;
 pub(crate) use history::{SmarthomeArgs, range as history_range, read as read_history};
-pub(crate) use host::{HostsArgs, hosts};
+pub(crate) use host::{HostsArgs, add_addressing, hosts};
 pub(crate) use powerline::powerline;
 use tree::mesh_tree;
 pub(crate) use users::users;

@@ -90,8 +90,13 @@ pub struct Host {
     pub active: bool,
     /// Like `Ethernet` or `802.11`.
     pub interface: Option<String>,
-    /// Like `DHCP` or `Static`. Only in the entries, not in the host list.
+    /// Like `DHCP` or `Static`. In the entries, not in the host list; see
+    /// [`crate::host::add_addressing`] for all hosts at once.
     pub address_source: Option<String>,
+    /// Whether the device always gives the host the same IPv4 address
+    /// ("permanent assignment"). Only from the web interface, see
+    /// [`crate::host::add_addressing`].
+    pub permanent_address: Option<bool>,
     /// Whether the host is in the guest network. Only in the host list.
     pub guest: Option<bool>,
     /// Whether the host may use the internet: `granted`, `denied` or
