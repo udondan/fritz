@@ -190,6 +190,7 @@ pub fn hosts(xml: &str) -> Result<Vec<Host>, Error> {
             internet_access: item.text("X_AVM-DE_WANAccess"),
             speed: item.number("X_AVM-DE_Speed"),
             permanent_address: None,
+            last_seen: None,
         })
         .collect())
 }

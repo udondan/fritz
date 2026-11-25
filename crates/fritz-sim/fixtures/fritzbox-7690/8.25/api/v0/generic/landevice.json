@@ -5,6 +5,7 @@
       "active": "0",
       "dhcp": "1",
       "ip": "192.0.2.1",
+      "lastused": "1795629942",
       "mac": "AA:BB:CC:00:00:02",
       "name": "device-1",
       "static_dhcp": "1"
@@ -14,6 +15,7 @@
       "active": "1",
       "dhcp": "1",
       "ip": "192.0.2.2",
+      "lastused": "1795716342",
       "mac": "AA:BB:CC:00:00:03",
       "name": "device-2",
       "static_dhcp": "0"
@@ -23,6 +25,7 @@
       "active": "0",
       "dhcp": "0",
       "ip": "192.0.2.13",
+      "lastused": "1795457142",
       "mac": "AA:BB:CC:00:00:0E",
       "name": "device-12",
       "static_dhcp": "0"
@@ -32,6 +35,7 @@
       "active": "0",
       "dhcp": "1",
       "ip": "192.0.2.22",
+      "lastused": "0",
       "mac": "AA:BB:CC:00:00:19",
       "name": "device-22",
       "static_dhcp": "0"
@@ -41,6 +45,7 @@
       "active": "0",
       "dhcp": "1",
       "ip": "192.0.2.26",
+      "lastused": "1795284342",
       "mac": "AA:BB:CC:00:00:24",
       "name": "device-33",
       "static_dhcp": "1"
@@ -50,6 +55,7 @@
       "active": "0",
       "dhcp": "1",
       "ip": "192.0.2.27",
+      "lastused": "0",
       "mac": "AA:BB:CC:00:00:2F",
       "name": "device-44",
       "static_dhcp": "0"
@@ -59,6 +65,7 @@
       "active": "0",
       "dhcp": "1",
       "ip": "192.0.2.28",
+      "lastused": "1795111542",
       "mac": "AA:BB:CC:00:00:30",
       "name": "device-45",
       "static_dhcp": "0"
@@ -68,6 +75,7 @@
       "active": "0",
       "dhcp": "1",
       "ip": "192.0.2.29",
+      "lastused": "0",
       "mac": "AA:BB:CC:00:00:31",
       "name": "device-46",
       "static_dhcp": "1"
@@ -77,6 +85,7 @@
       "active": "1",
       "dhcp": "1",
       "ip": "192.0.2.30",
+      "lastused": "1795716342",
       "mac": "AA:BB:CC:00:00:32",
       "name": "device-47",
       "static_dhcp": "0"
@@ -86,6 +95,7 @@
       "active": "0",
       "dhcp": "1",
       "ip": "192.0.2.31",
+      "lastused": "0",
       "mac": "AA:BB:CC:00:00:33",
       "name": "device-48",
       "static_dhcp": "0"
@@ -95,6 +105,7 @@
       "active": "0",
       "dhcp": "1",
       "ip": "192.0.2.3",
+      "lastused": "1794765942",
       "mac": "AA:BB:CC:00:00:04",
       "name": "device-3",
       "static_dhcp": "1"
@@ -104,6 +115,7 @@
       "active": "0",
       "dhcp": "1",
       "ip": "192.0.2.4",
+      "lastused": "0",
       "mac": "AA:BB:CC:00:00:05",
       "name": "device-4",
       "static_dhcp": "0"
@@ -113,6 +125,7 @@
       "active": "0",
       "dhcp": "1",
       "ip": "192.0.2.5",
+      "lastused": "1794593142",
       "mac": "AA:BB:CC:00:00:06",
       "name": "device-5",
       "static_dhcp": "0"
@@ -122,6 +135,7 @@
       "active": "0",
       "dhcp": "1",
       "ip": "192.0.2.6",
+      "lastused": "0",
       "mac": "AA:BB:CC:00:00:07",
       "name": "device-6",
       "static_dhcp": "1"
@@ -131,6 +145,7 @@
       "active": "0",
       "dhcp": "1",
       "ip": "192.0.2.7",
+      "lastused": "1794420342",
       "mac": "AA:BB:CC:00:00:08",
       "name": "device-7",
       "static_dhcp": "0"
@@ -140,6 +155,7 @@
       "active": "0",
       "dhcp": "1",
       "ip": "192.0.2.8",
+      "lastused": "0",
       "mac": "AA:BB:CC:00:00:09",
       "name": "device-8",
       "static_dhcp": "0"
@@ -149,6 +165,7 @@
       "active": "0",
       "dhcp": "1",
       "ip": "192.0.2.9",
+      "lastused": "1794247542",
       "mac": "AA:BB:CC:00:00:0A",
       "name": "device-9",
       "static_dhcp": "1"
@@ -158,6 +175,7 @@
       "active": "0",
       "dhcp": "1",
       "ip": "192.0.2.10",
+      "lastused": "0",
       "mac": "AA:BB:CC:00:00:0B",
       "name": "device-10",
       "static_dhcp": "0"
@@ -167,6 +185,7 @@
       "active": "0",
       "dhcp": "1",
       "ip": "192.0.2.11",
+      "lastused": "1794074742",
       "mac": "AA:BB:CC:00:00:0C",
       "name": "device-11",
       "static_dhcp": "0"
@@ -176,6 +195,7 @@
       "active": "0",
       "dhcp": "1",
       "ip": "192.0.2.12",
+      "lastused": "0",
       "mac": "AA:BB:CC:00:00:0D",
       "name": "device-11",
       "static_dhcp": "1"
@@ -185,6 +205,7 @@
       "active": "1",
       "dhcp": "1",
       "ip": "192.0.2.14",
+      "lastused": "1795716342",
       "mac": "AA:BB:CC:00:00:0F",
       "name": "device-13",
       "static_dhcp": "0"
@@ -194,6 +215,7 @@
       "active": "1",
       "dhcp": "1",
       "ip": "192.0.2.15",
+      "lastused": "1795716342",
       "mac": "AA:BB:CC:00:00:10",
       "name": "device-14",
       "static_dhcp": "0"
@@ -203,6 +225,7 @@
       "active": "0",
       "dhcp": "1",
       "ip": "192.0.2.16",
+      "lastused": "1793729142",
       "mac": "AA:BB:CC:00:00:11",
       "name": "device-14",
       "static_dhcp": "1"
@@ -212,6 +235,7 @@
       "active": "0",
       "dhcp": "1",
       "ip": "192.0.2.17",
+      "lastused": "0",
       "mac": "AA:BB:CC:00:00:12",
       "name": "device-15",
       "static_dhcp": "0"
@@ -221,6 +245,7 @@
       "active": "1",
       "dhcp": "1",
       "ip": "192.0.2.18",
+      "lastused": "1795716342",
       "mac": "AA:BB:CC:00:00:13",
       "name": "device-16",
       "static_dhcp": "0"
@@ -230,6 +255,7 @@
       "active": "1",
       "dhcp": "1",
       "ip": "192.0.2.19",
+      "lastused": "1795716342",
       "mac": "AA:BB:CC:00:00:14",
       "name": "device-17",
       "static_dhcp": "1"
@@ -239,6 +265,7 @@
       "active": "1",
       "dhcp": "1",
       "ip": "192.0.2.20",
+      "lastused": "1795716342",
       "mac": "AA:BB:CC:00:00:15",
       "name": "device-18",
       "static_dhcp": "0"
@@ -248,6 +275,7 @@
       "active": "0",
       "dhcp": "1",
       "ip": "192.0.2.21",
+      "lastused": "0",
       "mac": "AA:BB:CC:00:00:16",
       "name": "device-19",
       "static_dhcp": "0"
@@ -257,6 +285,7 @@
       "active": "0",
       "dhcp": "0",
       "ip": "",
+      "lastused": "1793210742",
       "mac": "AA:BB:CC:00:00:17",
       "name": "device-20",
       "static_dhcp": "0"
@@ -266,6 +295,7 @@
       "active": "0",
       "dhcp": "0",
       "ip": "",
+      "lastused": "0",
       "mac": "AA:BB:CC:00:00:18",
       "name": "device-21",
       "static_dhcp": "0"
@@ -275,6 +305,7 @@
       "active": "0",
       "dhcp": "0",
       "ip": "",
+      "lastused": "1793037942",
       "mac": "AA:BB:CC:00:00:1A",
       "name": "device-23",
       "static_dhcp": "0"
@@ -284,6 +315,7 @@
       "active": "0",
       "dhcp": "1",
       "ip": "192.0.2.23",
+      "lastused": "0",
       "mac": "AA:BB:CC:00:00:1B",
       "name": "device-24",
       "static_dhcp": "1"
@@ -293,6 +325,7 @@
       "active": "0",
       "dhcp": "1",
       "ip": "192.0.2.24",
+      "lastused": "1792865142",
       "mac": "AA:BB:CC:00:00:1C",
       "name": "device-25",
       "static_dhcp": "0"
@@ -302,6 +335,7 @@
       "active": "0",
       "dhcp": "0",
       "ip": "",
+      "lastused": "0",
       "mac": "AA:BB:CC:00:00:1D",
       "name": "device-26",
       "static_dhcp": "0"
@@ -311,6 +345,7 @@
       "active": "0",
       "dhcp": "0",
       "ip": "",
+      "lastused": "1792692342",
       "mac": "AA:BB:CC:00:00:1E",
       "name": "device-27",
       "static_dhcp": "0"
@@ -320,6 +355,7 @@
       "active": "0",
       "dhcp": "0",
       "ip": "",
+      "lastused": "0",
       "mac": "AA:BB:CC:00:00:1F",
       "name": "device-28",
       "static_dhcp": "0"
@@ -329,6 +365,7 @@
       "active": "0",
       "dhcp": "0",
       "ip": "",
+      "lastused": "1792519542",
       "mac": "AA:BB:CC:00:00:20",
       "name": "device-29",
       "static_dhcp": "0"
@@ -338,6 +375,7 @@
       "active": "0",
       "dhcp": "0",
       "ip": "",
+      "lastused": "0",
       "mac": "AA:BB:CC:00:00:21",
       "name": "device-30",
       "static_dhcp": "0"
@@ -347,6 +385,7 @@
       "active": "0",
       "dhcp": "0",
       "ip": "",
+      "lastused": "1792346742",
       "mac": "AA:BB:CC:00:00:22",
       "name": "device-31",
       "static_dhcp": "0"
@@ -356,6 +395,7 @@
       "active": "0",
       "dhcp": "1",
       "ip": "192.0.2.25",
+      "lastused": "0",
       "mac": "AA:BB:CC:00:00:23",
       "name": "device-32",
       "static_dhcp": "0"
@@ -365,6 +405,7 @@
       "active": "0",
       "dhcp": "0",
       "ip": "",
+      "lastused": "1792173942",
       "mac": "AA:BB:CC:00:00:25",
       "name": "device-34",
       "static_dhcp": "0"
@@ -374,6 +415,7 @@
       "active": "0",
       "dhcp": "0",
       "ip": "",
+      "lastused": "0",
       "mac": "AA:BB:CC:00:00:26",
       "name": "device-35",
       "static_dhcp": "0"
@@ -383,6 +425,7 @@
       "active": "0",
       "dhcp": "0",
       "ip": "",
+      "lastused": "1792001142",
       "mac": "AA:BB:CC:00:00:27",
       "name": "device-36",
       "static_dhcp": "0"
@@ -392,6 +435,7 @@
       "active": "0",
       "dhcp": "0",
       "ip": "",
+      "lastused": "0",
       "mac": "AA:BB:CC:00:00:28",
       "name": "device-37",
       "static_dhcp": "0"
@@ -401,6 +445,7 @@
       "active": "0",
       "dhcp": "0",
       "ip": "",
+      "lastused": "1791828342",
       "mac": "AA:BB:CC:00:00:29",
       "name": "device-38",
       "static_dhcp": "0"
@@ -410,6 +455,7 @@
       "active": "0",
       "dhcp": "0",
       "ip": "",
+      "lastused": "0",
       "mac": "AA:BB:CC:00:00:2A",
       "name": "device-39",
       "static_dhcp": "0"
@@ -419,6 +465,7 @@
       "active": "0",
       "dhcp": "0",
       "ip": "",
+      "lastused": "1791655542",
       "mac": "AA:BB:CC:00:00:2B",
       "name": "device-40",
       "static_dhcp": "0"
@@ -428,6 +475,7 @@
       "active": "0",
       "dhcp": "0",
       "ip": "",
+      "lastused": "0",
       "mac": "AA:BB:CC:00:00:2C",
       "name": "device-41",
       "static_dhcp": "0"
@@ -437,6 +485,7 @@
       "active": "0",
       "dhcp": "0",
       "ip": "",
+      "lastused": "1791482742",
       "mac": "AA:BB:CC:00:00:2D",
       "name": "device-42",
       "static_dhcp": "0"

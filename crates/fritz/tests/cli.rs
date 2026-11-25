@@ -1255,6 +1255,22 @@ async fn adds_the_addressing_to_the_hosts() {
         assert_eq!(host["address_source"], source, "{host}");
         assert_eq!(host["permanent_address"], permanent, "{host}");
     }
+    // The device forgets when hosts were connected after a while.
+    for (mac, last_seen) in [
+        (
+            "AA:BB:CC:00:00:03",
+            serde_json::json!("2026-11-26T18:05:42Z"),
+        ),
+        (
+            "AA:BB:CC:00:00:0E",
+            serde_json::json!("2026-11-23T18:05:42Z"),
+        ),
+        ("AA:BB:CC:00:00:19", serde_json::json!(null)),
+        ("AA:BB:CC:00:00:2E", serde_json::json!(null)),
+    ] {
+        let host = host(mac);
+        assert_eq!(host["last_seen"], last_seen, "{host}");
+    }
 }
 
 #[tokio::test(flavor = "multi_thread")]
@@ -1270,6 +1286,7 @@ async fn looks_up_one_host() {
     assert_eq!(host["mac"], "AA:BB:CC:00:00:02", "{host}");
     assert_eq!(host["address_source"], "DHCP", "{host}");
     assert_eq!(host["permanent_address"], true, "{host}");
+    assert_eq!(host["last_seen"], "2026-11-25T18:05:42Z", "{host}");
     // Without an exact name, the names that contain it.
     let host = json(&run(&sim, &["hosts", "ice-47"], password).await);
     assert_eq!(host["name"], "device-47", "{host}");

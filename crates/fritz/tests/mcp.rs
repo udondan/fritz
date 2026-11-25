@@ -411,6 +411,7 @@ async fn reads_the_state() {
     assert_eq!(first["mac"], "AA:BB:CC:00:00:02", "{first}");
     assert_eq!(first["address_source"], "DHCP", "{first}");
     assert_eq!(first["permanent_address"], true, "{first}");
+    assert_eq!(first["last_seen"], "2026-11-25T18:05:42Z", "{first}");
 
     let page = success(&client, "fritz_hosts", json!({"offset": 1, "limit": 1})).await;
     assert_eq!(page["total"], total);
@@ -429,6 +430,7 @@ async fn reads_the_state() {
     assert_eq!(host["name"], "device-2", "{host}");
     assert_eq!(host["address_source"], "DHCP", "{host}");
     assert_eq!(host["permanent_address"], false, "{host}");
+    assert_eq!(host["last_seen"], "2026-11-26T18:05:42Z", "{host}");
     assert_eq!(host["attached_to"]["band"], "5 GHz", "{host}");
     let host = success(&client, "fritz_hosts", json!({"ip": "192.0.2.30"})).await;
     assert_eq!(host["name"], "device-47", "{host}");
