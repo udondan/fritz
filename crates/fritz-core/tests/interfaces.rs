@@ -7,7 +7,10 @@ use fritz_core::session::Session;
 use fritz_sim::{Fixture, Injection, Sim};
 use tr064::SecretString;
 
-const FIXTURE: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/fixtures/fritzbox-7690/8.25");
+const FIXTURE: &str = concat!(
+    env!("CARGO_MANIFEST_DIR"),
+    "/../fritz-sim/fixtures/fritzbox-7690/8.25"
+);
 
 async fn sim() -> Sim {
     Sim::start(Fixture::load(FIXTURE).unwrap()).await.unwrap()

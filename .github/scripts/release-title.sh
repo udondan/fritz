@@ -2,8 +2,7 @@
 # Prints the title of the release pull request with the planned versions,
 # like "chore: release fritz 0.2.0, tr064 0.1.2". Reads the body of the pull
 # request on stdin, which has a summary "<component>: <version>" for every
-# release. fritz-core and fritz-sim share the version of fritz and are left
-# out.
+# release, fritz first.
 #
 # Release Please parses the title again when the pull request is merged: it
 # must start with "chore: release <component> <version>". With more than one
@@ -18,7 +17,6 @@ while IFS= read -r line; do
     name=${BASH_REMATCH[1]}
     version=${BASH_REMATCH[2]}
     case $name in
-      fritz-core | fritz-sim) ;;
       fritz) first+=("$name $version") ;;
       *) rest+=("$name $version") ;;
     esac

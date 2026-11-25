@@ -13,7 +13,10 @@ use fritz_core::read::Reader;
 use fritz_sim::dns::DnsServer;
 use fritz_sim::{Answer, Fixture, Sim};
 
-const FIXTURE: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/fixtures/fritzbox-7690/8.25");
+const FIXTURE: &str = concat!(
+    env!("CARGO_MANIFEST_DIR"),
+    "/../fritz-sim/fixtures/fritzbox-7690/8.25"
+);
 
 /// Real queries to the DNS server, a fixed answer of the resolver of this
 /// machine and a fixed configuration.

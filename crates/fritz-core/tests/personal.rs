@@ -7,7 +7,10 @@ use fritz_core::personal::{self, CallFilter, Contact, ContactNumber};
 use fritz_core::read::Reader;
 use fritz_sim::{Answer, Fixture, Sim};
 
-const FIXTURE: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/fixtures/fritzbox-7690/8.25");
+const FIXTURE: &str = concat!(
+    env!("CARGO_MANIFEST_DIR"),
+    "/../fritz-sim/fixtures/fritzbox-7690/8.25"
+);
 
 const ONTEL: &str = "X_AVM-DE_OnTel1";
 

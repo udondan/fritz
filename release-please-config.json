@@ -25,9 +25,8 @@
   ],
   "plugins": [
     {
-      "type": "linked-versions",
-      "groupName": "fritz",
-      "components": ["fritz", "fritz-core", "fritz-sim"]
+      "type": "cargo-workspace",
+      "merge": true
     }
   ],
   "packages": {

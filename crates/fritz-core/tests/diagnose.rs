@@ -7,7 +7,10 @@ use fritz_core::diagnose::{self, Fixed, Options, Port, Report, Status};
 use fritz_core::read::Reader;
 use fritz_sim::{Fixture, Sim};
 
-const FIXTURE: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/fixtures/fritzbox-7690/8.25");
+const FIXTURE: &str = concat!(
+    env!("CARGO_MANIFEST_DIR"),
+    "/../fritz-sim/fixtures/fritzbox-7690/8.25"
+);
 
 /// Diagnoses `query` and checks that only getters were called.
 async fn diagnose(query: &str, network: &Fixed, options: &Options) -> Report {

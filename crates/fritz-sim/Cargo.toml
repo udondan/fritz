@@ -32,9 +32,5 @@ tr064.workspace = true
 workspace = true
 
 [dev-dependencies]
-# Path only: cargo publish leaves it out, so fritz-sim can be published
-# before fritz-core.
-fritz-core = { path = "../fritz-core" }
-secrecy = "=0.10.3"
 tempfile = "=3.27.0"
 tokio = { version = "=1.54.1", features = ["test-util"] }

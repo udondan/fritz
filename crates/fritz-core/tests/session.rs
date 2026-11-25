@@ -8,7 +8,10 @@ use fritz_core::{settings, smarthome};
 use fritz_sim::{Fixture, Injection, PASSWORD, Sim, USERNAME};
 use tr064::{Client, SecretString};
 
-const FIXTURE: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/fixtures/fritzbox-7690/8.25");
+const FIXTURE: &str = concat!(
+    env!("CARGO_MANIFEST_DIR"),
+    "/../fritz-sim/fixtures/fritzbox-7690/8.25"
+);
 const SID: &str = "AVM-SID 5e55104d0c0ffee5";
 
 async fn sim() -> Sim {
@@ -224,7 +227,7 @@ async fn reads_the_settings() {
     // A device without the modules of the mesh, like a repeater.
     let repeater = Fixture::load(concat!(
         env!("CARGO_MANIFEST_DIR"),
-        "/fixtures/fritz-repeater-2400/8.25"
+        "/../fritz-sim/fixtures/fritz-repeater-2400/8.25"
     ))
     .unwrap();
     let sim = Sim::start(repeater).await.unwrap();

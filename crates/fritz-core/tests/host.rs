@@ -5,7 +5,10 @@ use fritz_core::read::Reader;
 use fritz_core::status::Host;
 use fritz_sim::{Answer, Fixture, Injection, Sim};
 
-const FIXTURE: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/fixtures/fritzbox-7690/8.25");
+const FIXTURE: &str = concat!(
+    env!("CARGO_MANIFEST_DIR"),
+    "/../fritz-sim/fixtures/fritzbox-7690/8.25"
+);
 
 async fn reader(sim: &Sim) -> Reader {
     Reader::new(sim.client().build().unwrap()).await.unwrap()

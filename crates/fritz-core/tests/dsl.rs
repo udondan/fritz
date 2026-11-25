@@ -6,7 +6,10 @@ use fritz_core::dsl::{self, Errors, Link};
 use fritz_core::read::Reader;
 use fritz_sim::{Answer, Fixture, Injection, Sim};
 
-const FIXTURE: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/fixtures/fritzbox-7690/8.25");
+const FIXTURE: &str = concat!(
+    env!("CARGO_MANIFEST_DIR"),
+    "/../fritz-sim/fixtures/fritzbox-7690/8.25"
+);
 const INTERFACE: &str = "WANDSLInterfaceConfig1";
 
 async fn reader(sim: &Sim) -> Reader {
