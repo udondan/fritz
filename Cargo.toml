@@ -13,7 +13,7 @@ authors = ["Daniel Schroeder"]
 # own dependencies with exact versions. Cargo.lock pins every build.
 [workspace.dependencies]
 tr064 = { path = "crates/tr064", version = "0.1.2" }
-fritz-core = { path = "crates/fritz-core", version = "0.2.1" }
+fritz-core = { path = "crates/fritz-core", version = "0.2.2" }
 fritz-sim = { path = "crates/fritz-sim" }
 
 [workspace.lints.rust]
