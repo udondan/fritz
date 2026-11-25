@@ -97,6 +97,10 @@ pub struct Host {
     /// ("permanent assignment"). Only from the web interface, see
     /// [`crate::host::add_addressing`].
     pub permanent_address: Option<bool>,
+    /// When the host was last connected, in UTC, like
+    /// `2026-11-20T18:05:42Z`. Only from the web interface, see
+    /// [`crate::host::add_addressing`]. The device forgets it after a while.
+    pub last_seen: Option<String>,
     /// Whether the host is in the guest network. Only in the host list.
     pub guest: Option<bool>,
     /// Whether the host may use the internet: `granted`, `denied` or

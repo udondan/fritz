@@ -317,6 +317,7 @@ Name               laptop
 IP                 192.168.178.20
 MAC                02:00:5E:10:00:01
 Active             yes
+Last seen          2026-11-26T18:05:42Z
 Address source     DHCP
 Permanent address  yes
 Interface          802.11
@@ -328,9 +329,11 @@ Attached to        fritzbox, WLAN 5 GHz ↓ 866.7 Mbit/s  ↑ 433.3 Mbit/s
 
 The address source (`DHCP` or `Static`) and whether the box always gives a
 host the same IPv4 address (`permanent_address`, "Always assign this network
-device the same IPv4 address") come from the web interface, for all hosts in
-one request. TR-064 has no way to read the permanent assignment. If the user
-cannot log in to the web interface, both stay empty.
+device the same IPv4 address") and when the host was last connected
+(`last_seen`, in UTC) come from the web interface, for all hosts in one
+request. TR-064 has no way to read them. The box forgets when a host was last
+connected after a while; `last_seen` is then empty. If the user cannot log in
+to the web interface, all three stay empty.
 
 ```console
 $ fritz mesh

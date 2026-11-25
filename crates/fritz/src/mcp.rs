@@ -646,7 +646,7 @@ impl Server {
     }
 
     #[tool(
-        description = "Hosts the device knows, with IP, MAC, interface, internet access, address source (DHCP, Static) and whether the address is reserved permanently. Paginated. With mac or ip, the one host with all details: lease, guest network and the mesh node it is connected to.",
+        description = "Hosts the device knows, with IP, MAC, interface, internet access, address source (DHCP, Static), whether the address is reserved permanently and when the host was last seen (UTC; null if the device forgot). Paginated. With mac or ip, the one host with all details: lease, guest network and the mesh node it is connected to.",
         annotations(read_only_hint = true, open_world_hint = false)
     )]
     async fn fritz_hosts(&self, Parameters(query): Parameters<HostsQuery>) -> CallToolResult {

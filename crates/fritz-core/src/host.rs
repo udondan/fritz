@@ -228,6 +228,7 @@ fn overlay(host: Host, entry: &Values) -> Host {
         interface: text("NewInterfaceType").or(host.interface),
         address_source: text("NewAddressSource").or(host.address_source),
         permanent_address: host.permanent_address,
+        last_seen: host.last_seen,
         guest: entry.flag("NewX_AVM-DE_Guest").or(host.guest),
         internet_access: text("NewX_AVM-DE_WANAccess").or(host.internet_access),
         speed: entry
@@ -300,9 +301,10 @@ pub fn contains(host: &Host, text: &str) -> bool {
 }
 
 /// Adds how the `hosts` got their addresses from the LAN devices of the web
-/// interface, in one request: the address source where it is missing, and
-/// whether the address is reserved for the host permanently, which TR-064
-/// does not tell. Hosts the web interface does not list stay as they are.
+/// interface, in one request: the address source where it is missing,
+/// whether the address is reserved for the host permanently and when the
+/// host was last connected, which TR-064 does not tell. Hosts the web
+/// interface does not list stay as they are.
 ///
 /// # Errors
 ///
@@ -341,7 +343,37 @@ pub fn addressing(devices: &Value, hosts: &mut [Host]) {
                 flag(device, "dhcp").map(|dhcp| if dhcp { "DHCP" } else { "Static" }.to_owned());
         }
         host.permanent_address = flag(device, "static_dhcp");
+        // In seconds since the Unix epoch, 0 if the device does not know.
+        host.last_seen = device
+            .get("lastused")
+            .and_then(Value::as_str)
+            .and_then(|s| s.parse::<i64>().ok())
+            .filter(|&s| s > 0)
+            .map(utc);
     }
+}
+
+/// The time `seconds` after the Unix epoch, in UTC, like
+/// `2026-11-20T18:05:42Z`.
+fn utc(seconds: i64) -> String {
+    let (days, time) = (seconds.div_euclid(86_400), seconds.rem_euclid(86_400));
+    // The civil date of a day count; see
+    // <https://howardhinnant.github.io/date_algorithms.html#civil_from_days>.
+    let z = days + 719_468;
+    let era = z.div_euclid(146_097);
+    let doe = z.rem_euclid(146_097);
+    let yoe = (doe - doe / 1460 + doe / 36_524 - doe / 146_096) / 365;
+    let doy = doe - (365 * yoe + yoe / 4 - yoe / 100);
+    let mp = (5 * doy + 2) / 153;
+    let day = doy - (153 * mp + 2) / 5 + 1;
+    let month = if mp < 10 { mp + 3 } else { mp - 9 };
+    let year = yoe + era * 400 + i64::from(month <= 2);
+    format!(
+        "{year:04}-{month:02}-{day:02}T{:02}:{:02}:{:02}Z",
+        time / 3600,
+        time / 60 % 60,
+        time % 60
+    )
 }
 
 #[cfg(test)]
@@ -434,6 +466,14 @@ mod tests {
     }
 
     #[test]
+    fn formats_times_in_utc() {
+        assert_eq!(utc(0), "1970-01-01T00:00:00Z");
+        assert_eq!(utc(1_709_251_199), "2024-02-29T23:59:59Z");
+        assert_eq!(utc(1_767_225_600), "2026-01-01T00:00:00Z");
+        assert_eq!(utc(-1), "1969-12-31T23:59:59Z");
+    }
+
+    #[test]
     fn adds_the_addressing_of_lan_devices() {
         let with_mac = |mac: &str, source: Option<&str>| Host {
             mac: Some(mac.to_owned()),
@@ -452,26 +492,32 @@ mod tests {
             Host::default(),
         ];
         let devices = serde_json::json!({"landevice": [
-            {"mac": "aa:bb:cc:00:00:01", "dhcp": "1", "static_dhcp": "1"},
-            {"mac": "AA:BB:CC:00:00:02", "dhcp": "0", "static_dhcp": "0"},
-            {"mac": "AA:BB:CC:00:00:03", "dhcp": "0", "static_dhcp": "0"},
-            {"mac": "AA:BB:CC:00:00:04", "dhcp": "", "static_dhcp": 1},
+            {"mac": "aa:bb:cc:00:00:01", "dhcp": "1", "static_dhcp": "1", "lastused": "1795716342"},
+            {"mac": "AA:BB:CC:00:00:02", "dhcp": "0", "static_dhcp": "0", "lastused": "0"},
+            {"mac": "AA:BB:CC:00:00:03", "dhcp": "0", "static_dhcp": "0", "lastused": "951782400"},
+            {"mac": "AA:BB:CC:00:00:04", "dhcp": "", "static_dhcp": 1, "lastused": "x"},
             {"name": "no MAC", "dhcp": "1"},
         ]});
         addressing(&devices, &mut hosts);
         let found: Vec<_> = hosts
             .iter()
-            .map(|h| (h.address_source.as_deref(), h.permanent_address))
+            .map(|h| {
+                (
+                    h.address_source.as_deref(),
+                    h.permanent_address,
+                    h.last_seen.as_deref(),
+                )
+            })
             .collect();
         assert_eq!(
             found,
             [
-                (Some("DHCP"), Some(true)),
-                (Some("Static"), Some(false)),
-                (Some("DHCP"), Some(false)),
-                (None, None),
-                (None, None),
-                (None, None),
+                (Some("DHCP"), Some(true), Some("2026-11-26T18:05:42Z")),
+                (Some("Static"), Some(false), None),
+                (Some("DHCP"), Some(false), Some("2000-02-29T00:00:00Z")),
+                (None, None, None),
+                (None, None, None),
+                (None, None, None),
             ]
         );
 

@@ -105,6 +105,7 @@ fn host_detail(detail: &Detail, out: &mut impl Write) -> anyhow::Result<()> {
             ("IP", host.ip.clone()),
             ("MAC", host.mac.clone()),
             ("Active", Some(yes_no(host.active))),
+            ("Last seen", host.last_seen.clone()),
             ("Address source", host.address_source.clone()),
             ("Permanent address", host.permanent_address.map(yes_no)),
             ("Lease remaining", detail.lease_remaining.map(duration)),
@@ -156,6 +157,7 @@ mod tests {
                 interface: Some("802.11".to_owned()),
                 address_source: Some("DHCP".to_owned()),
                 permanent_address: Some(true),
+                last_seen: Some("2026-11-26T18:05:42Z".to_owned()),
                 guest: Some(false),
                 internet_access: Some("granted".to_owned()),
                 speed: Some(866),
@@ -176,6 +178,7 @@ mod tests {
              IP                 192.0.2.2\n\
              MAC                AA:BB:CC:00:00:03\n\
              Active             yes\n\
+             Last seen          2026-11-26T18:05:42Z\n\
              Address source     DHCP\n\
              Permanent address  yes\n\
              Lease remaining    3h 2m\n\
