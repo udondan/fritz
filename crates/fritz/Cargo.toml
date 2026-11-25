@@ -1,6 +1,6 @@
 [package]
 name = "fritz"
-version = "0.2.0"
+version = "0.2.1"
 description = "CLI and MCP server for FRITZ!Box routers (unofficial, not affiliated with FRITZ! GmbH)"
 keywords = ["fritzbox", "mcp", "cli", "tr-064"]
 categories = ["command-line-utilities", "network-programming"]
