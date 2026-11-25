@@ -3,10 +3,6 @@
 ## [0.2.1](https://github.com/udondan/fritz/compare/fritz-core-v0.2.0...fritz-core-v0.2.1) (2026-11-25)
 
 
-### Features
-
-* **fritz:** show the address source and permanent address of all hosts ([#164](https://github.com/udondan/fritz/issues/164)) ([abd1b6a](https://github.com/udondan/fritz/commit/abd1b6ae57b8c94ca72312d3f77a0b7b1610c49b))
-
 ## [0.2.0](https://github.com/udondan/fritz/compare/fritz-core-v0.1.1...fritz-core-v0.2.0) (2026-11-24)
 
 
