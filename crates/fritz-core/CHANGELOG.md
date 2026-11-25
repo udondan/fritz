@@ -1,5 +1,8 @@
 # Changelog
 
+## [0.2.1](https://github.com/udondan/fritz/compare/fritz-core-v0.2.0...fritz-core-v0.2.1) (2026-11-25)
+
+
 ## [0.2.0](https://github.com/udondan/fritz/compare/fritz-core-v0.1.1...fritz-core-v0.2.0) (2026-11-24)
 
 
