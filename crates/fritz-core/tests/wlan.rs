@@ -4,7 +4,7 @@ use fritz_core::read::Reader;
 use fritz_core::wlan::{self, Client, Hint, Night, Security, Statistics, Views, Wlan, Wps};
 use fritz_sim::{Answer, Fixture, Injection, Sim};
 
-const FIXTURE: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/fixtures/fritzbox-7690/8.25");
+const FIXTURE: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/../fritz-sim/fixtures/fritzbox-7690/8.25");
 
 const CLIENTS: Views = Views {
     clients: true,

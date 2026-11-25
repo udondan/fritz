@@ -11,7 +11,7 @@ use fritz_core::wlan::join::{self, Auth, Error};
 use fritz_sim::{Answer, Fixture, Injection, Sim};
 use secrecy::ExposeSecret as _;
 
-const FIXTURE: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/fixtures/fritzbox-7690/8.25");
+const FIXTURE: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/../fritz-sim/fixtures/fritzbox-7690/8.25");
 
 /// A fake passphrase with every character that needs escaping.
 const SPECIAL: &str = r#"fake\pass;phrase,with:"quotes""#;

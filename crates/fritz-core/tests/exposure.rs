@@ -9,7 +9,7 @@ use fritz_core::session::Session;
 use fritz_sim::{Answer, Fixture, PASSWORD, Sim, USERNAME};
 use tr064::{Client, SecretString};
 
-const FIXTURE: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/fixtures/fritzbox-7690/8.25");
+const FIXTURE: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/../fritz-sim/fixtures/fritzbox-7690/8.25");
 
 fn ok(out: &[(&str, &str)]) -> Answer {
     Answer::Ok(

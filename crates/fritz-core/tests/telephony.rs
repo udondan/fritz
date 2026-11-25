@@ -10,7 +10,7 @@ use fritz_core::telephony::{self, Account, AnsweringMachine, Deflection, Handset
 use fritz_sim::{Answer, Fixture, Injection, Sim};
 use tr064::SecretString;
 
-const FIXTURE: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/fixtures/fritzbox-7690/8.25");
+const FIXTURE: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/../fritz-sim/fixtures/fritzbox-7690/8.25");
 
 fn fixture() -> Fixture {
     Fixture::load(FIXTURE).unwrap()
