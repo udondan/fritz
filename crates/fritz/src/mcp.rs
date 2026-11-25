@@ -58,6 +58,7 @@ use tr064::Direction;
 use crate::context::Context;
 use crate::doctor;
 use crate::personal::find_log;
+use crate::status::add_addressing;
 use crate::tr64::kind;
 
 /// The hosts in one page, unless the call asks for another number.
@@ -645,7 +646,7 @@ impl Server {
     }
 
     #[tool(
-        description = "Hosts the device knows, with IP, MAC, interface and internet access. Paginated. With mac or ip, the one host with all details: address source, lease, guest network and the mesh node it is connected to.",
+        description = "Hosts the device knows, with IP, MAC, interface, internet access, address source (DHCP, Static) and whether the address is reserved permanently. Paginated. With mac or ip, the one host with all details: lease, guest network and the mesh node it is connected to.",
         annotations(read_only_hint = true, open_world_hint = false)
     )]
     async fn fritz_hosts(&self, Parameters(query): Parameters<HostsQuery>) -> CallToolResult {
@@ -653,13 +654,15 @@ impl Server {
             let lookup = lookup(&query)?;
             let mut reader = self.reader().await?;
             if let Some(lookup) = lookup {
-                let detail = host::lookup(&mut reader, &lookup)
+                let mut detail = host::lookup(&mut reader, &lookup)
                     .await?
                     .filter(|d| !query.active || d.host.active)
                     .with_context(|| format!("no host has {lookup}"))?;
+                add_addressing(&self.context, std::slice::from_mut(&mut detail.host)).await;
                 return Ok(serde_json::to_value(detail)?);
             }
-            let hosts = status::hosts(&mut reader).await?;
+            let mut hosts = status::hosts(&mut reader).await?;
+            add_addressing(&self.context, &mut hosts.hosts).await;
             Ok(serde_json::to_value(page(hosts, &query))?)
         })
         .await

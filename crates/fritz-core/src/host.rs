@@ -4,14 +4,18 @@
 //! Addresses are checked before they are sent. Host names are untrusted
 //! strings.
 
+use std::collections::HashMap;
 use std::fmt;
 use std::net::Ipv4Addr;
 
 use serde::Serialize;
+use serde_json::Value;
 
 use crate::generic::Error;
 use crate::lists::{self, Branch};
 use crate::read::{Reader, Values};
+use crate::session::{self, Session};
+use crate::settings;
 use crate::status::{self, Host};
 
 /// What a host is looked up by: an address the device can look up itself.
@@ -223,6 +227,7 @@ fn overlay(host: Host, entry: &Values) -> Host {
         active: entry.flag("NewActive").unwrap_or(host.active),
         interface: text("NewInterfaceType").or(host.interface),
         address_source: text("NewAddressSource").or(host.address_source),
+        permanent_address: host.permanent_address,
         guest: entry.flag("NewX_AVM-DE_Guest").or(host.guest),
         internet_access: text("NewX_AVM-DE_WANAccess").or(host.internet_access),
         speed: entry
@@ -292,6 +297,51 @@ pub fn contains(host: &Host, text: &str) -> bool {
         .into_iter()
         .flatten()
         .any(|v| v.to_lowercase().contains(&text))
+}
+
+/// Adds how the `hosts` got their addresses from the LAN devices of the web
+/// interface, in one request: the address source where it is missing, and
+/// whether the address is reserved for the host permanently, which TR-064
+/// does not tell. Hosts the web interface does not list stay as they are.
+///
+/// # Errors
+///
+/// The errors of reading the module `landevice`.
+pub async fn add_addressing(session: &Session, hosts: &mut [Host]) -> Result<(), session::Error> {
+    let devices = settings::module(session, "landevice").await?;
+    addressing(&devices, hosts);
+    Ok(())
+}
+
+/// Adds the addressing of the LAN `devices`, matched by MAC address, to the
+/// `hosts`; see [`add_addressing`].
+pub fn addressing(devices: &Value, hosts: &mut [Host]) {
+    let flag = |device: &Value, name: &str| match device.get(name).and_then(Value::as_str) {
+        Some("1") => Some(true),
+        Some("0") => Some(false),
+        _ => None,
+    };
+    let by_mac: HashMap<String, &Value> = devices
+        .get("landevice")
+        .and_then(Value::as_array)
+        .into_iter()
+        .flatten()
+        .filter_map(|d| Some((d.get("mac")?.as_str()?.to_ascii_uppercase(), d)))
+        .collect();
+    for host in hosts {
+        let Some(device) = host
+            .mac
+            .as_deref()
+            .and_then(|mac| by_mac.get(&mac.to_ascii_uppercase()))
+        else {
+            continue;
+        };
+        if host.address_source.is_none() {
+            host.address_source =
+                flag(device, "dhcp").map(|dhcp| if dhcp { "DHCP" } else { "Static" }.to_owned());
+        }
+        host.permanent_address = flag(device, "static_dhcp");
+    }
 }
 
 #[cfg(test)]
@@ -381,5 +431,53 @@ mod tests {
         assert_eq!(band("UPLINK:6G:0").as_deref(), Some("6 GHz"));
         assert_eq!(band("AP:5G:1").as_deref(), Some("5 GHz"));
         assert_eq!(band("LAN:1"), None);
+    }
+
+    #[test]
+    fn adds_the_addressing_of_lan_devices() {
+        let with_mac = |mac: &str, source: Option<&str>| Host {
+            mac: Some(mac.to_owned()),
+            address_source: source.map(str::to_owned),
+            ..Host::default()
+        };
+        let mut hosts = [
+            with_mac("AA:BB:CC:00:00:01", None),
+            with_mac("aa:bb:cc:00:00:02", None),
+            // The entry of the host wins over the web interface.
+            with_mac("AA:BB:CC:00:00:03", Some("DHCP")),
+            // Unknown values are left out.
+            with_mac("AA:BB:CC:00:00:04", None),
+            // Not a LAN device.
+            with_mac("AA:BB:CC:00:00:05", None),
+            Host::default(),
+        ];
+        let devices = serde_json::json!({"landevice": [
+            {"mac": "aa:bb:cc:00:00:01", "dhcp": "1", "static_dhcp": "1"},
+            {"mac": "AA:BB:CC:00:00:02", "dhcp": "0", "static_dhcp": "0"},
+            {"mac": "AA:BB:CC:00:00:03", "dhcp": "0", "static_dhcp": "0"},
+            {"mac": "AA:BB:CC:00:00:04", "dhcp": "", "static_dhcp": 1},
+            {"name": "no MAC", "dhcp": "1"},
+        ]});
+        addressing(&devices, &mut hosts);
+        let found: Vec<_> = hosts
+            .iter()
+            .map(|h| (h.address_source.as_deref(), h.permanent_address))
+            .collect();
+        assert_eq!(
+            found,
+            [
+                (Some("DHCP"), Some(true)),
+                (Some("Static"), Some(false)),
+                (Some("DHCP"), Some(false)),
+                (None, None),
+                (None, None),
+                (None, None),
+            ]
+        );
+
+        // Without the list, nothing changes.
+        let before = hosts.clone();
+        addressing(&serde_json::json!({}), &mut hosts);
+        assert_eq!(hosts, before);
     }
 }

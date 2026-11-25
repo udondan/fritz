@@ -222,7 +222,7 @@
   },
   {
     "name": "fritz_hosts",
-    "description": "Hosts the device knows, with IP, MAC, interface and internet access. Paginated. With mac or ip, the one host with all details: address source, lease, guest network and the mesh node it is connected to.",
+    "description": "Hosts the device knows, with IP, MAC, interface, internet access, address source (DHCP, Static) and whether the address is reserved permanently. Paginated. With mac or ip, the one host with all details: lease, guest network and the mesh node it is connected to.",
     "inputSchema": {
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "properties": {

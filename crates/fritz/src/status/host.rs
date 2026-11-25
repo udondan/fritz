@@ -2,11 +2,12 @@
 //! its name or address.
 
 use std::io::Write;
+use std::slice;
 
 use anyhow::{Context as _, bail};
 use clap::Args;
 use fritz_core::host::{self, Attachment, Detail, Lookup};
-use fritz_core::status;
+use fritz_core::status::{self, Host};
 
 use super::{duration, host_table, pairs, rates, reader, shortfall, yes_no};
 use crate::context::Context;
@@ -46,11 +47,12 @@ pub(crate) async fn hosts(
     let mut reader = reader(context).await?;
     let which = if args.active { "active host" } else { "host" };
     if let Some(lookup) = args.mac.or(args.ip) {
-        let detail = host::lookup(&mut reader, &lookup)
+        let mut detail = host::lookup(&mut reader, &lookup)
             .await
             .context("cannot read the host")?
             .filter(|d| !args.active || d.host.active)
             .with_context(|| format!("no {which} has {lookup}"))?;
+        add_addressing(context, slice::from_mut(&mut detail.host)).await;
         return show(&detail, format, out, host_detail);
     }
     let mut hosts = status::hosts(&mut reader)
@@ -65,15 +67,33 @@ pub(crate) async fn hosts(
         match hosts.hosts.pop() {
             None => bail!("no {which} is named {name:?}"),
             Some(found) if hosts.hosts.is_empty() => {
-                let detail = host::detail(&mut reader, found)
+                let mut detail = host::detail(&mut reader, found)
                     .await
                     .context("cannot read the host")?;
+                add_addressing(context, slice::from_mut(&mut detail.host)).await;
                 return show(&detail, format, out, host_detail);
             }
             Some(found) => hosts.hosts.push(found),
         }
     }
+    add_addressing(context, &mut hosts.hosts).await;
     show(&hosts, format, out, host_table)
+}
+
+/// Adds how the hosts got their addresses, from the web interface, see
+/// [`host::add_addressing`]. Without a login to the web interface, or if
+/// reading fails, the hosts stay as they are: the rest of the hosts does not
+/// need the web interface.
+pub(crate) async fn add_addressing(context: &Context, hosts: &mut [Host]) {
+    let Ok(session) = context.session().await else {
+        return;
+    };
+    let read = host::add_addressing(&session, hosts).await;
+    // Ends the session even if reading failed.
+    let logout = session.logout().await;
+    if let Err(error) = read.and(logout) {
+        tracing::debug!(%error, "no addressing of the hosts");
+    }
 }
 
 /// One host with all details, a line for each.
@@ -86,6 +106,7 @@ fn host_detail(detail: &Detail, out: &mut impl Write) -> anyhow::Result<()> {
             ("MAC", host.mac.clone()),
             ("Active", Some(yes_no(host.active))),
             ("Address source", host.address_source.clone()),
+            ("Permanent address", host.permanent_address.map(yes_no)),
             ("Lease remaining", detail.lease_remaining.map(duration)),
             ("Interface", host.interface.clone()),
             ("Speed", host.speed.map(|s| format!("{s} Mbit/s"))),
@@ -134,6 +155,7 @@ mod tests {
                 active: true,
                 interface: Some("802.11".to_owned()),
                 address_source: Some("DHCP".to_owned()),
+                permanent_address: Some(true),
                 guest: Some(false),
                 internet_access: Some("granted".to_owned()),
                 speed: Some(866),
@@ -150,17 +172,18 @@ mod tests {
         };
         assert_eq!(
             text(|out| host_detail(&detail, out)),
-            "Name             device-2\n\
-             IP               192.0.2.2\n\
-             MAC              AA:BB:CC:00:00:03\n\
-             Active           yes\n\
-             Address source   DHCP\n\
-             Lease remaining  3h 2m\n\
-             Interface        802.11\n\
-             Speed            866 Mbit/s\n\
-             Guest            no\n\
-             Internet         granted\n\
-             Attached to      device-50, WLAN 5 GHz ↓ 866.7 Mbit/s  ↑ 433.3 Mbit/s\n"
+            "Name               device-2\n\
+             IP                 192.0.2.2\n\
+             MAC                AA:BB:CC:00:00:03\n\
+             Active             yes\n\
+             Address source     DHCP\n\
+             Permanent address  yes\n\
+             Lease remaining    3h 2m\n\
+             Interface          802.11\n\
+             Speed              866 Mbit/s\n\
+             Guest              no\n\
+             Internet           granted\n\
+             Attached to        device-50, WLAN 5 GHz ↓ 866.7 Mbit/s  ↑ 433.3 Mbit/s\n"
         );
         let lan = Attachment {
             node: Some("device-51".to_owned()),
