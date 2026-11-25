@@ -78,7 +78,8 @@ mobiled, plc, tam, user, vpn and wlan. Secrets are replaced by `***`.
 
 Anything else goes through TR-064:
 
-1. `fritz tr064 services` lists the services, like `DeviceInfo:1  DeviceInfo1`.
+1. `fritz tr064 services` lists the services by their short name, like
+   `DeviceInfo1` for `DeviceInfo:1`.
 2. `fritz tr064 actions <service>` lists the actions with their class. Only
    `read` actions can be called.
 3. `fritz tr064 describe <service> <action>` shows the arguments and types.

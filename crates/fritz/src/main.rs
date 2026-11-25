@@ -691,7 +691,7 @@ async fn run(
         Command::Auth(AuthCommand::Login) => auth::login(&load()?, system::read_password, out),
         Command::Auth(AuthCommand::Logout) => auth::logout(&load()?, out),
         Command::Auth(AuthCommand::Status) => auth::status(&load()?, out).await,
-        Command::Tr064(command) => tr64(&load()?, command, out).await,
+        Command::Tr064(command) => tr64(&load()?, command, format, out).await,
         Command::Cache(CacheCommand::Show) => cache::show(&cache::open()?, format, out),
         Command::Cache(CacheCommand::Clear) => cache::clear(&cache::open()?, out),
         #[cfg(feature = "write")]
@@ -729,19 +729,27 @@ async fn exposure(
 async fn tr64(
     context: &Context,
     command: Tr064Command,
+    format: Format,
     out: &mut impl io::Write,
 ) -> anyhow::Result<()> {
     match command {
-        Tr064Command::Services => tr64::services(context, out).await,
-        Tr064Command::Actions { service } => tr64::actions(context, &service, out).await,
+        Tr064Command::Services => tr64::services(context, format, out).await,
+        Tr064Command::Actions { service } => tr64::actions(context, &service, format, out).await,
         Tr064Command::Describe { service, action } => {
-            tr64::describe(context, &service, &action, out).await
+            tr64::describe(context, &service, &action, format, out).await
         }
         Tr064Command::Call {
             service,
             action,
             arguments,
-        } => tr64::call(context, &service, &action, &arguments, out).await,
+        } => {
+            let call = tr64::Call {
+                service: &service,
+                action: &action,
+                arguments: &arguments,
+            };
+            tr64::call(context, &call, format, out).await
+        }
     }
 }
 

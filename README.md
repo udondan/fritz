@@ -867,10 +867,11 @@ Inputs go after the action, like `fritz tr064 call Hosts1 GetGenericHostEntry Ne
 ### JSON and YAML output
 
 The commands from `overview` to `log` print a table on a terminal and JSON
-otherwise, for scripts and agents, and so do `config list`, `cache show` and
-`version`. `--output` (`-o`) picks `text`, `json` or `yaml`. The other
-`config` and `cache` commands, `tls`,
-`auth` and `tr064` always print text.
+otherwise, for scripts and agents, and so do `config list`, `cache show`,
+`tr064` and `version`. `--output` (`-o`) picks `text`, `json` or `yaml`. The
+other `config` and `cache` commands, `tls` and `auth` always print text.
+`tr064 call` prints the outputs of the action as an object of names and
+values.
 
 To keep text in pipes, like `fritz hosts | grep phone`, set
 `FRITZ_OUTPUT=text` in your shell; `--output` still wins over it.

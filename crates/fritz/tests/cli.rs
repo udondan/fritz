@@ -873,9 +873,10 @@ const FIXTURE: &str = concat!(
 /// The session ID of the simulator.
 const SESSION: &str = "5e55104d0c0ffee5";
 
-/// Runs `fritz tr064` against `sim` as its user, with the given password.
+/// Runs `fritz tr064` against `sim` as its user, with the given password,
+/// and prints text.
 async fn tr64(sim: &fritz_sim::Sim, args: &[&str], password: Option<&str>) -> Output {
-    let mut all = vec!["tr064"];
+    let mut all = vec!["-o", "text", "tr064"];
     all.extend(args);
     run(sim, &all, password).await
 }
@@ -1042,6 +1043,53 @@ async fn calls_only_actions_that_read() {
     assert!(error.contains("GetInfo failed"), "{error}");
     let error = failure(&tr64(&sim, &["call", "DeviceInfo1", "GetInfo"], None).await);
     assert!(error.contains("no password for"), "{error}");
+}
+
+/// Runs `fritz tr064` against `sim` and parses its output as JSON.
+async fn tr64_json(sim: &fritz_sim::Sim, args: &[&str]) -> serde_json::Value {
+    let mut all = vec!["tr064"];
+    all.extend(args);
+    let output = run(sim, &all, Some(fritz_sim::PASSWORD)).await;
+    serde_json::from_str(&success(&output)).unwrap()
+}
+
+#[tokio::test(flavor = "multi_thread")]
+async fn prints_tr064_as_json_or_yaml() {
+    let fixture = fritz_sim::Fixture::load(FIXTURE).unwrap();
+    let sim = fritz_sim::Sim::start(fixture).await.unwrap();
+
+    // Without a terminal, the output is JSON.
+    let services = tr64_json(&sim, &["services"]).await;
+    assert_eq!(services["DeviceInfo1"], "DeviceInfo:1");
+    assert_eq!(services["WLANConfiguration3"], "WLANConfiguration:3");
+
+    let actions = tr64_json(&sim, &["actions", "DeviceConfig:1"]).await;
+    assert_eq!(actions["Reboot"], "critical");
+    assert_eq!(actions["X_AVM-DE_GetUserAgreement"], "read");
+
+    let describe = tr64_json(&sim, &["describe", "Hosts1", "GetGenericHostEntry"]).await;
+    assert_eq!(describe["action"], "GetGenericHostEntry");
+    assert_eq!(describe["class"], "read");
+    assert_eq!(describe["in"]["NewIndex"], "ui2");
+    assert!(describe["out"]["NewActive"].is_string(), "{describe}");
+
+    let info = tr64_json(&sim, &["call", "DeviceInfo1", "GetInfo"]).await;
+    assert_eq!(info["NewModelName"], "FRITZ!Box 7690");
+    let path = tr64_json(&sim, &["call", "Hosts1", "X_AVM-DE_GetHostListPath"]).await;
+    assert_eq!(
+        path,
+        serde_json::json!({"NewX_AVM-DE_HostListPath": "/devicehostlist.lua?sid=***"})
+    );
+
+    let yaml = success(
+        &run(
+            &sim,
+            &["-o", "yaml", "tr064", "call", "DeviceInfo1", "GetInfo"],
+            Some(fritz_sim::PASSWORD),
+        )
+        .await,
+    );
+    assert!(yaml.contains("NewModelName: FRITZ!Box 7690\n"), "{yaml}");
 }
 
 #[test]
