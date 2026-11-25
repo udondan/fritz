@@ -1,5 +1,8 @@
 # Changelog
 
+## [0.2.2](https://github.com/udondan/fritz/compare/fritz-sim-v0.2.1...fritz-sim-v0.2.2) (2026-11-25)
+
+
 ## [0.2.1](https://github.com/udondan/fritz/compare/fritz-sim-v0.2.0...fritz-sim-v0.2.1) (2026-11-25)
 
 
