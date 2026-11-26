@@ -34,7 +34,7 @@ tr064.workspace = true
 tracing = { version = "0.1.44", default-features = false, features = ["std"] }
 
 [target.'cfg(target_os = "macos")'.dependencies]
-apple-native-keyring-store = { version = "1.0.2", features = ["keychain"] }
+apple-native-keyring-store = { version = "1.0.3", features = ["keychain"] }
 
 [target.'cfg(target_os = "windows")'.dependencies]
 windows-native-keyring-store = "1.1.0"
