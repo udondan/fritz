@@ -188,7 +188,8 @@ pub(crate) struct SmarthomeQuery {
     history: bool,
     /// The device, by name or AIN. Needs `history`.
     device: Option<String>,
-    /// Only `hours`, `days` or `months`.
+    /// Only the series of `hours`, `days` or `months`. Default: all.
+    /// Needs `history`.
     range: Option<String>,
     /// Also all values of each series, the newest first, null for gaps.
     #[serde(default)]
@@ -225,7 +226,7 @@ pub(crate) struct HostsQuery {
     /// The host with this IPv4 address, with all details instead of a page.
     /// Combines only with `active`.
     ip: Option<String>,
-    /// Hosts to skip.
+    /// Hosts to skip, for the next page. Default 0.
     #[serde(default)]
     offset: usize,
     /// Hosts to return, at most 200. Default 50.
@@ -247,9 +248,11 @@ pub(crate) struct DiagnoseQuery {
 /// The name of `fritz_dns`.
 #[derive(Debug, Default, Deserialize, JsonSchema)]
 pub(crate) struct DnsQuery {
-    /// Like `nas.fritz.box` or `nas`.
+    /// The host name to check, fully qualified or short, like
+    /// `nas.fritz.box` or `nas`.
     name: String,
-    /// The address the answers should have.
+    /// The address the answers should have, like `192.168.178.20`; the
+    /// verdict then says whether they match.
     expected_ip: Option<String>,
     /// The DNS server asked as the router, like `192.168.178.1`. Default:
     /// the LAN address of the device.
@@ -286,7 +289,7 @@ pub(crate) struct CallsQuery {
 pub(crate) struct PhonebookQuery {
     /// Part of the name, or digits of the number.
     search: Option<String>,
-    /// Contacts to skip.
+    /// Contacts to skip, for the next page. Default 0.
     #[serde(default)]
     offset: usize,
     /// Contacts to return, at most 200. Default 50.
@@ -313,7 +316,9 @@ pub(crate) struct LogQuery {
 /// A service, or one of its actions.
 #[derive(Debug, Deserialize, JsonSchema)]
 pub(crate) struct ServiceQuery {
-    /// Like `DeviceInfo1` or `DeviceInfo:1`. Without it, all services.
+    /// The service, by the short id or the name and version that the list
+    /// of services shows, like `DeviceInfo1` or `DeviceInfo:1`. Without it,
+    /// all services.
     service: Option<String>,
 }
 
@@ -357,7 +362,7 @@ pub(crate) struct ChangeQuery {
 pub(crate) struct ApplyQuery {
     #[serde(flatten)]
     change: ChangeQuery,
-    /// The token of the plan.
+    /// The token that `fritz_plan_change` returned for this change.
     token: String,
 }
 
@@ -416,7 +421,7 @@ impl Server {
     }
 
     #[tool(
-        description = "Model, firmware, uptime, update, internet connection, rights of the user, and with `system` CPU load, temperature and memory.",
+        description = "Reads a summary of the device in one call: model, firmware version and update state, uptime, internet connection and the rights of the configured user. With `system`, also CPU load, temperature and memory. Use it first to get oriented; for details use fritz_internet, fritz_firmware or fritz_capabilities.",
         annotations(read_only_hint = true, open_world_hint = false)
     )]
     async fn fritz_overview(&self, Parameters(query): Parameters<OverviewQuery>) -> CallToolResult {
@@ -436,7 +441,7 @@ impl Server {
     }
 
     #[tool(
-        description = "Internet connection: status, addresses, provider, DNS, rates, DSL line, and with `dsl_details` the error counters and line diagnosis of DSL.",
+        description = "Reads the internet connection: status, external IPv4 and IPv6 addresses, provider, DNS servers, current and maximum rates, and a summary of the DSL line. With `dsl_details`, also the DSL error counters and the line diagnosis, which takes longer. Use it for connection problems; for the current throughput use fritz_traffic, for name resolution fritz_dns.",
         annotations(read_only_hint = true, open_world_hint = false)
     )]
     async fn fritz_internet(&self, Parameters(query): Parameters<InternetQuery>) -> CallToolResult {
@@ -457,7 +462,7 @@ impl Server {
     }
 
     #[tool(
-        description = "WAN traffic per direction: current and peak rate and line maximum in bit/s, utilization in percent, byte and packet totals; upstream by priority and multicast where reported. With `sample_seconds`, averages from the counters.",
+        description = "Measures the WAN traffic per direction: current and peak rate and line maximum in bit/s, utilization in percent, byte and packet totals, and upstream by priority and multicast where the device reports them. Without `sample_seconds` it reads once. With it, it reads twice that many seconds apart (at most 10; the call waits that long) and adds `sample` with the averages in between. `supported` is false on devices without these counters. For the counters of each LAN interface use fritz_interfaces.",
         annotations(read_only_hint = true, open_world_hint = false)
     )]
     async fn fritz_traffic(&self, Parameters(query): Parameters<TrafficQuery>) -> CallToolResult {
@@ -483,7 +488,7 @@ impl Server {
     }
 
     #[tool(
-        description = "Firmware: state (available, none, unknown, unsupported), installed and offered version, info URL, auto update, last update. Does not check for updates.",
+        description = "Reads the firmware state: `state` (available, none, unknown or unsupported), installed and offered version, info URL, whether auto update is on, and the last update. Reports what the device already knows: it does not start an update check and never installs. Use it to tell whether an update is pending; fritz_overview has only a summary.",
         annotations(read_only_hint = true, open_world_hint = false)
     )]
     async fn fritz_firmware(&self) -> CallToolResult {
@@ -495,7 +500,7 @@ impl Server {
     }
 
     #[tool(
-        description = "Powerline adapters: name, model, MAC, active, update available and the result of the last update. `supported` is false on devices without powerline support.",
+        description = "Lists the powerline adapters the device knows: name, model, MAC, whether active, whether an update is available, and the result of the last update. `supported` is false and the list empty on devices without powerline support. For repeaters and the other mesh devices use fritz_mesh.",
         annotations(read_only_hint = true, open_world_hint = false)
     )]
     async fn fritz_powerline(&self) -> CallToolResult {
@@ -507,7 +512,7 @@ impl Server {
     }
 
     #[tool(
-        description = "Wireless networks: SSID, band, channel, standard, status, guest network, number of clients, with `clients` the clients of each, and with `details` the security settings, radio, WPS, night time switch-off, statistics and hints on weak settings.",
+        description = "Lists the wireless networks: SSID, band, channel, standard, status, whether it is the guest network, and the number of clients. With `clients`, also the clients of each network; with `details`, the security settings, radio, WPS, night time switch-off, statistics and hints on weak settings like an open network. Keys are never read. For byte and error counters use fritz_interfaces; for all hosts, wired ones too, fritz_hosts.",
         annotations(read_only_hint = true, open_world_hint = false)
     )]
     async fn fritz_wlan(&self, Parameters(query): Parameters<WlanQuery>) -> CallToolResult {
@@ -523,7 +528,7 @@ impl Server {
     }
 
     #[tool(
-        description = "LAN interfaces and wireless networks with byte, packet and error counters; LAN ports.",
+        description = "Reads the counters of the network interfaces: each LAN interface and wireless network with its status and the bytes, packets and errors sent and received, and the LAN ports with link, speed and mode. Use it to find errors or the load of one interface; for the internet rates use fritz_traffic, for wireless settings fritz_wlan.",
         annotations(read_only_hint = true, open_world_hint = false)
     )]
     async fn fritz_interfaces(&self) -> CallToolResult {
@@ -535,7 +540,7 @@ impl Server {
     }
 
     #[tool(
-        description = "Port forwardings and whether UPnP lets hosts open ports.",
+        description = "Lists the port forwardings (service, enabled, protocol, external port, internal client and port, description, remote host, lease) and `upnp`: whether hosts may open ports themselves, null if unknown. Use it to check one forwarding; for everything that can be reached from the internet, like remote access, exposed host or VPN, use fritz_exposure.",
         annotations(read_only_hint = true, open_world_hint = false)
     )]
     async fn fritz_ports(&self) -> CallToolResult {
@@ -547,7 +552,7 @@ impl Server {
     }
 
     #[tool(
-        description = "Telephony: numbers, accounts, call deflections, answering machines, DECT handsets.",
+        description = "Reads the telephony setup: own numbers, internet telephony accounts with registrar and status, call deflections, answering machines, and DECT handsets with model and update state. Lists are empty when the device has none. It does not read calls or contacts: fritz_calls and fritz_phonebook do, offered with `--personal`.",
         annotations(read_only_hint = true, open_world_hint = false)
     )]
     async fn fritz_telephony(&self) -> CallToolResult {
@@ -559,7 +564,7 @@ impl Server {
     }
 
     #[tool(
-        description = "Features the device offers, the rights of the user, two-factor confirmation.",
+        description = "Reports what the device offers and what the configured user may do: `features` (like wlan, dect or powerline), `rights` (each area with its access, like BoxAdmin: readwrite), `two_factor` (whether changes need a confirmation on the device, null if unknown) and the number of TR-064 services. The rights are those of the user fritz logs in with. Use it to see which tools can work, or when a tool fails for lack of rights; for a full check of the setup use fritz_doctor.",
         annotations(read_only_hint = true, open_world_hint = false)
     )]
     async fn fritz_capabilities(&self) -> CallToolResult {
@@ -571,7 +576,7 @@ impl Server {
     }
 
     #[tool(
-        description = "Checks the setup step by step: configuration, host, port, certificate, password source, login, rights, two-factor, web interface, Smart Home. Each check: status (ok, warn, fail, skip), detail and hint. Call first when other tools fail.",
+        description = "Checks the setup step by step and explains what is wrong: configuration, host, port, certificate, password source, login, rights, two-factor, web interface and Smart Home. Returns a list of checks, each with status (ok, warn, fail or skip), detail and hint. Call it first when other tools fail to connect or log in. It logs in like the other tools and changes nothing.",
         annotations(read_only_hint = true, open_world_hint = false)
     )]
     async fn fritz_doctor(&self) -> CallToolResult {
@@ -580,7 +585,7 @@ impl Server {
     }
 
     #[tool(
-        description = "Users of the device (null if not allowed; names hidden without `--personal`), rights of the current user, login settings: anonymous and button login, default password, two-factor confirmation, and hints on weak settings. No passwords are read.",
+        description = "Reads the users of the device and the login settings: the users with their rights (null if the configured user may not see them; names hidden unless the server runs with `--personal`), the rights of the current user, whether anonymous and button login are allowed, whether the default password is still set, two-factor confirmation, and hints on weak settings. Passwords are never read. For the rights of the current user alone, fritz_capabilities is enough.",
         annotations(read_only_hint = true, open_world_hint = false)
     )]
     async fn fritz_users(&self) -> CallToolResult {
@@ -597,7 +602,7 @@ impl Server {
     }
 
     #[tool(
-        description = "Why a name does or does not resolve: local domain, DNS servers handed out and host table of the router, answers of the router's DNS server and of this machine's resolver, this machine's resolvers and search domains, and a verdict with the likely cause. Asks only for this name; changes nothing.",
+        description = "Explains why a host name does or does not resolve. Gathers the local domain, the DNS servers and the host table the router hands out, the answers of the router's DNS server and of this machine's resolver, and this machine's resolvers and search domains, and returns them with a verdict and the likely cause. Sends DNS queries for this name only, which this machine's resolver may forward to the internet; changes nothing. Use it when a name fails or points to the wrong address; for whether a host is reachable use fritz_diagnose.",
         annotations(read_only_hint = true, open_world_hint = true)
     )]
     async fn fritz_dns(&self, Parameters(query): Parameters<DnsQuery>) -> CallToolResult {
@@ -610,7 +615,7 @@ impl Server {
     }
 
     #[tool(
-        description = "What can be reached from the internet or managed from outside: remote access, MyFRITZ, dynamic DNS, port forwardings, exposed host, UPnP, FTP, shared links, VPN, TR-069, USP. Each item has a state (on, off, unknown), a count for lists, a severity (info, notice, warning) and hints. Addresses, domains, names and hosts hidden without `--personal`. Link URLs and passwords are never read.",
+        description = "Audits what can be reached from the internet or managed from outside: remote access, MyFRITZ, dynamic DNS, port forwardings, exposed host, UPnP, FTP, shared links, VPN, TR-069 and USP. Returns one item each, with a state (on, off or unknown), a count for lists, a severity (info, notice or warning) and hints. Addresses, domains, names and hosts are hidden unless the server runs with `--personal`; link URLs and passwords are never read. Logs in to the web interface for the exposed host and VPN. Use it for a security review; for the forwardings alone use fritz_ports.",
         annotations(read_only_hint = true, open_world_hint = false)
     )]
     async fn fritz_exposure(&self) -> CallToolResult {
@@ -629,7 +634,7 @@ impl Server {
     }
 
     #[tool(
-        description = "Settings like DNS, IPv6, MTU, DHCP and time, by module, from the web interface. Secrets hidden.",
+        description = "Reads settings from the web interface by module: without `modules`, DNS, IPv6, internet, LAN ports, mesh steering, routes and time; with `modules`, only those. Returns each module with its values; passwords and other secrets are hidden. Logs in to the web interface and out again. Use it for settings that no specific tool covers, like MTU, DHCP ranges or static routes; prefer fritz_internet or fritz_wlan where they answer the question.",
         annotations(read_only_hint = true, open_world_hint = false)
     )]
     async fn fritz_settings(&self, Parameters(query): Parameters<SettingsQuery>) -> CallToolResult {
@@ -646,7 +651,7 @@ impl Server {
     }
 
     #[tool(
-        description = "Hosts the device knows, with IP, MAC, interface, internet access, address source (DHCP, Static), whether the address is reserved permanently and when the host was last seen (UTC; null if the device forgot). Paginated. With mac or ip, the one host with all details: lease, guest network and the mesh node it is connected to.",
+        description = "Lists the hosts the router knows: name, IP, MAC, interface, internet access, address source (DHCP or Static), whether the address is reserved permanently, whether active, and when it was last seen (UTC; null if the device forgot). Filters with `active` and `search`; pages with `offset` and `limit`, with `total` the number that match. With `mac` or `ip`, returns that one host with all details instead: lease, guest network and the mesh node it is connected to. To find out why a host cannot be reached use fritz_diagnose.",
         annotations(read_only_hint = true, open_world_hint = false)
     )]
     async fn fritz_hosts(&self, Parameters(query): Parameters<HostsQuery>) -> CallToolResult {
@@ -669,7 +674,7 @@ impl Server {
     }
 
     #[tool(
-        description = "Diagnoses a host end to end: known to the device, active, address, link with mesh node and signal, whether its name resolves to that address, and whether TCP ports are open, closed or filtered. Each check passes, fails with a hint, or is skipped. `router` checks the device: private address, TR-064 over HTTPS and HTTP, web interface, certificate.",
+        description = "Diagnoses why a host can or cannot be reached: whether the device knows it, whether it is active, its address, its link with mesh node and signal, whether its name resolves to that address, and whether the given TCP `ports` are open, closed or filtered. Returns checks that each pass, fail with a hint, or are skipped. Probes the ports from this machine, and only on private addresses. With host `router`, checks the device itself: private address, TR-064 over HTTPS and HTTP, web interface and certificate. For name resolution alone use fritz_dns; for the setup of fritz, fritz_doctor.",
         annotations(read_only_hint = true, open_world_hint = false)
     )]
     async fn fritz_diagnose(&self, Parameters(query): Parameters<DiagnoseQuery>) -> CallToolResult {
@@ -695,7 +700,7 @@ impl Server {
     }
 
     #[tool(
-        description = "Mesh topology: nodes with their IP addresses and the links between them, or as a tree of which device is connected to which router or repeater.",
+        description = "Reads the mesh topology: the nodes (router, repeaters and clients) with their IP addresses and the links between them. With `tree`, nests every device below the router or repeater it is connected to instead. Returns null if the device reports no mesh. Use it to see which device is connected where; for addresses, leases and last seen use fritz_hosts.",
         annotations(read_only_hint = true, open_world_hint = false)
     )]
     async fn fritz_mesh(&self, Parameters(query): Parameters<MeshQuery>) -> CallToolResult {
@@ -720,7 +725,10 @@ impl Server {
     }
 
     #[tool(
-        description = "Smart Home devices and their values (FRITZ!OS 8.20 and later).",
+        description = "Reads the Smart Home devices from the web interface (FRITZ!OS 8.20 and later): each device with AIN, name, product, connection and battery, and its units with switch state, temperature, target, power (W), energy (Wh), voltage (V), level, humidity and alerts. With `history` and `device`, returns the history of that one device instead: series of power, voltage, energy, temperature and humidity, each with interval, time of the newest value and summary. Logs in to the web interface and out again.",
+        // Without a closure that panics, which no test can reach.
+        input_schema = rmcp::handler::server::common::schema_for_input::<SmarthomeQuery>()
+            .expect("the schema of the query"),
         annotations(read_only_hint = true, open_world_hint = false)
     )]
     async fn fritz_smarthome(
@@ -753,7 +761,7 @@ impl Server {
     }
 
     #[tool(
-        description = "TR-064 services, or the actions of one service with their class. Only read actions can be called.",
+        description = "Lists the TR-064 services of the device as short id to name and version, or with `service` the actions of that service, each with its class: read, personal, secret, write or critical. Only read actions, and personal ones with `--personal`, can be called with fritz_call_action. Use it to find an action when no specific tool covers the question; then fritz_describe_action shows its arguments.",
         annotations(read_only_hint = true, open_world_hint = false)
     )]
     async fn fritz_list_services(
@@ -782,7 +790,7 @@ impl Server {
     }
 
     #[tool(
-        description = "The class and the arguments of an action, with their types.",
+        description = "Describes one TR-064 action without calling it: its class (read, personal, secret, write or critical, with the reason) and its input (`in`) and output (`out`) arguments with their types. Use it after fritz_list_services and before fritz_call_action, to know which arguments to pass.",
         annotations(read_only_hint = true, open_world_hint = false)
     )]
     async fn fritz_describe_action(
@@ -815,7 +823,7 @@ impl Server {
     }
 
     #[tool(
-        description = "Calls an action that only reads. Secrets in the output are hidden.",
+        description = "Calls one TR-064 action of class read, or personal with `--personal`, with the given input arguments, and returns its output arguments as names and values. Refuses actions that change something or could return secrets, before anything is sent. Secrets in the output are hidden and values longer than 4096 characters cut. Use it only when no specific tool covers the question: find the action with fritz_list_services and its arguments with fritz_describe_action.",
         annotations(read_only_hint = true, open_world_hint = false)
     )]
     async fn fritz_call_action(&self, Parameters(query): Parameters<CallQuery>) -> CallToolResult {
@@ -862,7 +870,7 @@ impl Server {
 #[tool_router(router = personal_router)]
 impl Server {
     #[tool(
-        description = "Latest calls: kind, date, minutes, number, name, own number, device. Filters by kind, days and name or number. Personal data.",
+        description = "Lists the latest calls of the call list, newest first: kind (incoming, missed, outgoing, rejected or active), date, duration in minutes, number, name, own number and device. Filters by `kind`, `days` and `search` and returns at most `limit`. Personal data, offered only with `--personal`. For the contacts use fritz_phonebook.",
         annotations(read_only_hint = true, open_world_hint = false)
     )]
     async fn fritz_calls(&self, Parameters(query): Parameters<CallsQuery>) -> CallToolResult {
@@ -884,7 +892,7 @@ impl Server {
     }
 
     #[tool(
-        description = "Contacts of the phonebooks with their numbers, by name or number. Personal data. Paginated.",
+        description = "Lists the contacts of all phonebooks, each with its phonebook and numbers. Filters with `search`; pages with `offset` and `limit`, with `total` the number that match. Personal data, offered only with `--personal`. For past calls use fritz_calls.",
         annotations(read_only_hint = true, open_world_hint = false)
     )]
     async fn fritz_phonebook(
@@ -922,7 +930,7 @@ impl Server {
     }
 
     #[tool(
-        description = "Latest entries of the event log: connections, logins, WLAN, telephony. Filters by text, time and category. Personal data.",
+        description = "Reads the latest entries of the event log, newest first, like connections, logins, WLAN and telephony events. Filters by `search`, `since` and `category` and returns at most `limit`. Personal data, offered only with `--personal`. For the current state of a host use fritz_diagnose; for the setup of fritz, fritz_doctor.",
         annotations(read_only_hint = true, open_world_hint = false)
     )]
     async fn fritz_log(&self, Parameters(query): Parameters<LogQuery>) -> CallToolResult {
@@ -946,7 +954,7 @@ impl Server {
 #[tool_router(router = change_router)]
 impl Server {
     #[tool(
-        description = "Checks a change and shows the current and the new values of its inputs, without changing anything; the device may change other settings along with them. Returns a token for fritz_apply_change, valid once for 5 minutes.",
+        description = "Plans a change of a TR-064 setting without changing anything: checks that the change is allowed and shows the current and the new value of each input. The device may change other settings along with them; fritz_apply_change reports those. Returns a token for fritz_apply_change, valid once for 5 minutes. Show the plan to the user and apply only changes the user asked for.",
         annotations(read_only_hint = true, open_world_hint = false)
     )]
     async fn fritz_plan_change(
@@ -966,7 +974,7 @@ impl Server {
     }
 
     #[tool(
-        description = "Applies a planned change with the same arguments and the token of the plan, then reads the values back: verified is true, false or null if unknown, and side_effects lists the other values of the service that changed.",
+        description = "Applies a change planned with fritz_plan_change: pass the same service, action and arguments and the token of the plan. Changes the device, then reads the values back: `verified` is true, false or null if unknown, and `side_effects` lists the other values of the service that changed. The token is valid once. Apply only changes the user asked for, and tell the user about the side effects.",
         annotations(
             read_only_hint = false,
             destructive_hint = true,
