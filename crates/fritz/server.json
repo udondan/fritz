@@ -3,7 +3,7 @@
   "name": "io.github.udondan/fritz",
   "title": "FRITZ!Box (unofficial)",
   "description": "Reads the status and settings of a FRITZ!Box router over TR-064. Never changes anything.",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "repository": {
     "url": "https://github.com/udondan/fritz",
     "source": "github"
