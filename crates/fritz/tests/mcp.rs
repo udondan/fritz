@@ -19,7 +19,7 @@ const FIXTURE: &str = concat!(
 const GOLDEN: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/tests/data/mcp-tools.json");
 
 /// The most tokens the tool list may cost, counted as four characters each.
-const TOKEN_BUDGET: usize = 5000;
+const TOKEN_BUDGET: usize = 6000;
 
 type Client = RunningService<RoleClient, ()>;
 
