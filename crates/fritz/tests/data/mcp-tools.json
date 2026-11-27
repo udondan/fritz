@@ -495,12 +495,12 @@
   },
   {
     "name": "fritz_smarthome",
-    "description": "Reads the Smart Home devices from the web interface (FRITZ!OS 8.20 and later): each device with AIN, name, product, connection and battery, and its units with switch state, temperature, target, power (W), energy (Wh), voltage (V), level, humidity and alerts. With `history` and `device`, returns the history of that one device instead: series of power, voltage, energy, temperature and humidity, each with interval, time of the newest value and summary. Logs in to the web interface and out again.",
+    "description": "Reads the Smart Home devices (plugs, thermostats, sensors) from the web interface, FRITZ!OS 8.20 and later: each device with AIN, name, product, connection and battery, and its units with switch state, temperature, target, power (W), energy (Wh), voltage (V), level, humidity and alerts. Call it without arguments first to find the name or AIN of a device. With `history` and `device`, returns the history of that one device instead: series of power, voltage, energy, temperature and humidity, each with interval, time of the newest value and summary; `range` keeps one series length and `values` adds the single values. Use it for consumption, temperatures and switch states; DECT handsets are in fritz_telephony, powerline adapters in fritz_powerline. If the login fails, fritz_doctor checks the access to the web interface. Logs in to the web interface and out again; changes nothing.",
     "inputSchema": {
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "properties": {
         "device": {
-          "description": "The device, by name or AIN. Needs `history`.",
+          "description": "The device: its name, exact or else ignoring case, or its AIN with or\nwithout spaces, as listed without `history`, e.g. `Kühlschrank` or\n`11657 0123456`. Needs `history`.",
           "type": [
             "string",
             "null"
@@ -512,7 +512,7 @@
           "type": "boolean"
         },
         "range": {
-          "description": "Only the series of `hours`, `days` or `months`. Default: all.\nNeeds `history`.",
+          "description": "Only the series of one length: `hours`, `days` or\n`months`. Default: all. Needs `history`.",
           "type": [
             "string",
             "null"
@@ -520,7 +520,7 @@
         },
         "values": {
           "default": false,
-          "description": "Also all values of each series, the newest first, null for gaps.",
+          "description": "Also all values of each series, the newest first, null for gaps.\nOnly with `history`; each series has its summary anyway.",
           "type": "boolean"
         }
       },

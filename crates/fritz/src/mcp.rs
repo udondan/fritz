@@ -186,12 +186,15 @@ pub(crate) struct SmarthomeQuery {
     /// sum for energy).
     #[serde(default)]
     history: bool,
-    /// The device, by name or AIN. Needs `history`.
+    /// The device: its name, exact or else ignoring case, or its AIN with or
+    /// without spaces, as listed without `history`, e.g. `Kühlschrank` or
+    /// `11657 0123456`. Needs `history`.
     device: Option<String>,
-    /// Only the series of `hours`, `days` or `months`. Default: all.
-    /// Needs `history`.
+    /// Only the series of one length: `hours`, `days` or
+    /// `months`. Default: all. Needs `history`.
     range: Option<String>,
     /// Also all values of each series, the newest first, null for gaps.
+    /// Only with `history`; each series has its summary anyway.
     #[serde(default)]
     values: bool,
 }
@@ -725,7 +728,7 @@ impl Server {
     }
 
     #[tool(
-        description = "Reads the Smart Home devices from the web interface (FRITZ!OS 8.20 and later): each device with AIN, name, product, connection and battery, and its units with switch state, temperature, target, power (W), energy (Wh), voltage (V), level, humidity and alerts. With `history` and `device`, returns the history of that one device instead: series of power, voltage, energy, temperature and humidity, each with interval, time of the newest value and summary. Logs in to the web interface and out again.",
+        description = "Reads the Smart Home devices (plugs, thermostats, sensors) from the web interface, FRITZ!OS 8.20 and later: each device with AIN, name, product, connection and battery, and its units with switch state, temperature, target, power (W), energy (Wh), voltage (V), level, humidity and alerts. Call it without arguments first to find the name or AIN of a device. With `history` and `device`, returns the history of that one device instead: series of power, voltage, energy, temperature and humidity, each with interval, time of the newest value and summary; `range` keeps one series length and `values` adds the single values. Use it for consumption, temperatures and switch states; DECT handsets are in fritz_telephony, powerline adapters in fritz_powerline. If the login fails, fritz_doctor checks the access to the web interface. Logs in to the web interface and out again; changes nothing.",
         // Without a closure that panics, which no test can reach.
         input_schema = rmcp::handler::server::common::schema_for_input::<SmarthomeQuery>()
             .expect("the schema of the query"),
