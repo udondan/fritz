@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.5](https://github.com/udondan/fritz/compare/fritz-v0.2.4...fritz-v0.2.5) (2026-11-27)
+
+
+### Features
+
+* say when to use fritz_smarthome and how it finds a device ([#180](https://github.com/udondan/fritz/issues/180)) ([2574e17](https://github.com/udondan/fritz/commit/2574e17661202efdc9a4cfc985c06098c2c30c2e))
+
 ## [0.2.4](https://github.com/udondan/fritz/compare/fritz-v0.2.3...fritz-v0.2.4) (2026-11-27)
 
 
