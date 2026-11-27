@@ -8,6 +8,7 @@
 
 [![Release](https://img.shields.io/github/v/release/udondan/fritz?filter=fritz-v*&label=release)](https://github.com/udondan/fritz/releases/latest)
 [![Docker](https://img.shields.io/docker/v/udondan/fritz?sort=semver&label=docker)](https://hub.docker.com/r/udondan/fritz)
+[![udondan/fritz MCP server](https://glama.ai/mcp/servers/udondan/fritz/badges/score.svg)](https://glama.ai/mcp/servers/udondan/fritz)
 [![CI](https://github.com/udondan/fritz/actions/workflows/test.yml/badge.svg?branch=main)](https://github.com/udondan/fritz/actions/workflows/test.yml)
 [![codecov](https://codecov.io/gh/udondan/fritz/graph/badge.svg)](https://codecov.io/gh/udondan/fritz)
 [![Maintainability](https://qlty.sh/gh/udondan/projects/fritz/maintainability.svg)](https://qlty.sh/gh/udondan/projects/fritz)
