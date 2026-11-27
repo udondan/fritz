@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.3](https://github.com/udondan/fritz/compare/fritz-v0.2.2...fritz-v0.2.3) (2026-11-27)
+
+
+### Features
+
+* publish the MCP server to the MCP Registry ([#174](https://github.com/udondan/fritz/issues/174)) ([23260a4](https://github.com/udondan/fritz/commit/23260a461ebcf039a11a2835b0389de01259beb2))
+
 ## [0.2.2](https://github.com/udondan/fritz/compare/fritz-v0.2.1...fritz-v0.2.2) (2026-11-25)
 
 
