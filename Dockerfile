@@ -32,6 +32,8 @@ FROM alpine:3.24
 
 LABEL com.docker.desktop.mcp="true"
 LABEL com.docker.desktop.mcp.name="fritz"
+# The MCP Registry checks that the image belongs to the server it lists.
+LABEL io.modelcontextprotocol.server.name="io.github.udondan/fritz"
 
 # apk upgrade pulls fixes for Alpine packages released after the base image.
 RUN apk upgrade --no-cache && adduser -D -H -u 10001 fritz

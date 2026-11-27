@@ -1116,6 +1116,9 @@ docker run --rm -i \
   udondan/fritz
 ```
 
+The image is listed in the [MCP Registry](https://registry.modelcontextprotocol.io/)
+as `io.github.udondan/fritz`.
+
 `mise run docker-build` builds the image from source. For the Docker MCP
 Toolkit, `mise run docker` builds it and adds
 [docker-mcp.yml](https://github.com/udondan/fritz/blob/main/docker-mcp.yml) to the profile `fritz`. Set the secrets

@@ -62,6 +62,7 @@ jobs:
       code: ${{ steps.filter.outputs.code }}
       docker: ${{ steps.filter.outputs.docker }}
       actions: ${{ steps.filter.outputs.actions }}
+      registry: ${{ steps.filter.outputs.registry }}
     steps:
       - name: Check turn
         if: needs.boarding-gate.result == 'failure' || needs.boarding-gate.result == 'cancelled'
@@ -90,6 +91,9 @@ jobs:
             actions:
               - .github/**
               - mise.toml
+            registry:
+              - crates/fritz/server.json
+              - .github/workflows/test.yml
 
   build:
     needs: [boarding-gate, changes]
@@ -337,6 +341,34 @@ jobs:
           docker mcp gateway run --profile ci --dry-run --verbose 2>&1 | tee gateway.log
           grep -E "fritz: \([1-9][0-9]* tools\)" gateway.log
 
+  # Checks crates/fritz/server.json, which a release publishes to the MCP
+  # Registry, against the schema it names. `mcp-publisher validate` would send
+  # the file to the registry; an outage of the registry must not fail pull
+  # requests.
+  mcp-registry:
+    name: MCP Registry
+    needs: [boarding-gate, changes]
+    # Skipped if server.json didn't change.
+    if: ${{ !cancelled() && (needs.changes.result == 'skipped' || (needs.changes.result == 'success' && needs.changes.outputs.registry == 'true')) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - name: Check turn
+        if: needs.boarding-gate.result == 'failure' || needs.boarding-gate.result == 'cancelled'
+        run: exit 1
+
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Validate server.json
+        run: |
+          schema=$(jq -r '."$schema"' crates/fritz/server.json)
+          pipx run --spec check-jsonschema==0.39.0 check-jsonschema \
+            --schemafile "$schema" crates/fritz/server.json
+
   # The only required status check. Every job must have run and succeeded: a
   # skipped job must never let a PR become mergeable, least of all through
   # automerge. Only these may be skipped:
@@ -344,7 +376,8 @@ jobs:
   #   anyway, or when build was skipped for lack of changes;
   # - boarding-gate: for pull requests from forks;
   # - changes: outside of pull requests;
-  # - build, docker and actions: when changes found nothing they use.
+  # - build, docker, actions and mcp-registry: when changes found nothing
+  #   they use.
   required:
     if: always()
     runs-on: ubuntu-latest
@@ -356,6 +389,7 @@ jobs:
       - changes
       - coverage
       - docker
+      - mcp-registry
       - qlty
     steps:
       - name: Check that all jobs succeeded
@@ -372,7 +406,8 @@ jobs:
                 or (.key == "changes" and ($pr | not))
                 or (.key == "build" and $pr and $changed.code == "false")
                 or (.key == "docker" and $pr and $changed.docker == "false")
-                or (.key == "actions" and $pr and $changed.actions == "false");
+                or (.key == "actions" and $pr and $changed.actions == "false")
+                or (.key == "mcp-registry" and $pr and $changed.registry == "false");
               to_entries[]
               | select(.value.result != "success" and (.value.result != "skipped" or (may_skip | not)))
               | "\(.key): \(.value.result)"')
