@@ -5,7 +5,7 @@
 
 ### Features
 
-* **fritz:** describe what each MCP tool returns and when to use it ([#178](https://github.com/udondan/fritz/issues/178)) ([7a678b4](https://github.com/udondan/fritz/commit/7a678b4cf31cef8ff89dff8db06fb2090827b6e3))
+* describe what each MCP tool returns and when to use it ([#178](https://github.com/udondan/fritz/issues/178)) ([7a678b4](https://github.com/udondan/fritz/commit/7a678b4cf31cef8ff89dff8db06fb2090827b6e3))
 
 ## [0.2.3](https://github.com/udondan/fritz/compare/fritz-v0.2.2...fritz-v0.2.3) (2026-11-27)
 
