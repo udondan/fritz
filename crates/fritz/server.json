@@ -1,0 +1,55 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.udondan/fritz",
+  "title": "FRITZ!Box (unofficial)",
+  "description": "Reads the status and settings of a FRITZ!Box router over TR-064. Never changes anything.",
+  "version": "0.2.6",
+  "repository": {
+    "url": "https://github.com/udondan/fritz",
+    "source": "github"
+  },
+  "packages": [
+    {
+      "registryType": "oci",
+      "identifier": "docker.io/udondan/fritz:0.2.2",
+      "transport": {
+        "type": "stdio"
+      },
+      "packageArguments": [
+        {
+          "type": "positional",
+          "value": "mcp"
+        }
+      ],
+      "environmentVariables": [
+        {
+          "name": "FRITZ_HOST",
+          "description": "Address of the FRITZ!Box, like 192.168.178.1 (HTTPS on port 49443) or http://192.168.178.1:49000. Defaults to fritz.box.",
+          "isRequired": false
+        },
+        {
+          "name": "FRITZ_USERNAME",
+          "description": "User on the FRITZ!Box. Leave it out for devices with only a password.",
+          "isRequired": false
+        },
+        {
+          "name": "FRITZ_PASSWORD",
+          "description": "Password of that user.",
+          "isRequired": true,
+          "isSecret": true
+        },
+        {
+          "name": "FRITZ_TLS_FINGERPRINT",
+          "description": "SHA-256 fingerprint of the certificate of the box, from `fritz tls fingerprint`. Needed for HTTPS, the default.",
+          "isRequired": false
+        },
+        {
+          "name": "FRITZ_MCP_PERSONAL",
+          "description": "true also serves calls, phonebooks and the event log, which are personal.",
+          "format": "boolean",
+          "isRequired": false
+        }
+      ]
+    }
+  ]
+}

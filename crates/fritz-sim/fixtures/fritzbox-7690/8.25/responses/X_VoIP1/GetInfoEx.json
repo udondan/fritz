@@ -1,0 +1,26 @@
+{
+  "out": {
+    "NewVoIPNumberAllowedChars": "0123456789+",
+    "NewVoIPNumberMaxChars": "128",
+    "NewVoIPNumberMinChars": "1",
+    "NewVoIPPasswordAllowedChars": "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-._",
+    "NewVoIPPasswordMaxChars": "64",
+    "NewVoIPPasswordMinChars": "3",
+    "NewVoIPRegistrarAllowedChars": "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-._",
+    "NewVoIPRegistrarMaxChars": "64",
+    "NewVoIPRegistrarMinChars": "1",
+    "NewVoIPSTUNServerAllowedChars": "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-._:",
+    "NewVoIPSTUNServerMaxChars": "255",
+    "NewVoIPSTUNServerMinChars": "0",
+    "NewVoIPUsernameAllowedChars": "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-._@",
+    "NewVoIPUsernameMaxChars": "128",
+    "NewVoIPUsernameMinChars": "4",
+    "NewX_AVM-DE_ClientPasswordAllowedChars": "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-._",
+    "NewX_AVM-DE_ClientPasswordMaxChars": "64",
+    "NewX_AVM-DE_ClientPasswordMinChars": "8",
+    "NewX_AVM-DE_ClientUsernameAllowedChars": "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-._",
+    "NewX_AVM-DE_ClientUsernameMaxChars": "64",
+    "NewX_AVM-DE_ClientUsernameMinChars": "4"
+  },
+  "status": "ok"
+}

@@ -1,0 +1,66 @@
+<?xml version="1.0"?>
+<!-- Synthetic SCPD, laid out like the DeviceInfo service of a home router. -->
+<scpd xmlns="urn:dslforum-org:service-1-0">
+  <specVersion>
+    <major>1</major>
+    <minor>0</minor>
+  </specVersion>
+  <actionList>
+    <action>
+      <name>GetInfo</name>
+      <argumentList>
+        <argument>
+          <name>NewManufacturerName</name>
+          <direction>out</direction>
+          <relatedStateVariable>ManufacturerName</relatedStateVariable>
+        </argument>
+        <argument>
+          <name>NewUpTime</name>
+          <direction>out</direction>
+          <relatedStateVariable>UpTime</relatedStateVariable>
+        </argument>
+      </argumentList>
+    </action>
+    <action>
+      <name>SetProvisioningCode</name>
+      <argumentList>
+        <argument>
+          <name>NewProvisioningCode</name>
+          <direction>IN</direction>
+          <relatedStateVariable>ProvisioningCode</relatedStateVariable>
+        </argument>
+      </argumentList>
+    </action>
+    <action>
+      <name>Reboot</name>
+    </action>
+  </actionList>
+  <serviceStateTable>
+    <stateVariable sendEvents="no">
+      <name>ManufacturerName</name>
+      <dataType>string</dataType>
+    </stateVariable>
+    <stateVariable sendEvents="yes">
+      <name>UpTime</name>
+      <dataType>ui4</dataType>
+      <defaultValue>0</defaultValue>
+      <allowedValueRange>
+        <minimum>0</minimum>
+        <maximum>4294967295</maximum>
+      </allowedValueRange>
+    </stateVariable>
+    <stateVariable>
+      <name>ProvisioningCode</name>
+      <dataType>string</dataType>
+    </stateVariable>
+    <stateVariable sendEvents="no">
+      <name>Status</name>
+      <dataType>string</dataType>
+      <allowedValueList>
+        <allowedValue>Up</allowedValue>
+        <allowedValue> Down </allowedValue>
+        <allowedValue/>
+      </allowedValueList>
+    </stateVariable>
+  </serviceStateTable>
+</scpd>

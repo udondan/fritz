@@ -1,0 +1,605 @@
+[
+  {
+    "name": "fritz_call_action",
+    "description": "Calls one TR-064 action of class read, or personal with `--personal`, with the given input arguments, and returns its output arguments as names and values. Refuses actions that change something or could return secrets, before anything is sent. Secrets in the output are hidden and values longer than 4096 characters cut. Use it only when no specific tool covers the question: find the action with fritz_list_services and its arguments with fritz_describe_action.",
+    "inputSchema": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "action": {
+          "description": "Like `GetInfo`.",
+          "type": "string"
+        },
+        "arguments": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "default": {},
+          "description": "The input arguments, like {\"NewIndex\": \"0\"}.",
+          "type": "object"
+        },
+        "service": {
+          "description": "Like `DeviceInfo1`.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "service",
+        "action"
+      ],
+      "type": "object"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "fritz_calls",
+    "description": "Lists the latest calls of the call list, newest first: kind (incoming, missed, outgoing, rejected or active), date, duration in minutes, number, name, own number and device. Filters by `kind`, `days` and `search` and returns at most `limit`. Personal data, offered only with `--personal`. For the contacts use fritz_phonebook.",
+    "inputSchema": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "days": {
+          "description": "Only calls of the last this many days.",
+          "format": "uint32",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "kind": {
+          "description": "Only calls of these kinds, separated by commas: `incoming`,\n`missed`, `outgoing`, `rejected`, `active` or `all`.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "limit": {
+          "description": "Calls to return after the filters, the latest first, at most 200.\nDefault 50.",
+          "format": "uint",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "search": {
+          "description": "Part of the name, or digits of the number.",
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "type": "object"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "fritz_capabilities",
+    "description": "Reports what the device offers and what the configured user may do: `features` (like wlan, dect or powerline), `rights` (each area with its access, like BoxAdmin: readwrite), `two_factor` (whether changes need a confirmation on the device, null if unknown) and the number of TR-064 services. The rights are those of the user fritz logs in with. Use it to see which tools can work, or when a tool fails for lack of rights; for a full check of the setup use fritz_doctor.",
+    "inputSchema": {
+      "properties": {},
+      "type": "object"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "fritz_describe_action",
+    "description": "Describes one TR-064 action without calling it: its class (read, personal, secret, write or critical, with the reason) and its input (`in`) and output (`out`) arguments with their types. Use it after fritz_list_services and before fritz_call_action, to know which arguments to pass.",
+    "inputSchema": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "action": {
+          "description": "Like `GetInfo`.",
+          "type": "string"
+        },
+        "service": {
+          "description": "Like `DeviceInfo1`.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "service",
+        "action"
+      ],
+      "type": "object"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "fritz_diagnose",
+    "description": "Diagnoses why a host can or cannot be reached: whether the device knows it, whether it is active, its address, its link with mesh node and signal, whether its name resolves to that address, and whether the given TCP `ports` are open, closed or filtered. Returns checks that each pass, fail with a hint, or are skipped. Probes the ports from this machine, and only on private addresses. With host `router`, checks the device itself: private address, TR-064 over HTTPS and HTTP, web interface and certificate. For name resolution alone use fritz_dns; for the setup of fritz, fritz_doctor.",
+    "inputSchema": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "host": {
+          "description": "A host the device knows, by name, MAC or IPv4 address, or `router`\nfor the device itself.",
+          "type": "string"
+        },
+        "ports": {
+          "default": [],
+          "description": "TCP ports to probe on the host, at most 8. Only on private\naddresses, not with `router`.",
+          "items": {
+            "format": "uint16",
+            "maximum": 65535,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "host"
+      ],
+      "type": "object"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "fritz_dns",
+    "description": "Explains why a host name does or does not resolve. Gathers the local domain, the DNS servers and the host table the router hands out, the answers of the router's DNS server and of this machine's resolver, and this machine's resolvers and search domains, and returns them with a verdict and the likely cause. Sends DNS queries for this name only, which this machine's resolver may forward to the internet; changes nothing. Use it when a name fails or points to the wrong address; for whether a host is reachable use fritz_diagnose.",
+    "inputSchema": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "expected_ip": {
+          "description": "The address the answers should have, like `192.168.178.20`; the\nverdict then says whether they match.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "name": {
+          "description": "The host name to check, fully qualified or short, like\n`nas.fritz.box` or `nas`.",
+          "type": "string"
+        },
+        "router_dns": {
+          "description": "The DNS server asked as the router, like `192.168.178.1`. Default:\nthe LAN address of the device.",
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "type": "object"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "openWorldHint": true
+    }
+  },
+  {
+    "name": "fritz_doctor",
+    "description": "Checks the setup step by step and explains what is wrong: configuration, host, port, certificate, password source, login, rights, two-factor, web interface and Smart Home. Returns a list of checks, each with status (ok, warn, fail or skip), detail and hint. Call it first when other tools fail to connect or log in. It logs in like the other tools and changes nothing.",
+    "inputSchema": {
+      "properties": {},
+      "type": "object"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "fritz_exposure",
+    "description": "Audits what can be reached from the internet or managed from outside: remote access, MyFRITZ, dynamic DNS, port forwardings, exposed host, UPnP, FTP, shared links, VPN, TR-069 and USP. Returns one item each, with a state (on, off or unknown), a count for lists, a severity (info, notice or warning) and hints. Addresses, domains, names and hosts are hidden unless the server runs with `--personal`; link URLs and passwords are never read. Logs in to the web interface for the exposed host and VPN. Use it for a security review; for the forwardings alone use fritz_ports.",
+    "inputSchema": {
+      "properties": {},
+      "type": "object"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "fritz_firmware",
+    "description": "Reads the firmware state: `state` (available, none, unknown or unsupported), installed and offered version, info URL, whether auto update is on, and the last update. Reports what the device already knows: it does not start an update check and never installs. Use it to tell whether an update is pending; fritz_overview has only a summary.",
+    "inputSchema": {
+      "properties": {},
+      "type": "object"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "fritz_hosts",
+    "description": "Lists the hosts the router knows: name, IP, MAC, interface, internet access, address source (DHCP or Static), whether the address is reserved permanently, whether active, and when it was last seen (UTC; null if the device forgot). Filters with `active` and `search`; pages with `offset` and `limit`, with `total` the number that match. With `mac` or `ip`, returns that one host with all details instead: lease, guest network and the mesh node it is connected to. To find out why a host cannot be reached use fritz_diagnose.",
+    "inputSchema": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "active": {
+          "default": false,
+          "description": "Only hosts that are connected now.",
+          "type": "boolean"
+        },
+        "ip": {
+          "description": "The host with this IPv4 address, with all details instead of a page.\nCombines only with `active`.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "limit": {
+          "description": "Hosts to return, at most 200. Default 50.",
+          "format": "uint",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "mac": {
+          "description": "The host with this MAC address, like `AA:BB:CC:DD:EE:FF`, with all\ndetails instead of a page. Combines only with `active`.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "offset": {
+          "default": 0,
+          "description": "Hosts to skip, for the next page. Default 0.",
+          "format": "uint",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "search": {
+          "description": "Part of the name, IP or MAC, ignoring case.",
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "type": "object"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "fritz_interfaces",
+    "description": "Reads the counters of the network interfaces: each LAN interface and wireless network with its status and the bytes, packets and errors sent and received, and the LAN ports with link, speed and mode. Use it to find errors or the load of one interface; for the internet rates use fritz_traffic, for wireless settings fritz_wlan.",
+    "inputSchema": {
+      "properties": {},
+      "type": "object"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "fritz_internet",
+    "description": "Reads the internet connection: status, external IPv4 and IPv6 addresses, provider, DNS servers, current and maximum rates, and a summary of the DSL line. With `dsl_details`, also the DSL error counters and the line diagnosis, which takes longer. Use it for connection problems; for the current throughput use fritz_traffic, for name resolution fritz_dns.",
+    "inputSchema": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "dsl_details": {
+          "default": false,
+          "description": "Also `dsl_details`: the DSL line with status, sync, standard,\nprofile, rates and maximum rates in kbit/s, noise margins and\nattenuations in dB and power; the error counters (CRC, FEC, HEC,\nerrored seconds, resyncs) in total and since the sync where reported;\nthe line diagnosis with its state, the seconds since the line lost\nits signal and the distance to a cable fault in meters; and hints.\nWithout details and with `note` on connections that are not DSL.",
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "fritz_list_services",
+    "description": "Lists the TR-064 services of the device as short id to name and version, or with `service` the actions of that service, each with its class: read, personal, secret, write or critical. Only read actions, and personal ones with `--personal`, can be called with fritz_call_action. Use it to find an action when no specific tool covers the question; then fritz_describe_action shows its arguments.",
+    "inputSchema": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "service": {
+          "description": "The service, by the short id or the name and version that the list\nof services shows, like `DeviceInfo1` or `DeviceInfo:1`. Without it,\nall services.",
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "type": "object"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "fritz_log",
+    "description": "Reads the latest entries of the event log, newest first, like connections, logins, WLAN and telephony events. Filters by `search`, `since` and `category` and returns at most `limit`. Personal data, offered only with `--personal`. For the current state of a host use fritz_diagnose; for the setup of fritz, fritz_doctor.",
+    "inputSchema": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "category": {
+          "description": "Only entries of this category: `system`, `internet`, `telephony`,\n`wlan` or `usb`. Reads the event log of the web interface; fails if\nthe device shows none with categories.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "limit": {
+          "description": "Entries to return after the filters, the latest first, at most 200.\nDefault 50.",
+          "format": "uint",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "search": {
+          "description": "Part of the message, ignoring case.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "since": {
+          "description": "Only entries since a duration ago, like `30m`, `24h`, `7d` or `2w`,\nor since a date like `2026-11-20`.",
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "type": "object"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "fritz_mesh",
+    "description": "Reads the mesh topology: the nodes (router, repeaters and clients) with their IP addresses and the links between them. With `tree`, nests every device below the router or repeater it is connected to instead. Returns null if the device reports no mesh. Use it to see which device is connected where; for addresses, leases and last seen use fritz_hosts.",
+    "inputSchema": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "tree": {
+          "default": false,
+          "description": "Nest every device below the router or repeater it is connected to,\nwith its links up.",
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "fritz_overview",
+    "description": "Reads a summary of the device in one call: model, firmware version and update state, uptime, internet connection and the rights of the configured user. With `system`, also CPU load, temperature and memory. Use it first to get oriented; for details use fritz_internet, fritz_firmware or fritz_capabilities.",
+    "inputSchema": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "system": {
+          "default": false,
+          "description": "Also `system`: CPU load in percent, CPU temperature in °C and memory\nshares in percent, now and as min/avg/max over the history the device\nkeeps (24 hours). Experimental, read from the web interface; null with\n`system_note` if the device does not show it.",
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "fritz_phonebook",
+    "description": "Lists the contacts of all phonebooks, each with its phonebook and numbers. Filters with `search`; pages with `offset` and `limit`, with `total` the number that match. Personal data, offered only with `--personal`. For past calls use fritz_calls.",
+    "inputSchema": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "limit": {
+          "description": "Contacts to return, at most 200. Default 50.",
+          "format": "uint",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "offset": {
+          "default": 0,
+          "description": "Contacts to skip, for the next page. Default 0.",
+          "format": "uint",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "search": {
+          "description": "Part of the name, or digits of the number.",
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "type": "object"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "fritz_ports",
+    "description": "Lists the port forwardings (service, enabled, protocol, external port, internal client and port, description, remote host, lease) and `upnp`: whether hosts may open ports themselves, null if unknown. Use it to check one forwarding; for everything that can be reached from the internet, like remote access, exposed host or VPN, use fritz_exposure.",
+    "inputSchema": {
+      "properties": {},
+      "type": "object"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "fritz_powerline",
+    "description": "Lists the powerline adapters the device knows: name, model, MAC, whether active, whether an update is available, and the result of the last update. `supported` is false and the list empty on devices without powerline support. For repeaters and the other mesh devices use fritz_mesh.",
+    "inputSchema": {
+      "properties": {},
+      "type": "object"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "fritz_settings",
+    "description": "Reads settings from the web interface by module: without `modules`, DNS, IPv6, internet, LAN ports, mesh steering, routes and time; with `modules`, only those. Returns each module with its values; passwords and other secrets are hidden. Logs in to the web interface and out again. Use it for settings that no specific tool covers, like MTU, DHCP ranges or static routes; prefer fritz_internet or fritz_wlan where they answer the question.",
+    "inputSchema": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "modules": {
+          "default": [],
+          "description": "Like `ipv6`. Without, the common modules: DNS, IPv6, internet, LAN\nports, mesh steering, routes, time. Others: `dect`, `filter_profile`, `inetstat`,\n`landevice`, `mobiled`, `plc`, `tam`, `user`, `vpn`, `wlan`.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "type": "object"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "fritz_smarthome",
+    "description": "Reads the Smart Home devices (plugs, thermostats, sensors) from the web interface, FRITZ!OS 8.20 and later: each device with AIN, name, product, connection and battery, and its units with switch state, temperature, target, power (W), energy (Wh), voltage (V), level, humidity and alerts. Call it without arguments first to find the name or AIN of a device. With `history` and `device`, returns the history of that one device instead: series of power, voltage, energy, temperature and humidity, each with interval, time of the newest value and summary; `range` keeps one series length and `values` adds the single values. Use it for consumption, temperatures and switch states; DECT handsets are in fritz_telephony, powerline adapters in fritz_powerline. If the login fails, fritz_doctor checks the access to the web interface. Logs in to the web interface and out again; changes nothing.",
+    "inputSchema": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "device": {
+          "description": "The device: its name, exact or else ignoring case, or its AIN with or\nwithout spaces, as listed without `history`, e.g. `Kühlschrank` or\n`11657 0123456`. Needs `history`.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "history": {
+          "default": false,
+          "description": "The history of `device` instead of the current values of all\ndevices: power (W) and voltage (V) over the last hours, energy (Wh)\nper day and per month, temperature (°C) and humidity (%), each as a\nseries with its interval in seconds, the time of the newest value\n(Unix seconds) and a summary (count, gaps, min, avg, max, and the\nsum for energy).",
+          "type": "boolean"
+        },
+        "range": {
+          "description": "Only the series of one length: `hours`, `days` or\n`months`. Default: all. Needs `history`.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "values": {
+          "default": false,
+          "description": "Also all values of each series, the newest first, null for gaps.\nOnly with `history`; each series has its summary anyway.",
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "fritz_telephony",
+    "description": "Reads the telephony setup: own numbers, internet telephony accounts with registrar and status, call deflections, answering machines, and DECT handsets with model and update state. Lists are empty when the device has none. It does not read calls or contacts: they are personal data, and the server only lists tools for them when it runs with `--personal` (`FRITZ_MCP_PERSONAL=true`).",
+    "inputSchema": {
+      "properties": {},
+      "type": "object"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "fritz_traffic",
+    "description": "Measures the WAN traffic per direction: current and peak rate and line maximum in bit/s, utilization in percent, byte and packet totals, and upstream by priority and multicast where the device reports them. Without `sample_seconds` it reads once. With it, it reads twice that many seconds apart (at most 10; the call waits that long) and adds `sample` with the averages in between. `supported` is false on devices without these counters. For the counters of each LAN interface use fritz_interfaces.",
+    "inputSchema": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "sample_seconds": {
+          "description": "Read twice this many seconds apart, at most 10, and add `sample`\nwith the averages of the byte counters in between.",
+          "format": "uint64",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        }
+      },
+      "type": "object"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "fritz_users",
+    "description": "Reads the users of the device and the login settings: the users with their rights (null if the configured user may not see them; names hidden unless the server runs with `--personal`), the rights of the current user, whether anonymous and button login are allowed, whether the default password is still set, two-factor confirmation, and hints on weak settings. Passwords are never read. For the rights of the current user alone, fritz_capabilities is enough.",
+    "inputSchema": {
+      "properties": {},
+      "type": "object"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "fritz_wlan",
+    "description": "Lists the wireless networks: SSID, band, channel, standard, status, whether it is the guest network, and the number of clients. With `clients`, also the clients of each network; with `details`, the security settings, radio, WPS, night time switch-off, statistics and hints on weak settings like an open network. Keys are never read. For byte and error counters use fritz_interfaces; for all hosts, wired ones too, fritz_hosts.",
+    "inputSchema": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "clients": {
+          "default": false,
+          "description": "Also the clients of each network: name, IP, MAC, signal in percent\nand rate in Mbit/s.",
+          "type": "boolean"
+        },
+        "details": {
+          "default": false,
+          "description": "Also the details of each network: security (beacon type, encryption,\nhidden SSID, MAC filter, user isolation), radio (channel, automatic\nchannel, possible channels, BSSID), WPS, night time switch-off,\npacket statistics, and hints on weak settings like `wps_enabled`,\n`tkip_allowed` or `open_network`. Keys are never read.",
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "openWorldHint": false
+    }
+  }
+]

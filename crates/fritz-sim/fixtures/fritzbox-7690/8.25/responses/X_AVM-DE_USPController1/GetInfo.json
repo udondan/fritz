@@ -1,0 +1,23 @@
+{
+  "out": {
+    "NewAllowedCharsEndpointID": "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz:-._%",
+    "NewMaxCharsEndpointID": "64",
+    "NewMaxCharsHostname": "255",
+    "NewMaxCharsMQTTClientID": "1024",
+    "NewMaxCharsMQTTControllerTopic": "1024",
+    "NewMaxCharsMQTTResponseTopic": "1024",
+    "NewMaxCharsPassword": "256",
+    "NewMaxCharsPath": "1024",
+    "NewMaxCharsUsername": "256",
+    "NewMinCharsEndpointID": "0",
+    "NewMinCharsHostname": "0",
+    "NewMinCharsMQTTClientID": "0",
+    "NewMinCharsMQTTControllerTopic": "0",
+    "NewMinCharsMQTTResponseTopic": "0",
+    "NewMinCharsPassword": "0",
+    "NewMinCharsPath": "0",
+    "NewMinCharsUsername": "0",
+    "NewUSPMyFRITZEnabled": "0"
+  },
+  "status": "ok"
+}

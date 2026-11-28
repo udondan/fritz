@@ -1,0 +1,3520 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+<List>
+<!-- devicehosts :185 -->
+<!-- users :0 -->
+<Item>
+<Index>1</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:01</MACAddress>
+<Active>0</Active>
+<HostName>device-1</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>2</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:02</MACAddress>
+<Active>0</Active>
+<HostName>device-2</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>3</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:03</MACAddress>
+<Active>0</Active>
+<HostName>device-3</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>4</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:04</MACAddress>
+<Active>0</Active>
+<HostName>device-4</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>5</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:05</MACAddress>
+<Active>0</Active>
+<HostName>device-5</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>6</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:06</MACAddress>
+<Active>0</Active>
+<HostName>device-6</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>7</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:07</MACAddress>
+<Active>0</Active>
+<HostName>device-7</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>8</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:08</MACAddress>
+<Active>0</Active>
+<HostName>device-8</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>9</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:09</MACAddress>
+<Active>0</Active>
+<HostName>device-9</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>10</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:0A</MACAddress>
+<Active>0</Active>
+<HostName>device-10</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>11</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:0B</MACAddress>
+<Active>0</Active>
+<HostName>device-11</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>12</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:0C</MACAddress>
+<Active>0</Active>
+<HostName>device-12</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>13</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:0D</MACAddress>
+<Active>0</Active>
+<HostName>device-13</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>14</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:0E</MACAddress>
+<Active>0</Active>
+<HostName>device-14</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>15</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:0F</MACAddress>
+<Active>0</Active>
+<HostName>device-15</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>16</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:10</MACAddress>
+<Active>0</Active>
+<HostName>device-16</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>17</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:11</MACAddress>
+<Active>0</Active>
+<HostName>device-17</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>18</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:12</MACAddress>
+<Active>0</Active>
+<HostName>device-18</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>19</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:13</MACAddress>
+<Active>0</Active>
+<HostName>device-19</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>20</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:14</MACAddress>
+<Active>0</Active>
+<HostName>device-20</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>21</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:15</MACAddress>
+<Active>0</Active>
+<HostName>device-21</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>22</Index>
+<IPAddress>192.0.2.1</IPAddress>
+<MACAddress>AA:BB:CC:00:00:16</MACAddress>
+<Active>1</Active>
+<HostName>device-22</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>702</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model>FRITZ!Box</X_AVM-DE_Model>
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>23</Index>
+<IPAddress>192.0.2.2</IPAddress>
+<MACAddress>AA:BB:CC:00:00:17</MACAddress>
+<Active>0</Active>
+<HostName>device-23</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>24</Index>
+<IPAddress>192.0.2.3</IPAddress>
+<MACAddress>AA:BB:CC:00:00:18</MACAddress>
+<Active>1</Active>
+<HostName>device-24</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>25</Index>
+<IPAddress>192.0.2.4</IPAddress>
+<MACAddress>AA:BB:CC:00:00:19</MACAddress>
+<Active>0</Active>
+<HostName>device-25</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>26</Index>
+<IPAddress>192.0.2.5</IPAddress>
+<MACAddress>AA:BB:CC:00:00:1A</MACAddress>
+<Active>1</Active>
+<HostName>device-26</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>27</Index>
+<IPAddress>192.0.2.6</IPAddress>
+<MACAddress>AA:BB:CC:00:00:1B</MACAddress>
+<Active>0</Active>
+<HostName>device-27</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>28</Index>
+<IPAddress>192.0.2.7</IPAddress>
+<MACAddress>AA:BB:CC:00:00:1C</MACAddress>
+<Active>1</Active>
+<HostName>device-28</HostName>
+<InterfaceType>802.11</InterfaceType>
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>526</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>29</Index>
+<IPAddress>192.0.2.8</IPAddress>
+<MACAddress>AA:BB:CC:00:00:1D</MACAddress>
+<Active>0</Active>
+<HostName>device-29</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>30</Index>
+<IPAddress>192.0.2.9</IPAddress>
+<MACAddress>AA:BB:CC:00:00:1E</MACAddress>
+<Active>0</Active>
+<HostName>device-30</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>31</Index>
+<IPAddress>192.0.2.10</IPAddress>
+<MACAddress>AA:BB:CC:00:00:1F</MACAddress>
+<Active>1</Active>
+<HostName>device-31</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>32</Index>
+<IPAddress>192.0.2.11</IPAddress>
+<MACAddress>AA:BB:CC:00:00:20</MACAddress>
+<Active>1</Active>
+<HostName>device-32</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>33</Index>
+<IPAddress>192.0.2.12</IPAddress>
+<MACAddress>AA:BB:CC:00:00:21</MACAddress>
+<Active>0</Active>
+<HostName>device-33</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>34</Index>
+<IPAddress>192.0.2.13</IPAddress>
+<MACAddress>AA:BB:CC:00:00:22</MACAddress>
+<Active>1</Active>
+<HostName>device-34</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>35</Index>
+<IPAddress>192.0.2.14</IPAddress>
+<MACAddress>AA:BB:CC:00:00:23</MACAddress>
+<Active>1</Active>
+<HostName>device-35</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>36</Index>
+<IPAddress>192.0.2.15</IPAddress>
+<MACAddress>AA:BB:CC:00:00:24</MACAddress>
+<Active>0</Active>
+<HostName>device-36</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>37</Index>
+<IPAddress>192.0.2.16</IPAddress>
+<MACAddress>AA:BB:CC:00:00:25</MACAddress>
+<Active>1</Active>
+<HostName>device-37</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>38</Index>
+<IPAddress>192.0.2.17</IPAddress>
+<MACAddress>AA:BB:CC:00:00:26</MACAddress>
+<Active>0</Active>
+<HostName>device-38</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>39</Index>
+<IPAddress>192.0.2.18</IPAddress>
+<MACAddress>AA:BB:CC:00:00:27</MACAddress>
+<Active>1</Active>
+<HostName>device-39</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>40</Index>
+<IPAddress>192.0.2.19</IPAddress>
+<MACAddress>AA:BB:CC:00:00:28</MACAddress>
+<Active>0</Active>
+<HostName>device-40</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>41</Index>
+<IPAddress>192.0.2.20</IPAddress>
+<MACAddress>AA:BB:CC:00:00:29</MACAddress>
+<Active>1</Active>
+<HostName>device-41</HostName>
+<InterfaceType>Ethernet</InterfaceType>
+<X_AVM-DE_Port>1</X_AVM-DE_Port>
+<X_AVM-DE_Speed>100</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>42</Index>
+<IPAddress>192.0.2.21</IPAddress>
+<MACAddress>AA:BB:CC:00:00:2A</MACAddress>
+<Active>0</Active>
+<HostName>device-42</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>43</Index>
+<IPAddress>192.0.2.22</IPAddress>
+<MACAddress>AA:BB:CC:00:00:2B</MACAddress>
+<Active>0</Active>
+<HostName>device-43</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>44</Index>
+<IPAddress>192.0.2.23</IPAddress>
+<MACAddress>AA:BB:CC:00:00:2C</MACAddress>
+<Active>0</Active>
+<HostName>device-44</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>45</Index>
+<IPAddress>192.0.2.24</IPAddress>
+<MACAddress>AA:BB:CC:00:00:2D</MACAddress>
+<Active>0</Active>
+<HostName>device-45</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>46</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:2E</MACAddress>
+<Active>0</Active>
+<HostName>device-46</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>47</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:2F</MACAddress>
+<Active>0</Active>
+<HostName>device-47</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>48</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:30</MACAddress>
+<Active>0</Active>
+<HostName>device-48</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>49</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:31</MACAddress>
+<Active>0</Active>
+<HostName>device-49</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>50</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:32</MACAddress>
+<Active>0</Active>
+<HostName>device-50</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>51</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:33</MACAddress>
+<Active>0</Active>
+<HostName>device-51</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>52</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:34</MACAddress>
+<Active>0</Active>
+<HostName>device-52</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>53</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:35</MACAddress>
+<Active>0</Active>
+<HostName>device-53</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>54</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:36</MACAddress>
+<Active>0</Active>
+<HostName>device-54</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>55</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:37</MACAddress>
+<Active>0</Active>
+<HostName>device-55</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>56</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:38</MACAddress>
+<Active>0</Active>
+<HostName>device-56</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>57</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:39</MACAddress>
+<Active>0</Active>
+<HostName>device-57</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>58</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:3A</MACAddress>
+<Active>0</Active>
+<HostName>device-58</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>59</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:3B</MACAddress>
+<Active>0</Active>
+<HostName>device-59</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>60</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:3C</MACAddress>
+<Active>0</Active>
+<HostName>device-60</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>61</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:3D</MACAddress>
+<Active>0</Active>
+<HostName>device-61</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>62</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:3E</MACAddress>
+<Active>0</Active>
+<HostName>device-62</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>63</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:3F</MACAddress>
+<Active>0</Active>
+<HostName>device-63</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>64</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:40</MACAddress>
+<Active>0</Active>
+<HostName>device-64</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>65</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:41</MACAddress>
+<Active>0</Active>
+<HostName>device-65</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>66</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:42</MACAddress>
+<Active>0</Active>
+<HostName>device-66</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>67</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:43</MACAddress>
+<Active>0</Active>
+<HostName>device-67</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>68</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:44</MACAddress>
+<Active>0</Active>
+<HostName>device-68</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>69</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:45</MACAddress>
+<Active>0</Active>
+<HostName>device-69</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>70</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:46</MACAddress>
+<Active>0</Active>
+<HostName>device-70</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>71</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:47</MACAddress>
+<Active>0</Active>
+<HostName>device-71</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>72</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:48</MACAddress>
+<Active>0</Active>
+<HostName>device-72</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>73</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:49</MACAddress>
+<Active>0</Active>
+<HostName>device-73</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>74</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:4A</MACAddress>
+<Active>0</Active>
+<HostName>device-74</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>75</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:4B</MACAddress>
+<Active>0</Active>
+<HostName>device-75</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>76</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:4C</MACAddress>
+<Active>0</Active>
+<HostName>device-76</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>77</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:4D</MACAddress>
+<Active>0</Active>
+<HostName>device-77</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>78</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:4E</MACAddress>
+<Active>0</Active>
+<HostName>device-78</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>79</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:4F</MACAddress>
+<Active>0</Active>
+<HostName>device-79</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>80</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:50</MACAddress>
+<Active>0</Active>
+<HostName>device-80</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>81</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:51</MACAddress>
+<Active>0</Active>
+<HostName>device-81</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>82</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:52</MACAddress>
+<Active>0</Active>
+<HostName>device-82</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>83</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:53</MACAddress>
+<Active>0</Active>
+<HostName>device-83</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>84</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:54</MACAddress>
+<Active>0</Active>
+<HostName>device-84</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>85</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:55</MACAddress>
+<Active>0</Active>
+<HostName>device-85</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>86</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:56</MACAddress>
+<Active>0</Active>
+<HostName>device-86</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>87</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:57</MACAddress>
+<Active>0</Active>
+<HostName>device-87</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>88</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:58</MACAddress>
+<Active>0</Active>
+<HostName>device-88</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>89</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:59</MACAddress>
+<Active>0</Active>
+<HostName>device-89</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>90</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:5A</MACAddress>
+<Active>0</Active>
+<HostName>device-90</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>91</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:5B</MACAddress>
+<Active>0</Active>
+<HostName>device-91</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>92</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:5C</MACAddress>
+<Active>0</Active>
+<HostName>device-92</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>93</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:5D</MACAddress>
+<Active>0</Active>
+<HostName>device-93</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>94</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:5E</MACAddress>
+<Active>0</Active>
+<HostName>device-94</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>95</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:5F</MACAddress>
+<Active>0</Active>
+<HostName>device-95</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>96</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:60</MACAddress>
+<Active>0</Active>
+<HostName>device-96</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>97</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:61</MACAddress>
+<Active>0</Active>
+<HostName>device-97</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>98</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:62</MACAddress>
+<Active>0</Active>
+<HostName>device-98</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>99</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:63</MACAddress>
+<Active>0</Active>
+<HostName>device-99</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>100</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:64</MACAddress>
+<Active>0</Active>
+<HostName>device-100</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>101</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:65</MACAddress>
+<Active>0</Active>
+<HostName>device-101</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>102</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:66</MACAddress>
+<Active>0</Active>
+<HostName>device-102</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>103</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:67</MACAddress>
+<Active>0</Active>
+<HostName>device-103</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>104</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:68</MACAddress>
+<Active>0</Active>
+<HostName>device-104</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>105</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:69</MACAddress>
+<Active>0</Active>
+<HostName>device-105</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>106</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:6A</MACAddress>
+<Active>0</Active>
+<HostName>device-106</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>107</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:6B</MACAddress>
+<Active>0</Active>
+<HostName>device-107</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>108</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:6C</MACAddress>
+<Active>0</Active>
+<HostName>device-108</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>109</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:6D</MACAddress>
+<Active>0</Active>
+<HostName>device-109</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>110</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:6E</MACAddress>
+<Active>0</Active>
+<HostName>device-110</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>111</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:6F</MACAddress>
+<Active>0</Active>
+<HostName>device-111</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>112</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:70</MACAddress>
+<Active>0</Active>
+<HostName>device-112</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>113</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:71</MACAddress>
+<Active>0</Active>
+<HostName>device-113</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>114</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:72</MACAddress>
+<Active>0</Active>
+<HostName>device-114</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>115</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:73</MACAddress>
+<Active>0</Active>
+<HostName>device-115</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>116</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:74</MACAddress>
+<Active>0</Active>
+<HostName>device-116</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>117</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:75</MACAddress>
+<Active>0</Active>
+<HostName>device-117</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>118</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:76</MACAddress>
+<Active>1</Active>
+<HostName>device-118</HostName>
+<InterfaceType>802.11</InterfaceType>
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>215</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>119</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:77</MACAddress>
+<Active>0</Active>
+<HostName>device-119</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>120</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:78</MACAddress>
+<Active>0</Active>
+<HostName>device-120</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>121</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:79</MACAddress>
+<Active>0</Active>
+<HostName>device-121</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>122</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:7A</MACAddress>
+<Active>0</Active>
+<HostName>device-122</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>123</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:7B</MACAddress>
+<Active>0</Active>
+<HostName>device-123</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>124</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:7C</MACAddress>
+<Active>0</Active>
+<HostName>device-124</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>125</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:7D</MACAddress>
+<Active>0</Active>
+<HostName>device-125</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>126</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:7E</MACAddress>
+<Active>0</Active>
+<HostName>device-126</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>127</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:7F</MACAddress>
+<Active>0</Active>
+<HostName>device-127</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>128</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:80</MACAddress>
+<Active>0</Active>
+<HostName>device-128</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>129</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:81</MACAddress>
+<Active>0</Active>
+<HostName>device-129</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>130</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:82</MACAddress>
+<Active>0</Active>
+<HostName>device-130</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>131</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:83</MACAddress>
+<Active>0</Active>
+<HostName>device-131</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>132</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:84</MACAddress>
+<Active>0</Active>
+<HostName>device-132</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>133</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:85</MACAddress>
+<Active>0</Active>
+<HostName>device-133</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>134</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:86</MACAddress>
+<Active>0</Active>
+<HostName>device-134</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>135</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:87</MACAddress>
+<Active>0</Active>
+<HostName>device-135</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>136</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:88</MACAddress>
+<Active>0</Active>
+<HostName>device-136</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>137</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:89</MACAddress>
+<Active>0</Active>
+<HostName>device-137</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>138</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:8A</MACAddress>
+<Active>0</Active>
+<HostName>device-138</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>139</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:8B</MACAddress>
+<Active>0</Active>
+<HostName>device-139</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>140</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:8C</MACAddress>
+<Active>0</Active>
+<HostName>device-140</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>141</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:8D</MACAddress>
+<Active>0</Active>
+<HostName>device-141</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>142</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:8E</MACAddress>
+<Active>0</Active>
+<HostName>device-142</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>143</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:8F</MACAddress>
+<Active>0</Active>
+<HostName>device-143</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>144</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:90</MACAddress>
+<Active>0</Active>
+<HostName>device-144</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>145</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:91</MACAddress>
+<Active>0</Active>
+<HostName>device-145</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>146</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:92</MACAddress>
+<Active>0</Active>
+<HostName>device-146</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>147</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:93</MACAddress>
+<Active>0</Active>
+<HostName>device-147</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>148</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:94</MACAddress>
+<Active>0</Active>
+<HostName>device-148</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>149</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:95</MACAddress>
+<Active>0</Active>
+<HostName>device-149</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>150</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:96</MACAddress>
+<Active>0</Active>
+<HostName>device-150</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>151</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:97</MACAddress>
+<Active>0</Active>
+<HostName>device-151</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>152</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:98</MACAddress>
+<Active>0</Active>
+<HostName>device-152</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>153</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:99</MACAddress>
+<Active>0</Active>
+<HostName>device-153</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>154</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:9A</MACAddress>
+<Active>0</Active>
+<HostName>device-154</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>155</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:9B</MACAddress>
+<Active>0</Active>
+<HostName>device-155</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>156</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:9C</MACAddress>
+<Active>0</Active>
+<HostName>device-156</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>157</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:9D</MACAddress>
+<Active>0</Active>
+<HostName>device-157</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>158</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:9E</MACAddress>
+<Active>0</Active>
+<HostName>device-158</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>159</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:9F</MACAddress>
+<Active>0</Active>
+<HostName>device-159</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>160</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:A0</MACAddress>
+<Active>0</Active>
+<HostName>device-160</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>161</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:A1</MACAddress>
+<Active>0</Active>
+<HostName>device-161</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>162</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:A2</MACAddress>
+<Active>0</Active>
+<HostName>device-162</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>163</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:A3</MACAddress>
+<Active>0</Active>
+<HostName>device-163</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>164</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:A4</MACAddress>
+<Active>0</Active>
+<HostName>device-164</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>165</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:A5</MACAddress>
+<Active>0</Active>
+<HostName>device-165</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>166</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:A6</MACAddress>
+<Active>0</Active>
+<HostName>device-166</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>167</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:A7</MACAddress>
+<Active>0</Active>
+<HostName>device-167</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>168</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:A8</MACAddress>
+<Active>0</Active>
+<HostName>device-168</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>169</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:A9</MACAddress>
+<Active>0</Active>
+<HostName>device-169</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>170</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:AA</MACAddress>
+<Active>0</Active>
+<HostName>device-170</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>171</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:AB</MACAddress>
+<Active>0</Active>
+<HostName>device-171</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>172</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:AC</MACAddress>
+<Active>0</Active>
+<HostName>device-172</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>173</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:AD</MACAddress>
+<Active>0</Active>
+<HostName>device-173</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>174</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:AE</MACAddress>
+<Active>0</Active>
+<HostName>device-174</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>175</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:AF</MACAddress>
+<Active>0</Active>
+<HostName>device-175</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>176</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:B0</MACAddress>
+<Active>0</Active>
+<HostName>device-176</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>177</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:B1</MACAddress>
+<Active>0</Active>
+<HostName>device-177</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>178</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:B2</MACAddress>
+<Active>0</Active>
+<HostName>device-178</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>179</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:B3</MACAddress>
+<Active>0</Active>
+<HostName>device-179</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>180</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:B4</MACAddress>
+<Active>0</Active>
+<HostName>device-180</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>181</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:B5</MACAddress>
+<Active>0</Active>
+<HostName>device-181</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>182</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:B6</MACAddress>
+<Active>0</Active>
+<HostName>device-182</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>183</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:B7</MACAddress>
+<Active>0</Active>
+<HostName>device-183</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>184</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:B8</MACAddress>
+<Active>0</Active>
+<HostName>device-184</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+<Item>
+<Index>185</Index>
+<IPAddress />
+<MACAddress>AA:BB:CC:00:00:B9</MACAddress>
+<Active>0</Active>
+<HostName>device-185</HostName>
+<InterfaceType />
+<X_AVM-DE_Port>0</X_AVM-DE_Port>
+<X_AVM-DE_Speed>0</X_AVM-DE_Speed>
+<X_AVM-DE_UpdateAvailable>0</X_AVM-DE_UpdateAvailable>
+<X_AVM-DE_UpdateSuccessful>unknown</X_AVM-DE_UpdateSuccessful>
+<X_AVM-DE_InfoURL />
+<X_AVM-DE_Model />
+<X_AVM-DE_URL />
+<X_AVM-DE_Guest>0</X_AVM-DE_Guest>
+<X_AVM-DE_VPN>0</X_AVM-DE_VPN>
+<X_AVM-DE_WANAccess />
+<X_AVM-DE_Disallow>0</X_AVM-DE_Disallow>
+</Item>
+</List>

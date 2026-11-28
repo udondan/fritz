@@ -1,0 +1,15 @@
+{
+  "out": {
+    "NewDHCPRelay": "0",
+    "NewDHCPServerConfigurable": "1",
+    "NewDHCPServerEnable": "1",
+    "NewDNSServers": "192.0.2.34",
+    "NewDomainName": "(none)",
+    "NewIPRouters": "192.0.2.34",
+    "NewMaxAddress": "192.0.2.32",
+    "NewMinAddress": "192.0.2.33",
+    "NewReservedAddresses": "",
+    "NewSubnetMask": "255.255.255.0"
+  },
+  "status": "ok"
+}

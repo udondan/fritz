@@ -1,0 +1,7 @@
+{
+  "out": {
+    "NewX_AVM-DE_CurrentUserRights": "<rights><path>BoxAdmin</path><access>readwrite</access><path>Phone</path><access>readwrite</access><path>Dial</path><access>readwrite</access><path>NAS</path><access>readwrite</access><path>HomeAuto</path><access>readwrite</access><path>App</path><access>readwrite</access></rights>",
+    "NewX_AVM-DE_CurrentUsername": "***"
+  },
+  "status": "ok"
+}

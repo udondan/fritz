@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<List>
+<TotalAssociations>2</TotalAssociations>
+<Item>
+<AssociatedDeviceIndex>0</AssociatedDeviceIndex>
+<AssociatedDeviceMACAddress>AA:BB:CC:00:00:76</AssociatedDeviceMACAddress>
+<AssociatedDeviceIPAddress></AssociatedDeviceIPAddress>
+<AssociatedDeviceAuthState>1</AssociatedDeviceAuthState>
+<X_AVM-DE_Speed>215</X_AVM-DE_Speed>
+<X_AVM-DE_SignalStrength>89</X_AVM-DE_SignalStrength>
+<AssociatedDeviceChannel>6</AssociatedDeviceChannel>
+<X_AVM-DE_ChannelWidth>20</X_AVM-DE_ChannelWidth>
+<AssociatedDeviceGuest>0</AssociatedDeviceGuest>
+</Item>
+<Item>
+<AssociatedDeviceIndex>1</AssociatedDeviceIndex>
+<AssociatedDeviceMACAddress>AA:BB:CC:00:00:1C</AssociatedDeviceMACAddress>
+<AssociatedDeviceIPAddress>192.0.2.7</AssociatedDeviceIPAddress>
+<AssociatedDeviceAuthState>1</AssociatedDeviceAuthState>
+<X_AVM-DE_Speed>526</X_AVM-DE_Speed>
+<X_AVM-DE_SignalStrength>67</X_AVM-DE_SignalStrength>
+<AssociatedDeviceChannel>48</AssociatedDeviceChannel>
+<X_AVM-DE_ChannelWidth>20</X_AVM-DE_ChannelWidth>
+<AssociatedDeviceGuest>0</AssociatedDeviceGuest>
+</Item>
+</List>

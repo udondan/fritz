@@ -1,0 +1,15 @@
+{
+  "out": {
+    "NewX_AVM-DE_APEnabled": "",
+    "NewX_AVM-DE_APType": "normal",
+    "NewX_AVM-DE_EncryptionMode": "",
+    "NewX_AVM-DE_FrequencyBand": "5000",
+    "NewX_AVM-DE_LastChangedStamp": "0",
+    "NewX_AVM-DE_NoForcedOff": "",
+    "NewX_AVM-DE_TimeRemain": "",
+    "NewX_AVM-DE_Timeout": "",
+    "NewX_AVM-DE_TimeoutActive": "",
+    "NewX_AVM-DE_UserIsolation": ""
+  },
+  "status": "ok"
+}

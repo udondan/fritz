@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<!-- Synthetic SCPD with getters only, laid out like a telephony service. -->
+<scpd xmlns="urn:dslforum-org:service-1-0">
+  <specVersion>
+    <major>1</major>
+    <minor>0</minor>
+  </specVersion>
+  <actionList>
+    <action>
+      <name>GetCallList</name>
+      <argumentList>
+        <argument>
+          <name>NewCallListURL</name>
+          <direction>out</direction>
+          <relatedStateVariable>X_AVM-DE_CallListURL</relatedStateVariable>
+        </argument>
+      </argumentList>
+    </action>
+    <action>
+      <name>GetNumberOfDeflections</name>
+      <argumentList>
+        <argument>
+          <name>NewNumberOfDeflections</name>
+          <direction>out</direction>
+          <relatedStateVariable>X_AVM-DE_NumberOfDeflections</relatedStateVariable>
+        </argument>
+      </argumentList>
+    </action>
+  </actionList>
+  <serviceStateTable>
+    <stateVariable sendEvents="no">
+      <name>X_AVM-DE_CallListURL</name>
+      <dataType>string</dataType>
+    </stateVariable>
+    <stateVariable sendEvents="no">
+      <name>X_AVM-DE_NumberOfDeflections</name>
+      <dataType>ui2</dataType>
+    </stateVariable>
+  </serviceStateTable>
+</scpd>

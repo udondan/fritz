@@ -1,0 +1,17 @@
+{
+  "out": {
+    "NewDescription": "FRITZ!Box 7690 Release 285.08.25",
+    "NewDeviceLog": "(removed by fritz fixture anonymize)",
+    "NewHardwareVersion": "FRITZ!Box 7690",
+    "NewManufacturerName": "AVM",
+    "NewManufacturerOUI": "00040E",
+    "NewModelName": "FRITZ!Box 7690",
+    "NewProductClass": "FRITZ!Box",
+    "NewProvisioningCode": "666",
+    "NewSerialNumber": "AABBCC000001",
+    "NewSoftwareVersion": "285.08.25",
+    "NewSpecVersion": "1.0",
+    "NewUpTime": "760415"
+  },
+  "status": "ok"
+}

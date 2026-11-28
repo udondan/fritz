@@ -1,0 +1,13 @@
+{
+  "sg": [
+    {
+      "UID": "sg0",
+      "dhcpv6c_use_wanted_prefixlen": "0",
+      "enabled": "1",
+      "ipv4_mode": "native",
+      "ipv6_mode": "native",
+      "is_primary": "1",
+      "name": "Internet"
+    }
+  ]
+}

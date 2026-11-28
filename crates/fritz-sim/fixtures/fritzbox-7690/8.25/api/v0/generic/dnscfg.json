@@ -1,0 +1,14 @@
+{
+  "dns_over_tls_enabled": "0",
+  "ipv4_dhcpserver_lan_dns": "192.0.2.1",
+  "ipv4_firstdns": "198.51.100.53",
+  "ipv4_seconddns": "198.51.100.54",
+  "ipv4_use_user_dns": "1",
+  "ipv4_user_firstdns": "198.51.100.53",
+  "ipv4_user_seconddns": "198.51.100.54",
+  "ipv6_use_user_dns": "0",
+  "ipv6_user_firstdns": "",
+  "ipv6_user_seconddns": "",
+  "public_dns_servers_use_as_fallback": "1",
+  "wpad_protection": "1"
+}

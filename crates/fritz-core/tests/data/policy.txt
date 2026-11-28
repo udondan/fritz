@@ -1,0 +1,363 @@
+DeviceConfig ConfigurationFinished critical: changes DeviceConfig
+DeviceConfig ConfigurationStarted critical: changes DeviceConfig
+DeviceConfig FactoryReset critical: changes DeviceConfig
+DeviceConfig GetPersistentData secret: returns opaque data that can hold credentials
+DeviceConfig Reboot critical: changes DeviceConfig
+DeviceConfig SetPersistentData critical: changes DeviceConfig
+DeviceConfig X_AVM-DE_CreateUrlSID critical: changes DeviceConfig
+DeviceConfig X_AVM-DE_GetConfigFile secret: exports the whole configuration including passwords
+DeviceConfig X_AVM-DE_GetSupportDataEnable read
+DeviceConfig X_AVM-DE_GetSupportDataInfo read
+DeviceConfig X_AVM-DE_GetUserAgreement read
+DeviceConfig X_AVM-DE_SendSupportData critical: changes DeviceConfig
+DeviceConfig X_AVM-DE_SetConfigFile critical: changes DeviceConfig
+DeviceConfig X_AVM-DE_SetSupportDataEnable critical: changes DeviceConfig
+DeviceConfig X_AVM-DE_SetUserAgreement critical: changes DeviceConfig
+DeviceConfig X_GenerateUUID critical: changes DeviceConfig
+DeviceInfo GetDeviceLog personal
+DeviceInfo GetInfo read
+DeviceInfo GetSecurityPort read
+DeviceInfo SetProvisioningCode critical: changes DeviceInfo
+DeviceInfo X_AVM-DE_GetDeviceLogPath read
+Hosts GetGenericHostEntry read
+Hosts GetHostNumberOfEntries read
+Hosts GetSpecificHostEntry read
+Hosts X_AVM-DE_GetAutoWakeOnLANByMACAddress read
+Hosts X_AVM-DE_GetChangeCounter read
+Hosts X_AVM-DE_GetFriendlyName read
+Hosts X_AVM-DE_GetHostListPath read
+Hosts X_AVM-DE_GetInfo read
+Hosts X_AVM-DE_GetMeshListPath read
+Hosts X_AVM-DE_GetSpecificHostEntryByIP read
+Hosts X_AVM-DE_HostDoUpdate critical: the name says update
+Hosts X_AVM-DE_HostsCheckUpdate critical: the name says update
+Hosts X_AVM-DE_SetAutoWakeOnLANByMACAddress write
+Hosts X_AVM-DE_SetDeviceClassUserByIP write
+Hosts X_AVM-DE_SetDeviceClassUserByMAC write
+Hosts X_AVM-DE_SetFriendlyName write
+Hosts X_AVM-DE_SetFriendlyNameByIP write
+Hosts X_AVM-DE_SetFriendlyNameByMAC write
+Hosts X_AVM-DE_SetHostNameByMACAddress write
+Hosts X_AVM-DE_SetPrioritizationByIP write
+Hosts X_AVM-DE_WakeOnLANByMACAddress critical: unknown kind of action X_AVM-DE_WakeOnLANByMACAddress
+LANConfigSecurity GetInfo read
+LANConfigSecurity SetConfigPassword critical: changes LANConfigSecurity
+LANConfigSecurity X_AVM-DE_GetAnonymousLogin read
+LANConfigSecurity X_AVM-DE_GetCurrentUser read
+LANConfigSecurity X_AVM-DE_GetUserList read
+LANEthernetInterfaceConfig GetInfo read
+LANEthernetInterfaceConfig GetStatistics read
+LANEthernetInterfaceConfig SetEnable write
+LANHostConfigManagement GetAddressRange read
+LANHostConfigManagement GetDNSServers read
+LANHostConfigManagement GetIPInterfaceNumberOfEntries read
+LANHostConfigManagement GetIPRoutersList read
+LANHostConfigManagement GetInfo read
+LANHostConfigManagement GetSubnetMask read
+LANHostConfigManagement SetAddressRange critical: changes LANHostConfigManagement
+LANHostConfigManagement SetDHCPServerEnable critical: changes LANHostConfigManagement
+LANHostConfigManagement SetIPInterface critical: changes LANHostConfigManagement
+LANHostConfigManagement SetIPRouter critical: changes LANHostConfigManagement
+LANHostConfigManagement SetSubnetMask critical: changes LANHostConfigManagement
+Layer3Forwarding AddForwardingEntry critical: changes Layer3Forwarding
+Layer3Forwarding DeleteForwardingEntry critical: changes Layer3Forwarding
+Layer3Forwarding GetDefaultConnectionService read
+Layer3Forwarding GetForwardNumberOfEntries read
+Layer3Forwarding GetGenericForwardingEntry read
+Layer3Forwarding GetSpecificForwardingEntry read
+Layer3Forwarding SetDefaultConnectionService critical: changes Layer3Forwarding
+Layer3Forwarding SetForwardingEntryEnable critical: changes Layer3Forwarding
+ManagementServer GetInfo read
+ManagementServer SetConnectionRequestAuthentication critical: changes ManagementServer
+ManagementServer SetManagementServerPassword critical: changes ManagementServer
+ManagementServer SetManagementServerURL critical: changes ManagementServer
+ManagementServer SetManagementServerUsername critical: changes ManagementServer
+ManagementServer SetPeriodicInform critical: changes ManagementServer
+ManagementServer SetUpgradeManagement critical: changes ManagementServer
+ManagementServer X_AVM-DE_GetTR069FirmwareDownloadEnabled read
+ManagementServer X_AVM-DE_SetTR069FirmwareDownloadEnabled critical: changes ManagementServer
+ManagementServer X_SetTR069Enable critical: changes ManagementServer
+Time GetInfo read
+Time SetNTPServers write
+UserInterface GetInfo read
+UserInterface X_AVM-DE_CheckUpdate critical: changes UserInterface
+UserInterface X_AVM-DE_DoManualUpdate critical: changes UserInterface
+UserInterface X_AVM-DE_DoPrepareCGI critical: changes UserInterface
+UserInterface X_AVM-DE_DoUpdate critical: changes UserInterface
+UserInterface X_AVM-DE_GetInfo read
+UserInterface X_AVM-DE_GetInternationalConfig read
+UserInterface X_AVM-DE_SetConfig critical: changes UserInterface
+UserInterface X_AVM-DE_SetInternationalConfig critical: changes UserInterface
+WANCommonInterfaceConfig GetCommonLinkProperties read
+WANCommonInterfaceConfig GetTotalBytesReceived read
+WANCommonInterfaceConfig GetTotalBytesSent read
+WANCommonInterfaceConfig GetTotalPacketsReceived read
+WANCommonInterfaceConfig GetTotalPacketsSent read
+WANCommonInterfaceConfig X_AVM-DE_GetActiveProvider read
+WANCommonInterfaceConfig X_AVM-DE_GetOnlineMonitor read
+WANCommonInterfaceConfig X_AVM-DE_SetWANAccessType critical: changes WANCommonInterfaceConfig
+WANDSLInterfaceConfig GetInfo read
+WANDSLInterfaceConfig GetStatisticsTotal read
+WANDSLInterfaceConfig X_AVM-DE_GetDSLDiagnoseInfo read
+WANDSLInterfaceConfig X_AVM-DE_GetDSLInfo read
+WANDSLLinkConfig GetATMEncapsulation read
+WANDSLLinkConfig GetAutoConfig read
+WANDSLLinkConfig GetDSLLinkInfo read
+WANDSLLinkConfig GetDestinationAddress read
+WANDSLLinkConfig GetInfo read
+WANDSLLinkConfig GetStatistics read
+WANDSLLinkConfig SetATMEncapsulation critical: changes WANDSLLinkConfig
+WANDSLLinkConfig SetDSLLinkType critical: changes WANDSLLinkConfig
+WANDSLLinkConfig SetDestinationAddress critical: changes WANDSLLinkConfig
+WANDSLLinkConfig SetEnable critical: changes WANDSLLinkConfig
+WANEthernetLinkConfig GetEthernetLinkStatus read
+WANIPConnection AddPortMapping critical: changes WANIPConnection
+WANIPConnection DeletePortMapping critical: changes WANIPConnection
+WANIPConnection ForceTermination critical: changes WANIPConnection
+WANIPConnection GetConnectionTypeInfo read
+WANIPConnection GetExternalIPAddress read
+WANIPConnection GetGenericPortMappingEntry read
+WANIPConnection GetInfo read
+WANIPConnection GetNATRSIPStatus read
+WANIPConnection GetPortMappingNumberOfEntries read
+WANIPConnection GetSpecificPortMappingEntry read
+WANIPConnection GetStatusInfo read
+WANIPConnection RequestConnection critical: changes WANIPConnection
+WANIPConnection SetConnectionTrigger critical: changes WANIPConnection
+WANIPConnection SetConnectionType critical: changes WANIPConnection
+WANIPConnection SetIdleDisconnectTime critical: changes WANIPConnection
+WANIPConnection SetRouteProtocolRx critical: changes WANIPConnection
+WANIPConnection X_GetDNSServers critical: changes WANIPConnection
+WANPPPConnection AddPortMapping critical: changes WANPPPConnection
+WANPPPConnection DeletePortMapping critical: changes WANPPPConnection
+WANPPPConnection ForceTermination critical: changes WANPPPConnection
+WANPPPConnection GetConnectionTypeInfo read
+WANPPPConnection GetExternalIPAddress read
+WANPPPConnection GetGenericPortMappingEntry read
+WANPPPConnection GetInfo read
+WANPPPConnection GetLinkLayerMaxBitRates read
+WANPPPConnection GetNATRSIPStatus read
+WANPPPConnection GetPortMappingNumberOfEntries read
+WANPPPConnection GetSpecificPortMappingEntry read
+WANPPPConnection GetStatusInfo read
+WANPPPConnection GetUserName read
+WANPPPConnection RequestConnection critical: changes WANPPPConnection
+WANPPPConnection SetConnectionTrigger critical: changes WANPPPConnection
+WANPPPConnection SetConnectionType critical: changes WANPPPConnection
+WANPPPConnection SetIdleDisconnectTime critical: changes WANPPPConnection
+WANPPPConnection SetPassword critical: changes WANPPPConnection
+WANPPPConnection SetRouteProtocolRx critical: changes WANPPPConnection
+WANPPPConnection SetUserName critical: changes WANPPPConnection
+WANPPPConnection X_AVM-DE_GetAutoDisconnectTimeSpan read
+WANPPPConnection X_AVM-DE_SetAutoDisconnectTimeSpan critical: changes WANPPPConnection
+WANPPPConnection X_GetDNSServers critical: changes WANPPPConnection
+WLANConfiguration GetBSSID read
+WLANConfiguration GetBasBeaconSecurityProperties read
+WLANConfiguration GetBeaconAdvertisement read
+WLANConfiguration GetBeaconType read
+WLANConfiguration GetChannelInfo read
+WLANConfiguration GetDefaultWEPKeyIndex read
+WLANConfiguration GetGenericAssociatedDeviceInfo read
+WLANConfiguration GetInfo read
+WLANConfiguration GetPacketStatistics read
+WLANConfiguration GetSSID read
+WLANConfiguration GetSecurityKeys secret: the name points to a secret
+WLANConfiguration GetSpecificAssociatedDeviceInfo read
+WLANConfiguration GetStatistics read
+WLANConfiguration GetTotalAssociations read
+WLANConfiguration SetBasBeaconSecurityProperties write
+WLANConfiguration SetBeaconAdvertisement write
+WLANConfiguration SetBeaconType write
+WLANConfiguration SetChannel write
+WLANConfiguration SetConfig write
+WLANConfiguration SetDefaultWEPKeyIndex write
+WLANConfiguration SetEnable write
+WLANConfiguration SetSSID write
+WLANConfiguration SetSecurityKeys critical: sets a secret
+WLANConfiguration X_AVM-DE_GetIPTVOptimized read
+WLANConfiguration X_AVM-DE_GetNightControl read
+WLANConfiguration X_AVM-DE_GetSpecificAssociatedDeviceInfoByIp read
+WLANConfiguration X_AVM-DE_GetWLANConnectionInfo read
+WLANConfiguration X_AVM-DE_GetWLANDeviceListPath read
+WLANConfiguration X_AVM-DE_GetWLANExtInfo read
+WLANConfiguration X_AVM-DE_GetWLANHybridMode secret: returns NewKeyPassphrase, which points to a secret
+WLANConfiguration X_AVM-DE_GetWPSInfo read
+WLANConfiguration X_AVM-DE_SetIPTVOptimized write
+WLANConfiguration X_AVM-DE_SetStickSurfEnable write
+WLANConfiguration X_AVM-DE_SetWLANGlobalEnable write
+WLANConfiguration X_AVM-DE_SetWLANHybridMode critical: sets NewKeyPassphrase, which points to a secret
+WLANConfiguration X_AVM-DE_SetWPSConfig write
+WLANConfiguration X_AVM-DE_SetWPSEnable write
+X_AVM-DE_AppSetup GetAppMessageFilter read
+X_AVM-DE_AppSetup GetAppRemoteInfo read
+X_AVM-DE_AppSetup GetBoxSenderId read
+X_AVM-DE_AppSetup GetConfig read
+X_AVM-DE_AppSetup GetInfo read
+X_AVM-DE_AppSetup RegisterApp critical: changes X_AVM-DE_AppSetup
+X_AVM-DE_AppSetup ResetEvent critical: changes X_AVM-DE_AppSetup
+X_AVM-DE_AppSetup SetAppMessageFilter critical: changes X_AVM-DE_AppSetup
+X_AVM-DE_AppSetup SetAppMessageReceiver critical: changes X_AVM-DE_AppSetup
+X_AVM-DE_AppSetup SetAppVPN critical: changes X_AVM-DE_AppSetup
+X_AVM-DE_AppSetup SetAppVPNwithPFS critical: changes X_AVM-DE_AppSetup
+X_AVM-DE_Auth GetInfo read
+X_AVM-DE_Auth GetState read
+X_AVM-DE_Auth SetConfig critical: changes X_AVM-DE_Auth
+X_AVM-DE_Dect DectDoUpdate critical: the name says update
+X_AVM-DE_Dect GetDectListPath read
+X_AVM-DE_Dect GetGenericDectEntry read
+X_AVM-DE_Dect GetNumberOfDectEntries read
+X_AVM-DE_Dect GetSpecificDectEntry read
+X_AVM-DE_Filelinks DeleteFilelinkEntry write
+X_AVM-DE_Filelinks GetFilelinkListPath read
+X_AVM-DE_Filelinks GetGenericFilelinkEntry read
+X_AVM-DE_Filelinks GetNumberOfFilelinkEntries read
+X_AVM-DE_Filelinks GetSpecificFilelinkEntry read
+X_AVM-DE_Filelinks NewFilelinkEntry write
+X_AVM-DE_Filelinks SetFilelinkEntry write
+X_AVM-DE_Homeauto GetGenericDeviceInfos read
+X_AVM-DE_Homeauto GetInfo read
+X_AVM-DE_Homeauto GetSpecificDeviceInfos read
+X_AVM-DE_Homeauto SetDeviceName write
+X_AVM-DE_Homeauto SetSwitch write
+X_AVM-DE_Homeplug DeviceDoUpdate critical: the name says update
+X_AVM-DE_Homeplug GetGenericDeviceEntry read
+X_AVM-DE_Homeplug GetNumberOfDeviceEntries read
+X_AVM-DE_Homeplug GetSpecificDeviceEntry read
+X_AVM-DE_HostFilter AddHostEntryToFilterProfile write
+X_AVM-DE_HostFilter AddTicketTimeToHostEntryByIP write
+X_AVM-DE_HostFilter DisallowWANAccessByIP write
+X_AVM-DE_HostFilter DiscardAllTickets write
+X_AVM-DE_HostFilter GetFilterProfileByID read
+X_AVM-DE_HostFilter GetFilterProfiles read
+X_AVM-DE_HostFilter GetHostEntryByIP read
+X_AVM-DE_HostFilter GetTicketIDStatus read
+X_AVM-DE_HostFilter GetWANAccessByIP read
+X_AVM-DE_HostFilter MarkTicket write
+X_AVM-DE_MyFritz DeleteServiceByIndex critical: changes X_AVM-DE_MyFritz
+X_AVM-DE_MyFritz GetInfo read
+X_AVM-DE_MyFritz GetNumberOfServices read
+X_AVM-DE_MyFritz GetServiceByIndex read
+X_AVM-DE_MyFritz SetMyFRITZ critical: changes X_AVM-DE_MyFritz
+X_AVM-DE_MyFritz SetServiceByIndex critical: changes X_AVM-DE_MyFritz
+X_AVM-DE_OnTel AddPhonebook write
+X_AVM-DE_OnTel DeleteByIndex write
+X_AVM-DE_OnTel DeleteCallBarringEntryUID write
+X_AVM-DE_OnTel DeletePhonebook write
+X_AVM-DE_OnTel DeletePhonebookEntry write
+X_AVM-DE_OnTel DeletePhonebookEntryUID write
+X_AVM-DE_OnTel GetCallBarringEntry read
+X_AVM-DE_OnTel GetCallBarringEntryByNum read
+X_AVM-DE_OnTel GetCallBarringList read
+X_AVM-DE_OnTel GetCallList personal
+X_AVM-DE_OnTel GetDECTHandsetInfo read
+X_AVM-DE_OnTel GetDECTHandsetList read
+X_AVM-DE_OnTel GetDeflection read
+X_AVM-DE_OnTel GetDeflections read
+X_AVM-DE_OnTel GetInfo read
+X_AVM-DE_OnTel GetInfoByIndex read
+X_AVM-DE_OnTel GetNumberOfDeflections read
+X_AVM-DE_OnTel GetNumberOfEntries read
+X_AVM-DE_OnTel GetPhonebook personal
+X_AVM-DE_OnTel GetPhonebookEntry personal
+X_AVM-DE_OnTel GetPhonebookEntryUID personal
+X_AVM-DE_OnTel GetPhonebookList personal
+X_AVM-DE_OnTel SetCallBarringEntry write
+X_AVM-DE_OnTel SetConfig critical: sets NewPassword, which points to a secret
+X_AVM-DE_OnTel SetConfigByIndex critical: sets NewPassword, which points to a secret
+X_AVM-DE_OnTel SetDECTHandsetPhonebook write
+X_AVM-DE_OnTel SetDeflectionEnable write
+X_AVM-DE_OnTel SetEnable write
+X_AVM-DE_OnTel SetEnableByIndex write
+X_AVM-DE_OnTel SetPhonebookEntry write
+X_AVM-DE_OnTel SetPhonebookEntryUID write
+X_AVM-DE_RemoteAccess GetDDNSInfo read
+X_AVM-DE_RemoteAccess GetDDNSProviders read
+X_AVM-DE_RemoteAccess GetInfo read
+X_AVM-DE_RemoteAccess SetConfig critical: changes X_AVM-DE_RemoteAccess
+X_AVM-DE_RemoteAccess SetDDNSConfig critical: changes X_AVM-DE_RemoteAccess
+X_AVM-DE_RemoteAccess SetEnable critical: changes X_AVM-DE_RemoteAccess
+X_AVM-DE_RemoteAccess SetLetsEncryptEnable critical: changes X_AVM-DE_RemoteAccess
+X_AVM-DE_Speedtest GetInfo read
+X_AVM-DE_Speedtest GetStatistics read
+X_AVM-DE_Speedtest ResetStatistics critical: the name says reset
+X_AVM-DE_Speedtest SetConfig write
+X_AVM-DE_Storage GetInfo read
+X_AVM-DE_Storage GetUserInfo read
+X_AVM-DE_Storage RequestFTPServerWAN critical: changes X_AVM-DE_Storage
+X_AVM-DE_Storage SetFTPServer critical: changes X_AVM-DE_Storage
+X_AVM-DE_Storage SetFTPServerWAN critical: changes X_AVM-DE_Storage
+X_AVM-DE_Storage SetSMBServer critical: changes X_AVM-DE_Storage
+X_AVM-DE_Storage SetUserConfig critical: changes X_AVM-DE_Storage
+X_AVM-DE_TAM DeleteMessage write
+X_AVM-DE_TAM GetInfo read
+X_AVM-DE_TAM GetList read
+X_AVM-DE_TAM GetMessageList personal
+X_AVM-DE_TAM MarkMessage write
+X_AVM-DE_TAM SetEnable write
+X_AVM-DE_UPnP GetInfo read
+X_AVM-DE_UPnP SetConfig write
+X_AVM-DE_USPController AddUSPController critical: changes X_AVM-DE_USPController
+X_AVM-DE_USPController DeleteUSPControllerByIndex critical: changes X_AVM-DE_USPController
+X_AVM-DE_USPController GetInfo read
+X_AVM-DE_USPController GetUSPControllerByIndex read
+X_AVM-DE_USPController GetUSPControllerNumberOfEntries read
+X_AVM-DE_USPController GetUSPMyFRITZEnable read
+X_AVM-DE_USPController SetUSPControllerEnableByIndex critical: changes X_AVM-DE_USPController
+X_AVM-DE_USPController SetUSPMyFRITZEnable critical: changes X_AVM-DE_USPController
+X_AVM-DE_WANMobileConnection GetAccessTechnology read
+X_AVM-DE_WANMobileConnection GetBandCapabilities read
+X_AVM-DE_WANMobileConnection GetEnabledBandCapabilities read
+X_AVM-DE_WANMobileConnection GetInfo read
+X_AVM-DE_WANMobileConnection GetInfoEx read
+X_AVM-DE_WANMobileConnection GetPreferredAccessTechnology read
+X_AVM-DE_WANMobileConnection SetAccessTechnology critical: changes X_AVM-DE_WANMobileConnection
+X_AVM-DE_WANMobileConnection SetEnabledBandCapabilities critical: changes X_AVM-DE_WANMobileConnection
+X_AVM-DE_WANMobileConnection SetPIN critical: changes X_AVM-DE_WANMobileConnection
+X_AVM-DE_WANMobileConnection SetPUK critical: changes X_AVM-DE_WANMobileConnection
+X_AVM-DE_WANMobileConnection SetPreferredAccessTechnology critical: changes X_AVM-DE_WANMobileConnection
+X_AVM-DE_WebDAVClient GetInfo read
+X_AVM-DE_WebDAVClient SetConfig critical: sets NewPassword, which points to a secret
+X_VoIP GetExistingVoIPNumbers read
+X_VoIP GetInfo read
+X_VoIP GetInfoEx read
+X_VoIP GetMaxVoIPNumbers read
+X_VoIP GetVoIPCommonAreaCode read
+X_VoIP GetVoIPCommonCountryCode read
+X_VoIP GetVoIPEnableAreaCode read
+X_VoIP GetVoIPEnableCountryCode read
+X_VoIP SetConfig write
+X_VoIP SetVoIPCommonAreaCode write
+X_VoIP SetVoIPCommonCountryCode write
+X_VoIP SetVoIPEnableAreaCode write
+X_VoIP SetVoIPEnableCountryCode write
+X_VoIP X_AVM-DE_AddVoIPAccount critical: sets NewVoIPPassword, which points to a secret
+X_VoIP X_AVM-DE_DelVoIPAccount write
+X_VoIP X_AVM-DE_DeleteClient write
+X_VoIP X_AVM-DE_DialGetConfig critical: the name says dial
+X_VoIP X_AVM-DE_DialHangup critical: the name says dial
+X_VoIP X_AVM-DE_DialNumber critical: the name says dial
+X_VoIP X_AVM-DE_DialSetConfig critical: the name says dial
+X_VoIP X_AVM-DE_GetAlarmClock read
+X_VoIP X_AVM-DE_GetClient secret: returns the credentials of telephony clients
+X_VoIP X_AVM-DE_GetClient2 secret: returns the credentials of telephony clients
+X_VoIP X_AVM-DE_GetClient3 secret: returns the credentials of telephony clients
+X_VoIP X_AVM-DE_GetClientByClientId secret: returns the credentials of telephony clients
+X_VoIP X_AVM-DE_GetClients secret: returns the credentials of telephony clients
+X_VoIP X_AVM-DE_GetNumberOfAlarmClocks read
+X_VoIP X_AVM-DE_GetNumberOfClients read
+X_VoIP X_AVM-DE_GetNumberOfNumbers read
+X_VoIP X_AVM-DE_GetNumbers read
+X_VoIP X_AVM-DE_GetPhonePort read
+X_VoIP X_AVM-DE_GetVoIPAccount secret: returns NewVoIPPassword, which points to a secret
+X_VoIP X_AVM-DE_GetVoIPAccounts read
+X_VoIP X_AVM-DE_GetVoIPCommonAreaCode read
+X_VoIP X_AVM-DE_GetVoIPCommonCountryCode read
+X_VoIP X_AVM-DE_GetVoIPStatus read
+X_VoIP X_AVM-DE_SetAlarmClockEnable write
+X_VoIP X_AVM-DE_SetClient critical: sets NewX_AVM-DE_ClientPassword, which points to a secret
+X_VoIP X_AVM-DE_SetClient2 critical: sets NewX_AVM-DE_ClientPassword, which points to a secret
+X_VoIP X_AVM-DE_SetClient3 critical: sets NewX_AVM-DE_ClientPassword, which points to a secret
+X_VoIP X_AVM-DE_SetClient4 critical: sets NewX_AVM-DE_ClientPassword, which points to a secret
+X_VoIP X_AVM-DE_SetDelayedCallNotification write
+X_VoIP X_AVM-DE_SetVoIPCommonAreaCode write
+X_VoIP X_AVM-DE_SetVoIPCommonCountryCode write

@@ -1,0 +1,54 @@
+<?xml version="1.0"?>
+<!-- Synthetic SCPD, laid out like the DeviceInfo service of a home router. -->
+<scpd xmlns="urn:dslforum-org:service-1-0">
+  <specVersion>
+    <major>1</major>
+    <minor>0</minor>
+  </specVersion>
+  <actionList>
+    <action>
+      <name>GetInfo</name>
+      <argumentList>
+        <argument>
+          <name>NewSerialNumber</name>
+          <direction>out</direction>
+          <relatedStateVariable>SerialNumber</relatedStateVariable>
+        </argument>
+      </argumentList>
+    </action>
+    <action>
+      <name>SetProvisioningCode</name>
+      <argumentList>
+        <argument>
+          <name>NewProvisioningCode</name>
+          <direction>in</direction>
+          <relatedStateVariable>ProvisioningCode</relatedStateVariable>
+        </argument>
+      </argumentList>
+    </action>
+    <action>
+      <name>GetSecurityPort</name>
+      <argumentList>
+        <argument>
+          <name>NewSecurityPort</name>
+          <direction>out</direction>
+          <relatedStateVariable>SecurityPort</relatedStateVariable>
+        </argument>
+      </argumentList>
+    </action>
+  </actionList>
+  <serviceStateTable>
+    <stateVariable sendEvents="no">
+      <name>SerialNumber</name>
+      <dataType>string</dataType>
+    </stateVariable>
+    <stateVariable sendEvents="no">
+      <name>ProvisioningCode</name>
+      <dataType>string</dataType>
+    </stateVariable>
+    <stateVariable sendEvents="no">
+      <name>SecurityPort</name>
+      <dataType>ui2</dataType>
+    </stateVariable>
+  </serviceStateTable>
+</scpd>

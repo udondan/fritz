@@ -1,0 +1,11 @@
+{
+  "out": {
+    "NewFTPEnable": "1",
+    "NewFTPStatus": "Enabled",
+    "NewFTPWANEnable": "0",
+    "NewFTPWANPort": "43051",
+    "NewFTPWANSSLOnly": "0",
+    "NewSMBEnable": "1"
+  },
+  "status": "ok"
+}

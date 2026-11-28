@@ -1,0 +1,20 @@
+{
+  "out": {
+    "NewATURCountry": "0400",
+    "NewATURVendor": "41564d00",
+    "NewDataPath": "Fast",
+    "NewDownstreamAttenuation": "140",
+    "NewDownstreamCurrRate": "274793",
+    "NewDownstreamMaxRate": "276310",
+    "NewDownstreamNoiseMargin": "70",
+    "NewDownstreamPower": "514",
+    "NewEnable": "1",
+    "NewStatus": "Up",
+    "NewUpstreamAttenuation": "100",
+    "NewUpstreamCurrRate": "45853",
+    "NewUpstreamMaxRate": "45853",
+    "NewUpstreamNoiseMargin": "80",
+    "NewUpstreamPower": "500"
+  },
+  "status": "ok"
+}

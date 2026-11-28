@@ -1,0 +1,793 @@
+//! `fritz overview`, `hosts`, `mesh`, `wlan`, `internet` and `smarthome`:
+//! the state of the device as text, JSON or YAML.
+//!
+//! Values from the device are untrusted: control characters in them are
+//! replaced in text output, so a host name cannot steer the terminal.
+
+use std::io::Write;
+
+use anyhow::Context as _;
+use fritz_core::lists::{Mesh, Node};
+use fritz_core::read::Reader;
+use fritz_core::smarthome::{self, Device, Target, Unit};
+use fritz_core::status::{self, Connection, Host, Hosts, Internet, Overview};
+use fritz_core::system::{self, Range, Section};
+use serde::Serialize;
+
+mod exposure;
+mod firmware;
+mod history;
+mod host;
+mod powerline;
+mod tree;
+mod users;
+mod wlan;
+
+pub(crate) use exposure::{WARNING as EXPOSURE_WARNING, exposure};
+pub(crate) use firmware::firmware;
+pub(crate) use history::{SmarthomeArgs, range as history_range, read as read_history};
+pub(crate) use host::{HostsArgs, add_addressing, hosts};
+pub(crate) use powerline::powerline;
+use tree::mesh_tree;
+pub(crate) use users::users;
+pub(crate) use wlan::wlan;
+
+use crate::context::Context;
+use crate::output::{Format, show};
+
+pub(crate) async fn reader(context: &Context) -> anyhow::Result<Reader> {
+    let client = context.client().await?;
+    Reader::new(client)
+        .await
+        .context("cannot read the device description")
+}
+
+/// The overview, and with `--system` the load of the device.
+#[derive(Debug, Serialize)]
+pub(crate) struct Full {
+    #[serde(flatten)]
+    pub(crate) overview: Overview,
+    #[serde(flatten)]
+    pub(crate) system: Option<Section>,
+}
+
+/// Prints the overview, and with `system` the load of the device.
+pub(crate) async fn overview(
+    context: &Context,
+    system: bool,
+    format: Format,
+    out: &mut impl Write,
+) -> anyhow::Result<()> {
+    let mut reader = reader(context).await?;
+    let overview = status::overview(&mut reader)
+        .await
+        .context("cannot read the overview")?;
+    let system = if system {
+        Some(system_section(context).await)
+    } else {
+        None
+    };
+    let full = Full { overview, system };
+    show(&full, format, out, |full, out| {
+        let mut all = overview_pairs(&full.overview);
+        all.extend(full.system.as_ref().map_or_default(system_pairs));
+        pairs(&all, out)
+    })
+}
+
+/// Reads the load of the device through the web interface. Never fails:
+/// without a login or the page, the section tells why.
+pub(crate) async fn system_section(context: &Context) -> Section {
+    let session = match context.session().await {
+        Ok(session) => session,
+        Err(e) => return Section::missing(format!("cannot log in to the web interface: {e:#}")),
+    };
+    let section = system::section(&session).await;
+    // The device ends the session itself after a while.
+    let _ = session.logout().await;
+    section
+}
+
+/// The load of the device, like `CPU load  8% (24 h: min 6%, avg 8.3%,
+/// max 15%)`, or why it is missing.
+fn system_pairs(section: &Section) -> Vec<(&'static str, Option<String>)> {
+    let Some(system) = &section.system else {
+        return vec![("System", section.system_note.clone())];
+    };
+    let history = &system.history;
+    let span = history
+        .hours
+        .map_or_else(|| "history".to_owned(), |hours| format!("{hours} h"));
+    let range = |range: Option<&Range>, unit: &str| {
+        range.map_or_default(|r| {
+            format!(
+                " ({span}: min {}{unit}, avg {}{unit}, max {}{unit})",
+                r.min, r.avg, r.max
+            )
+        })
+    };
+    let value = |now: Option<f64>, history: Option<&Range>, unit: &str| {
+        now.map(|now| format!("{now}{unit}{}", range(history, unit)))
+    };
+    let memory = &system.memory;
+    let shares: Vec<String> = [
+        (memory.used_percent, "used"),
+        (memory.cache_percent, "cache"),
+        (memory.free_percent, "free"),
+    ]
+    .iter()
+    .filter_map(|(share, name)| share.map(|share| format!("{share}% {name}")))
+    .collect();
+    let used = range(history.memory_used_percent.as_ref(), "%");
+    let memory = Some(shares.join(", "))
+        .filter(|shares| !shares.is_empty())
+        .map(|shares| format!("{shares}{used}"));
+    vec![
+        (
+            "System",
+            Some("experimental, read from the web interface".to_owned()),
+        ),
+        (
+            "CPU load",
+            value(
+                system.cpu_load_percent,
+                history.cpu_load_percent.as_ref(),
+                "%",
+            ),
+        ),
+        (
+            "CPU temperature",
+            value(
+                system.cpu_temperature_celsius,
+                history.cpu_temperature_celsius.as_ref(),
+                " °C",
+            ),
+        ),
+        ("Memory", memory),
+    ]
+}
+
+fn overview_pairs(overview: &Overview) -> Vec<(&'static str, Option<String>)> {
+    let rights: Vec<String> = overview
+        .rights
+        .iter()
+        .map(|r| format!("{}: {}", r.area, r.access))
+        .collect();
+    vec![
+        ("Model", overview.model.clone()),
+        ("Firmware", overview.firmware.clone()),
+        ("Uptime", overview.uptime.map(duration)),
+        (
+            "Update",
+            overview
+                .update_available
+                .map(|a| if a { "available" } else { "none" }.to_owned()),
+        ),
+        ("Two-factor", overview.two_factor.map(on_off)),
+        ("Internet", overview.internet.as_ref().map(summary)),
+        ("Rights", Some(rights.join(", ")).filter(|r| !r.is_empty())),
+    ]
+}
+
+/// The connection in one line, like
+/// `Connected over DSL (link Up), 192.0.2.1, for 2h 5m`.
+fn summary(connection: &Connection) -> String {
+    let status = connection.status.as_deref().unwrap_or("unknown");
+    let part = |value: &Option<String>, prefix: &str, suffix: &str| {
+        value
+            .as_ref()
+            .map_or_else(String::new, |v| format!("{prefix}{v}{suffix}"))
+    };
+    let over = part(&connection.access_type, " over ", "");
+    let link = part(&connection.link, " (link ", ")");
+    let address = part(&connection.external_address, ", ", "");
+    let uptime = part(&connection.uptime.map(duration), ", for ", "");
+    format!("{status}{over}{link}{address}{uptime}")
+}
+
+/// Prints the internet connection.
+pub(crate) async fn internet(
+    context: &Context,
+    format: Format,
+    out: &mut impl Write,
+) -> anyhow::Result<()> {
+    let mut reader = reader(context).await?;
+    let internet = status::internet(&mut reader)
+        .await
+        .context("cannot read the internet connection")?;
+    show(&internet, format, out, |i, out| {
+        pairs(&internet_pairs(i), out)
+    })
+}
+
+fn internet_pairs(internet: &Internet) -> Vec<(&'static str, Option<String>)> {
+    let connection = &internet.connection;
+    let mut pairs = vec![
+        ("Status", connection.status.clone()),
+        ("Access", connection.access_type.clone()),
+        ("Link", connection.link.clone()),
+        ("Provider", internet.provider.clone()),
+        ("Address", connection.external_address.clone()),
+        (
+            "DNS servers",
+            Some(internet.dns_servers.join(", ")).filter(|d| !d.is_empty()),
+        ),
+        ("Connected for", connection.uptime.map(duration)),
+        (
+            "Link speed",
+            rates(internet.downstream_max, internet.upstream_max),
+        ),
+    ];
+    if let Some(dsl) = &internet.dsl {
+        pairs.extend([
+            ("DSL", dsl.status.clone()),
+            ("DSL rate", rates(dsl.downstream_rate, dsl.upstream_rate)),
+            ("DSL maximum", rates(dsl.downstream_max, dsl.upstream_max)),
+            (
+                "Noise margin",
+                decibels(dsl.downstream_noise_margin, dsl.upstream_noise_margin),
+            ),
+            (
+                "Attenuation",
+                decibels(dsl.downstream_attenuation, dsl.upstream_attenuation),
+            ),
+        ]);
+    }
+    pairs
+}
+
+/// Rates in kbit/s, like `↓ 100 Mbit/s ↑ 40 Mbit/s`.
+pub(crate) fn rates(down: Option<u64>, up: Option<u64>) -> Option<String> {
+    both(down.map(rate), up.map(rate))
+}
+
+/// A rate in kbit/s, like `100.0 Mbit/s` or `800 kbit/s`.
+fn rate(kbits: u64) -> String {
+    if kbits >= 1000 {
+        format!("{:.1} Mbit/s", kbits_to_mbits(kbits))
+    } else {
+        format!("{kbits} kbit/s")
+    }
+}
+
+#[expect(clippy::cast_precision_loss, reason = "rates are far below 2^52")]
+fn kbits_to_mbits(kbits: u64) -> f64 {
+    kbits as f64 / 1000.0
+}
+
+pub(crate) fn decibels(down: Option<f64>, up: Option<f64>) -> Option<String> {
+    let decibel = |value: f64| format!("{value:.1} dB");
+    both(down.map(decibel), up.map(decibel))
+}
+
+/// A downstream and an upstream value, like `↓ 7.0 dB ↑ 8.0 dB`.
+pub(crate) fn both(down: Option<String>, up: Option<String>) -> Option<String> {
+    match (down, up) {
+        (Some(down), Some(up)) => Some(format!("↓ {down}  ↑ {up}")),
+        (Some(down), None) => Some(format!("↓ {down}")),
+        (None, Some(up)) => Some(format!("↑ {up}")),
+        (None, None) => None,
+    }
+}
+
+/// A line that tells how many hosts were not read, or nothing.
+fn shortfall(hosts: &Hosts) -> String {
+    let read = hosts.hosts.len();
+    if read < hosts.reported as usize {
+        format!(
+            "the device reported {} hosts, read {read}\n",
+            hosts.reported
+        )
+    } else {
+        String::new()
+    }
+}
+
+fn host_table(hosts: &Hosts, out: &mut impl Write) -> anyhow::Result<()> {
+    let rows = hosts.hosts.iter().map(|h: &Host| {
+        vec![
+            h.name.clone().unwrap_or_default(),
+            h.ip.clone().unwrap_or_default(),
+            h.mac.clone().unwrap_or_default(),
+            yes_no(h.active),
+            h.interface.clone().unwrap_or_default(),
+        ]
+    });
+    table(&["NAME", "IP", "MAC", "ACTIVE", "INTERFACE"], rows, out)
+}
+
+/// Prints the mesh: its nodes, and the links between all nodes, or with
+/// `tree` the tree of the devices below the nodes they are connected to.
+pub(crate) async fn mesh(
+    context: &Context,
+    tree: bool,
+    format: Format,
+    out: &mut impl Write,
+) -> anyhow::Result<()> {
+    let mut reader = reader(context).await?;
+    let mut mesh = status::mesh(&mut reader)
+        .await
+        .context("cannot read the mesh")?
+        .context("the device has no mesh list, or the user may not read it")?;
+    if let Some(note) = status::add_addresses(&mut reader, &mut mesh).await {
+        eprintln!("{note}");
+    }
+    if tree {
+        show(mesh.tree().as_slice(), format, out, mesh_tree)
+    } else {
+        show(&mesh, format, out, mesh_tables)
+    }
+}
+
+/// The nodes of the mesh, then the links. The rates go down from `FROM` to
+/// `TO`, and up the other way.
+fn mesh_tables(mesh: &Mesh, out: &mut impl Write) -> anyhow::Result<()> {
+    let text = |value: &Option<String>| value.clone().unwrap_or_default();
+    let nodes = mesh.nodes.iter().filter(|n| n.meshed).map(|n| {
+        vec![
+            text(&n.name),
+            address(n),
+            text(&n.role),
+            text(&n.model),
+            text(&n.mac),
+        ]
+    });
+    table(&["NODE", "IP", "ROLE", "MODEL", "MAC"], nodes, out)?;
+    writeln!(out)?;
+    let links = mesh.links.iter().map(|l| {
+        vec![
+            l.from.clone(),
+            l.to.clone(),
+            text(&l.kind),
+            text(&l.interface),
+            text(&l.state),
+            rates(l.rate_tx, l.rate_rx).unwrap_or_default(),
+        ]
+    });
+    let headers = ["FROM", "TO", "TYPE", "INTERFACE", "STATE", "RATE"];
+    table(&headers, links, out)
+}
+
+/// The IP address of a mesh node, like `192.0.2.1 (inactive)` if its host
+/// is not active, or `-` if unknown.
+fn address(node: &Node) -> String {
+    match (&node.ip, node.active) {
+        (Some(ip), Some(false)) => format!("{ip} (inactive)"),
+        (Some(ip), _) => ip.clone(),
+        (None, _) => "-".to_owned(),
+    }
+}
+
+/// Prints the Smart Home devices. Logs in to the web interface for this,
+/// and out again.
+pub(crate) async fn smarthome(
+    context: &Context,
+    args: &SmarthomeArgs,
+    format: Format,
+    out: &mut impl Write,
+) -> anyhow::Result<()> {
+    if let Some((device, range)) = args.history() {
+        return history::history(context, device, range, format, out).await;
+    }
+    let session = context
+        .session()
+        .await
+        .context("cannot log in to the web interface")?;
+    let devices = smarthome::devices(&session).await;
+    // Ends the session even if reading failed.
+    let logout = session.logout().await;
+    let devices = devices.context("cannot read the Smart Home devices")?;
+    logout.context("cannot log out of the web interface")?;
+    show(devices.as_slice(), format, out, smarthome_table)
+}
+
+/// One line per unit, so devices with several units, like a plug with a
+/// switch and a thermometer in one unit, or a remote with buttons, get
+/// several lines.
+fn smarthome_table(devices: &[Device], out: &mut impl Write) -> anyhow::Result<()> {
+    let empty = [Unit::default()];
+    let rows = devices.iter().flat_map(|device| {
+        let units = if device.units.is_empty() {
+            &empty[..]
+        } else {
+            &device.units[..]
+        };
+        units.iter().map(move |unit| {
+            let name = if unit.name.is_empty() || unit.name == device.name {
+                device.name.clone()
+            } else {
+                format!("{} / {}", device.name, unit.name)
+            };
+            let battery = device.battery.map(|b| {
+                let low = if device.battery_low == Some(true) {
+                    " low"
+                } else {
+                    ""
+                };
+                format!("{b}%{low}")
+            });
+            vec![
+                name,
+                device.category.clone().unwrap_or_default(),
+                yes_no(device.connected),
+                unit.on.map_or_default(on_off),
+                unit.temperature.map_or_default(celsius),
+                unit.target.as_ref().map_or_default(target),
+                unit.power.map_or_default(|w| format!("{w:.1} W")),
+                unit.energy.map_or_default(|wh| format!("{wh} Wh")),
+                battery.unwrap_or_default(),
+                other(unit),
+            ]
+        })
+    });
+    let headers = [
+        "NAME",
+        "CATEGORY",
+        "CONNECTED",
+        "SWITCH",
+        "TEMPERATURE",
+        "TARGET",
+        "POWER",
+        "ENERGY",
+        "BATTERY",
+        "OTHER",
+    ];
+    table(&headers, rows, out)
+}
+
+fn celsius(value: f64) -> String {
+    format!("{value:.1} °C")
+}
+
+fn target(target: &Target) -> String {
+    match target {
+        Target::Celsius(value) => celsius(*value),
+        Target::Mode(mode) => mode.clone(),
+    }
+}
+
+/// The values without a column of their own, like `level 25%`.
+fn other(unit: &Unit) -> String {
+    let mut values = Vec::new();
+    values.extend(unit.voltage.map(|v| format!("{v:.1} V")));
+    values.extend(unit.level.map(|l| format!("level {l}%")));
+    values.extend(unit.humidity.map(|h| format!("humidity {h}%")));
+    values.extend(unit.alerts.iter().map(|a| format!("alert {a}")));
+    values.join(", ")
+}
+
+/// Prints the pairs that have a value, one per line, with aligned values.
+pub(crate) fn pairs(pairs: &[(&str, Option<String>)], out: &mut impl Write) -> anyhow::Result<()> {
+    let width = pairs.iter().map(|(n, _)| n.len()).max().unwrap_or_default();
+    for (name, value) in pairs {
+        if let Some(value) = value {
+            writeln!(out, "{name:width$}  {}", clean(value))?;
+        }
+    }
+    Ok(())
+}
+
+/// Prints a table with aligned columns.
+pub(crate) fn table(
+    headers: &[&str],
+    rows: impl Iterator<Item = Vec<String>>,
+    out: &mut impl Write,
+) -> anyhow::Result<()> {
+    let rows: Vec<Vec<String>> = rows
+        .map(|row| row.iter().map(|cell| clean(cell)).collect())
+        .collect();
+    let mut widths: Vec<usize> = headers.iter().map(|h| h.chars().count()).collect();
+    for row in &rows {
+        for (width, cell) in widths.iter_mut().zip(row) {
+            *width = (*width).max(cell.chars().count());
+        }
+    }
+    let header: Vec<String> = headers.iter().map(|h| (*h).to_owned()).collect();
+    for row in std::iter::once(&header).chain(&rows) {
+        let cells: Vec<String> = row
+            .iter()
+            .zip(&widths)
+            .map(|(cell, width)| format!("{cell:width$}"))
+            .collect();
+        writeln!(out, "{}", cells.join("  ").trim_end())?;
+    }
+    Ok(())
+}
+
+/// The text with control characters replaced, so that it cannot steer the
+/// terminal.
+pub(crate) fn clean(text: &str) -> String {
+    text.chars()
+        .map(|c| if c.is_control() { '\u{FFFD}' } else { c })
+        .collect()
+}
+
+/// Seconds as days, hours and minutes, like `2d 3h 4m`.
+pub(crate) fn duration(seconds: u64) -> String {
+    let (days, rest) = (seconds / 86_400, seconds % 86_400);
+    let (hours, minutes) = (rest / 3600, rest % 3600 / 60);
+    match (days, hours) {
+        (0, 0) => format!("{minutes}m"),
+        (0, _) => format!("{hours}h {minutes}m"),
+        _ => format!("{days}d {hours}h {minutes}m"),
+    }
+}
+
+pub(crate) fn on_off(on: bool) -> String {
+    if on { "on" } else { "off" }.to_owned()
+}
+
+pub(crate) fn yes_no(yes: bool) -> String {
+    if yes { "yes" } else { "no" }.to_owned()
+}
+
+#[cfg(test)]
+pub(crate) mod tests {
+    use fritz_core::lists::{Link, Node};
+    use fritz_core::status::{Dsl, Right};
+
+    use super::*;
+
+    pub(crate) fn text(write: impl FnOnce(&mut Vec<u8>) -> anyhow::Result<()>) -> String {
+        let mut out = Vec::new();
+        write(&mut out).unwrap();
+        String::from_utf8(out).unwrap()
+    }
+
+    #[test]
+    fn formats_durations() {
+        assert_eq!(duration(59), "0m");
+        assert_eq!(duration(3 * 3600 + 120), "3h 2m");
+        assert_eq!(duration(2 * 86_400 + 3600 + 60), "2d 1h 1m");
+    }
+
+    #[test]
+    fn formats_rates_and_decibels() {
+        assert_eq!(
+            rates(Some(276_310), Some(800)).as_deref(),
+            Some("↓ 276.3 Mbit/s  ↑ 800 kbit/s")
+        );
+        assert_eq!(rates(Some(1000), None).as_deref(), Some("↓ 1.0 Mbit/s"));
+        assert_eq!(rates(None, Some(1)).as_deref(), Some("↑ 1 kbit/s"));
+        assert_eq!(rates(None, None), None);
+        assert_eq!(
+            decibels(Some(7.0), Some(8.5)).as_deref(),
+            Some("↓ 7.0 dB  ↑ 8.5 dB")
+        );
+    }
+
+    #[test]
+    fn replaces_control_characters() {
+        assert_eq!(clean("a\u{1b}[2Jb\n"), "a\u{FFFD}[2Jb\u{FFFD}");
+        let output = text(|out| {
+            table(
+                &["A", "B"],
+                [vec!["\u{7}".to_owned(), String::new()]].into_iter(),
+                out,
+            )
+        });
+        assert_eq!(output, "A  B\n\u{FFFD}\n");
+    }
+
+    #[test]
+    fn prints_smart_home_devices_as_text() {
+        let devices = [
+            Device {
+                ain: "1".to_owned(),
+                name: "Heating".to_owned(),
+                product: None,
+                category: Some("thermostat".to_owned()),
+                firmware: None,
+                connected: true,
+                battery: Some(9),
+                battery_low: Some(true),
+                units: vec![Unit {
+                    name: "Valve".to_owned(),
+                    temperature: Some(20.25),
+                    target: Some(Target::Mode("off".to_owned())),
+                    ..Unit::default()
+                }],
+            },
+            Device {
+                ain: "2".to_owned(),
+                name: "Plug".to_owned(),
+                product: None,
+                category: None,
+                firmware: None,
+                connected: false,
+                battery: Some(100),
+                battery_low: None,
+                units: vec![Unit {
+                    name: "Plug".to_owned(),
+                    on: Some(true),
+                    target: Some(Target::Celsius(21.0)),
+                    power: Some(1.25),
+                    energy: Some(12),
+                    voltage: Some(230.1),
+                    level: Some(5),
+                    humidity: Some(40),
+                    alerts: vec!["open".to_owned()],
+                    ..Unit::default()
+                }],
+            },
+            Device {
+                ain: "3".to_owned(),
+                name: "Remote".to_owned(),
+                product: None,
+                category: None,
+                firmware: None,
+                connected: true,
+                battery: None,
+                battery_low: None,
+                units: Vec::new(),
+            },
+        ];
+        let output = text(|out| smarthome_table(&devices, out));
+        assert_eq!(
+            output,
+            "NAME             CATEGORY    CONNECTED  SWITCH  TEMPERATURE  TARGET   POWER  ENERGY  BATTERY  OTHER\n\
+             Heating / Valve  thermostat  yes                20.2 °C      off                     9% low\n\
+             Plug                         no         on                   21.0 °C  1.2 W  12 Wh   100%     \
+             230.1 V, level 5%, humidity 40%, alert open\n\
+             Remote                       yes\n"
+        );
+    }
+
+    #[test]
+    fn prints_the_overview_as_text() {
+        let mut overview = Overview {
+            model: Some("FRITZ!Box 7690".to_owned()),
+            uptime: Some(90),
+            update_available: Some(true),
+            two_factor: Some(true),
+            rights: vec![Right {
+                area: "NAS".to_owned(),
+                access: "read".to_owned(),
+            }],
+            internet: Some(Connection::default()),
+            ..Overview::default()
+        };
+        let output = text(|out| pairs(&overview_pairs(&overview), out));
+        assert_eq!(
+            output,
+            "Model       FRITZ!Box 7690\n\
+             Uptime      1m\n\
+             Update      available\n\
+             Two-factor  on\n\
+             Internet    unknown\n\
+             Rights      NAS: read\n"
+        );
+        overview.update_available = Some(false);
+        overview.two_factor = Some(false);
+        overview.rights.clear();
+        let output = text(|out| pairs(&overview_pairs(&overview), out));
+        assert!(
+            output.contains("Update      none\nTwo-factor  off\n"),
+            "{output}"
+        );
+        assert!(!output.contains("Rights"), "{output}");
+    }
+
+    #[tokio::test]
+    async fn leaves_out_the_load_without_a_login() {
+        let dir = tempfile::tempdir().unwrap();
+        // Without a password, nothing is sent.
+        let context = crate::context::tests::context(dir.path(), crate::context::tests::agent());
+        let section = system_section(&context).await;
+        assert_eq!(section.system, None);
+        let note = section.system_note.unwrap();
+        assert!(
+            note.starts_with("cannot log in to the web interface: no password for agent@"),
+            "{note}"
+        );
+    }
+
+    #[test]
+    fn prints_the_internet_connection_as_text() {
+        let mut internet = Internet {
+            connection: Connection {
+                access_type: Some("DSL".to_owned()),
+                link: Some("Up".to_owned()),
+                status: Some("Connected".to_owned()),
+                external_address: Some("192.0.2.1".to_owned()),
+                uptime: Some(3600),
+            },
+            dsl: Some(Dsl {
+                downstream_noise_margin: Some(7.0),
+                ..Dsl::default()
+            }),
+            ..Internet::default()
+        };
+        assert_eq!(
+            summary(&internet.connection),
+            "Connected over DSL (link Up), 192.0.2.1, for 1h 0m"
+        );
+        let output = text(|out| pairs(&internet_pairs(&internet), out));
+        assert!(output.contains("Noise margin   ↓ 7.0 dB\n"), "{output}");
+        assert!(!output.contains("DNS servers"), "{output}");
+        internet.dsl = None;
+        let output = text(|out| pairs(&internet_pairs(&internet), out));
+        assert!(!output.contains("Noise"), "{output}");
+    }
+
+    #[test]
+    fn prints_tables() {
+        let hosts = Hosts {
+            reported: 2,
+            hosts: vec![
+                Host {
+                    name: Some("device-1".to_owned()),
+                    active: true,
+                    ..Host::default()
+                },
+                Host::default(),
+            ],
+        };
+        assert_eq!(shortfall(&hosts), "");
+        let output = text(|out| host_table(&hosts, out));
+        assert_eq!(
+            output,
+            "NAME      IP  MAC  ACTIVE  INTERFACE\n\
+             device-1           yes\n\
+             \x20                  no\n"
+        );
+        let fewer = Hosts {
+            reported: 3,
+            ..hosts
+        };
+        assert_eq!(shortfall(&fewer), "the device reported 3 hosts, read 2\n");
+        let mesh = Mesh {
+            nodes: vec![
+                Node {
+                    uid: "n-1".to_owned(),
+                    name: Some("box".to_owned()),
+                    role: Some("master".to_owned()),
+                    meshed: true,
+                    ip: Some("192.0.2.1".to_owned()),
+                    ..Node::default()
+                },
+                Node {
+                    uid: "n-2".to_owned(),
+                    name: Some("host".to_owned()),
+                    ip: Some("192.0.2.5".to_owned()),
+                    active: Some(false),
+                    ..Node::default()
+                },
+                Node {
+                    uid: "n-3".to_owned(),
+                    name: Some("repeater".to_owned()),
+                    role: Some("slave".to_owned()),
+                    meshed: true,
+                    ..Node::default()
+                },
+            ],
+            links: vec![Link {
+                from: "box".to_owned(),
+                to: "host".to_owned(),
+                from_uid: "n-1".to_owned(),
+                to_uid: "n-2".to_owned(),
+                rate_rx: Some(800),
+                rate_tx: Some(2000),
+                ..Link::default()
+            }],
+        };
+        let tree_output = text(|out| mesh_tree(&mesh.tree(), out));
+        assert_eq!(
+            tree_output,
+            "NODE      IP                    ROLE    MODEL  CONNECTION\n\
+             box       192.0.2.1             master\n\
+             └── host  192.0.2.5 (inactive)                 ↓ 2.0 Mbit/s  ↑ 800 kbit/s\n\
+             repeater  -                     slave\n"
+        );
+        let output = text(|out| mesh_tables(&mesh, out));
+        assert_eq!(
+            output,
+            "NODE      IP         ROLE    MODEL  MAC\n\
+             box       192.0.2.1  master\n\
+             repeater  -          slave\n\
+             \n\
+             FROM  TO    TYPE  INTERFACE  STATE  RATE\n\
+             box   host                          ↓ 2.0 Mbit/s  ↑ 800 kbit/s\n"
+        );
+    }
+}

@@ -1,0 +1,12 @@
+{
+  "out": {
+    "NewActive": "1",
+    "NewAddressSource": "DHCP",
+    "NewHostName": "device-47",
+    "NewIPAddress": "192.0.2.30",
+    "NewInterfaceType": "Ethernet",
+    "NewLeaseTimeRemaining": "0",
+    "NewMACAddress": "AA:BB:CC:00:00:32"
+  },
+  "status": "ok"
+}

@@ -1,0 +1,10 @@
+{
+  "out": {
+    "NewDuplexMode": "Auto",
+    "NewEnable": "1",
+    "NewMACAddress": "AA:BB:CC:00:00:01",
+    "NewMaxBitRate": "Auto",
+    "NewStatus": "Up"
+  },
+  "status": "ok"
+}
