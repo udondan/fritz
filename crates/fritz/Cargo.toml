@@ -17,7 +17,7 @@ write = ["fritz-core/write"]
 
 [dependencies]
 anyhow = "=1.0.105"
-clap = { version = "=4.6.9", features = ["derive", "env", "wrap_help"] }
+clap = { version = "=4.6.10", features = ["derive", "env", "wrap_help"] }
 clap_complete = { version = "=4.6.12", features = ["unstable-dynamic"] }
 fritz-core.workspace = true
 png = "=0.18.1"
