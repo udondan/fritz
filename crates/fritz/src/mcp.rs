@@ -555,7 +555,7 @@ impl Server {
     }
 
     #[tool(
-        description = "Reads the telephony setup: own numbers, internet telephony accounts with registrar and status, call deflections, answering machines, and DECT handsets with model and update state. Lists are empty when the device has none. It does not read calls or contacts: fritz_calls and fritz_phonebook do, offered with `--personal`.",
+        description = "Reads the telephony setup: own numbers, internet telephony accounts with registrar and status, call deflections, answering machines, and DECT handsets with model and update state. Lists are empty when the device has none. It does not read calls or contacts: they are personal data, and the server only lists tools for them when it runs with `--personal` (`FRITZ_MCP_PERSONAL=true`).",
         annotations(read_only_hint = true, open_world_hint = false)
     )]
     async fn fritz_telephony(&self) -> CallToolResult {
