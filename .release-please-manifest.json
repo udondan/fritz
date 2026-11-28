@@ -2,5 +2,5 @@
   "crates/tr064": "0.1.2",
   "crates/fritz-core": "0.2.2",
   "crates/fritz-sim": "0.2.2",
-  "crates/fritz": "0.2.5"
+  "crates/fritz": "0.2.6"
 }

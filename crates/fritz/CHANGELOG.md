@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.6](https://github.com/udondan/fritz/compare/fritz-v0.2.5...fritz-v0.2.6) (2026-11-28)
+
+
+### Features
+
+* describe the personal tools without naming them when they are not offered ([#187](https://github.com/udondan/fritz/issues/187)) ([db09846](https://github.com/udondan/fritz/commit/db09846a8938d00ee80b4e370eb3c9c00a059353))
+
 ## [0.2.5](https://github.com/udondan/fritz/compare/fritz-v0.2.4...fritz-v0.2.5) (2026-11-27)
 
 
