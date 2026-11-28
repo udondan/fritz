@@ -13,7 +13,7 @@ authors.workspace = true
 [dependencies]
 anyhow = "1.0.105"
 axum = "0.8.9"
-clap = { version = "4.6.9", features = ["derive"] }
+clap = { version = "4.6.10", features = ["derive"] }
 form_urlencoded = "1.2.3"
 http-body = "1.1.0"
 md-5 = "0.11.0"
